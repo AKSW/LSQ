@@ -34,13 +34,137 @@
 <p>A Linked Dataset describing SPARQL queries extracted from the logs of a variety of prominent public SPARQL endpoints. We argue that this dataset has a variety of uses for the SPARQL research community, be it, for example, to generate benchmarks on-the-fly by selecting real-world queries with specific characteristics that we describe, or to conduct analysis of what SPARQL (1.1) query features are most often used to interrogate endpoints, or to characterize the behavior of the different types of agents that are using these endpoints, or to find out what queries agents are asking about a given resource, etc. </p>
 
 <h3>
-<a id="sparql-endpoint" class="anchor" href="#sparql-endpoint" aria-hidden="true"><span class="octicon octicon-link"></span></a>SPARQL Endpoint</h3>
+<a id="sparql-endpoint" class="anchor" href="#sparql-endpoint" aria-hidden="true"><span class="octicon octicon-link"></span></a><a href="http://titan.informatik.uni-leipzig.de:3333/sparql">SPARQL Endpoint</a>
+</h3>
 
-<p>LSQ SPARQL endpoint is available at  <a href="http://titan.informatik.uni-leipzig.de:3333/sparql">here</a>. A list of example queries can be found here. </p>
+<p>LSQ SPARQL endpoint is available at  <a href="http://titan.informatik.uni-leipzig.de:3333/sparql">here</a>. Currently, we have RDFized query logs of DBpedia3.5.1, Linked Geo Data, Semantic Web Dog Food, and British Museum. If you want to query for a particular query log you can specify the following named graphs. </p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<ul>
+<li>DBpedia: <a href="http://dbpedia.org">http://dbpedia.org</a>
+</li>
+<li>Linked Geo Data: <a href="http://linkedgeodata.org">http://linkedgeodata.org</a>
+</li>
+<li>Semantic Web Dog Food: <a href="http://data.semanticweb.org">http://data.semanticweb.org</a>
+</li>
+<li>British Museum: <a href="http://bm.rkbexplorer.com">http://bm.rkbexplorer.com</a>
+</li>
+</ul>
+
+<p>A list of example queries can be found at the bottom of this page. </p>
+
+<h3>
+<a id="datadumps" class="anchor" href="#datadumps" aria-hidden="true"><span class="octicon octicon-link"></span></a>Datadumps</h3>
+
+<p>All the datadumps are available here. </p>
+
+<h3>
+<a id="example-sparql-queries" class="anchor" href="#example-sparql-queries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example SPARQL Queries</h3>
+
+<p>Here is few of the example SPARQL queries. </p>
+
+<pre><code>---Get custom benchmark of 50 queries having result size greater than 10 and triple patterns less
+than 5 and query execution time less than 50(ms). Also the quereis must contains SPARQL FILTER---
+
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT ?query  FROM &lt;http://data.semanticweb.org&gt;
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:resultSize ?resultSize .
+    ?id lsqv:triplePatterns ?triplePatterns .
+    ?id lsqv:runTimeMs ?runTime .
+    ?id lsqv:usesFeature lsqv:Filter . 
+   FILTER (?resultSize &gt; 10 &amp;&amp; ?triplePatterns &lt;5  &amp;&amp; ?runTime &lt; 50 ) 
+}
+LIMIT 50
+
+---The number of queries containing UNION--- 
+PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
+SELECT COUNT(?queryId) AS ?UnionCount
+WHERE {    ?queryId  lsqv:usesFeature lsqv:Union . }
+
+---The number of queries of Star type---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+SELECT COUNT(?id) AS ?TotalStarQueries
+WHERE {
+?id lsqv:joinVertex  ?joinVertex . 
+?joinVertex lsqv:joinVertexType lsqv:Star .
+} 
+
+---Get top query executions for smaller result set queries---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:resultSize ?resultSize .
+    ?id lsqv:execution ?executions. 
+   FILTER (?resultSize &lt;100)
+}
+  ORDER BY DESC(COUNT(?executions))
+
+---How an agent tried to correct queries with parse errors?---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX lsqr:&lt;http://lsq.aksw.org/res/&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+PREFIX dct:&lt;http://purl.org/dc/terms/&gt;  
+SELECT   ?query ?time 
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:parseError ?error .
+    ?id lsqv:execution ?executions. 
+    ?executions dct:issued  ?time .
+    ?executions lsqv:agent lsqr:A-WlFJE0QQRlhBVRNGRx1QGVdaRhNsN2YUW15R
+}
+
+---Get average of the different SPARQL query features from DBpedia query log---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt; 
+SELECT AVG(?resultSize) AS ?resultSizeAvg AVG(?bgps) AS ?bgpsAvg 
+AVG(?triplePatterns) AS ?triplePatternsAvg AVG(?joinVertices) AS ?joinVerticesAvg
+AVG(?meanJoinVerticesDegree) AS ?meanJoinVerticesDegreeAvg
+AVG(?meanTriplePatternSelectivity) AS ?meanTriplePatternSelectivityAvg
+AVG(?runTime) AS ?runTimeAvg FROM &lt;http://dbpedia.org&gt;
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:resultSize ?resultSize .
+    ?id lsqv:bgps ?bgps.
+    ?id lsqv:triplePatterns ?triplePatterns .
+    ?id lsqv:joinVertices ?joinVertices .
+    ?id lsqv:meanJoinVerticesDegree   ?meanJoinVerticesDegree .
+    ?id lsqv:meanTriplePatternSelectivity ?meanTriplePatternSelectivity .
+    ?id lsqv:runTimeMs ?runTime .
+}
+
+---Top queries by number of executions---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:execution ?executions.   
+}
+  ORDER BY DESC(COUNT(?executions))
+
+---All queries which talk about Michael Jackson---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT  DISTINCT  ?object
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:mentionsPredicate &lt;http://xmlns.com/foaf/0.1/name&gt; .
+    ?id lsqv:mentionsObject &lt;http://dbpedia.org/ontology/Michael_Jackson&gt; 
+}
+---Top agents by number of execution---
+PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
+ WHERE {
+    ?id sp:text ?query .
+    ?id lsqv:execution ?executions .
+    ?executions lsqv:agent  ?agent.  
+     }
+  ORDER BY DESC(COUNT(?executions))
 </code></pre>
 
 <p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
