@@ -220,6 +220,66 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
 </code></pre>
 
 <h3>
+<a id="sample-rdf-representation" class="anchor" href="#sample-rdf-representation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sample RDF Representation</h3>
+
+<p>A sample RDF representation of a query is given below. </p>
+
+<pre><code>@prefix rdf:   &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; .
+@prefix lsqr:&lt;http://lsq.aksw.org/res/&gt; . 
+@prefix lsqrd:&lt;http://lsq.aksw.org/res/SWDF-&gt; . 
+@prefix lsqv:&lt;http://lsq.aksw.org/vocab#&gt; . 
+@prefix sp:&lt;http://spinrdf.org/sp#&gt; . 
+@prefix dct:&lt;http://purl.org/dc/terms/&gt; . 
+@prefix xsd:&lt;http://www.w3.org/2001/XMLSchema#&gt; . 
+@prefix swdf:&lt;&lt;http://data.semanticweb.org/ns/swc/ontology#&gt;
+
+lsqrd:q483 lsqv:endpoint &lt;http://data.semanticweb.org/sparql&gt; ; 
+ sp:text "SELECT DISTINCT ?prop 
+  WHERE { 
+         ?obj  rdf:type swdf:SessionEvent .    
+         ?obj ?prop    ?targetObj .    
+         FILTER (isLiteral(?targetObj)) } 
+         LIMIT 150" ; 
+
+lsqv:resultSize 16 ;  lsqv:runTimeMs 6 ;  lsqv:bgps 1 ;  lsqv:triplePatterns 2 ; lsqv:joinVertices 1 ; 
+lsqv:meanJoinVerticesDegree 2.0 ;  lsqv:meanTriplePatternSelectivity 0.5007155695730322 . 
+lsqrd:q483 lsqv:usesFeature  lsqv:Filter, lsqv:Distinct, lsqv:Limit . 
+
+lsqrd:q483 lsqv:mentionsSubject "?obj" . 
+lsqrd:q483 lsqv:mentionsPredicate "?prop" , rdf:type . 
+lsqrd:q483 lsqv:mentionsObject "?targetObj", swdf:SessionEvent . 
+lsqrd:q483 lsqv:joinVertex lsqr:obj . 
+lsqr:obj lsqv:joinVertexDegree 2 ; lsqv:joinVertexType lsqv:Star . 
+
+lsqrd:q483 lsqv:execution lsqrd:q483-e1 , lsqrd:q483-e2 , lsqrd:q483-e3 , lsqrd:q483-e4 . 
+lsqrd:q483-e1 lsqv:agent lsqr:A-WlxKE0QQRlhCUBdGRx1QGVRbQRNsN2YUWF5W  ; 
+dct:issued "2014-05-22T17:08:17+01:00"^^xsd:dateTimeStamp . 
+lsqrd:q483-e2 lsqv:agent lsqr:A-WlxKE0QQRlhCUBdGRx1QGVRdRBNsN2YUW1pS  ; 
+dct:issued "2014-05-20T14:34:35+01:00"^^xsd:dateTimeStamp . 
+lsqrd:q483-e3 lsqv:agent lsqr:A-WlxKE0QQRlhCUBdGRx1QGVRdRBNsN2YUW1pS  ; 
+dct:issued "2014-05-20T14:28:37+01:00"^^xsd:dateTimeStamp . 
+lsqrd:q483-e4 lsqv:agent lsqr:A-WlxKE0QQRlhCUBdGRx1QGVRdRBNsN2YUW1pS  ; 
+dct:issued "2014-05-20T14:24:13+01:00"^^xsd:dateTimeStamp . 
+lsqrd:q483   a sp:Select ;
+sp:distinct         true ;
+sp:limit "150"^^&lt;http://www.w3.org/2001/XMLSchema#long&gt; ;
+sp:resultVariables  
+( [ sp:varName  "prop"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ] ) ;
+sp:where  
+ ( [ sp:object     &lt;http://data.semanticweb.org/ns/swc/ontology#SessionEvent&gt; ;
+sp:predicate  rdf:type ;
+sp:subject    [ sp:varName  "obj"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ]
+] [ sp:object     [ sp:varName  "targetObj"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ] ;
+sp:predicate  [ sp:varName  "prop"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ] ;
+sp:subject    [ sp:varName  "obj"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ]
+ ] [ a              sp:Filter ;
+ sp:expression  [ a        sp:isLiteral ;
+ sp:arg1  [ sp:varName  "targetObj"^^&lt;http://www.w3.org/2001/XMLSchema#string&gt; ]
+     ]
+] )
+</code></pre>
+
+<h3>
 <a id="issue-tracker-and-mailing-list" class="anchor" href="#issue-tracker-and-mailing-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Issue Tracker and Mailing List</h3>
 
 <p>If you notice any issue, you may use LSQ <a href="https://github.com/AKSW/LSQ/issues">issue tracker</a>. Alternatively, you can contact any of the LSQ team member. We would be more than happy to reply as soon as possible. You may also use LSQ Google <a href="https://groups.google.com/forum/#!forum/public-lsq">mailing list</a> for further discussion and suggestions. </p>
@@ -227,7 +287,12 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
 <h3>
 <a id="query-logs-results" class="anchor" href="#query-logs-results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Query Logs Results</h3>
 
-<p>Our complete query logs results (statistics about queries) can be downloaded from <a href="https://drive.google.com/file/d/0B1tUDhWNTjO-aW9RRllpcFFFejA/view?usp=sharing">here</a>. Please refers to the LSQ paper for details. </p>
+<p>Our complete query logs results (statistics about queries) can be downloaded <a href="https://drive.google.com/file/d/0B1tUDhWNTjO-aW9RRllpcFFFejA/view?usp=sharing">here</a>. Please refers to the LSQ paper for details. </p>
+
+<h3>
+<a id="how-can-i-add-my-queries" class="anchor" href="#how-can-i-add-my-queries" aria-hidden="true"><span class="octicon octicon-link"></span></a>How Can I Add My Queries?</h3>
+
+<p>If you have a query log, you may contact the maintainer of LSQ. In future, we are planning to provide an API for on-the-fly queries addition to our public endpoint. </p>
 
 <h3>
 <a id="lsq-team" class="anchor" href="#lsq-team" aria-hidden="true"><span class="octicon octicon-link"></span></a>LSQ Team</h3>
