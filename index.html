@@ -1,36 +1,51 @@
 <!DOCTYPE html>
 <html>
-
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="description" content="LSQ : The Linked SPARQL Queries Dataset">
+    <meta name="viewport" content="width=640">
 
-    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+    <link rel="stylesheet" href="stylesheets/core.css" media="screen">
+    <link rel="stylesheet" href="stylesheets/mobile.css" media="handheld, only screen and (max-device-width:640px)">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
 
-    <title>LSQ</title>
+    <script type="text/javascript" src="javascripts/modernizr.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script type="text/javascript" src="javascripts/headsmart.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function () {
+        $('#main_content').headsmart()
+      })
+    </script>
+    <title>LSQ by AKSW</title>
   </head>
 
   <body>
+    <a id="forkme_banner" href="https://github.com/AKSW/LSQ">View on GitHub</a>
+    <div class="shell">
 
-    <!-- HEADER -->
-    <div id="header_wrap" class="outer">
-        <header class="inner">
-          <a id="forkme_banner" href="https://github.com/AKSW/LSQ">View on GitHub</a>
+      <header>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <h1>LSQ</h1>
+            <h2>The Linked SPARQL Queries Dataset</h2>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+      </header>
 
-          <h1 id="project_title">LSQ</h1>
-          <h2 id="project_tagline">The Linked SPARQL Queries Dataset</h2>
+      <section id="downloads">
+        <span class="inner">
+          <a href="https://github.com/AKSW/LSQ/zipball/master" class="zip"><em>download</em> .ZIP</a><a href="https://github.com/AKSW/LSQ/tarball/master" class="tgz"><em>download</em> .TGZ</a>
+        </span>
+      </section>
 
-            <section id="downloads">
-              <a class="zip_download_link" href="https://github.com/AKSW/LSQ/zipball/master">Download this project as a .zip file</a>
-              <a class="tar_download_link" href="https://github.com/AKSW/LSQ/tarball/master">Download this project as a tar.gz file</a>
-            </section>
-        </header>
-    </div>
 
-    <!-- MAIN CONTENT -->
-    <div id="main_content_wrap" class="outer">
-      <section id="main_content" class="inner">
+      <span class="banner-fix"></span>
+
+
+      <section id="main_content">
         <h3>
 <a id="lsq" class="anchor" href="#lsq" aria-hidden="true"><span class="octicon octicon-link"></span></a>LSQ</h3>
 
@@ -232,14 +247,19 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
 
 <p>We are very thankful to Richard Cyganiak (TopQuadrant), Jens Lehmann (AKSW, Uni. Leipzig), Dimitris Kontokostas (AKSW, Uni. Leipzig), Ivan Ermilov (AKSW, Uni. Leipzig), and Hugh Glaser (Ethos VO Ltd) for providing query logs.</p>
       </section>
-    </div>
 
-    <!-- FOOTER  -->
-    <div id="footer_wrap" class="outer">
-      <footer class="inner">
-        <p class="copyright">LSQ maintained by <a href="https://github.com/AKSW">AKSW</a></p>
-        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      <footer>
+        <span class="ribbon-outer">
+          <span class="ribbon-inner">
+            <p>this project by <a href="https://github.com/AKSW">AKSW</a> can be found on <a href="https://github.com/AKSW/LSQ">GitHub</a></p>
+          </span>
+          <span class="left-tail"></span>
+          <span class="right-tail"></span>
+        </span>
+        <p>Generated with <a href="https://pages.github.com">GitHub Pages</a> using Merlot</p>
+        <span class="octocat"></span>
       </footer>
+
     </div>
 
               <script type="text/javascript">
@@ -252,7 +272,6 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
             pageTracker._trackPageview();
             } catch(err) {}
           </script>
-
 
   </body>
 </html>
