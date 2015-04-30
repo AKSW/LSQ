@@ -72,7 +72,7 @@
 <ul>
 <li>DBpedia: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://dbpedia.org/void</a>
 </li>
-<li>Linked Geo Data: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdlinkedgeodata.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://linkedgeodata.org/void</a>
+<li>Linked Geo Data: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Flinkedgeodata.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://linkedgeodata.org/void</a>
 </li>
 <li>Semantic Web Dog Food: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdata.semanticweb.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://data.semanticweb.org/void</a>
 </li>
@@ -82,11 +82,17 @@
 
 <p>An example query to get DBpedia Void is given below </p>
 
-<pre><code>SELECT * FROM &lt;http://dbpedia.org/void&gt;
+<pre><code>CONSTRUCT {?s ?p ?o} FROM &lt;http://dbpedia.org/void&gt;
+WHERE
+{
+?s ?p ?o
+}
+OR
+SELECT * FROM &lt;http://dbpedia.org/void&gt;
 WHERE {?s ?p ?o}
 </code></pre>
 
-<p>The output can be seen <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=SELECT+*+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D&amp;format=text%2Fhtml&amp;timeout=0&amp;debug=on">here</a></p>
+<p>The output of the SELECT query can be seen <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=SELECT+*+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D&amp;format=text%2Fhtml&amp;timeout=0&amp;debug=on">here</a></p>
 
 <h3>
 <a id="schema-diagram" class="anchor" href="#schema-diagram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Schema Diagram</h3>
@@ -195,7 +201,7 @@ SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
 ---All queries which talk about Michael Jackson---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT  DISTINCT  ?object
+SELECT  DISTINCT  ?query
  WHERE {
     ?id sp:text ?query .
     ?id lsqv:mentionsPredicate &lt;http://xmlns.com/foaf/0.1/name&gt; .
@@ -217,6 +223,11 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
 <a id="issue-tracker-and-mailing-list" class="anchor" href="#issue-tracker-and-mailing-list" aria-hidden="true"><span class="octicon octicon-link"></span></a>Issue Tracker and Mailing List</h3>
 
 <p>If you notice any issue, you may use LSQ <a href="https://github.com/AKSW/LSQ/issues">issue tracker</a>. Alternatively, you can contact any of the LSQ team member. We would be more than happy to reply as soon as possible. You may also use LSQ Google <a href="https://groups.google.com/forum/#!forum/public-lsq">mailing list</a> for further discussion and suggestions. </p>
+
+<h3>
+<a id="query-logs-results" class="anchor" href="#query-logs-results" aria-hidden="true"><span class="octicon octicon-link"></span></a>Query Logs Results</h3>
+
+<p>Our complete query logs results (statistics about queries) can be downloaded from <a href="https://drive.google.com/file/d/0B1tUDhWNTjO-aW9RRllpcFFFejA/view?usp=sharing">here</a>. Please refers to the LSQ paper for details. </p>
 
 <h3>
 <a id="lsq-team" class="anchor" href="#lsq-team" aria-hidden="true"><span class="octicon octicon-link"></span></a>LSQ Team</h3>
