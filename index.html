@@ -58,6 +58,35 @@
 <p>All the datadumps are available here. </p>
 
 <h3>
+<a id="void-data" class="anchor" href="#void-data" aria-hidden="true"><span class="octicon octicon-link"></span></a>Void Data</h3>
+
+<p>Our SPARQL endpoint directly provides the Void data for each of the query log. Below are the named graphs for Void</p>
+
+<ul>
+<li>DBpedia: <a href="http://dbpedia.org/void">http://dbpedia.org/void</a>
+</li>
+<li>Linked Geo Data: <a href="http://linkedgeodata.org/void">http://linkedgeodata.org/void</a>
+</li>
+<li>Semantic Web Dog Food: <a href="http://data.semanticweb.org/void">http://data.semanticweb.org/void</a>
+</li>
+<li>British Museum: <a href="http://bm.rkbexplorer.com/void">http://bm.rkbexplorer.com/void</a>
+</li>
+</ul>
+
+<p>An example query to get DBpedia Void is given below </p>
+
+<pre><code>SELECT * FROM &lt;http://dbpedia.org/void&gt;
+WHERE {?s ?p ?o}
+</code></pre>
+
+<p>The output can be seen <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=SELECT+*+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D&amp;format=text%2Fhtml&amp;timeout=0&amp;debug=on">here</a></p>
+
+<h3>
+<a id="schema-diagram" class="anchor" href="#schema-diagram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Schema Diagram</h3>
+
+<p><img src="https://sites.google.com/site/saleemsweb/home/LinkedSQL_Schema_V5.png" alt="LSQL Schema Diagram"></p>
+
+<h3>
 <a id="example-sparql-queries" class="anchor" href="#example-sparql-queries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example SPARQL Queries</h3>
 
 <p>Here is few of the example SPARQL queries. </p>
