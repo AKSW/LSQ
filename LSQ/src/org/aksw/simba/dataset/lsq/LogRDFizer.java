@@ -334,8 +334,8 @@ public class LogRDFizer {
 		for(String submission:submissions)
 		{
 			String prts [] = submission.split(separator);
-			String txt=prts[0].replace(".", "34x49") ;
-			String key="key phrase used for XOR-ing";
+			String txt=prts[0].replace(".", "useanystring") ; // of course we used different one
+			String key="what is your key string?";  //of course we use different key in LSQ. 
 			txt=EncryptUtils.xorMessage( txt, key );
 			String encoded=EncryptUtils.base64encode( txt ); 
 			encoded = encoded.replace("=", "-");
