@@ -127,52 +127,109 @@ Class: LogRDFizer
 </code></pre>
 
 <h3>
-<a id="example-sparql-queries" class="anchor" href="#example-sparql-queries" aria-hidden="true"><span class="octicon octicon-link"></span></a>Example SPARQL Queries</h3>
+<a id="use-cases" class="anchor" href="#use-cases" aria-hidden="true"><span class="octicon octicon-link"></span></a>Use Cases</h3>
 
-<p>Here is few of the example SPARQL queries. </p>
+<p>We wish to provide some concrete queries (relevant to the use cases discussed in paper) that can be issued against the LSQ SPARQL endpoint</p>
 
-<pre><code>---Get custom benchmark of 50 queries having result size greater than 10 and triple patterns less
-than 5 and query execution time less than 50(ms). Also the quereis must contains SPARQL FILTER---
+<h4>
+<a id="uc1-facilitating-benchmark-generation" class="anchor" href="#uc1-facilitating-benchmark-generation" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC1 Facilitating Benchmark Generation</h4>
 
-PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
-PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+<p>Linked SQ can help users generate custom benchmarks by selecting real-world queries meeting certain criteria. The query given below is an example SPARQL query over LSQ that provides a list of 50 queries with additional parameters set for both structural and data-driven criteria useful for creating custom benchmarks. </p>
+
+<pre><code>PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX sp: &lt;http://spinrdf.org/sp#&gt;
 SELECT ?query  FROM &lt;http://data.semanticweb.org&gt;
  WHERE {
-    ?id sp:text ?query .
-    ?id lsqv:resultSize ?resultSize .
-    ?id lsqv:triplePatterns ?triplePatterns .
-    ?id lsqv:runTimeMs ?runTime .
-    ?id lsqv:usesFeature lsqv:Filter . 
-   FILTER (?resultSize &gt; 10 &amp;&amp; ?triplePatterns &lt;5  &amp;&amp; ?runTime &lt; 50 ) 
-}
+    ?id sp:text ?query ; lsqv:resultSize ?rs ; lsqv:triplePatterns ?tp ;
+        lsqv:runTimeMs ?rt ; lsqv:usesFeature lsqv:Filter . 
+   FILTER (?rs &gt; 10 &amp;&amp; ?tp &lt;5  &amp;&amp; ?rt &lt; 50 ) }
 LIMIT 50
+</code></pre>
 
----The number of queries containing UNION--- 
+<h4>
+<a id="uc2-sparql-adoption" class="anchor" href="#uc2-sparql-adoption" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC2 SPARQL Adoption</h4>
+
+<p>The Linked SQ dataset can also be used to gain insights into how the SPARQL query language is being used in practice, be that to find out how features are used and combined or to see, for example, what kinds of joins are most common. Below are the two example queries. </p>
+
+<pre><code>----The number of queries using both UNION and FILTER----
 PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
-SELECT COUNT(?queryId) AS ?UnionCount
-WHERE {    ?queryId  lsqv:usesFeature lsqv:Union . }
+SELECT COUNT(?queryId) AS ?unionFilterCount
+WHERE {  ?queryId  lsqv:usesFeature lsqv:Union , lsqv:Filter . }
 
----The number of queries of Star type---
-PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
-SELECT COUNT(?id) AS ?TotalStarQueries
+----The number of empty-result queries with path joins----
+PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
+SELECT COUNT(?id) AS ?starQueries
 WHERE {
-?id lsqv:joinVertex  ?joinVertex . 
-?joinVertex lsqv:joinVertexType lsqv:Star .
-} 
+  ?id lsqv:joinVertex  ?joinVertex ; lsqv:resultSize 0 . 
+  ?joinVertex lsqv:joinVertexType lsqv:Path . } 
+</code></pre>
 
----Get top query executions for smaller result set queries---
-PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
+<h4>
+<a id="uc3-caching" class="anchor" href="#uc3-caching" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC3 Caching</h4>
+
+<p>The Linked SQ dataset can also be used to find useful patterns to cache, commonly repeated queries, or to create realistic caching benchmarks using the timestamp of execution times. Query given below gives an example of an LSQ query that finds the most frequently executed queries that take a long time to compute but have small result sizes that can be cheaply cached.</p>
+
+<pre><code>PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
+SELECT DISTINCT ?query COUNT(?exs) AS ?exsCount
  WHERE {
-    ?id sp:text ?query .
-    ?id lsqv:resultSize ?resultSize .
-    ?id lsqv:execution ?executions. 
-   FILTER (?resultSize &lt;100)
-}
-  ORDER BY DESC(COUNT(?executions))
+    ?id sp:text ?query ; lsqv:resultSize ?rs ; lsqv:execution ?exs ; lsqv:runTimeMs ?rt . 
+    FILTER (?rs &lt; 100 &amp;&amp; ?rt &gt; 10000)}
+  GROUP BY ?query ORDER BY DESC(COUNT(?exsCount))
+</code></pre>
 
----How an agent tried to correct queries with parse errors?---
+<h4>
+<a id="uc4-usability" class="anchor" href="#uc4-usability" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC4 Usability</h4>
+
+<p>From the Linked SQ Dataset, one can derive a list of queries that resulted in parse errors, runtime errors, or empty results. One can also look at which agents issued such queries, and how their queries evolved over time. Query given below gives a small example of a query looking for parse errors encountered by a given agent, ordered by time.</p>
+
+<pre><code>PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
+PREFIX lsqr: &lt;http://lsq.aksw.org/res/&gt;
+PREFIX sp: &lt;http://spinrdf.org/sp#&gt;
+PREFIX dct: &lt;http://purl.org/dc/terms/&gt;  
+SELECT ?query ?time ?error
+ WHERE {
+    ?id sp:text ?query ; lsqv:parseError ?error ; lsqv:execution ?ex . 
+    ?ex dct:issued ?time ; 
+        lsqv:agent lsqr:A-WlFJE0QQRlhBVRNGRx1QGVdaRhNsN2YUW15R .
+ }
+ORDER BY ?time
+</code></pre>
+
+<h4>
+<a id="uc5-optimisation" class="anchor" href="#uc5-optimisation" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC5 Optimisation</h4>
+
+<p>Given a particular workload of queries, an optimiser can decide how to configure indexes, etc., to improve the performance of typical queries. Administrators can use LSQ to derive some default statistics for what is most common across different databases. For example, the query given below provides a query to see how frequently queries containing paths return zero results, which may motivate optimisations to pre-filter empty paths; one could consider a similar example to find path queries that take the longest time, which may suggest to materialise indexes for specific paths.</p>
+
+<pre><code>PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
+SELECT COUNT(?id) AS ?starQueries
+WHERE {
+  ?id lsqv:joinVertex  ?joinVertex ; lsqv:resultSize 0 . 
+  ?joinVertex lsqv:joinVertexType lsqv:Path .
+    } 
+</code></pre>
+
+<h4>
+<a id="uc6-meta-querying" class="anchor" href="#uc6-meta-querying" aria-hidden="true"><span class="octicon octicon-link"></span></a>UC6 Meta-querying</h4>
+
+<p>The final example query given below shows how one can find all the queries relating to a given resource, in this case Michael Jackson.</p>
+
+<pre><code>PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+SELECT  DISTINCT  ?query
+ WHERE {
+    ?id sp:text ?query . 
+    { ?id lsqv:mentionsSubject &lt;http://dbpedia.org/ontology/Michael_Jackson&gt; }
+    UNION
+    { ?id lsqv:mentionsObject &lt;http://dbpedia.org/ontology/Michael_Jackson&gt; } 
+ }
+</code></pre>
+
+<h3>
+<a id="some-other-examples" class="anchor" href="#some-other-examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Some Other Examples</h3>
+
+<p>Here are few of the SPARQL queries that might be interesting</p>
+
+<pre><code>---How an agent tried to correct queries with parse errors?---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX lsqr:&lt;http://lsq.aksw.org/res/&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
@@ -215,15 +272,6 @@ SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
 }
   ORDER BY DESC(COUNT(?executions))
 
----All queries which talk about Michael Jackson---
-PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
-PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT  DISTINCT  ?query
- WHERE {
-    ?id sp:text ?query .
-    ?id lsqv:mentionsPredicate &lt;http://xmlns.com/foaf/0.1/name&gt; .
-    ?id lsqv:mentionsObject &lt;http://dbpedia.org/ontology/Michael_Jackson&gt; 
-}
 ---Top agents by number of execution---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
@@ -332,7 +380,20 @@ lsqrd:q483   a sp:Select ;
 <p>We are very thankful to Richard Cyganiak (TopQuadrant), Jens Lehmann (AKSW, Uni. Leipzig), Dimitris Kontokostas (AKSW, Uni. Leipzig), Ivan Ermilov (AKSW, Uni. Leipzig), and Hugh Glaser (Ethos VO Ltd) for providing query logs.</p>
         </section>
 
-        
+        <aside id="sidebar">
+          <a href="https://github.com/AKSW/LSQ/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/AKSW/LSQ/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/AKSW/LSQ"></a> is maintained by <a href="https://github.com/AKSW">AKSW</a>.</p>
+
+          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
       </div>
     </div>
 
