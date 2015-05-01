@@ -10,5 +10,5 @@ Package: org.aksw.simba.dataset.lsq
 Class: LogRDFizer
 
 ```
-
+Complete details given at [LogRDFizer](https://github.com/AKSW/LSQ/blob/gh-pages/LSQ/src/org/aksw/simba/dataset/lsq/LogRDFizer.java) class.
 
