@@ -57,7 +57,7 @@ public class LogRDFizer {
 		String graph = "http://linkedgeodata.org"; //can be null
 		//String graph = null;
 		
-		String outputFile = "Linked-SQ-LGD-Aidan.ttl";
+		String outputFile = "Linked-SQ-LGD.ttl";
 		//String outputFile = "LinkedDBpedia351SQL.ttl";
 		//String outputFile = "Linked-SQ-DBpedia-Fixed.ttl";
 		
