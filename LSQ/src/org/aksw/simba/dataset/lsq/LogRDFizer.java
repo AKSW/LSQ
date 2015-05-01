@@ -76,7 +76,7 @@ public class LogRDFizer {
 		LogRDFizer rdfizer = new LogRDFizer();
 		
 		//Map<String, Set<String>> queryToSubmissions = slr.getSesameQueryExecutions(queryLogDir);  // this map contains a query as key and their all submissions. 
-		//Note submission is combination  hashed I.P + Exectuion time in xsd:dateTimeFormat. Note the the dateTime format is strict. 
+		//Note submission is combination  of  three strings: hashed I.P + separator String+ Exectuion time in xsd:dateTimeFormat. Note the the dateTime format is strict. 
 	//	Map<String, Set<String>> queryToSubmissions = dblr.getVirtuosoQueryExecutions(queryLogDir);  // this map contains a query as key and their all submissions
 	//	Map<String, Set<String>> queryToSubmissions = rkblr.getBritishMuseumQueryExecutions(queryLogDir); 
 		Map<String, Set<String>> queryToSubmissions = lglr.getVirtuosoQueryExecutions(queryLogDir);
