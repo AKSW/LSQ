@@ -2,7 +2,7 @@
 
 ###Start-up
 
-You can start-up with RDFising your own query log from:
+The LSQ folder contains the source code. You can start-up with RDFising your own query log from:
 
 ```
 Package: org.aksw.simba.dataset.lsq
@@ -10,4 +10,5 @@ Package: org.aksw.simba.dataset.lsq
 Class: LogRDFizer
 
 ```
+
 
