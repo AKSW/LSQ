@@ -53,7 +53,7 @@ public class LogRDFizer {
 		 String localEndpoint = "http://linkedgeodata.org/sparql";
 		// String localEndpoint = "http://linkedgeodata.org/sparql";
 		
-		//String graph = "http://aksw.org/benchmark"; //can be null
+		//String graph = "http://aksw.org/benchmark"; //Named graph. can be null
 		String graph = "http://linkedgeodata.org"; //can be null
 		//String graph = null;
 		
@@ -65,26 +65,27 @@ public class LogRDFizer {
 		//String publicEndpoint = "http://dbpedia.org/sparql";
 		String publicEndpoint = "http://linkedgeodata.org/sparql";
 		
-		maxRunTime = 900;
-		tobw = new BufferedWriter(new FileWriter("timeOutQueries.txt"));
-		String separator = "- -";   // this is separator which separates  the agent ip and corresponding exe time. can be null if there is no user I.P provided in log
+		maxRunTime = 900;  //Max query runtime in seconds
+		tobw = new BufferedWriter(new FileWriter("timeOutQueries.txt")); // the location where time out queries will be stored
+		String separator = "- -";   // this is separator which separates the agent ip (encrypted) and corresponding exe time. can be null if there is no user I.P provided in log
 		//String separator = null;  //null is when IP is missing. like in BM
 		
 		//SesameLogReader slr = new SesameLogReader();
 		// DBpediaLogReader dblr = new DBpediaLogReader();
 		//RKBExplorerLogReader rkblr = new RKBExplorerLogReader();
-		LinkedGeoDataLogReader lglr = new LinkedGeoDataLogReader();
+		LinkedGeoDataLogReader lglr = new LinkedGeoDataLogReader();  //here is your parser class
 		
 		LogRDFizer rdfizer = new LogRDFizer();
 		
-		//Map<String, Set<String>> queryToSubmissions = slr.getSesameQueryExecutions(queryLogDir);  // this map contains a query as key and their all submissions
+		//Map<String, Set<String>> queryToSubmissions = slr.getSesameQueryExecutions(queryLogDir);  // this map contains a query as key and their all submissions. 
+		//Note submission is combination  hashed I.P + Exectuion time in xsd:dateTimeFormat. Note the the dateTime format is strict. 
 	//	Map<String, Set<String>> queryToSubmissions = dblr.getVirtuosoQueryExecutions(queryLogDir);  // this map contains a query as key and their all submissions
 	//	Map<String, Set<String>> queryToSubmissions = rkblr.getBritishMuseumQueryExecutions(queryLogDir); 
 		Map<String, Set<String>> queryToSubmissions = lglr.getVirtuosoQueryExecutions(queryLogDir);
 		
 		System.out.println(queryToSubmissions.keySet().size());
-		
 		System.out.println("Number of Distinct queries: " +  queryToSubmissions.keySet().size());
+		//-----Once you get the query to submissions map by parsing the log then the below method is general---
 		rdfizer.rdfizeLog(queryToSubmissions,localEndpoint,publicEndpoint,graph,outputFile,separator,acronym);
 		System.out.println("Dataset stored at " + outputFile);
 	}
