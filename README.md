@@ -1,4 +1,4 @@
-# LSQ: The Linked SPARQL Queries Dataset
+## LSQ: The Linked SPARQL Queries Dataset
 
 ###Start-up
 
