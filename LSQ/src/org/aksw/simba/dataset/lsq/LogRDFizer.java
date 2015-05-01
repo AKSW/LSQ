@@ -94,7 +94,6 @@ public class LogRDFizer {
 	 * @param localEndpoint Endpoint which will be used for feature generation
 	 * @param publicEndpoint Public endpoint of the log
 	 * @param graph named Graph, can be null
-	 * @param baseURI  Base URI of the log dataset
 	 * @param outputFile The output RDF file
 	 * @param separator Submission separator. Explained above
 	 * @param acronym A Short acronym of the dataset log, e.g., DBpedia or SWDF
