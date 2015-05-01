@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Map;
 import java.util.Set;
-
 import org.aksw.simba.benchmark.encryption.EncryptUtils;
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
 import org.aksw.simba.benchmark.log.operations.LinkedGeoDataLogReader;
@@ -26,11 +25,10 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
-
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 /**
- * Generat Linked Log RDF dataset 
+ * This is the main class used to RDFise query logs 
  * @author Saleem
  *
  */
