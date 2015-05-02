@@ -597,9 +597,9 @@ public class QueryStatistics {
 		{
 			String joinVertex = jv.label;
 			 if(joinVertex.startsWith("http://") || joinVertex.startsWith("ftp://"))
-				 joinVertex =  "<"+joinVertex+">";
+				 joinVertex =  "lsqrd:q"+(LogRDFizer.queryNo-1)+"-"+joinVertex;
 				 else{
-					 joinVertex =  "lsqr:"+joinVertex;
+					 joinVertex =  "lsqrd:q"+(LogRDFizer.queryNo-1)+"-"+joinVertex;
 					 joinVertex = joinVertex.replace("?", "");
 				 }
 			 
