@@ -296,6 +296,7 @@ SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
 @prefix sp: &lt;http://spinrdf.org/sp#&gt; . 
 @prefix dct: &lt;http://purl.org/dc/terms/&gt; . 
 @prefix xsd: &lt;http://www.w3.org/2001/XMLSchema#&gt; .
+@prefix swdf: &lt;http://data.semanticweb.org/ns/swc/ontology#&gt; .
 
 # QUERY INSTANCE META-DATA
 lsqrd:q483 lsqv:endpoint &lt;http://data.semanticweb.org/sparql&gt; ; 
@@ -318,7 +319,7 @@ lsqr:q483-obj lsqv:joinVertexDegree 2 ; lsqv:joinVertexType lsqv:Star .
 
 # DATA-SENSITIVE META-DATA 
 lsqrd:q483 lsqv:resultSize 16 ;  lsqv:runTimeMs 6 ;
-  lsqv:meanTriplePatternSelectivity 0.5007155695730322 ;
+  lsqv:meanTriplePatternSelectivity 0.5007155695730322 .
 
 # QUERY EXECUTION META-DATA
 lsqrd:q483 lsqv:execution lsqrd:q483-e1 , lsqrd:q483-e2 , lsqrd:q483-e3 , lsqrd:q483-e4 . 
