@@ -153,12 +153,12 @@ LIMIT 50
 
 <pre><code>----The number of queries using both UNION and FILTER----
 PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
-SELECT COUNT(?queryId) AS ?unionFilterCount
+SELECT (COUNT(?queryId) AS ?unionFilterCount)
 WHERE {  ?queryId  lsqv:usesFeature lsqv:Union , lsqv:Filter . }
 
 ----The number of empty-result queries with path joins----
 PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
-SELECT COUNT(?id) AS ?starQueries
+SELECT (COUNT(?id) AS ?starQueries)
 WHERE {
   ?id lsqv:joinVertex  ?joinVertex ; lsqv:resultSize 0 . 
   ?joinVertex lsqv:joinVertexType lsqv:Path . } 
@@ -171,7 +171,7 @@ WHERE {
 
 <pre><code>PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT DISTINCT ?query COUNT(?exs) AS ?exsCount
+SELECT DISTINCT ?query (COUNT(?exs) AS ?exsCount)
  WHERE {
     ?id sp:text ?query ; lsqv:resultSize ?rs ; lsqv:execution ?exs ; lsqv:runTimeMs ?rt . 
     FILTER (?rs &lt; 100 &amp;&amp; ?rt &gt; 10000)}
@@ -202,7 +202,7 @@ ORDER BY ?time
 <p>Given a particular workload of queries, an optimiser can decide how to configure indexes, etc., to improve the performance of typical queries. Administrators can use LSQ to derive some default statistics for what is most common across different databases. For example, the query given below provides a query to see how frequently queries containing paths return zero results, which may motivate optimisations to pre-filter empty paths; one could consider a similar example to find path queries that take the longest time, which may suggest to materialise indexes for specific paths.</p>
 
 <pre><code>PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
-SELECT COUNT(?id) AS ?starQueries
+SELECT (COUNT(?id) AS ?starQueries)
 WHERE {
   ?id lsqv:joinVertex  ?joinVertex ; lsqv:resultSize 0 . 
   ?joinVertex lsqv:joinVertexType lsqv:Path .
@@ -215,6 +215,7 @@ WHERE {
 <p>The final example query given below shows how one can find all the queries relating to a given resource, in this case Michael Jackson.</p>
 
 <pre><code>PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
+PREFIX lsqv: &lt;http://lsq.aksw.org/vocab#&gt;
 SELECT  DISTINCT  ?query
  WHERE {
     ?id sp:text ?query . 
@@ -246,11 +247,12 @@ SELECT   ?query ?time
 ---Get average of the different SPARQL query features from DBpedia query log---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt; 
-SELECT AVG(?resultSize) AS ?resultSizeAvg AVG(?bgps) AS ?bgpsAvg 
-AVG(?triplePatterns) AS ?triplePatternsAvg AVG(?joinVertices) AS ?joinVerticesAvg
-AVG(?meanJoinVerticesDegree) AS ?meanJoinVerticesDegreeAvg
-AVG(?meanTriplePatternSelectivity) AS ?meanTriplePatternSelectivityAvg
-AVG(?runTime) AS ?runTimeAvg FROM &lt;http://dbpedia.org&gt;
+SELECT (AVG(?resultSize) AS ?resultSizeAvg) (AVG(?bgps) AS ?bgpsAvg)
+(AVG(?triplePatterns) AS ?triplePatternsAvg) (AVG(?joinVertices) AS ?joinVerticesAvg)
+(AVG(?meanJoinVerticesDegree) AS ?meanJoinVerticesDegreeAvg)
+(AVG(?meanTriplePatternSelectivity) AS ?meanTriplePatternSelectivityAvg)
+(AVG(?runTime) AS ?runTimeAvg)
+FROM &lt;http://dbpedia.org&gt;
  WHERE {
     ?id sp:text ?query .
     ?id lsqv:resultSize ?resultSize .
@@ -265,22 +267,24 @@ AVG(?runTime) AS ?runTimeAvg FROM &lt;http://dbpedia.org&gt;
 ---Top queries by number of executions---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT DISTINCT ?id COUNT (?executions) AS ?executionsCount
+SELECT DISTINCT ?id (COUNT(?executions) AS ?executionsCount)
  WHERE {
     ?id sp:text ?query .
     ?id lsqv:execution ?executions.   
 }
+  GROUP BY ?id
   ORDER BY DESC(COUNT(?executions))
 
 ---Top agents by number of execution---
 PREFIX lsqv:&lt;http://lsq.aksw.org/vocab#&gt;
 PREFIX sp:&lt;http://spinrdf.org/sp#&gt;
-SELECT DISTINCT ?agent COUNT (?executions) AS ?executionsCount
+SELECT DISTINCT ?agent (COUNT(?executions) AS ?executionsCount)
  WHERE {
     ?id sp:text ?query .
     ?id lsqv:execution ?executions .
     ?executions lsqv:agent  ?agent.  
      }
+  GROUP BY ?agent
   ORDER BY DESC(COUNT(?executions))
 </code></pre>
 
