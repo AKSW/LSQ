@@ -41,7 +41,7 @@
 <h3>
 <a id="sparql-endpoint" class="anchor" href="#sparql-endpoint" aria-hidden="true"><span class="octicon octicon-link"></span></a>SPARQL Endpoint</h3>
 
-<p>LSQ <a href="http://titan.informatik.uni-leipzig.de:3333/sparql">SPARQL endpoint</a> is available online. Currently, we have RDFized query logs of DBpedia3.5.1, Linked Geo Data, Semantic Web Dog Food, and British Museum. If you want to query for a particular query log you can specify the following named graphs. </p>
+<p>LSQ <a href="http://lsq.aksw.org/sparql">SPARQL endpoint</a> is available online. Currently, we have RDFized query logs of DBpedia3.5.1, Linked Geo Data, Semantic Web Dog Food, and British Museum. If you want to query for a particular query log you can specify the following named graphs. </p>
 
 <ul>
 <li>DBpedia: <a href="http://dbpedia.org">http://dbpedia.org</a>
@@ -87,13 +87,13 @@ $ ./start_virtuoso.sh
 <p>Our SPARQL endpoint directly provides the Void statistics for each of the query log. Below are the named graphs for Void. You may directly clicke on the named graphs to see the Void statistics on-th-fly. </p>
 
 <ul>
-<li>DBpedia: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://dbpedia.org/void</a>
+<li>DBpedia: <a href="http://lsq.aksw.org/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://dbpedia.org/void</a>
 </li>
-<li>Linked Geo Data: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Flinkedgeodata.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://linkedgeodata.org/void</a>
+<li>Linked Geo Data: <a href="http://lsq.aksw.org/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Flinkedgeodata.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://linkedgeodata.org/void</a>
 </li>
-<li>Semantic Web Dog Food: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdata.semanticweb.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://data.semanticweb.org/void</a>
+<li>Semantic Web Dog Food: <a href="http://lsq.aksw.org/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fdata.semanticweb.org%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://data.semanticweb.org/void</a>
 </li>
-<li>British Museum: <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fbm.rkbexplorer.com%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://bm.rkbexplorer.com/void</a>
+<li>British Museum: <a href="http://lsq.aksw.org/sparql?default-graph-uri=&amp;query=CONSTRUCT+%7B%3Fs+%3Fp+%3Fo%7D+FROM+%3Chttp%3A%2F%2Fbm.rkbexplorer.com%2Fvoid%3E%0D%0AWHERE%0D%0A%7B%0D%0A%3Fs+%3Fp+%3Fo%0D%0A%7D&amp;format=text%2Fturtle&amp;timeout=0&amp;debug=on">http://bm.rkbexplorer.com/void</a>
 </li>
 </ul>
 
@@ -109,7 +109,7 @@ SELECT * FROM &lt;http://dbpedia.org/void&gt;
 WHERE {?s ?p ?o}
 </code></pre>
 
-<p>The output of the SELECT query can be seen <a href="http://titan.informatik.uni-leipzig.de:3333/sparql?default-graph-uri=&amp;query=SELECT+*+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D&amp;format=text%2Fhtml&amp;timeout=0&amp;debug=on">here</a></p>
+<p>The output of the SELECT query can be seen <a href="http://lsq.aksw.org/sparql?default-graph-uri=&amp;query=SELECT+*+FROM+%3Chttp%3A%2F%2Fdbpedia.org%2Fvoid%3E%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D&amp;format=text%2Fhtml&amp;timeout=0&amp;debug=on">here</a></p>
 
 <h3>
 <a id="schema-diagram" class="anchor" href="#schema-diagram" aria-hidden="true"><span class="octicon octicon-link"></span></a>Schema Diagram</h3>
