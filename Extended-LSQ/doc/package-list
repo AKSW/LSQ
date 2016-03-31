@@ -1,0 +1,11 @@
+org.aksw.simba.benchmark
+org.aksw.simba.benchmark.clustring
+org.aksw.simba.benchmark.comparisons
+org.aksw.simba.benchmark.encryption
+org.aksw.simba.benchmark.log.operations
+org.aksw.simba.benchmark.query.stats
+org.aksw.simba.benchmark.spin
+org.aksw.simba.benchmark.startup
+org.aksw.simba.hibiscus.hypergraph
+org.aksw.simba.largerdfbench.util
+org.aksw.sparql.query.algebra.helpers

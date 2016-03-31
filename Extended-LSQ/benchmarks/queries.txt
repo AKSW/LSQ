@@ -1,0 +1,47 @@
+#-------------------------------------------------------
+PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX  owl:  <http://www.w3.org/2002/07/owl#>
+PREFIX  foaf: <http://xmlns.com/foaf/0.1/>
+
+SELECT DISTINCT  ?name ?homepage ?mbox_sha1sum ?page ?sameAs ?seeAlso
+WHERE
+  { <http://data.semanticweb.org/person/asuncion-gomez-perez> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> foaf:Person
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> foaf:name ?name }
+    UNION
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> rdfs:label ?name }
+    OPTIONAL
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> foaf:mbox_sha1sum ?mbox_sha1sum }
+    OPTIONAL
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> foaf:homepage ?homepage }
+    OPTIONAL
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> foaf:page ?page }
+    OPTIONAL
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> owl:sameAs ?sameAs }
+    OPTIONAL
+      { <http://data.semanticweb.org/person/asuncion-gomez-perez> rdfs:seeAlso ?seeAlso }
+  }
+#-------------------------------------------------------
+DESCRIBE <http://data.semanticweb.org/conference/iswc/2004/proceedings/paper-20>
+#-------------------------------------------------------
+SELECT  (count(?p) AS ?no) ?p
+WHERE
+  { ?s ?p ?o .
+    ?o <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class>
+  }
+GROUP BY ?p
+#-------------------------------------------------------
+SELECT DISTINCT  ?b ?attrType
+WHERE
+  { ?a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://data.semanticweb.org/ns/swc/ontology#ConferenceEvent> .
+    ?a ?b ?c
+    OPTIONAL
+      { ?b <http://www.w3.org/2000/01/rdf-schema#range> ?attrType }
+    OPTIONAL
+      { ?c <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ?d }
+    FILTER ( ! bound(?d) )
+  }
+#-------------------------------------------------------
+SELECT DISTINCT  ?property ?hasValue
+WHERE
+  { <http://data.semanticweb.org/conference/eswc/2014/author> ?property ?hasValue }
+ORDER BY ?hasValue

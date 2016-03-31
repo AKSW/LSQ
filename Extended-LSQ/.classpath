@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/commons-compress-1.1.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/commons-io-2.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/fedx-2.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/jackson-core-2.1.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/jena-arq-2.11.0.jar" sourcepath="C:/Users/Saleem/.m2/repository/org/apache/jena/jena-arq/2.11.0/jena-arq-2.11.0-sources.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/jena-core-2.11.0.jar" sourcepath="C:/Users/Saleem/.m2/repository/org/apache/jena/jena-core/2.11.0/jena-core-2.11.0-sources.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/jena-iri-0.9.5.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/openrdf-sesame-2.7.13-onejar.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/org.apache.commons.io.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/slf4j-api-1.6.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/slf4j-log4j12-1.6.4.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/spin-1.4.0.jar" sourcepath="C:/Users/Saleem/Desktop/spin-1.4.0"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/sun.misc.BASE64Decoder.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/xercesImpl-2.10.0.jar"/>
+	<classpathentry kind="lib" path="D:/workspace/Extended-LSQ/lib/xml-apis-1.4.01.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
