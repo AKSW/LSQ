@@ -2,7 +2,7 @@
  * Copyright (c) 2009 TopQuadrant, Inc.
  * All rights reserved.
  *******************************************************************************/
-package org.aksw.simba.dataset.lsq;
+package org.aksw.simba.lsq.core;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -139,6 +139,9 @@ public class LSQARQ2SPIN {
     private Model model;
 
     private static Map<String,List<Resource>> symbolsMap = new HashMap<String,List<Resource>>();
+
+    private int tripleCount = 0;
+
 
     static {
         Model symbolsModel = SPL.getModel();
@@ -619,6 +622,7 @@ public class LSQARQ2SPIN {
                             }
                         }
                         if(next instanceof Triple) {
+                            System.out.println("GOT TRIPLE: " + (++tripleCount));
                             Triple triple = (Triple) next;
                             Resource subject = (Resource) getNode(triple.getSubject());
                             Resource predicate = (Resource) getNode(triple.getPredicate());

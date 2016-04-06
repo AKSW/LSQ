@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.aksw.simba.benchmark.log.operations.CleanQueryWriter;
-import org.aksw.simba.dataset.lsq.LogRDFizer;
+import org.aksw.simba.lsq.core.LogRDFizer;
 import org.aksw.sparql.query.algebra.helpers.BGPGroupGenerator;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;

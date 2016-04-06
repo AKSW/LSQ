@@ -1,4 +1,4 @@
-package org.aksw.simba.dataset.lsq;
+package org.aksw.simba.lsq.core;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -10,14 +10,20 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.simba.benchmark.encryption.EncryptUtils;
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
 import org.aksw.simba.benchmark.log.operations.SesameLogReader;
 import org.aksw.simba.benchmark.spin.Spin;
 import org.aksw.simba.largerdfbench.util.QueryStatistics;
 import org.aksw.simba.largerdfbench.util.Selectivity;
+import org.aksw.simba.largerdfbench.util.Selectivity2;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -30,6 +36,10 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
+import org.topbraid.spin.arq.ARQFactory;
+import org.topbraid.spin.system.SPINModuleRegistry;
+
+import arq.arq;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem
@@ -48,6 +58,11 @@ public class LogRDFizer {
     public static long queryHash=0 ;  //hash of the query
     public static String generatedBy ; // a URI showing the specs for the local experiements
     public static void main(String[] args) throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException, DateParseException {
+
+
+        SPINModuleRegistry.get().init();
+
+
         String ep = "Virtuoso";
         String endpointVersion = "Virtuoso v.7.2";
         String ram = "8GB";
@@ -216,6 +231,27 @@ public class LogRDFizer {
             queryStats = queryStats+QueryStatistics.getRDFizedQueryStats(query,localEndpoint,graph,endpointSize, queryStats);
             queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
             queryStats =queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
+
+
+
+            // model = create spin model
+            // extend model with computed spin stats
+            // extend model with stats after performing user execution
+            //
+
+            // This is an abstraction that can execute SPARQL queries
+            QueryExecutionFactory dataQef =
+                    FluentQueryExecutionFactory
+                    .http(localEndpoint, graph)
+                    .create();
+
+            Model model = ModelFactory.createDefaultModel();
+            LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
+            org.topbraid.spin.model.Query foo = arq2spin.createQuery(query, null);
+
+            //Selectivity2.(dataQef);
+
+
             queryStats = queryStats + Selectivity.getTriplePatternSelectivity(query.toString(), localEndpoint,graph,endpointSize);
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
@@ -224,6 +260,9 @@ public class LogRDFizer {
             queryStats = queryStats + " lsqv:resultSize "+resultSize  +" ; ";
             queryStats = queryStats+" lsqv:runTimeMs "+exeTime  +" ; ";
             queryStats = queryStats + " prov:wasGeneratdBy "+LogRDFizer.generatedBy+ " . ";
+
+
+            //ModelUtils.toString(model)
 
             bw.write(queryStats);
 

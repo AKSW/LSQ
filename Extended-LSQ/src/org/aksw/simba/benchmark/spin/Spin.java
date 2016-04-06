@@ -1,7 +1,7 @@
 package org.aksw.simba.benchmark.spin;
 import java.io.StringWriter;
 
-import org.aksw.simba.dataset.lsq.LSQARQ2SPIN;
+import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;

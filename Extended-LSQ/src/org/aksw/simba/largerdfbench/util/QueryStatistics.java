@@ -9,11 +9,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.simba.dataset.lsq.LogRDFizer;
 import org.aksw.simba.benchmark.query.stats.QueryStats;
 import org.aksw.simba.benchmark.query.stats.QueryStatsTest;
 import org.aksw.simba.hibiscus.hypergraph.HyperGraph.HyperEdge;
 import org.aksw.simba.hibiscus.hypergraph.HyperGraph.Vertex;
+import org.aksw.simba.lsq.core.LogRDFizer;
 import org.aksw.sparql.query.algebra.helpers.BGPGroupGenerator;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
