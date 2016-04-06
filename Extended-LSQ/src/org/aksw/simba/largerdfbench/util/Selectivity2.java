@@ -27,26 +27,6 @@ public class Selectivity2 {
 
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
 
-//    public static final String TRIPLE_PATTERN_QUERY_STR
-//            = "PREFIX sp: <http://lsq.aksw.org/ontology/>\n"
-//            + "PREFIX sp: <http://spinrdf.org/sp#>\n"
-//            + "SELECT ?x ?i ?s ?sv ?p ?pv ?o ?ov {\n"
-//            + "  ?x\n"
-//            + "    sp:subject ?s ;\n"
-//            + "    sp:predicate ?p ;\n"
-//            + "    sp:object ?o . \n"
-//            + "\n"
-//            + "  Optional { lsq:triplePatternIndex ?i }\n"
-//            + "  Optional { ?s sp:varName ?sv }\n"
-//            + "  Optional { ?p sp:varName ?pv }\n"
-//            + "  Optional { ?o sp:varName ?ov }\n"
-//            + "}"
-//            ;
-
-    //public static final Query TRIPLE_PATTERN_QUERY = QueryFactory.create(TRIPLE_PATTERN_QUERY_STR, Syntax.syntaxARQ);
-
-
-
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
         Var c = Var.alloc("_c_");
