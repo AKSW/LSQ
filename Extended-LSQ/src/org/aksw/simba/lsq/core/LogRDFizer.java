@@ -19,11 +19,14 @@ import org.aksw.simba.benchmark.spin.Spin;
 import org.aksw.simba.largerdfbench.util.QueryStatistics;
 import org.aksw.simba.largerdfbench.util.Selectivity;
 import org.aksw.simba.largerdfbench.util.Selectivity2;
+import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.Lang;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -36,10 +39,7 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
-import org.topbraid.spin.arq.ARQFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
-
-import arq.arq;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem
@@ -224,6 +224,10 @@ public class LogRDFizer {
      */
     public void RDFizeSelect(Query query, String localEndpoint, String graph, Set<String> submissions, String separator) throws IOException, RepositoryException, MalformedQueryException, ParseException, QueryEvaluationException {
         String queryStats ="";
+
+        Model model = ModelFactory.createDefaultModel();
+        Resource itemRes = model.createResource("http://TODOinjectResource");
+
         try {
             Query queryNew = SesameLogReader.removeNamedGraphs(query);
             queryStats =queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
@@ -245,14 +249,22 @@ public class LogRDFizer {
                     .http(localEndpoint, graph)
                     .create();
 
-            Model model = ModelFactory.createDefaultModel();
             LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-            org.topbraid.spin.model.Query foo = arq2spin.createQuery(query, null);
+            org.topbraid.spin.model.Query queryRes = arq2spin.createQuery(query, null);
 
-            //Selectivity2.(dataQef);
+            Selectivity2.enrichModelWithHasTriplePattern(model, queryRes);
+            Selectivity2.enrichModelWithTriplePatternText(model);
+            Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
 
-            queryStats = queryStats + Selectivity.getTriplePatternSelectivity(query.toString(), localEndpoint,graph,endpointSize);
+
+            //(dataQef);
+
+
+            //queryStats = queryStats + Selectivity.getTriplePatternSelectivity(query.toString(), localEndpoint,graph,endpointSize);
+
+
+
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
             long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
@@ -266,13 +278,21 @@ public class LogRDFizer {
 
             bw.write(queryStats);
 
-        } catch (Exception ex) {String runtimeError = ex.getMessage().toString().replace("\"", "'").replaceAll("\n", " ").replace("\r", "");
-        bw.write(" lsqv:runtimeError \""+runtimeError+ "\" . ");
-        runtimeErrorCount++; }
-        queryStats = this.getRDFUserExecutions(submissions,separator);
-        bw.write(queryStats);
-        queryStats = this.getSpinRDFStats(query);
-        bw.write(queryStats);
+        } catch (Exception ex) {
+            String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
+            model.add(itemRes, LSQ.runtimeError, msg);
+        }
+
+        model.write(System.out, "TURTLE");
+
+//
+//            String runtimeError = ex.getMessage().toString().replace("\"", "'").replaceAll("\n", " ").replace("\r", "");
+//        bw.write(" lsqv:runtimeError \""+runtimeError+ "\" . ");
+//        runtimeErrorCount++; }
+//        queryStats = this.getRDFUserExecutions(submissions,separator);
+//        bw.write(queryStats);
+//        queryStats = this.getSpinRDFStats(query);
+//        bw.write(queryStats);
     }
     /**
      * RDFized DESCRIBE query

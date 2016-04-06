@@ -21,7 +21,9 @@ public class LSQ {
     public static final Property hasTriplePattern = property("hasTriplePattern");
     public static final Property triplePatternText = property("triplePatternText");
     public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
+    public static final Property triplePatternExtensionSize = property("triplePatternExtensionSize");
     public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
+    public static final Property runtimeError = property("runtimeError");
 
 
 

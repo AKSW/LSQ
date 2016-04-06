@@ -56,7 +56,7 @@ public class SpinModelUtils {
             RDFNode o = Iterables.getFirst(model.listObjectsOfProperty(r, SP.varName).toList(), null);
             if(o != null) {
                 String varName = o.asLiteral().getString();
-                result = Var.alloc(varName);
+                tmp = Var.alloc(varName);
             }
         }
 

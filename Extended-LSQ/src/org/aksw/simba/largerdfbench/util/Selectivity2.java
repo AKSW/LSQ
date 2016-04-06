@@ -91,19 +91,21 @@ public class Selectivity2 {
     }
 
 
-    public static void enrichModelWithMeanTriplePatternSelectivity(Model spinModel) {
-    }
-
-    public static void enrichModelWithTriplePatternSelectivities(Model spinModel, QueryExecutionFactory dataQef, long totalTripleCount) throws MalformedQueryException, RepositoryException, QueryEvaluationException {
+    public static void enrichModelWithTriplePatternExtensionSizes(Model spinModel, QueryExecutionFactory dataQef) throws MalformedQueryException, RepositoryException, QueryEvaluationException {
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         for(Resource r : triplePatternIndex.keySet()) {
             Triple t = SpinModelUtils.readTriple(spinModel, r);
 
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
+            //double selectivity = tripleCount / (double)totalTripleCount;
 
-            spinModel.add(r, LSQ.triplePatternSelectivity, spinModel.createTypedLiteral(123f));
+            spinModel.add(r, LSQ.triplePatternExtensionSize, spinModel.createTypedLiteral(tripleCount));
         }
+    }
+
+    public static void enrichModelWithTriplePatternSelectivities(Model spinModel, long totalTripleCount) {
+        //double selectivity = tripleCount / (double)totalTripleCount;
     }
 
 //
