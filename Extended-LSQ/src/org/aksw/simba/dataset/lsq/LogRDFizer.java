@@ -12,11 +12,12 @@ import java.util.Set;
 
 import org.aksw.simba.benchmark.encryption.EncryptUtils;
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
-import org.aksw.simba.benchmark.log.operations.LinkedGeoDataLogReader;
 import org.aksw.simba.benchmark.log.operations.SesameLogReader;
 import org.aksw.simba.benchmark.spin.Spin;
 import org.aksw.simba.largerdfbench.util.QueryStatistics;
 import org.aksw.simba.largerdfbench.util.Selectivity;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -29,10 +30,6 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
-import org.topbraid.spin.arq.ARQFactory;
-
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem

@@ -1,11 +1,11 @@
 package org.aksw.simba.benchmark.spin;
 import java.io.StringWriter;
 
+import org.aksw.simba.dataset.lsq.LSQARQ2SPIN;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.vocabulary.RDF;
-import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.arq.ARQFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
 @SuppressWarnings("deprecation")
@@ -143,7 +143,7 @@ public class Spin {
             model.setNsPrefix("rdf", RDF.getURI());
             model.setNsPrefix("ex", "http://example.org/demo#");
             Query arqQuery = ARQFactory.get().createQuery(model, query);
-            ARQ2SPIN arq2SPIN = new ARQ2SPIN(model);
+            LSQARQ2SPIN arq2SPIN = new LSQARQ2SPIN(model);
             arq2SPIN.createQuery(arqQuery, null);
 
             model.write(out, format);
