@@ -354,7 +354,6 @@ public class LogRDFizer {
             Selectivity2.enrichModelWithTriplePatternText(model);
             Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
-            //ResourceUtils.renameResource();
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
