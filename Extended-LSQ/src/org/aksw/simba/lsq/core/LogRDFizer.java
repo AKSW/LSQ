@@ -249,11 +249,14 @@ public class LogRDFizer {
             queryNo++;
             Query query = new Query();
             try {
+                // Parse the query ...
                 query = QueryFactory.create(queryStr);
 
-                // Rename the blank node of the query
+                // .. generate the spin model ...
                 LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
                 Resource queryRes = arq2spin.createQuery(query, null);
+
+                // ... and rename the blank node of the query
                 ResourceUtils.renameResource(queryRes, itemRes.getURI());
 
             } catch (Exception ex) {
