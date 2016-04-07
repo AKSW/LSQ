@@ -16,6 +16,7 @@ public class LSQ {
         return ResourceFactory.createProperty(ns + local);
     }
 
+    public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");
     public static final Property structuralFeatures = property("structuralFeatures");
     public static final Property hasTriplePattern = property("hasTriplePattern");
@@ -24,8 +25,19 @@ public class LSQ {
     public static final Property triplePatternExtensionSize = property("triplePatternExtensionSize");
     public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
     public static final Property runtimeError = property("runtimeError");
+    public static final Property runTimeMs = property("runTimeMs");
 
+    public static final Property hasLocalExecution = property("hasLocalExecution");
 
+    public static final Property engine = property("engine");
+    public static final Property vendor = property("vendor");
+    public static final Property version = property("version");
+    public static final Property processor = property("processor");
+    public static final Property ram = property("ram");
+
+    public static final Property dataset = property("dataset");
+
+    public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
 
     //public static final Property
 

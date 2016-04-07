@@ -74,14 +74,12 @@ public class Selectivity2 {
     public static void enrichModelWithTriplePatternExtensionSizes(Model spinModel, QueryExecutionFactory dataQef) throws MalformedQueryException, RepositoryException, QueryEvaluationException {
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        for(Resource r : triplePatternIndex.keySet()) {
-            Triple t = SpinModelUtils.readTriple(spinModel, r);
-
+        triplePatternIndex.forEach((r, t) -> {
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
             //double selectivity = tripleCount / (double)totalTripleCount;
 
             spinModel.add(r, LSQ.triplePatternExtensionSize, spinModel.createTypedLiteral(tripleCount));
-        }
+        });
     }
 
     public static void enrichModelWithTriplePatternSelectivities(Model spinModel, long totalTripleCount) {

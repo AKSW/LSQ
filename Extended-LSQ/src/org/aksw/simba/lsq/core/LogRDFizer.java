@@ -1,17 +1,24 @@
 package org.aksw.simba.lsq.core;
 
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
+import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
+import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.benchmark.encryption.EncryptUtils;
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
 import org.aksw.simba.benchmark.log.operations.SesameLogReader;
@@ -20,13 +27,16 @@ import org.aksw.simba.largerdfbench.util.QueryStatistics;
 import org.aksw.simba.largerdfbench.util.Selectivity;
 import org.aksw.simba.largerdfbench.util.Selectivity2;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.Lang;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -39,6 +49,8 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
 /**
  * This is the main class used to RDFise query logs
@@ -46,6 +58,10 @@ import org.topbraid.spin.system.SPINModuleRegistry;
  *
  */
 public class LogRDFizer {
+
+    private static final Logger logger = LoggerFactory.getLogger(LogRDFizer.class);
+
+
     public static BufferedWriter 	bw ;
     public  RepositoryConnection con = null;
     public static  BufferedWriter tobw= null;
@@ -56,18 +72,36 @@ public class LogRDFizer {
     public static  String publicEndpoint ;
     public static String acronym  ; // a short acrnym for the query log e.g. SWDF for semantic web dog food
     public static long queryHash=0 ;  //hash of the query
-    public static String generatedBy ; // a URI showing the specs for the local experiements
+    //public static String generatedBy ; // a URI showing the specs for the local experiements
     public static void main(String[] args) throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException, DateParseException {
 
 
         SPINModuleRegistry.get().init();
 
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar startTime = new GregorianCalendar();
 
-        String ep = "Virtuoso";
-        String endpointVersion = "Virtuoso v.7.2";
-        String ram = "8GB";
-        String processor = "2.5GHz i7";
-        String curTime = getCurTime();
+        Date date = startTime.getTime();
+        String prts []  = dateFormat.format(date).split(" ");
+
+
+        // Note: We re-use the generatorRes in every query's model, hence its not bound to the specs model directly
+        Resource generatorRes = ResourceFactory.createResource(LSQ.defaultLsqrNs + acronym + "-" + prts[0]);
+
+        Model specs = ModelFactory.createDefaultModel();
+
+        Resource engineRes = specs.createResource();
+        specs.add(generatorRes, LSQ.engine, engineRes);
+        specs.add(engineRes, LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"));
+        specs.add(engineRes, LSQ.version, "Virtuoso v.7.2");
+        specs.add(engineRes, LSQ.processor, "2.5GHz i7");
+        specs.add(engineRes, LSQ.ram,"8GB");
+
+        Resource datasetRes = specs.createResource();
+        specs.add(generatorRes, LSQ.dataset, datasetRes);
+        specs.add(datasetRes, PROV.hadPrimarySource, specs.createResource(publicEndpoint));
+        specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(startTime));
+
 
         String queryLogDir = "/home/raven/Projects/LSQ/SWDF-Test/";
 
@@ -113,7 +147,26 @@ public class LogRDFizer {
         System.out.println(queryToSubmissions.keySet().size());
 
         System.out.println("Number of Distinct queries: " +  queryToSubmissions.keySet().size());
-        rdfizer.rdfizeLog(queryToSubmissions,localEndpoint,graph,outputFile,separator,acronym,endpointVersion, ram, processor,ep,curTime);
+
+        OutputStream out = new FileOutputStream(outputFile);
+
+        // This is an abstraction that can execute SPARQL queries
+        QueryExecutionFactory dataQef =
+                FluentQueryExecutionFactory
+                .http(localEndpoint, graph)
+                .create();
+
+        rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
+
+
+        Calendar endTime = new GregorianCalendar();
+        specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
+
+        specs.write(out, "NTRIPLES");
+
+        out.close();
+        out.flush();
+
         System.out.println("Dataset stored at " + outputFile);
     }
     private static String getCurTime() {
@@ -145,61 +198,94 @@ public class LogRDFizer {
      * @throws QueryEvaluationException
      * @throws ParseException
      */
-    public void rdfizeLog(Map<String, Set<String>> queryToSubmissions, String localEndpoint, String graph, String outputFile, String separator, String acronym, String endpointVersion, String ram, String processor, String ep, String curTime) throws IOException, RepositoryException, MalformedQueryException, QueryEvaluationException, ParseException {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date date = new Date();
-        String prts []  = dateFormat.format(date).split(" ");
-        generatedBy = "lsqr:"+acronym+"-"+prts[0];
-        System.out.println("RDFization started...");
-        endpointSize = Selectivity.getEndpointTotalTriples(localEndpoint, graph);
-        long parseErrorCount =0;
-        bw = new BufferedWriter(new FileWriter(outputFile));
-        this.writePrefixes(acronym);
-      for(String queryStr: queryToSubmissions.keySet())
-        {
-            System.out.println(queryNo+" Started...");
-            //bw.write("\nlsqv:LinkedSQL  lsqv:hasLogOf    lsqr:q-"+queryNo+ " . \n");
-        //	bw.write("lsqr:q"+queryNo+ " lsqv:endpoint <" + publicEndpoint + "> ; \n");
-             queryHash = queryStr.hashCode();
-            bw.write("lsqr:q"+queryHash+ " sp:text \""+queryStr.trim()+"\" ; \n");
+    public void rdfizeLog(
+            OutputStream out,
+            Resource generatorRes,
+            Map<String, Set<String>> queryToSubmissions,
+            QueryExecutionFactory dataQef,
+            String separator,
+            String localEndpoint, // TODO get rid of argument, and use dataQef for executing queries instead
+            String graph, // TODO get rid of argument, and use dataQef for executing queries instead
+            String acronym)  {
+
+        logger.info("RDFization started...");
+        long endpointSize = ServiceUtils.fetchInteger(dataQef.createQueryExecution("SELECT (COUNT(*) AS ?x) { ?s ?p ?o }"), Vars.x);
+
+        // endpointSize = Selectivity.getEndpointTotalTriples(localEndpoint,
+        // graph);
+        long parseErrorCount = 0;
+
+        // this.writePrefixes(acronym);
+        // Resource executionRes =
+        // model.createResource(lsqr:le-"+acronym+"-q"+queryHash);
+
+        for (String queryStr : queryToSubmissions.keySet()) {
+            Model model = ModelFactory.createDefaultModel();
+            queryHash = queryStr.hashCode();
+
+            Resource itemRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
+            model.add(itemRes, PROV.wasGeneratdBy, generatorRes);
+            model.add(itemRes, LSQ.text, queryStr.trim());
+            // bw.write("lsqr:q"+queryNo+ " lsqv:endpoint <" + publicEndpoint +
+            // "> ; \n");
+            // bw.write("\nlsqv:LinkedSQL lsqv:hasLogOf lsqr:q-"+queryNo+ " .
+            // \n");
+
+            System.out.println(queryNo + " Started...");
+
             queryNo++;
-            Query query =  new Query();
-            try{
-                 query = QueryFactory.create(queryStr);
+            Query query = new Query();
+            try {
+                query = QueryFactory.create(queryStr);
+            } catch (Exception ex) {
+                String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
+                model.add(itemRes, LSQ.runtimeError, msg);
+
+                // TODO Port the getRDFUserExceptions function
+                // String queryStats =
+                // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
+                parseErrorCount++;
             }
-            catch (Exception ex){
-                String parseError = ex.getMessage().toString().replace("\"", "'").replaceAll("\n", " ").replace("\r", "");
-                bw.write(" lsqv:parseError \""+parseError+ "\" . ");
-                String queryStats = this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
-                bw.write(queryStats);
-                parseErrorCount++;}
-            try{
-                if(query.isDescribeType())
-                    this.RDFizeDescribe(query,localEndpoint,graph,queryToSubmissions.get(queryStr),separator);
-                else if (query.isSelectType())
-                    this.RDFizeSelect(query,localEndpoint,graph,queryToSubmissions.get(queryStr),separator);
-                else if (query.isAskType())
-                    this.RDFizeASK(query,localEndpoint,graph,queryToSubmissions.get(queryStr),separator);
-                else if (query.isConstructType())
-                    this.RDFizeConstruct(query,localEndpoint,graph,queryToSubmissions.get(queryStr),separator);
+            try {
+                if (query.isDescribeType()) {
+//                    this.RDFizeDescribe(query, localEndpoint, graph,
+//                            queryToSubmissions.get(queryStr), separator);
+                } else if (query.isSelectType()) {
+                    this.RDFizeSelect(model, itemRes, query, dataQef, queryToSubmissions.get(queryStr), separator);
+                } else if (query.isAskType()) {
+//                    this.RDFizeASK(query, localEndpoint, graph,
+//                            queryToSubmissions.get(queryStr), separator);
+                } else if (query.isConstructType()) {
+//                    this.RDFizeConstruct(query, localEndpoint, graph,
+//                            queryToSubmissions.get(queryStr), separator);
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException("Unhandled exception: ", ex);
             }
-            catch(Exception ex){}
+
+
+            model.write(System.out, "TURTLE");
+
+
+
+            RDFDataMgr.write(out, model, RDFFormat.NTRIPLES);
         }
-         writeSpecs(ep,endpointVersion,ram,processor,publicEndpoint,curTime);
-        bw.close();
-        System.out.println("Total Number of Queries with Parse Errors: " + parseErrorCount);
-        System.out.println("Total Number of Queries with Runtime Errors: " + runtimeErrorCount);
+
+        logger.info("Total Number of Queries with Parse Errors: "
+                + parseErrorCount);
+        logger.info("Total Number of Queries with Runtime Errors: "
+                + runtimeErrorCount);
     }
 
-    private static void writeSpecs(String ep, String endpointVersion, String ram, String processor, String publicEndpoint, String startTime) throws IOException {
-
-        String dateTimeStr = getCurTime();
+//    private static void writeSpecs(String ep, String endpointVersion, String ram, String processor, String publicEndpoint, String startTime) throws IOException {
+//
+//        String dateTimeStr = getCurTime();
     //	System.out.println(dateTimeStr);
 //		curData = System
-        bw.write(generatedBy + " \nlsqv:engine \n    [ lsqv:vendor lsqr:"+ep+ " ; lsqv:version \"" + endpointVersion+"\" ; lsqv:processor \"" + processor+"\" ; lsqv:ram \"" + ram+"\"] ; \n");
-        bw.write("lsqv:dataset \n   [ prov:hadPrimarySource <"+publicEndpoint+"> ; \n  prov:atTime \""+dateTimeStr+"\"^^xsd:dateTimeStamp ] ;\n");
-        bw.write( "prov:startedAtTime \""+startTime+"\"^^xsd:dateTimeStamp ; \n");
-        bw.write( "prov:endAtTime \""+dateTimeStr+"\"^^xsd:dateTimeStamp . \n");
+//                bw.write(generatedBy + " \nlsqv:engine \n    [ lsqv:vendor lsqr:"+ep+ " ; lsqv:version \"" + endpointVersion+"\" ; lsqv:processor \"" + processor+"\" ; lsqv:ram \"" + ram+"\"] ; \n");
+//                bw.write("lsqv:dataset \n   [ prov:hadPrimarySource <"+publicEndpoint+"> ; \n  prov:atTime \""+dateTimeStr+"\"^^xsd:dateTimeStamp ] ;\n");
+//                bw.write( "prov:startedAtTime \""+startTime+"\"^^xsd:dateTimeStamp ; \n");
+//                bw.write( "prov:endAtTime \""+dateTimeStr+"\"^^xsd:dateTimeStamp . \n");
 //		 lsqv:engine
 //		   [ lsqv:vendor lsqr:Virtuoso  ; lsqv:version "Virtuoso v.123/1239" ] ;
 //		 lsqv:dataset
@@ -207,8 +293,9 @@ public class LogRDFizer {
 //		     prov:atTime "2014-12-12T..."^^xsd:dateTimeStamp ] ;
 //		 prov:startedAtTime "2015-12-12T..."^^xsd:dateTimeStamp ;
 //		 prov:endedAtTime "2015-12-12T..."^^xsd:dateTimeStamp .
+//
+//    }
 
-    }
     /**
      * RDFized SELECT query
      * @param query Query
@@ -222,68 +309,40 @@ public class LogRDFizer {
      * @throws ParseException
      * @throws QueryEvaluationException
      */
-    public void RDFizeSelect(Query query, String localEndpoint, String graph, Set<String> submissions, String separator) throws IOException, RepositoryException, MalformedQueryException, ParseException, QueryEvaluationException {
+    public void RDFizeSelect(Model model, Resource itemRes, Query query, QueryExecutionFactory dataQef, Set<String> submissions, String separator) throws IOException, RepositoryException, MalformedQueryException, ParseException, QueryEvaluationException {
         String queryStats ="";
-
-        Model model = ModelFactory.createDefaultModel();
-        Resource itemRes = model.createResource("http://TODOinjectResource");
 
         try {
             Query queryNew = SesameLogReader.removeNamedGraphs(query);
-            queryStats =queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
+            queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
             queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-            queryStats = queryStats+QueryStatistics.getRDFizedQueryStats(query,localEndpoint,graph,endpointSize, queryStats);
+            //queryStats = queryStats+QueryStatistics.getRDFizedQueryStats(query,localEndpoint,graph,endpointSize, queryStats);
             queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
-            queryStats =queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
+            queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
 
 
-
-            // model = create spin model
-            // extend model with computed spin stats
-            // extend model with stats after performing user execution
-            //
-
-            // This is an abstraction that can execute SPARQL queries
-            QueryExecutionFactory dataQef =
-                    FluentQueryExecutionFactory
-                    .http(localEndpoint, graph)
-                    .create();
 
             LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-            org.topbraid.spin.model.Query queryRes = arq2spin.createQuery(query, null);
+            Resource queryRes = arq2spin.createQuery(query, null);
 
             Selectivity2.enrichModelWithHasTriplePattern(model, queryRes);
             Selectivity2.enrichModelWithTriplePatternText(model);
             Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
 
-
-            //(dataQef);
-
-
-            //queryStats = queryStats + Selectivity.getTriplePatternSelectivity(query.toString(), localEndpoint,graph,endpointSize);
-
-
-
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
-            long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
+            long resultSize = QueryExecutionUtils.countQuery(queryNew, dataQef);
+            //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
             long exeTime = System.currentTimeMillis() - curTime ;
-            queryStats = queryStats + " lsqv:resultSize "+resultSize  +" ; ";
-            queryStats = queryStats+" lsqv:runTimeMs "+exeTime  +" ; ";
-            queryStats = queryStats + " prov:wasGeneratdBy "+LogRDFizer.generatedBy+ " . ";
 
-
-            //ModelUtils.toString(model)
-
-            bw.write(queryStats);
+            model.add(itemRes, LSQ.resultSize, model.createTypedLiteral(resultSize));
+            model.add(itemRes, LSQ.runTimeMs, model.createTypedLiteral(exeTime));
 
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
             model.add(itemRes, LSQ.runtimeError, msg);
         }
-
-        model.write(System.out, "TURTLE");
 
 //
 //            String runtimeError = ex.getMessage().toString().replace("\"", "'").replaceAll("\n", " ").replace("\r", "");
