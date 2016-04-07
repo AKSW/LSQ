@@ -28,6 +28,9 @@ public class LSQ {
     public static final Property runTimeMs = property("runTimeMs");
 
     public static final Property hasLocalExecution = property("hasLocalExecution");
+    public static final Property hasRemoteExecution = property("hasRemoteExecution");
+
+    public static final Property usesFeature = property("usesFeature");
 
     public static final Property engine = property("engine");
     public static final Property vendor = property("vendor");

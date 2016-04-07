@@ -37,6 +37,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.util.ResourceUtils;
 import org.openrdf.query.BooleanQuery;
 import org.openrdf.query.GraphQuery;
 import org.openrdf.query.GraphQueryResult;
@@ -52,6 +53,8 @@ import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
+
+import info.aduna.io.ResourceUtil;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem
@@ -220,16 +223,26 @@ public class LogRDFizer {
         // model.createResource(lsqr:le-"+acronym+"-q"+queryHash);
 
         for (String queryStr : queryToSubmissions.keySet()) {
+
             Model model = ModelFactory.createDefaultModel();
+
+
             queryHash = queryStr.hashCode();
 
             Resource itemRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
+
+
+
             model.add(itemRes, PROV.wasGeneratdBy, generatorRes);
             model.add(itemRes, LSQ.text, queryStr.trim());
-            // bw.write("lsqr:q"+queryNo+ " lsqv:endpoint <" + publicEndpoint +
-            // "> ; \n");
-            // bw.write("\nlsqv:LinkedSQL lsqv:hasLogOf lsqr:q-"+queryNo+ " .
-            // \n");
+
+            Resource localExecutionRes = model.createResource(LSQ.defaultLsqrNs + "le-" + acronym + "-q" + queryHash);
+            model.add(itemRes, LSQ.hasLocalExecution, localExecutionRes);
+
+            Resource remoteExecutionRes = model.createResource(LSQ.defaultLsqrNs + "re-" + acronym + "-q" + queryHash);
+            model.add(itemRes, LSQ.hasRemoteExecution, remoteExecutionRes);
+
+                    //queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
 
             System.out.println(queryNo + " Started...");
 
@@ -237,6 +250,12 @@ public class LogRDFizer {
             Query query = new Query();
             try {
                 query = QueryFactory.create(queryStr);
+
+                // Rename the blank node of the query
+                LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
+                Resource queryRes = arq2spin.createQuery(query, null);
+                ResourceUtils.renameResource(queryRes, itemRes.getURI());
+
             } catch (Exception ex) {
                 String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
                 model.add(itemRes, LSQ.runtimeError, msg);
@@ -310,25 +329,29 @@ public class LogRDFizer {
      * @throws QueryEvaluationException
      */
     public void RDFizeSelect(Model model, Resource itemRes, Query query, QueryExecutionFactory dataQef, Set<String> submissions, String separator) throws IOException, RepositoryException, MalformedQueryException, ParseException, QueryEvaluationException {
-        String queryStats ="";
 
         try {
             Query queryNew = SesameLogReader.removeNamedGraphs(query);
-            queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-            queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
+
+
+            //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
+            Resource featureRes = model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
+            model.add(itemRes, LSQ.structuralFeatures, featureRes);
+
+            // Add used features
+            Set<Resource> features = ElementVisitorFeature.getFeatures(query);
+            features.forEach(f -> model.add(featureRes, LSQ.usesFeature, f));
+
+            // TODO These methods have to be ported
+            //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
             //queryStats = queryStats+QueryStatistics.getRDFizedQueryStats(query,localEndpoint,graph,endpointSize, queryStats);
-            queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
-            queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
+            //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
-
-
-            LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-            Resource queryRes = arq2spin.createQuery(query, null);
-
-            Selectivity2.enrichModelWithHasTriplePattern(model, queryRes);
+            Selectivity2.enrichModelWithHasTriplePattern(model, itemRes);
             Selectivity2.enrichModelWithTriplePatternText(model);
             Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
+            //ResourceUtils.renameResource();
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
