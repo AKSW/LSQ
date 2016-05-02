@@ -24,6 +24,7 @@ import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
 import org.aksw.simba.benchmark.log.operations.SesameLogReader;
 import org.aksw.simba.benchmark.spin.Spin;
 import org.aksw.simba.largerdfbench.util.QueryStatistics;
+import org.aksw.simba.largerdfbench.util.QueryStatistics2;
 import org.aksw.simba.largerdfbench.util.Selectivity;
 import org.aksw.simba.largerdfbench.util.Selectivity2;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -53,8 +54,6 @@ import org.openrdf.repository.sparql.SPARQLRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
-
-import info.aduna.io.ResourceUtil;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem
@@ -341,14 +340,16 @@ public class LogRDFizer {
             Resource featureRes = model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
             model.add(itemRes, LSQ.structuralFeatures, featureRes);
 
+            QueryStatistics2.enrichResourceWithQueryFeatures(itemRes, query);
+
+
             // Add used features
             Set<Resource> features = ElementVisitorFeature.getFeatures(query);
             features.forEach(f -> model.add(featureRes, LSQ.usesFeature, f));
 
             // TODO These methods have to be ported
-            //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-            //queryStats = queryStats+QueryStatistics.getRDFizedQueryStats(query,localEndpoint,graph,endpointSize, queryStats);
-            //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
+            queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
+            queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
             Selectivity2.enrichModelWithHasTriplePattern(model, itemRes);
             Selectivity2.enrichModelWithTriplePatternText(model);
