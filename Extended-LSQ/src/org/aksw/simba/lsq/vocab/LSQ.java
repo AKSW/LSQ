@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.vocab;
 
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 
 /**
@@ -15,6 +16,18 @@ public class LSQ {
     public static Property property(String local) {
         return ResourceFactory.createProperty(ns + local);
     }
+
+    // Used internally for the hypergraph
+    public static final Resource Vertex = ResourceFactory.createResource(ns + "Vertex");
+    public static final Resource Edge = ResourceFactory.createResource(ns + "Vertex");
+
+    public static final Resource Star = ResourceFactory.createResource(ns + "Star");
+    public static final Resource Sink = ResourceFactory.createResource(ns + "Sink");
+    public static final Resource Path = ResourceFactory.createResource(ns + "Path");
+    public static final Resource Hybrid = ResourceFactory.createResource(ns + "Hybrid");
+
+    public static final Property in = property("in");
+    public static final Property out = property("out");
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -17,7 +18,13 @@ import org.aksw.simba.lsq.core.ElementVisitorFeature;
 import org.aksw.simba.lsq.core.LogRDFizer;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql.query.algebra.helpers.BGPGroupGenerator;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
@@ -27,12 +34,12 @@ import org.apache.jena.sparql.algebra.op.Op2;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.repository.RepositoryException;
-
-import com.google.common.base.Functions;
 
 public class QueryStatistics2 {
     /**
@@ -95,6 +102,95 @@ public class QueryStatistics2 {
         return result;
     }
 
+    public static int propertyDegree(Resource r, Property p) {
+        int result = r.listProperties(p).toList().size();
+        return result;
+    }
+
+
+    public static Resource getJoinVertexType(Resource r) {
+        int indeg = propertyDegree(r, LSQ.in);
+        int outdeg = propertyDegree(r, LSQ.out);
+
+        Resource result;
+        if(indeg == 0) {
+            result = LSQ.Star;
+        } else if(outdeg == 0) {
+            result = LSQ.Sink;
+        } else if(indeg == 1 && outdeg == 1) {
+            result = LSQ.Path;
+        } else {
+            result = LSQ.Hybrid;
+        }
+
+        return result;
+    }
+
+
+    public static <V> HashSet<V> getJoinVertexCount(Model model) {
+        Set<Resource> vertices = model.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
+
+
+        HashSet<Vertex> V = new HashSet<Vertex>();
+        for (Vertex vertex:Vertices)
+        {
+            propertyDegree(vertex)
+
+            long inDeg = vertex.inEdges.size();
+            long outDeg = vertex.outEdges.size();
+            long degSum = inDeg + outDeg;
+            if(degSum>1)
+                V.add(vertex);
+        }
+        return V;
+    }
+
+
+
+    public static Model createHyperGraphModel(Iterable<Triple> triples) {
+        Model result = ModelFactory.createDefaultModel();
+        Map<Node, Resource> nodeToResource = new HashMap<Node, Resource>();
+
+        for(Triple t : triples)
+        {
+            // Get the triple's nodes
+            Node s = t.getSubject();
+            Node p = t.getPredicate();
+            Node o = t.getObject();
+
+            // Create anonymous resources as proxies for the original
+            // triple and nodes - needed because RDF literals cannot appear in subject position
+            // TODO We treat each triple different from the other even if they happen to be equal - is this desired?
+            Resource tx = result.createResource();
+            Resource sx = nodeToResource.merge(s, result.createResource(), (x, y) -> x);
+            Resource px = nodeToResource.merge(p, result.createResource(), (x, y) -> x);
+            Resource ox = nodeToResource.merge(o, result.createResource(), (x, y) -> x);
+
+            result.add(tx, RDF.type, LSQ.Edge);
+            result.add(sx, RDF.type, LSQ.Vertex);
+            result.add(px, RDF.type, LSQ.Vertex);
+            result.add(ox, RDF.type, LSQ.Vertex);
+
+
+            // Add the orginal nodes as annotations
+            Resource ss = result.wrapAsResource(t.getSubject());
+            Resource pp = result.wrapAsResource(t.getPredicate());
+            RDFNode oo = result.asRDFNode(t.getObject());
+
+            result.add(sx, RDF.subject, ss);
+            result.add(px, RDF.predicate, pp);
+            result.add(ox, RDF.object, oo);
+            result.add(tx, RDFS.label, result.createLiteral("" + t));
+
+
+            result.add(sx, LSQ.out, tx);
+            result.add(px, LSQ.in, tx);
+            result.add(ox, LSQ.in, tx);
+        }
+        return result;
+    }
+
+
 
     /**
      * Get the benchmark query features ( e.g resultsize, bgps mean join vertices etc)
@@ -129,42 +225,9 @@ public class QueryStatistics2 {
 
         HashSet<Vertex> joinVertices = new HashSet<Vertex>();
         HashSet<Vertex> vertices = new HashSet<Vertex>();
-        for(int DNFkey:bgpGrps.keySet())  //DNFgrp => bgp
-        {
-            HashSet<Vertex> V = new HashSet<Vertex>();   //--Set of all vertices used in our hypergraph. each subject, predicate and object of a triple pattern is one node until it is repeated
-            List<StatementPattern>   stmts =  bgpGrps.get(DNFkey);
-            totalTriplePatterns = totalTriplePatterns + stmts.size();
-            for (StatementPattern stmt : stmts)
-            {
-                String sbjVertexLabel, objVertexLabel, predVertexLabel;
-                Vertex sbjVertex, predVertex,objVertex ;
-                //--------add vertices---
-                sbjVertexLabel = getSubjectVertexLabel(stmt);
-                predVertexLabel = getPredicateVertexLabel(stmt);
-                objVertexLabel = getObjectVertexLabel(stmt);
-                sbjVertex = new Vertex(sbjVertexLabel);
-                predVertex = new Vertex(predVertexLabel);
-                objVertex = new Vertex(objVertexLabel);
-                if(!vertexExist(sbjVertex,V))
-                    V.add(sbjVertex);
-                if(!vertexExist(predVertex,V))
-                    V.add(predVertex);
-                if(!vertexExist(objVertex,V))
-                    V.add(objVertex);
-                //--------add hyperedges
-                HyperEdge hEdge = new HyperEdge(sbjVertex,predVertex,objVertex);
-                if(!(getVertex(sbjVertexLabel,V)==null))
-                    sbjVertex = getVertex(sbjVertexLabel,V);
-                if(!(getVertex(predVertexLabel,V)==null))
-                    predVertex = getVertex(predVertexLabel,V);
-                if(!(getVertex(objVertexLabel,V)==null))
-                    objVertex = getVertex(objVertexLabel,V);
-                sbjVertex.outEdges.add(hEdge); predVertex.inEdges.add(hEdge); objVertex.inEdges.add(hEdge);
-            }
-            vertices.addAll(V) ;
-            joinVertices.addAll(getJoinVertexCount(V));
-            // V.clear();
-        }
+
+
+
         grandTotalTriplePatterns = grandTotalTriplePatterns + totalTriplePatterns;
         //stats = stats +"Triple Patterns: "+ totalTriplePatterns+"\n";
         stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
