@@ -41,6 +41,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.writer.TurtleWriter;
@@ -51,6 +52,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.system.SPINModuleRegistry;
 
+import jena.schemagen.SchemagenOptions.OPT;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -63,21 +65,35 @@ public class MainLSQ {
 
     private static final Logger logger = LoggerFactory.getLogger(MainLSQ.class);
 
+    public static final OptionParser parser = new OptionParser();
+
+
     public static final PrefixMapping lsqPrefixes;
 
     static {
         try {
             ClassPathResource r = new ClassPathResource("lsq-prefixes.ttl");
             Model m = ModelFactory.createDefaultModel();
-            m.read(r.getInputStream(), "http://example.org/base/");
+            m.read(r.getInputStream(), "http://example.org/base/", "turtle");
             lsqPrefixes = m;
         } catch(Exception e) {
             throw new RuntimeException(e);
         }
     }
 
+
     public static void main(String[] args) throws Exception  {
-        OptionParser parser = new OptionParser();
+        // Try to start - if something goes wrong print help
+        // TODO Logic for when help is displayed could be improved
+        try {
+            run(args);
+        } catch(Exception e) {
+            logger.error("Error", e);
+            parser.printHelpOn(System.err);
+        }
+    }
+
+    public static void run(String[] args) throws Exception  {
 
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
