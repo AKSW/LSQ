@@ -13,21 +13,25 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public class LSQ {
     public static final String ns = "http://lsq.aksw.org/vocab#";
 
-    public static Property property(String local) {
-        return ResourceFactory.createProperty(ns + local);
-    }
+    public static Resource resource(String local) { return ResourceFactory.createResource(ns + local); }
+    public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
 
-    // Used internally for the hypergraph
-    public static final Resource Vertex = ResourceFactory.createResource(ns + "Vertex");
-    public static final Resource Edge = ResourceFactory.createResource(ns + "Vertex");
-
-    public static final Resource Star = ResourceFactory.createResource(ns + "Star");
-    public static final Resource Sink = ResourceFactory.createResource(ns + "Sink");
-    public static final Resource Path = ResourceFactory.createResource(ns + "Path");
-    public static final Resource Hybrid = ResourceFactory.createResource(ns + "Hybrid");
+    // Used internally for the hypergraph representation - not part of the public vocab
+    public static final Resource Vertex = resource(ns + "Vertex");
+    public static final Resource Edge = resource(ns + "Vertex");
 
     public static final Property in = property("in");
     public static final Property out = property("out");
+
+    public static final Resource Star = resource(ns + "Star");
+    public static final Resource Sink = resource(ns + "Sink");
+    public static final Resource Path = resource(ns + "Path");
+    public static final Resource Hybrid = resource(ns + "Hybrid");
+
+    public static final Property joinVertex = property("joinVertex");
+    public static final Property joinVertexType = property("joinVertexType");
+    public static final Property joinVertexDegree = property("joinVertexDegree");
+
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");

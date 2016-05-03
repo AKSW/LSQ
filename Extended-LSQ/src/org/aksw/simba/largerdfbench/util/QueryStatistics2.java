@@ -6,18 +6,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.aksw.simba.hibiscus.hypergraph.HyperGraph.HyperEdge;
-import org.aksw.simba.hibiscus.hypergraph.HyperGraph.Vertex;
 import org.aksw.simba.lsq.core.ElementVisitorFeature;
-import org.aksw.simba.lsq.core.LogRDFizer;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.aksw.sparql.query.algebra.helpers.BGPGroupGenerator;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -26,7 +23,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfxml.xmloutput.impl.Basic;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
@@ -38,9 +34,6 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.repository.RepositoryException;
 
 public class QueryStatistics2 {
     /**
@@ -103,8 +96,11 @@ public class QueryStatistics2 {
         return result;
     }
 
-    public static int propertyDegree(Resource r, Property p) {
-        int result = r.listProperties(p).toList().size();
+    public static int propertyDegree(Resource r, Property... ps) {
+        int result = new HashSet<>(Arrays.asList(ps)).stream()
+            .mapToInt(p -> r.listProperties(p).toList().size())
+            .sum();
+
         return result;
     }
 
@@ -127,23 +123,22 @@ public class QueryStatistics2 {
     }
 
 
-    public static <V> HashSet<V> getJoinVertexCount(Model model) {
+    public static Set<Resource> getJoinVertexCount(Model model) {
         Set<Resource> vertices = model.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
 
-        Set<Resource>
+        // Note: We do this intermediate map for debugging / tracability reasons
+        Map<Resource, Integer> vToDeg = vertices.stream()
+                .collect(Collectors.toMap(
+                        v -> v,
+                        v -> propertyDegree(v, LSQ.in, LSQ.out)));
 
-        HashSet<Vertex> V = new HashSet<Vertex>();
-        for (Vertex vertex:Vertices)
-        {
-            propertyDegree(vertex)
+        // Return those keys in the map, whose degree is non-zero
+        Set<Resource> result = vToDeg.entrySet().stream()
+            .filter(e -> e.getValue() > 0)
+            .map(Entry::getKey)
+            .collect(Collectors.toSet());
 
-            long inDeg = vertex.inEdges.size();
-            long outDeg = vertex.outEdges.size();
-            long degSum = inDeg + outDeg;
-            if(degSum>1)
-                V.add(vertex);
-        }
-        return V;
+        return result;
     }
 
 
@@ -209,7 +204,7 @@ public class QueryStatistics2 {
      * @return stats Query Features as string
      * @throws MalformedQueryException
      */
-    public static String getDirectQueryRelatedRDFizedStats(Query query) throws MalformedQueryException {
+    public static void getDirectQueryRelatedRDFizedStats(Query query) throws MalformedQueryException {
         Op op = Algebra.compile(query);
 
         // Get all BGPs from the algebra
@@ -244,7 +239,7 @@ public class QueryStatistics2 {
         Map<Resource, Integer> joinVertexToDegree = joinVertices.stream()
                 .collect(Collectors.toMap(
                         r -> r,
-                        r -> propertyDegree(r, LSQ.in) + propertyDegree(r, LSQ.out))
+                        r -> propertyDegree(r, LSQ.out, LSQ.in))
                 );
 
         double avgJoinVertexDegree = joinVertexToDegree.values().stream()
@@ -263,46 +258,51 @@ public class QueryStatistics2 {
 //        stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsSubject ";
 //            stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsPredicate ";
 //        stats = stats + getMentionsTuple(predicates); // subjects and objects
-    }
+//ModelUtils.
+        //ResourceUtils.
 
+        for(Resource v : joinVertices) {
+            // TODO Allocate a resource for the join vertex
+            Resource queryRes = null;
+            Resource joinVertexRes = null;//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
 
-       String joinVertexType = "" ;   // {Star, path, hybrid, sink}
-        if(!joinVertices.isEmpty()){
+            queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
-        for(Vertex jv:joinVertices)
-        {
-            String joinVertex = jv.label;
-             if(joinVertex.startsWith("http://") || joinVertex.startsWith("ftp://"))
-                 joinVertex =  "lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex;
-                 else{
-                     joinVertex =  "lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex;
-                     joinVertex = joinVertex.replace("?", "");
-                 }
+            Resource joinVertexType = getJoinVertexType(joinVertexRes);
+            joinVertexRes.addProperty(LSQ.joinVertexType, joinVertexType);
 
-            stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:joinVertex " + joinVertex + " . \n";
-            long joinVertexDegree = (jv.inEdges.size() + jv.outEdges.size());
-            joinVertexType =  getJoinVertexType(jv);
-            stats = stats + joinVertex + " lsqv:joinVertexDegree " + joinVertexDegree + " ; lsqv:joinVertexType lsqv:" + joinVertexType + " . " ;
+            int degree = joinVertexToDegree.get(v);
+            joinVertexRes.addLiteral(LSQ.joinVertexDegree, degree);
 
-            //System.out.println("     " + jv+ " Join Vertex Degree: " + joinVertexDegree + ", Join Vertex Type: " + joinVertexType);
         }
-        }
-        return stats ;
-    }
-    public static String getMentionsTuple(Set<String> subjects) {
-     String stats = "";
-     for (String sbj:subjects)
-     {
-         if(sbj.startsWith("http://") || sbj.startsWith("ftp://"))
-         stats = stats + "<"+sbj+"> , ";
-         else
-             stats = stats + "\""+sbj+"\" , ";
 
-     }
-     stats = stats.substring(0,stats.lastIndexOf(",")-1);
-        stats = stats + " . ";
-        return stats;
     }
+
+
+
+
+//    Resource joinVertexType = getJoinVertexType(r);
+//       String joinVertexType = "" ;   // {Star, path, hybrid, sink}
+//        for(Vertex jv:joinVertices)
+//        {
+//            String joinVertex = jv.label;
+//             if(joinVertex.startsWith("http://") || joinVertex.startsWith("ftp://"))
+//                 joinVertex =  "lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex;
+//                 else{
+//                     joinVertex =  "lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex;
+//                     joinVertex = joinVertex.replace("?", "");
+//                 }
+//
+//            stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:joinVertex " + joinVertex + " . \n";
+//            long joinVertexDegree = (jv.inEdges.size() + jv.outEdges.size());
+//            joinVertexType =  getJoinVertexType(jv);
+//            stats = stats + joinVertex + " lsqv:joinVertexDegree " + joinVertexDegree + " ; lsqv:joinVertexType lsqv:" + joinVertexType + " . " ;
+//
+//            //System.out.println("     " + jv+ " Join Vertex Degree: " + joinVertexDegree + ", Join Vertex Type: " + joinVertexType);
+//        }
+//        }
+//        return stats ;
+//    }
 
 
 }

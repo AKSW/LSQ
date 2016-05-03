@@ -348,8 +348,8 @@ public class LogRDFizer {
             features.forEach(f -> model.add(featureRes, LSQ.usesFeature, f));
 
             // TODO These methods have to be ported
-            queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-            queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
+            //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
+            //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
             Selectivity2.enrichModelWithHasTriplePattern(model, itemRes);
             Selectivity2.enrichModelWithTriplePatternText(model);
