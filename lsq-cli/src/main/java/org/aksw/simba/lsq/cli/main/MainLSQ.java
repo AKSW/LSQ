@@ -183,16 +183,16 @@ public class MainLSQ {
 
         // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
         Resource engineRes = specs.createResource();
-        specs.add(generatorRes, LSQ.engine, engineRes);
-        specs.add(engineRes, LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"));
-        specs.add(engineRes, LSQ.version, "Virtuoso v.7.2");
-        specs.add(engineRes, LSQ.processor, "2.5GHz i7");
-        specs.add(engineRes, LSQ.ram,"8GB");
+        generatorRes.addProperty(LSQ.engine, engineRes);
+        engineRes.addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"));
+        engineRes.addProperty(LSQ.version, "Virtuoso v.7.2");
+        engineRes.addProperty(LSQ.processor, "2.5GHz i7");
+        engineRes.addProperty(LSQ.ram,"8GB");
 
         Resource datasetRes = specs.createResource();
-        specs.add(generatorRes, LSQ.dataset, datasetRes);
-        specs.add(datasetRes, PROV.hadPrimarySource, specs.createResource(endpointUrl));
-        specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(startTime));
+        generatorRes.addLiteral(LSQ.dataset, datasetRes);
+        datasetRes.addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl));
+        datasetRes.addLiteral(PROV.startedAtTime, startTime);
 
 
         Model logModel = ModelFactory.createDefaultModel();
