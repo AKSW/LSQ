@@ -26,6 +26,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdfxml.xmloutput.impl.Basic;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
@@ -107,7 +108,6 @@ public class QueryStatistics2 {
         return result;
     }
 
-
     public static Resource getJoinVertexType(Resource r) {
         int indeg = propertyDegree(r, LSQ.in);
         int outdeg = propertyDegree(r, LSQ.out);
@@ -130,6 +130,7 @@ public class QueryStatistics2 {
     public static <V> HashSet<V> getJoinVertexCount(Model model) {
         Set<Resource> vertices = model.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
 
+        Set<Resource>
 
         HashSet<Vertex> V = new HashSet<Vertex>();
         for (Vertex vertex:Vertices)
@@ -147,9 +148,19 @@ public class QueryStatistics2 {
 
 
 
-    public static Model createHyperGraphModel(Iterable<Triple> triples) {
-        Model result = ModelFactory.createDefaultModel();
-        Map<Node, Resource> nodeToResource = new HashMap<Node, Resource>();
+    /**
+     * Creates a hypergraph model.
+     *
+     *
+     *
+     * @param result
+     * @param nodeToResource Mapping from nodes to resources. Can be used to
+     *   control whether e.g. nodes of different graph patters should map to the
+     *   same or to different resources. This is an in/out argument.
+     * @param triples
+     */
+    public static void enrichModelWithHyperGraphData(Model result, Map<Node, Resource> nodeToResource, Iterable<Triple> triples) {
+        //result = result == null ? ModelFactory.createDefaultModel() : result;
 
         for(Triple t : triples)
         {
@@ -187,7 +198,7 @@ public class QueryStatistics2 {
             result.add(px, LSQ.in, tx);
             result.add(ox, LSQ.in, tx);
         }
-        return result;
+        //return result;
     }
 
 
@@ -207,116 +218,53 @@ public class QueryStatistics2 {
                 .map(o -> ((OpBGP)o).getPattern())
                 .collect(Collectors.toList());
 
+        List<Integer> bgpSizes = bgps.stream()
+                .map(BasicPattern::size)
+                .collect(Collectors.toList());
 
         int totalBgpCount = bgps.size();
 
         // Find out minimum and maximum size of the bgpgs
-        int maxBgpTripleCount = bgps.stream()
-            .map(BasicPattern::size)
-            .max(Integer::max)
-            .map(x -> x)
-            .orElse(0);
+        int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
+        int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
+        int totalBgpTripleCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
-        int minBgpTripleCount = bgps.stream()
-            .map(BasicPattern::size)
-            .min(Integer::min)
-            .map(x -> x)
-            .orElse(0);
-
-        HashSet<Vertex> joinVertices = new HashSet<Vertex>();
-        HashSet<Vertex> vertices = new HashSet<Vertex>();
-
-
-
-        grandTotalTriplePatterns = grandTotalTriplePatterns + totalTriplePatterns;
-        //stats = stats +"Triple Patterns: "+ totalTriplePatterns+"\n";
-        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
-        //System.out.println("Triple Patterns: " +totalTriplePatterns);
-        //System.out.println("Total Vertices:"+vertices.size() + " ==> "+vertices);
-        //System.out.println("Join Vertices: " +joinVertices.size()+" ==> "+joinVertices);
-        //stats = stats+"Join Vertices: " + joinVertices.size()+"\n";
-        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
-        //System.out.println("Join Vertices to Total Vertices ratio: " +(double)joinVertices.size()/(double)vertices.size());
-        double meanJoinVertexDegree = 0;
-        //  String joinVertexType = "" ;   // {Star, path, hybrid, sink}
-        for(Vertex jv:joinVertices)
-        {
-            long joinVertexDegree = (jv.inEdges.size() + jv.outEdges.size());
-            meanJoinVertexDegree = meanJoinVertexDegree + joinVertexDegree;
+        // Create the hypergraph model over all bgps
+        // (Could be changed if individual stats are desired)
+        Model hyperGraph = ModelFactory.createDefaultModel();
+        Map<Node, Resource> nodeToResource = new HashMap<Node, Resource>();
+        for(BasicPattern bgp : bgps) {
+            enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
         }
-        if(joinVertices.size()==0)
-            stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";
-        //stats = stats +"Mean Join Vertices Degree: 0 \n";
-        else
-            stats = stats + " lsqv:meanJoinVerticesDegree "+(meanJoinVertexDegree/joinVertices.size())  +" . ";
-        //stats = stats +"Mean Join Vertices Degree: "+ +(meanJoinVertexDegree/joinVertices.size())+"\n";
-        return stats;
+
+        Set<Resource> joinVertices = hyperGraph
+                .listResourcesWithProperty(RDF.type, LSQ.Vertex)
+                .toSet();
+
+        Map<Resource, Integer> joinVertexToDegree = joinVertices.stream()
+                .collect(Collectors.toMap(
+                        r -> r,
+                        r -> propertyDegree(r, LSQ.in) + propertyDegree(r, LSQ.out))
+                );
+
+        double avgJoinVertexDegree = joinVertexToDegree.values().stream()
+                .mapToInt(x -> x).average().orElse(0.0);
+
+//        double meanJoinVertexDegree = joinVertexToDegree.values().stream()
+//                .mapToInt(x -> x)
+//                ???
+//                .orElse(0.0);
+
+//        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
+//        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
+//        stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";
+
+//        stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsObject ";
+//        stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsSubject ";
+//            stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsPredicate ";
+//        stats = stats + getMentionsTuple(predicates); // subjects and objects
     }
 
-    public static String rdfizeTuples_JoinVertices(String query) throws MalformedQueryException, RepositoryException, QueryEvaluationException {
-        String stats = "";
-        HashMap<Integer, List<StatementPattern>> bgpGrps =  BGPGroupGenerator.generateBgpGroups(query);
-        long totalTriplePatterns = 0;
-        HashSet<Vertex> joinVertices = new HashSet<Vertex>();
-        HashSet<Vertex> vertices = new HashSet<Vertex>();
-        Set<String> predicates = new HashSet<String> ();
-        Set<String> subjects = new HashSet<String> ();
-        Set<String> objects = new HashSet<String> ();
-        for(int DNFkey:bgpGrps.keySet())  //DNFgrp => bgp
-        {
-            HashSet<Vertex> V = new HashSet<Vertex>();   //--Set of all vertices used in our hypergraph. each subject, predicate and object of a triple pattern is one node until it is repeated
-            List<StatementPattern>   stmts =  bgpGrps.get(DNFkey);
-            totalTriplePatterns = totalTriplePatterns + stmts.size();
-            for (StatementPattern stmt : stmts)
-            {
-                String sbjVertexLabel, objVertexLabel, predVertexLabel;
-                Vertex sbjVertex, predVertex,objVertex ;
-                //--------add vertices---
-                sbjVertexLabel = getSubjectVertexLabel(stmt);
-                subjects.add(sbjVertexLabel);
-                predVertexLabel = getPredicateVertexLabel(stmt);
-                predicates.add(predVertexLabel);
-                objVertexLabel = getObjectVertexLabel(stmt);
-                objects.add(objVertexLabel);
-                sbjVertex = new Vertex(sbjVertexLabel);
-                predVertex = new Vertex(predVertexLabel);
-                objVertex = new Vertex(objVertexLabel);
-                if(!vertexExist(sbjVertex,V))
-                    V.add(sbjVertex);
-                if(!vertexExist(predVertex,V))
-                    V.add(predVertex);
-                if(!vertexExist(objVertex,V))
-                    V.add(objVertex);
-                //--------add hyperedges
-                HyperEdge hEdge = new HyperEdge(sbjVertex,predVertex,objVertex);
-                if(!(getVertex(sbjVertexLabel,V)==null))
-                    sbjVertex = getVertex(sbjVertexLabel,V);
-                if(!(getVertex(predVertexLabel,V)==null))
-                    predVertex = getVertex(predVertexLabel,V);
-                if(!(getVertex(objVertexLabel,V)==null))
-                    objVertex = getVertex(objVertexLabel,V);
-                sbjVertex.outEdges.add(hEdge); predVertex.inEdges.add(hEdge); objVertex.inEdges.add(hEdge);
-            }
-            vertices.addAll(V) ;
-            joinVertices.addAll(getJoinVertexCount(V));
-            // V.clear();
-        }
-       if(!subjects.isEmpty())
-       {
-               stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsSubject ";
-           stats = stats + getMentionsTuple(subjects);
-       }
-       if(!predicates.isEmpty())
-       {
-               stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsPredicate ";
-           stats = stats + getMentionsTuple(predicates);
-       }
-
-       if(!objects.isEmpty())
-       {
-               stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+" lsqv:mentionsObject ";
-           stats = stats + getMentionsTuple(objects);
-       }
 
        String joinVertexType = "" ;   // {Star, path, hybrid, sink}
         if(!joinVertices.isEmpty()){
