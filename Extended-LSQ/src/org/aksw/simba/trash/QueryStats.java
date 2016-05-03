@@ -1,4 +1,4 @@
-package org.aksw.simba.benchmark.query.stats;
+package org.aksw.simba.trash;
 
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.syntax.Element;

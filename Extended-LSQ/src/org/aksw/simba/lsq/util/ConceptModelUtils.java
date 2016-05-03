@@ -1,4 +1,4 @@
-package org.aksw.simba.largerdfbench.util;
+package org.aksw.simba.lsq.util;
 
 import java.util.ArrayList;
 import java.util.List;

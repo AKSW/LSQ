@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.util;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,7 +23,14 @@ import org.apache.jena.sparql.syntax.ElementVisitorBase;
 import org.apache.jena.sparql.syntax.ElementWalker;
 import org.topbraid.spin.vocabulary.SP;
 
-public class ElementVisitorFeature  extends ElementVisitorBase
+/**
+ * Class to extract a set of features (expressed in SPIN terms) from a
+ * SPARQL element
+ *
+ * @author raven
+ *
+ */
+public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 {
     protected Set<Resource> features = new HashSet<Resource>();
 
@@ -107,7 +114,7 @@ public class ElementVisitorFeature  extends ElementVisitorBase
 
         if(element != null)
         {
-            ElementVisitorFeature visitor = new ElementVisitorFeature();
+            ElementVisitorFeatureExtractor visitor = new ElementVisitorFeatureExtractor();
             ElementWalker.walk(element, visitor);
             result = visitor.getFeatures();
         } else {

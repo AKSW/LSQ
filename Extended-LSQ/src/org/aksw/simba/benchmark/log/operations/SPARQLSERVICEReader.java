@@ -9,11 +9,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.aksw.simba.largerdfbench.util.QueryStatistics;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
-
+import org.aksw.simba.trash.QueryStatistics;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 

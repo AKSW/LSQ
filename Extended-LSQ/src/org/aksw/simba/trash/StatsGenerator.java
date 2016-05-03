@@ -1,4 +1,4 @@
-package org.aksw.simba.largerdfbench.util;
+package org.aksw.simba.trash;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

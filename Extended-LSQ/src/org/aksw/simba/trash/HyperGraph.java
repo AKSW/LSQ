@@ -1,4 +1,4 @@
-package org.aksw.simba.hibiscus.hypergraph;
+package org.aksw.simba.trash;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.aksw.simba.largerdfbench.util.QueryStatistics;
-import org.aksw.simba.largerdfbench.util.Selectivity;
+import org.aksw.simba.trash.QueryStatistics;
+import org.aksw.simba.trash.Selectivity;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;

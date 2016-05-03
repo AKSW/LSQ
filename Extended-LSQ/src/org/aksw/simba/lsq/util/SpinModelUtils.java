@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.util;
 
 
 import java.util.Optional;

@@ -23,12 +23,11 @@ import org.aksw.simba.benchmark.encryption.EncryptUtils;
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
 import org.aksw.simba.benchmark.log.operations.SesameLogReader;
 import org.aksw.simba.benchmark.spin.Spin;
-import org.aksw.simba.largerdfbench.util.QueryStatistics;
-import org.aksw.simba.largerdfbench.util.QueryStatistics2;
-import org.aksw.simba.largerdfbench.util.Selectivity;
-import org.aksw.simba.largerdfbench.util.Selectivity2;
+import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
+import org.aksw.simba.trash.QueryStatistics;
+import org.aksw.simba.trash.Selectivity;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -344,7 +343,7 @@ public class LogRDFizer {
 
 
             // Add used features
-            Set<Resource> features = ElementVisitorFeature.getFeatures(query);
+            Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
             features.forEach(f -> model.add(featureRes, LSQ.usesFeature, f));
 
             // TODO These methods have to be ported

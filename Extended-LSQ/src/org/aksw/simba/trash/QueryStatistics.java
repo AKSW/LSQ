@@ -1,4 +1,4 @@
-package org.aksw.simba.largerdfbench.util;
+package org.aksw.simba.trash;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -9,21 +9,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.aksw.simba.benchmark.query.stats.QueryStats;
-import org.aksw.simba.benchmark.query.stats.QueryStatsTest;
-import org.aksw.simba.hibiscus.hypergraph.HyperGraph.HyperEdge;
-import org.aksw.simba.hibiscus.hypergraph.HyperGraph.Vertex;
 import org.aksw.simba.lsq.core.LogRDFizer;
+import org.aksw.simba.trash.HyperGraph.HyperEdge;
+import org.aksw.simba.trash.HyperGraph.Vertex;
 import org.aksw.sparql.query.algebra.helpers.BGPGroupGenerator;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.repository.RepositoryException;
-
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.serializer.SerializationContext;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.repository.RepositoryException;
 
 /**
  * Generate various query statistics.

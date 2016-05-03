@@ -1,4 +1,4 @@
-package org.aksw.simba.largerdfbench.util;
+package org.aksw.simba.lsq.core;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.aksw.simba.lsq.core.ElementVisitorFeature;
+import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -44,7 +44,7 @@ public class QueryStatistics2 {
      * @param query The query object from which to extract the features
      */
     public static void enrichResourceWithQueryFeatures(Resource resource, Query query) {
-        Set<Resource> features = ElementVisitorFeature.getFeatures(query);
+        Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
         for(Resource feature : features) {
             resource.addProperty(LSQ.usesFeature, feature);
         }

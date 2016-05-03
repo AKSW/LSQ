@@ -1,4 +1,4 @@
-package org.aksw.simba.benchmark.query.stats;
+package org.aksw.simba.trash;
 
 import java.util.Iterator;
 

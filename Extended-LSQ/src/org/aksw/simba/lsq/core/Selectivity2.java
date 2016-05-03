@@ -1,4 +1,4 @@
-package org.aksw.simba.largerdfbench.util;
+package org.aksw.simba.lsq.core;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -9,7 +9,8 @@ import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.simba.lsq.core.SpinModelUtils;
+import org.aksw.simba.lsq.util.ConceptModelUtils;
+import org.aksw.simba.lsq.util.SpinModelUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

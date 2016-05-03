@@ -11,7 +11,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.aksw.simba.benchmark.log.operations.DateConverter.DateParseException;
-import org.aksw.simba.largerdfbench.util.Selectivity;
+import org.aksw.simba.trash.Selectivity;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
