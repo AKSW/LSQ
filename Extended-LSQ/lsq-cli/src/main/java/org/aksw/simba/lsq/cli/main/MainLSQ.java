@@ -331,10 +331,11 @@ public class MainLSQ {
             RDFDataMgr.write(out, model, RDFFormat.NTRIPLES);
         }
 
-        logger.info("Total Number of Queries with Parse Errors: "
-                + parseErrorCount);
-        logger.info("Total Number of Queries with Runtime Errors: "
-                + runtimeErrorCount);
+        // TODO Track and report parse and execution errors
+//        logger.info("Total Number of Queries with Parse Errors: "
+//                + parseErrorCount);
+//        logger.info("Total Number of Queries with Runtime Errors: "
+//                + runtimeErrorCount);
     }
 
     public void rdfizeQuery(Model model, Resource itemRes, Query query, QueryExecutionFactory dataQef, Set<String> submissions, String separator) {
@@ -366,7 +367,7 @@ public class MainLSQ {
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
-            long resultSize = QueryExecutionUtils.countQuery(queryNew, dataQef);
+            long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
             long exeTime = System.currentTimeMillis() - curTime ;
 
