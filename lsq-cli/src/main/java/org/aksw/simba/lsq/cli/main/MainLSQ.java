@@ -3,7 +3,6 @@ package org.aksw.simba.lsq.cli.main;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,6 +19,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -41,10 +41,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.writer.TurtleWriter;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -52,7 +50,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.system.SPINModuleRegistry;
 
-import jena.schemagen.SchemagenOptions.OPT;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -176,10 +173,13 @@ public class MainLSQ {
         String prts []  = dateFormat.format(date).split(" ");
 
 
-        // Note: We re-use the generatorRes in every query's model, hence its not bound to the specs model directly
-        Resource generatorRes = ResourceFactory.createResource(LSQ.defaultLsqrNs + datasetLabel + "-" + prts[0]);
+        // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
+        // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
+        Resource baseGeneratorRes = ResourceFactory.createResource(LSQ.defaultLsqrNs + datasetLabel + "-" + prts[0]);
+
 
         Model specs = ModelFactory.createDefaultModel();
+        Resource generatorRes = baseGeneratorRes.inModel(specs);
 
         // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
         Resource engineRes = specs.createResource();
@@ -196,12 +196,13 @@ public class MainLSQ {
 
 
         Model logModel = ModelFactory.createDefaultModel();
-        reader.lines()
-            .map(line -> {
+        List<Resource> workloadResources = reader.lines()
+                .map(line -> {
                 Resource r = logModel.createResource();
                 ApacheLogParserUtils.parseEntry(line, r);
                 return r;
-            });
+            })
+            .collect(Collectors.toList());
 
 //        System.out.println(queryToSubmissions.keySet().size());
 
@@ -227,8 +228,17 @@ public class MainLSQ {
 
         specs.write(out, "NTRIPLES");
 
+        for(Resource r : workloadResources) {
+            Model m = ResourceUtils.reachableClosure(r);
+            m.write(System.out, "TURTLE");
+        }
+
+
+
         out.flush();
 
+        // If the output stream is based on a file then close it, but
+        // don't close stdout
         if(outFile != null) {
             out.close();
             logger.info("Done. Output written to: " + outFile.getAbsolutePath());
