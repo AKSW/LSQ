@@ -9,7 +9,6 @@ import java.util.GregorianCalendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.aksw.commons.util.apache.ApacheLogRequest;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.jena.rdf.model.Resource;
@@ -20,12 +19,13 @@ public class ApacheLogParserUtils {
             + "(?<host>[^\\s]+) "
             + "(\\S+) "
             + "(?<user>\\S+) "
-            + "\\[(<time>[\\w:/]+\\s[+\\-]\\d{4})\\] "
+            + "\\[(?<time>[\\w:/]+\\s[+\\-]\\d{4})\\] "
             + "\"(?<request>.+?)\" "
             + "(?<response>\\d{3}) "
             + "(?<bytecount>\\d+) "
             + "\"(?<referer>[^\"]+)\""
-            + "\"(?<agent>[^\"]+)\""
+            ; String foo = ""
+            + "\"(?<agent>[^\"]*)\""
             ;
 
     private static final Pattern logEntryPattern = Pattern.compile(logEntryPatternStr);
@@ -46,8 +46,8 @@ public class ApacheLogParserUtils {
     public static void parseEntry(String str, Resource inout) {
         Matcher m = logEntryPattern.matcher(str);
         if(m.find()) {
-            //inout.addLiteral(LSQ.host, m.group("host"));
-            //inout.addLiteral(LSQ.user, m.group("user"));
+            inout.addLiteral(LSQ.host, m.group("host"));
+            inout.addLiteral(LSQ.user, m.group("user"));
 
             String timestampStr = m.group("time");
             Date date;

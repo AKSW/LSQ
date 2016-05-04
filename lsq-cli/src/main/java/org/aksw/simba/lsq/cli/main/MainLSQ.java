@@ -229,8 +229,9 @@ public class MainLSQ {
         specs.write(out, "NTRIPLES");
 
         for(Resource r : workloadResources) {
+            logger.info("Processing: " + r);
             Model m = ResourceUtils.reachableClosure(r);
-            m.write(System.out, "TURTLE");
+            m.write(System.err, "TURTLE");
         }
 
 
