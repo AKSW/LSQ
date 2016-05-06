@@ -16,14 +16,17 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
+import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 
 public class Selectivity2 {
 
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
+    public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
 
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
@@ -40,6 +43,25 @@ public class Selectivity2 {
         return result;
     }
 
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
+        Map<Resource, BasicPattern> result = ConceptModelUtils.listResources(spinModel, basicPatterns)
+                .stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        t -> {
+                            Map<Resource, Triple> tmp = indexTriplePatterns(t);
+                            BasicPattern r = new BasicPattern();
+                            tmp.values().forEach(r::add);
+                            return r;
+                        }));
+        return result;
+    }
+
+    public static Map<Resource, Triple> indexTriplePatterns(Resource res) {
+        Model spinModel = ResourceUtils.reachableClosure(res);
+        Map<Resource, Triple> result = indexTriplePatterns(spinModel);
+        return result;
+    }
 
     public static Map<Resource, Triple> indexTriplePatterns(Model spinModel) {
         Map<Resource, Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
@@ -51,7 +73,7 @@ public class Selectivity2 {
     }
 
     public static void enrichModelWithHasTriplePattern(Resource queryRes) {
-        Model spinModel = queryRes.getModel();
+        Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.keySet().forEach(r ->
@@ -61,7 +83,7 @@ public class Selectivity2 {
 
 
     public static void enrichModelWithTriplePatternText(Resource queryRes) {
-        Model spinModel = queryRes.getModel();
+        Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach((r, t) -> r
@@ -71,7 +93,7 @@ public class Selectivity2 {
 
 
     public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, QueryExecutionFactory dataQef) {
-        Model spinModel = queryRes.getModel();
+        Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach((r, t) -> {
