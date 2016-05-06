@@ -1,6 +1,7 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.util;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -9,12 +10,13 @@ import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.simba.lsq.util.ConceptModelUtils;
-import org.aksw.simba.lsq.util.SpinModelUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
@@ -22,8 +24,15 @@ import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
+import org.topbraid.spin.vocabulary.SP;
 
-public class Selectivity2 {
+/**
+ * SPIN utils - mainly for extracting Jena Triple and BasicPattern objects from SPIN RDF.
+ * TODO Maybe the spin library already comes with a proper spin reader?
+ *
+ *
+ */
+public class SpinUtils {
 
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
     public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
@@ -68,7 +77,7 @@ public class Selectivity2 {
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        t -> SpinModelUtils.readTriple(spinModel, t)));
+                        t -> readTriple(t).get()));
         return result;
     }
 
@@ -106,6 +115,71 @@ public class Selectivity2 {
 
     public static void enrichModelWithTriplePatternSelectivities(Model spinModel, long totalTripleCount) {
         //double selectivity = tripleCount / (double)totalTripleCount;
+    }
+
+    /**
+     * Reads a single object for a given subject - predicate pair and
+     * maps the corresponding object through a transformation function.
+     *
+     * Convenience function. model.listObjectsOfProperty(s, p).toList().stream().map(
+     *
+     *
+     *
+     * @param model
+     * @param s
+     * @param p
+     * @param fn
+     * @return
+     */
+    public static Optional<RDFNode> readObject(Resource s, Property p) {
+        Optional<RDFNode> result = s.listProperties(p).toList().stream()
+                .map(stmt -> stmt.getObject())
+                .findFirst();
+
+        //T result = tmp.isPresent() ? tmp.get() : null;
+        return result;
+    }
+
+    /**
+     * If the node is a variable, returns the variable.
+     * Otherwise returns the given node
+     *
+     * @param model
+     * @param node
+     * @return
+     */
+    public static Node readNode(RDFNode node) {
+        Model model = node.getModel();
+
+        Node result;
+
+        Node tmp = null;
+        if(node != null & node.isResource()) {
+            Resource r = node.asResource();
+            RDFNode o = model.listObjectsOfProperty(r, SP.varName).toList().stream().findFirst().orElse(null);
+            if(o != null) {
+                String varName = o.asLiteral().getString();
+                tmp = Var.alloc(varName);
+            }
+        }
+
+        result = tmp == null
+                ? node.asNode()
+                : tmp;
+
+        return result;
+    }
+
+    public static Optional<Triple> readTriple(Resource r) {
+        Node s = readObject(r, SP.subject).map(x -> readNode(x)).orElse(null);
+        Node p = readObject(r, SP.predicate).map(x -> readNode(x)).orElse(null);
+        Node o = readObject(r, SP.object).map(x -> readNode(x)).orElse(null);
+
+        Optional<Triple> result = s == null || p == null || o == null
+                ? Optional.empty()
+                : Optional.of(new Triple(s, p, o));
+
+        return result;
     }
 
 //

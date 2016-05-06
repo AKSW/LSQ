@@ -33,9 +33,9 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
-import org.aksw.simba.lsq.core.Selectivity2;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
+import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -455,8 +455,8 @@ public class MainLSQ {
             //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
             //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
-            Selectivity2.enrichModelWithHasTriplePattern(queryRes);
-            Selectivity2.enrichModelWithTriplePatternText(queryRes);
+            SpinUtils.enrichModelWithHasTriplePattern(queryRes);
+            SpinUtils.enrichModelWithTriplePatternText(queryRes);
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(query);
 

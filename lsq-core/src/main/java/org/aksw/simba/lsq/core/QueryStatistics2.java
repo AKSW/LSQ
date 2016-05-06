@@ -203,6 +203,9 @@ public class QueryStatistics2 {
      * @return stats Query Features as string
      * @throws MalformedQueryException
      */
+    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes) {
+    }
+
     public static void getDirectQueryRelatedRDFizedStats(Query query) {
         Op op = Algebra.compile(query);
 
@@ -211,6 +214,9 @@ public class QueryStatistics2 {
                 .filter(o -> o != null && o instanceof OpBGP)
                 .map(o -> ((OpBGP)o).getPattern())
                 .collect(Collectors.toList());
+    }
+
+    public static void getDirectQueryRelatedRDFizedStats(List<BasicPattern> bgps) {
 
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
