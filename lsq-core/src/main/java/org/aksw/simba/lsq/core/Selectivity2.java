@@ -50,26 +50,28 @@ public class Selectivity2 {
         return result;
     }
 
-    public static void enrichModelWithHasTriplePattern(Model spinModel, Resource queryRes) {
+    public static void enrichModelWithHasTriplePattern(Resource queryRes) {
+        Model spinModel = queryRes.getModel();
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.keySet().forEach(r ->
-            spinModel.add(queryRes, LSQ.hasTriplePattern, r)
+            queryRes.addProperty(LSQ.hasTriplePattern, r)
         );
     }
 
 
-    public static void enrichModelWithTriplePatternText(Model spinModel) {
+    public static void enrichModelWithTriplePatternText(Resource queryRes) {
+        Model spinModel = queryRes.getModel();
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        triplePatternIndex.forEach((r, t) -> {
-            spinModel.add(r, RDFS.label, TripleUtils.toNTripleString(t));
-            spinModel.add(r, LSQ.triplePatternText, TripleUtils.toNTripleString(t));
-        });
+        triplePatternIndex.forEach((r, t) -> r
+                .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
+                .addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
     }
 
 
-    public static void enrichModelWithTriplePatternExtensionSizes(Model spinModel, QueryExecutionFactory dataQef) {
+    public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, QueryExecutionFactory dataQef) {
+        Model spinModel = queryRes.getModel();
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach((r, t) -> {

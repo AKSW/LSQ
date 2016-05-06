@@ -258,14 +258,28 @@ public class MainLSQ {
                 NestedResource baseRes = new NestedResource(queryModel.createResource(LSQ.defaultLsqrNs));
 
                 String queryHash = StringUtils.md5Hash(query.toString()).substring(0, 8);
+                NestedResource queryRes = baseRes.nest("q" + queryHash);
+                
+                
                 //Resource queryRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
-                //NestedResource queryRes = baseRes.nest("q" + queryHash);
+                
+                // The query resource represents the query and only depends on the (normalized) query string
+                
+                // Function to create resources that correspond to aspects of a query
+//                Function<String, NestedResource> nsToQueryRes = (ns) -> baseRes.nest(ns).nest("q" + queryHash);
+//                NestedResource queryRes = baseRes.nest("q" + queryHash);
+                
+                // Function for creating resources that correspond to aspects of the query
+                // Pattern: http://base.org/res/{aspect}-q{queryHash}
+                Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q" + queryHash);
 
 
                 // Create a resource with a certain namespace
-                Function<String, NestedResource> nsToBaseRes = (ns) -> baseRes.nest(datasetLabel);
-
-                rdfizeLog(nsToBaseRes, query, dataQef);
+//                Function<String, NestedResource> nsToDataQueryRes = (ns) -> baseRes.nest(ns).nest(datasetLabel + "-").nest("q" + queryHash);
+                
+                rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                
+                queryRes.get().getModel().write(System.out, "TURTLE");
             }
 
             //.write(System.err, "TURTLE");
@@ -283,10 +297,6 @@ public class MainLSQ {
         } else {
             logger.info("Done.");
         }
-
-    }
-
-    public static void rdfizeQuery(NestedResource baseResource, Query query) {
 
     }
 
@@ -311,10 +321,11 @@ public class MainLSQ {
      * @throws QueryEvaluationException
      * @throws ParseException
      */
-    public static void rdfizeLog(
+    public static void rdfizeQueryExecution(
             //OutputStream out,
             //Resource generatorRes,
             //NestedResource baseRes,
+            Resource queryRes,
             Function<String, NestedResource> nsToBaseRes,
             Query query,
             //Map<String, Set<String>> queryToSubmissions,
@@ -347,7 +358,7 @@ public class MainLSQ {
         Resource localExecutionRes = nsToBaseRes.apply("le-").get();
         Resource remoteExecutionRes = nsToBaseRes.apply("re-").get();
 
-        Resource queryRes = nsToBaseRes.apply("").get();
+        //Resource queryRes = nsToBaseRes.apply("").get();
 
         //Resource remoteExecutionRes = model.createResource(LSQ.defaultLsqrNs + "re-" + datasetLabel + "-q" + queryHash);
         String queryStr = query.toString();
@@ -358,32 +369,13 @@ public class MainLSQ {
             .addProperty(LSQ.hasLocalExecution, localExecutionRes)
             .addProperty(LSQ.hasRemoteExecution, remoteExecutionRes);
 
+        //rdfizeQuery(new NestedResource(queryRes), query);
 
                     //queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
 
 //            System.out.println(queryNo + " Started...");
 //
-//            queryNo++;
-            try {
-                // Parse the query ...
-                query = QueryFactory.create(queryStr);
 
-                // .. generate the spin model ...
-                LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-                Resource tmpQueryRes = arq2spin.createQuery(query, null);
-
-                // ... and rename the blank node of the query
-                ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
-
-            } catch (Exception ex) {
-                String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
-                queryRes.addLiteral(LSQ.runtimeError, msg);
-
-                // TODO Port the getRDFUserExceptions function
-                // String queryStats =
-                // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
-                parseErrorCount++;
-            }
 //            try {
 //                if (query.isDescribeType()) {
 ////                    this.RDFizeDescribe(query, localEndpoint, graph,
@@ -416,46 +408,72 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
-    public void rdfizeQuery(Model model, Resource itemRes, Query query, QueryExecutionFactory dataQef, Set<String> submissions, String separator) {
+    
+
+    // QueryExecutionFactory dataQef
+    public static void rdfizeQuery(Resource queryRes, Function<String, NestedResource> queryAspectFn, Query query) {
+
+        Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
 
         try {
             query = query.cloneQuery();
             query.getGraphURIs().clear();
 
+//          queryNo++;
+
+        // .. generate the spin model ...
+            Model spinModel = queryRes.getModel();
+          LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
+          Resource tmpQueryRes = arq2spin.createQuery(query, null);
+
+          // ... and rename the blank node of the query
+          ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
+
+              
+//          } catch (Exception ex) {
+//              String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
+//              queryRes.addLiteral(LSQ.runtimeError, msg);
+//
+//              // TODO Port the getRDFUserExceptions function
+//              // String queryStats =
+//              // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
+//              parseErrorCount++;
+//          }
 
             //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-            Resource featureRes = model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
-            model.add(itemRes, LSQ.structuralFeatures, featureRes);
+            Resource featureRes = queryAspectFn.apply("sf").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
+                queryRes.addProperty(LSQ.structuralFeatures, featureRes);
 
-            QueryStatistics2.enrichResourceWithQueryFeatures(itemRes, query);
+            QueryStatistics2.enrichResourceWithQueryFeatures(queryRes, query);
 
 
             // Add used features
             Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-            features.forEach(f -> model.add(featureRes, LSQ.usesFeature, f));
+            features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
 
             // TODO These methods have to be ported
             //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
             //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
-            Selectivity2.enrichModelWithHasTriplePattern(model, itemRes);
-            Selectivity2.enrichModelWithTriplePatternText(model);
-            Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
+            Selectivity2.enrichModelWithHasTriplePattern(queryRes);
+            Selectivity2.enrichModelWithTriplePatternText(queryRes);
+            //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
-            long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
+            //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
+            long resultSize = 0;
             long exeTime = System.currentTimeMillis() - curTime ;
-
-            itemRes
+            
+            queryRes
                 .addLiteral(LSQ.resultSize, resultSize)
                 .addLiteral(LSQ.runTimeMs, exeTime);
 
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
-            itemRes.addLiteral(LSQ.runtimeError, msg);
+            execRes.addLiteral(LSQ.runtimeError, msg);
         }
 
         // TODO Add getRDFUserExecutions
