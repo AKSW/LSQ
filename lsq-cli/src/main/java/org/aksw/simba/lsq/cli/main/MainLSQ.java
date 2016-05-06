@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
@@ -17,8 +16,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.util.strings.StringUtils;
@@ -26,6 +26,10 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
+import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
@@ -37,12 +41,11 @@ import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
@@ -181,18 +184,23 @@ public class MainLSQ {
         Model specs = ModelFactory.createDefaultModel();
         Resource generatorRes = baseGeneratorRes.inModel(specs);
 
+
         // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
-        Resource engineRes = specs.createResource();
-        generatorRes.addProperty(LSQ.engine, engineRes);
-        engineRes.addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"));
-        engineRes.addProperty(LSQ.version, "Virtuoso v.7.2");
-        engineRes.addProperty(LSQ.processor, "2.5GHz i7");
-        engineRes.addProperty(LSQ.ram,"8GB");
+        Resource engineRes = specs.createResource()
+                .addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"))
+                .addProperty(LSQ.version, "Virtuoso v.7.2")
+                .addProperty(LSQ.processor, "2.5GHz i7")
+                .addProperty(LSQ.ram,"8GB");
+
+        generatorRes
+            .addProperty(LSQ.engine, engineRes);
+
 
         Resource datasetRes = specs.createResource();
-        generatorRes.addLiteral(LSQ.dataset, datasetRes);
-        datasetRes.addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl));
-        datasetRes.addLiteral(PROV.startedAtTime, startTime);
+        generatorRes
+            .addLiteral(LSQ.dataset, datasetRes)
+            .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
+            .addLiteral(PROV.startedAtTime, startTime);
 
 
         Model logModel = ModelFactory.createDefaultModel();
@@ -228,10 +236,39 @@ public class MainLSQ {
 
         specs.write(out, "NTRIPLES");
 
+        //SparqlQueryParser queryParser = SparqlQueryParserImpl.create(Syntax.syntaxARQ);
+        SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
+
+
         for(Resource r : workloadResources) {
             logger.info("Processing: " + r);
-            Model m = ResourceUtils.reachableClosure(r);
-            m.write(System.err, "TURTLE");
+            //Model m = ResourceUtils.reachableClosure(r);
+            SparqlStmt stmt = Optional.ofNullable(r.getProperty(LSQ.query))
+                .map(queryStmt -> queryStmt.getString())
+                .map(stmtParser)
+                .orElse(null);
+
+            if(stmt != null && stmt.isQuery()) {
+                SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+                Query query = stmt.getAsQueryStmt().getQuery();
+
+                Model queryModel = ModelFactory.createDefaultModel();
+
+                //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
+                NestedResource baseRes = new NestedResource(queryModel.createResource(LSQ.defaultLsqrNs));
+
+                String queryHash = StringUtils.md5Hash(query.toString()).substring(0, 8);
+                //Resource queryRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
+                //NestedResource queryRes = baseRes.nest("q" + queryHash);
+
+
+                // Create a resource with a certain namespace
+                Function<String, NestedResource> nsToBaseRes = (ns) -> baseRes.nest(datasetLabel);
+
+                rdfizeLog(nsToBaseRes, query, dataQef);
+            }
+
+            //.write(System.err, "TURTLE");
         }
 
 
@@ -248,6 +285,11 @@ public class MainLSQ {
         }
 
     }
+
+    public static void rdfizeQuery(NestedResource baseResource, Query query) {
+
+    }
+
 
     /**
      * RDFize Log
@@ -269,15 +311,18 @@ public class MainLSQ {
      * @throws QueryEvaluationException
      * @throws ParseException
      */
-    public void rdfizeLog(
-            OutputStream out,
-            Resource generatorRes,
-            Map<String, Set<String>> queryToSubmissions,
-            QueryExecutionFactory dataQef,
-            String separator,
-            String localEndpoint, // TODO get rid of argument, and use dataQef for executing queries instead
-            String graph, // TODO get rid of argument, and use dataQef for executing queries instead
-            String acronym)  {
+    public static void rdfizeLog(
+            //OutputStream out,
+            //Resource generatorRes,
+            //NestedResource baseRes,
+            Function<String, NestedResource> nsToBaseRes,
+            Query query,
+            //Map<String, Set<String>> queryToSubmissions,
+            QueryExecutionFactory dataQef) {
+            //String separator,
+            //String localEndpoint, // TODO get rid of argument, and use dataQef for executing queries instead
+            //String graph, // TODO get rid of argument, and use dataQef for executing queries instead
+            //String acronym)  {
 
         logger.info("RDFization started...");
         long endpointSize = ServiceUtils.fetchInteger(dataQef.createQueryExecution("SELECT (COUNT(*) AS ?x) { ?s ?p ?o }"), Vars.x);
@@ -290,73 +335,79 @@ public class MainLSQ {
         // Resource executionRes =
         // model.createResource(lsqr:le-"+acronym+"-q"+queryHash);
 
-        for (String queryStr : queryToSubmissions.keySet()) {
+        //for (String queryStr : queryToSubmissions.keySet()) {
 
-            Model model = ModelFactory.createDefaultModel();
+        Model model = ModelFactory.createDefaultModel();
 
-            String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
+        // TODO The issue is that we want to have different 'classifiers' for a certain resource
+        // e.g. node1235, way123, relation123, query123, etc
+        //
+        //model.createResource(LSQ.defaultLsqrNs + "le-" + datasetLabel + "-q" + queryHash);
 
-            Resource itemRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
+        Resource localExecutionRes = nsToBaseRes.apply("le-").get();
+        Resource remoteExecutionRes = nsToBaseRes.apply("re-").get();
 
-            itemRes.addProperty(PROV.wasGeneratedBy, generatorRes);
-            itemRes.addProperty(LSQ.text, queryStr.trim());
+        Resource queryRes = nsToBaseRes.apply("").get();
 
-            Resource localExecutionRes = model.createResource(LSQ.defaultLsqrNs + "le-" + acronym + "-q" + queryHash);
-            itemRes.addProperty(LSQ.hasLocalExecution, localExecutionRes);
+        //Resource remoteExecutionRes = model.createResource(LSQ.defaultLsqrNs + "re-" + datasetLabel + "-q" + queryHash);
+        String queryStr = query.toString();
 
-            Resource remoteExecutionRes = model.createResource(LSQ.defaultLsqrNs + "re-" + acronym + "-q" + queryHash);
-            itemRes.addProperty(LSQ.hasRemoteExecution, remoteExecutionRes);
+        queryRes
+            //.addProperty(PROV.wasGeneratedBy, baseRes.get())
+            .addProperty(LSQ.text, queryStr.trim())
+            .addProperty(LSQ.hasLocalExecution, localExecutionRes)
+            .addProperty(LSQ.hasRemoteExecution, remoteExecutionRes);
+
 
                     //queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
 
 //            System.out.println(queryNo + " Started...");
 //
 //            queryNo++;
-            Query query = new Query();
             try {
                 // Parse the query ...
                 query = QueryFactory.create(queryStr);
 
                 // .. generate the spin model ...
                 LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-                Resource queryRes = arq2spin.createQuery(query, null);
+                Resource tmpQueryRes = arq2spin.createQuery(query, null);
 
                 // ... and rename the blank node of the query
-                ResourceUtils.renameResource(queryRes, itemRes.getURI());
+                ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
 
             } catch (Exception ex) {
                 String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
-                itemRes.addLiteral(LSQ.runtimeError, msg);
+                queryRes.addLiteral(LSQ.runtimeError, msg);
 
                 // TODO Port the getRDFUserExceptions function
                 // String queryStats =
                 // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
                 parseErrorCount++;
             }
-            try {
-                if (query.isDescribeType()) {
-//                    this.RDFizeDescribe(query, localEndpoint, graph,
-//                            queryToSubmissions.get(queryStr), separator);
-                } else if (query.isSelectType()) {
-                    this.rdfizeQuery(model, itemRes, query, dataQef, queryToSubmissions.get(queryStr), separator);
-                } else if (query.isAskType()) {
-//                    this.RDFizeASK(query, localEndpoint, graph,
-//                            queryToSubmissions.get(queryStr), separator);
-                } else if (query.isConstructType()) {
-//                    this.RDFizeConstruct(query, localEndpoint, graph,
-//                            queryToSubmissions.get(queryStr), separator);
-                }
-            } catch (Exception ex) {
-                throw new RuntimeException("Unhandled exception: ", ex);
-            }
+//            try {
+//                if (query.isDescribeType()) {
+////                    this.RDFizeDescribe(query, localEndpoint, graph,
+////                            queryToSubmissions.get(queryStr), separator);
+//                } else if (query.isSelectType()) {
+//                    //this.rdfizeQuery(model, itemRes, query, dataQef, queryToSubmissions.get(queryStr), separator);
+//                } else if (query.isAskType()) {
+////                    this.RDFizeASK(query, localEndpoint, graph,
+////                            queryToSubmissions.get(queryStr), separator);
+//                } else if (query.isConstructType()) {
+////                    this.RDFizeConstruct(query, localEndpoint, graph,
+////                            queryToSubmissions.get(queryStr), separator);
+//                }
+//            } catch (Exception ex) {
+//                throw new RuntimeException("Unhandled exception: ", ex);
+//            }
 
 
-            model.write(System.out, "TURTLE");
+            //model.write(System.out, "TURTLE");
 
 
 
-            RDFDataMgr.write(out, model, RDFFormat.NTRIPLES);
-        }
+            //RDFDataMgr.write(out, model, RDFFormat.NTRIPLES);
+//        }
 
         // TODO Track and report parse and execution errors
 //        logger.info("Total Number of Queries with Parse Errors: "
@@ -398,8 +449,9 @@ public class MainLSQ {
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
             long exeTime = System.currentTimeMillis() - curTime ;
 
-            itemRes.addLiteral(LSQ.resultSize, resultSize);
-            itemRes.addLiteral(LSQ.runTimeMs, exeTime);
+            itemRes
+                .addLiteral(LSQ.resultSize, resultSize)
+                .addLiteral(LSQ.runTimeMs, exeTime);
 
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
