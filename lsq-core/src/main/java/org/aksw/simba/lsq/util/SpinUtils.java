@@ -52,6 +52,12 @@ public class SpinUtils {
         return result;
     }
 
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r) {
+        Model spinModel = ResourceUtils.reachableClosure(r);
+        Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel);
+        return result;
+    }
+
     public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
         Map<Resource, BasicPattern> result = ConceptModelUtils.listResources(spinModel, basicPatterns)
                 .stream()

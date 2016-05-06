@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.core;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,6 +15,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
+import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -204,19 +206,12 @@ public class QueryStatistics2 {
      * @throws MalformedQueryException
      */
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes) {
+        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes);
+        getDirectQueryRelatedRDFizedStats(queryRes, resToBgp.values());
     }
 
-    public static void getDirectQueryRelatedRDFizedStats(Query query) {
-        Op op = Algebra.compile(query);
 
-        // Get all BGPs from the algebra
-        List<BasicPattern> bgps = linearizePrefix(op, null, QueryStatistics2::getSubOps)
-                .filter(o -> o != null && o instanceof OpBGP)
-                .map(o -> ((OpBGP)o).getPattern())
-                .collect(Collectors.toList());
-    }
-
-    public static void getDirectQueryRelatedRDFizedStats(List<BasicPattern> bgps) {
+    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Collection<BasicPattern> bgps) {
 
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
@@ -268,7 +263,7 @@ public class QueryStatistics2 {
 
         for(Resource v : joinVertices) {
             // TODO Allocate a resource for the join vertex
-            Resource queryRes = null;
+            //Resource queryRes = null;
             Resource joinVertexRes = null;//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
 
             queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
@@ -308,5 +303,15 @@ public class QueryStatistics2 {
 //        return stats ;
 //    }
 
+    // TODO This method is useless for our use case as it does not establish a relation to the SPIN model
+    public static void getDirectQueryRelatedRDFizedStats(Query query) {
+        Op op = Algebra.compile(query);
+
+        // Get all BGPs from the algebra
+        List<BasicPattern> bgps = linearizePrefix(op, null, QueryStatistics2::getSubOps)
+                .filter(o -> o != null && o instanceof OpBGP)
+                .map(o -> ((OpBGP)o).getPattern())
+                .collect(Collectors.toList());
+    }
 
 }
