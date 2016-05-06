@@ -441,8 +441,10 @@ public class MainLSQ {
 //          }
 
             //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-            Resource featureRes = queryAspectFn.apply("sf").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
-                queryRes.addProperty(LSQ.structuralFeatures, featureRes);
+            Resource featureRes = queryAspectFn.apply("sf-").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
+
+            queryRes.addProperty(LSQ.structuralFeatures, featureRes);
+
 
             QueryStatistics2.enrichResourceWithQueryFeatures(queryRes, query);
 
@@ -458,7 +460,7 @@ public class MainLSQ {
             SpinUtils.enrichModelWithHasTriplePattern(queryRes);
             SpinUtils.enrichModelWithTriplePatternText(queryRes);
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
-            QueryStatistics2.getDirectQueryRelatedRDFizedStats(query);
+            QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes);
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
