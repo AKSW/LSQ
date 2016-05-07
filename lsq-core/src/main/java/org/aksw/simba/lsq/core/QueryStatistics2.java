@@ -232,6 +232,9 @@ public class QueryStatistics2 {
             enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
         }
 
+        System.out.println("HYPER");
+        hyperGraph.write(System.out, "TURTLE");
+
         Set<Resource> joinVertices = hyperGraph
                 .listResourcesWithProperty(RDF.type, LSQ.Vertex)
                 .toSet();
@@ -244,7 +247,8 @@ public class QueryStatistics2 {
 
         double avgJoinVertexDegree = joinVertexToDegree.values().stream()
                 .mapToInt(x -> x).average().orElse(0.0);
-
+//LSQ.me
+        //queryRes.addProperty(LSQ.joinVert, o)
 //        double meanJoinVertexDegree = joinVertexToDegree.values().stream()
 //                .mapToInt(x -> x)
 //                ???

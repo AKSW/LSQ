@@ -622,7 +622,7 @@ public class LSQARQ2SPIN {
                             }
                         }
                         if(next instanceof Triple) {
-                            System.out.println("GOT TRIPLE: " + (++tripleCount));
+                            //System.out.println("GOT TRIPLE: " + (++tripleCount));
                             Triple triple = (Triple) next;
                             Resource subject = (Resource) getNode(triple.getSubject());
                             Resource predicate = (Resource) getNode(triple.getPredicate());

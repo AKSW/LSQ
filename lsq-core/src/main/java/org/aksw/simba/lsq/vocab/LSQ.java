@@ -32,6 +32,18 @@ public class LSQ {
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
 
+    public static final Property triplePatterns = property("triplePatterns");
+    public static final Property joinVertices = property("joinVertices");
+    public static final Property meanJoinVerticesDegree = property("meanJoinVerticesDegree");
+    public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
+
+    public static final Property mentionsSubject = property("mentionsSubject");
+    public static final Property mentionsPredicate = property("mentionsPredicate");
+    public static final Property mentionsObject = property("mentionsObject");
+
+    public static final Property mentionsTuple = property("mentionsTuple");
+
+//  stats = stats + getMentionsTuple(predicates); // subjects and objects
 
 // These attributes are part of SPIN - no need to duplicate them
 //    public static final Resource Select = resource("Select");
