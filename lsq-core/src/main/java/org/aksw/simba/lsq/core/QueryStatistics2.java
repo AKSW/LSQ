@@ -36,6 +36,8 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import com.google.common.math.IntMath;
+
 public class QueryStatistics2 {
     /**
      * Analyze the query for a set of structural features (e.g. use of optional, union, exists, etc...)
@@ -245,14 +247,30 @@ public class QueryStatistics2 {
                         r -> propertyDegree(r, LSQ.out, LSQ.in))
                 );
 
-        double avgJoinVertexDegree = joinVertexToDegree.values().stream()
+        List<Integer> degrees = joinVertexToDegree.values().stream()
+                .sorted().collect(Collectors.toList());
+        int n = degrees.size();
+        int nhalf = n / 2;
+
+        double avgJoinVertexDegree = degrees.stream()
                 .mapToInt(x -> x).average().orElse(0.0);
+
+        // 1 2 3 4
+        double medianJoinVertexDegree = n % 2 == 0
+                ? (degrees.get(nhalf) - 1) + degrees.get(nhalf)) / 2
+                : degrees.get(nhalf);
+
+
 //LSQ.me
         //queryRes.addProperty(LSQ.joinVert, o)
 //        double meanJoinVertexDegree = joinVertexToDegree.values().stream()
 //                .mapToInt(x -> x)
 //                ???
 //                .orElse(0.0);
+
+        queryRes
+            .addLiteral(LSQ.avgJoinVerticesDegree, avgJoinVertexDegree)
+            .addLiteral(LSQ.meanJoinVerticesDegree)
 
 //        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
 //        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
