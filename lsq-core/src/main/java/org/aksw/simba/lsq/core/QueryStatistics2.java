@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -33,10 +34,10 @@ import org.apache.jena.sparql.algebra.op.Op2;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.util.ModelUtils;
+import org.apache.jena.sparql.util.NodeUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-
-import com.google.common.math.IntMath;
 
 public class QueryStatistics2 {
     /**
@@ -214,6 +215,7 @@ public class QueryStatistics2 {
 
 
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Collection<BasicPattern> bgps) {
+        Model model = queryRes.getModel();
 
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
@@ -257,7 +259,7 @@ public class QueryStatistics2 {
 
         // 1 2 3 4
         double medianJoinVertexDegree = n % 2 == 0
-                ? (degrees.get(nhalf) - 1) + degrees.get(nhalf)) / 2
+                ? (degrees.get(nhalf - 1) + degrees.get(nhalf)) / 2
                 : degrees.get(nhalf);
 
 
@@ -269,9 +271,26 @@ public class QueryStatistics2 {
 //                .orElse(0.0);
 
         queryRes
-            .addLiteral(LSQ.avgJoinVerticesDegree, avgJoinVertexDegree)
-            .addLiteral(LSQ.meanJoinVerticesDegree)
+            .addLiteral(LSQ.avgJoinVertexDegree, avgJoinVertexDegree)
+            .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
 
+        Property[] props = new Property[] {LSQ.mentionsSubject, LSQ.mentionsPredicate, LSQ.mentionsObject };
+
+        for(BasicPattern bgp : bgps) {
+            for(Triple t : bgp) {
+                Node[] nodes = TripleUtils.toArray(t);
+                for(int i = 0; i < 3; ++i) {
+                    Node node = nodes[i];
+                    if(!node.isVariable()) {
+                        Property prop = props[i];
+                        RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
+                    //NodeUtils.
+                        queryRes.addProperty(prop, rdfNode);
+                    }
+                }
+
+            }
+        }
 //        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
 //        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
 //        stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";

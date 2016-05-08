@@ -34,8 +34,9 @@ public class LSQ {
 
     public static final Property triplePatterns = property("triplePatterns");
     public static final Property joinVertices = property("joinVertices");
-    public static final Property meanJoinVerticesDegree = property("meanJoinVerticesDegree");
-    public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
+    //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
+    public static final Property avgJoinVertexDegree = property("avgJoinVertexDegree");
+    public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");
 
     public static final Property mentionsSubject = property("mentionsSubject");
     public static final Property mentionsPredicate = property("mentionsPredicate");
