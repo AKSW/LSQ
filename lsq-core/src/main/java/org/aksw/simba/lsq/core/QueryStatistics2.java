@@ -14,8 +14,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
+import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
@@ -35,9 +37,10 @@ import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.util.ModelUtils;
-import org.apache.jena.sparql.util.NodeUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+
+import com.google.common.math.IntMath;
 
 public class QueryStatistics2 {
     /**
@@ -51,6 +54,11 @@ public class QueryStatistics2 {
         Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
         for(Resource feature : features) {
             resource.addProperty(LSQ.usesFeature, feature);
+        }
+
+        if(features.isEmpty()) {
+            // TODO hack; use proper vocab
+            resource.addProperty(LSQ.usesFeature, RDF.nil);
         }
     }
 
@@ -187,10 +195,17 @@ public class QueryStatistics2 {
             Resource pp = result.wrapAsResource(t.getPredicate());
             RDFNode oo = result.asRDFNode(t.getObject());
 
-            result.add(sx, RDF.subject, ss);
-            result.add(px, RDF.predicate, pp);
-            result.add(ox, RDF.object, oo);
-            result.add(tx, RDFS.label, result.createLiteral("" + t));
+            sx
+                .addProperty(RDF.subject, ss)
+                .addProperty(LSQ.proxyFor, ss);
+            px
+                .addProperty(RDF.predicate, pp)
+                .addProperty(LSQ.proxyFor, pp);
+            ox
+                .addProperty(RDF.object, oo)
+                .addProperty(LSQ.proxyFor, oo);
+
+            tx.addLiteral(RDFS.label, "" + t);
 
 
             result.add(sx, LSQ.out, tx);
@@ -258,10 +273,9 @@ public class QueryStatistics2 {
                 .mapToInt(x -> x).average().orElse(0.0);
 
         // 1 2 3 4
-        double medianJoinVertexDegree = n % 2 == 0
+        double medianJoinVertexDegree = n == 0 ? 0 : (n % 2 == 0
                 ? (degrees.get(nhalf - 1) + degrees.get(nhalf)) / 2
-                : degrees.get(nhalf);
-
+                : degrees.get(nhalf));
 
 //LSQ.me
         //queryRes.addProperty(LSQ.joinVert, o)
@@ -301,11 +315,17 @@ public class QueryStatistics2 {
 //        stats = stats + getMentionsTuple(predicates); // subjects and objects
 //ModelUtils.
         //ResourceUtils.
+        NestedResource joinVertexNres = new NestedResource(queryRes);
+
 
         for(Resource v : joinVertices) {
             // TODO Allocate a resource for the join vertex
             //Resource queryRes = null;
-            Resource joinVertexRes = null;//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
+            RDFNode o = v.getProperty(RDFS.label).getObject();
+            String name = "" + toPrettyString(o);
+
+            //System.out.println(name);
+            Resource joinVertexRes = joinVertexNres.nest("jv-" + name).get();//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
 
             queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
@@ -318,6 +338,23 @@ public class QueryStatistics2 {
 
     }
 
+    public static String toPrettyString(RDFNode node) {
+        String result;
+
+        if(node.isURIResource()) {
+            Resource r = node.asResource();
+            String ns = r.getNameSpace();
+            String localName = r.getLocalName();
+
+            String nsHash = StringUtils.md5Hash(ns).substring(0, 8);
+            String safeLocalName = StringUtils.urlEncode(localName);
+
+            result = nsHash + "-" + safeLocalName;
+        } else {
+            result = StringUtils.urlEncode("" + node);
+        }
+        return result;
+    }
 
 
 

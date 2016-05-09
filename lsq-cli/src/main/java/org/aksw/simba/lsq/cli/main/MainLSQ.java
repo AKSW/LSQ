@@ -35,6 +35,7 @@ import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
+import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
@@ -279,6 +280,7 @@ public class MainLSQ {
 
                 rdfizeQuery(queryRes.get(), queryAspectFn, query);
 
+                System.out.println("STATUS OF " + queryRes.get());
                 queryRes.get().getModel().write(System.out, "TURTLE");
             }
 

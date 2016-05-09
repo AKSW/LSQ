@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.util;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 

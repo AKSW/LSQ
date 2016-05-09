@@ -22,6 +22,10 @@ public class LSQ {
 
     public static final Property in = property("in");
     public static final Property out = property("out");
+    // Internal use. Indicates that one resource represents another one
+    public static final Property proxyFor = property("proxyFor");
+
+
 
     public static final Resource Star = resource("Star");
     public static final Resource Sink = resource("Sink");
@@ -43,6 +47,7 @@ public class LSQ {
     public static final Property mentionsObject = property("mentionsObject");
 
     public static final Property mentionsTuple = property("mentionsTuple");
+
 
 //  stats = stats + getMentionsTuple(predicates); // subjects and objects
 
