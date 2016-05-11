@@ -2,6 +2,12 @@ package org.aksw.simba.lsq.util;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 
+/**
+ * Helper class to conveniently create nested resources
+ *
+ * @author raven
+ *
+ */
 public class NestedResource {
     protected String str;
     protected Resource current = null;

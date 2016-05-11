@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIUtils;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
@@ -58,6 +59,15 @@ public class ApacheLogParserUtils {
     private String userAgent;
 */
 
+    public static String encodeUnsafeCharacters(String uri) {
+        String result = uri
+                .replace("{", "%7B")
+                .replace("}", "%7D")
+                ;
+
+        return result;
+    }
+
     public static void parseEntry(String str, Resource inout) {
         Matcher m = logEntryPattern.matcher(str);
         if(m.find()) {
@@ -77,9 +87,13 @@ public class ApacheLogParserUtils {
                 inout.addLiteral(LSQ.verb, n.group("verb"));
 
 
+                pathStr = encodeUnsafeCharacters(pathStr);
+
+
                 // Parse the path and extract sparql query string if present
+                String mockUri = "http://example.org" + pathStr;
                 try {
-                    URI uri = new URI(pathStr);
+                    URI uri = new URI(mockUri);
                     List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
                     String queryStr = qsArgs.stream()
                         .filter(x -> x.getName().equals("query"))
@@ -91,7 +105,8 @@ public class ApacheLogParserUtils {
                         inout.addLiteral(LSQ.query, queryStr);
                     }
                 } catch (Exception e) {
-                    logger.warn("Could not parse URI: " + pathStr);
+                    System.out.println(mockUri.substring(244));
+                    logger.warn("Could not parse URI: " + mockUri, e);
                 }
             }
 

@@ -206,6 +206,7 @@ public class MainLSQ {
 
         Model logModel = ModelFactory.createDefaultModel();
         List<Resource> workloadResources = reader.lines()
+                .limit(1)
                 .map(line -> {
                 Resource r = logModel.createResource();
                 ApacheLogParserUtils.parseEntry(line, r);
@@ -251,7 +252,7 @@ public class MainLSQ {
 
             if(stmt != null && stmt.isQuery()) {
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
-                Query query = stmt.getAsQueryStmt().getQuery();
+                Query query = queryStmt.getQuery();
 
                 Model queryModel = ModelFactory.createDefaultModel();
 
