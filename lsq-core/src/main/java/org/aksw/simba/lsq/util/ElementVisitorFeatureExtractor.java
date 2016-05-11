@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
@@ -105,6 +106,11 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 
     public static Set<Resource> getFeatures(Query query) {
         Set<Resource> result = getFeatures(query.getQueryPattern());
+
+        if(query.isDistinct()) {
+            // TODO We are hijacking the SP namespace here
+            result.add(ResourceFactory.createResource(SP.getURI() + "Distinct"));
+        }
 
         return result;
     }
