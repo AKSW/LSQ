@@ -75,6 +75,9 @@ public class LSQ {
 
     public static final Property usesFeature = property("usesFeature");
 
+    public static final Property triplePath = property("triplePath");
+
+    // TODO Not sure if the following metadata really belongs here ~ Claus
     public static final Property engine = property("engine");
     public static final Property vendor = property("vendor");
     public static final Property version = property("version");

@@ -35,12 +35,12 @@ import org.apache.jena.sparql.algebra.op.Op1;
 import org.apache.jena.sparql.algebra.op.Op2;
 import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
+import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-
-import com.google.common.math.IntMath;
 
 public class QueryStatistics2 {
     /**
@@ -390,6 +390,18 @@ public class QueryStatistics2 {
                 .filter(o -> o != null && o instanceof OpBGP)
                 .map(o -> ((OpBGP)o).getPattern())
                 .collect(Collectors.toList());
+    }
+
+    public static void getPropertyPaths(Resource queryRes, Query query) {
+        Op op = Algebra.compile(query);
+
+        // Get all BGPs from the algebra
+        List<Path> paths = linearizePrefix(op, null, QueryStatistics2::getSubOps)
+                .filter(o -> o != null && o instanceof OpPath)
+                .map(o -> ((OpPath)o).getTriplePath().getPath())
+                .collect(Collectors.toList());
+
+        paths.forEach(path -> queryRes.addLiteral(LSQ.triplePath, "" + path));
     }
 
 }

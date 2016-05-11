@@ -465,6 +465,8 @@ public class MainLSQ {
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes);
 
+            QueryStatistics2.getPropertyPaths(queryRes, query);
+
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();
             //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
