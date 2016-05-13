@@ -243,12 +243,13 @@ public class MainLSQ {
 
 
         for(Resource r : workloadResources) {
-            logger.info("Processing: " + r);
             //Model m = ResourceUtils.reachableClosure(r);
             SparqlStmt stmt = Optional.ofNullable(r.getProperty(LSQ.query))
                 .map(queryStmt -> queryStmt.getString())
                 .map(stmtParser)
                 .orElse(null);
+
+            logger.info("Processing: " + stmt.getOriginalString());
 
             if(stmt != null && stmt.isQuery()) {
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
@@ -372,6 +373,10 @@ public class MainLSQ {
             .addProperty(LSQ.hasLocalExecution, localExecutionRes)
             .addProperty(LSQ.hasRemoteExecution, remoteExecutionRes);
 
+// TODO runtime
+//        localExecutionRes
+//            .addLiteral(LSQ.runTimeMs, );
+
         //rdfizeQuery(new NestedResource(queryRes), query);
 
                     //queryStats = queryStats+"\nlsqr:q"+queryHash+" lsqv:hasLocalExecution lsqr:le-"+acronym+"-q"+queryHash+" . " ;
@@ -460,12 +465,13 @@ public class MainLSQ {
             //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
             //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
-            SpinUtils.enrichModelWithHasTriplePattern(queryRes);
-            SpinUtils.enrichModelWithTriplePatternText(queryRes);
+            SpinUtils.enrichWithHasTriplePattern(queryRes);
+            SpinUtils.enrichWithTriplePatternText(queryRes);
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes);
 
-            QueryStatistics2.getPropertyPaths(queryRes, query);
+            QueryStatistics2.enrichWithPropertyPaths(queryRes, query);
+            QueryStatistics2.enrichWithMentions(queryRes, query);
 
         //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             long curTime = System.currentTimeMillis();

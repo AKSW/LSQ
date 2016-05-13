@@ -37,6 +37,8 @@ import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
 import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.core.BasicPattern;
+import org.apache.jena.sparql.core.PathBlock;
+import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -288,23 +290,6 @@ public class QueryStatistics2 {
             .addLiteral(LSQ.avgJoinVertexDegree, avgJoinVertexDegree)
             .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
 
-        Property[] props = new Property[] {LSQ.mentionsSubject, LSQ.mentionsPredicate, LSQ.mentionsObject };
-
-        for(BasicPattern bgp : bgps) {
-            for(Triple t : bgp) {
-                Node[] nodes = TripleUtils.toArray(t);
-                for(int i = 0; i < 3; ++i) {
-                    Node node = nodes[i];
-                    if(!node.isVariable()) {
-                        Property prop = props[i];
-                        RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
-                    //NodeUtils.
-                        queryRes.addProperty(prop, rdfNode);
-                    }
-                }
-
-            }
-        }
 //        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
 //        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
 //        stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";
@@ -381,6 +366,33 @@ public class QueryStatistics2 {
 //        return stats ;
 //    }
 
+    public static void enrichWithMentions(Resource queryRes, Triple triple) {
+        Node[] nodes = TripleUtils.toArray(triple);
+        enrichWithMentions(queryRes, nodes);
+    }
+
+    public static void enrichWithMentions(Resource queryRes, TriplePath triplePath) {
+        Node[] nodes = new Node[] { triplePath.getSubject(), triplePath.getPredicate(), triplePath.getObject() };
+        enrichWithMentions(queryRes, nodes);
+    }
+
+    public static void enrichWithMentions(Resource queryRes, Node[] nodes) {
+        Model model = queryRes.getModel();
+
+        Property[] props = new Property[] {LSQ.mentionsSubject, LSQ.mentionsPredicate, LSQ.mentionsObject };
+        //IntStream.range(0, 3).
+        for(int i = 0; i < 3; ++i) {
+            Node node = nodes[i];
+            if(node != null && !node.isVariable()) {
+                Property prop = props[i];
+                RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
+            //NodeUtils.
+                queryRes.addProperty(prop, rdfNode);
+            }
+        }
+    }
+
+
     // TODO This method is useless for our use case as it does not establish a relation to the SPIN model
     public static void getDirectQueryRelatedRDFizedStats(Query query) {
         Op op = Algebra.compile(query);
@@ -392,7 +404,7 @@ public class QueryStatistics2 {
                 .collect(Collectors.toList());
     }
 
-    public static void getPropertyPaths(Resource queryRes, Query query) {
+    public static void enrichWithPropertyPaths(Resource queryRes, Query query) {
         Op op = Algebra.compile(query);
 
         // Get all BGPs from the algebra
@@ -403,5 +415,30 @@ public class QueryStatistics2 {
 
         paths.forEach(path -> queryRes.addLiteral(LSQ.triplePath, "" + path));
     }
+
+    public static void enrichWithMentions(Resource queryRes, Query query) {
+        Op op = Algebra.compile(query);
+
+        // Get all BGPs from the algebra
+        linearizePrefix(op, null, QueryStatistics2::getSubOps)
+            .filter(o -> o != null)
+            .forEach(o -> {
+                if(o instanceof OpBGP) {
+                    BasicPattern bgp = ((OpBGP)o).getPattern();
+                    for(Triple triple : bgp) {
+                        enrichWithMentions(queryRes, triple);
+                    }
+                } else if(o instanceof OpPath) {
+                    TriplePath triplePath = ((OpPath)o).getTriplePath();
+                    enrichWithMentions(queryRes, triplePath);
+                }
+            });
+    }
+
+//    for(BasicPattern bgp : bgps) {
+//        for(Triple t : bgp) {
+//            enrichWithMentions(queryRes, t);;
+//        }
+//    }
 
 }

@@ -1,0 +1,87 @@
+lsqr:q-1940256746 sp:text "PREFIX swc: <http://data.semanticweb.org/ns/swc/ontology#>   SELECT DISTINCT ?graph ?event ?event_acronym    WHERE {         ?event swc:completeGraph ?graph .       ?event swc:hasAcronym ?event_acronym .      } ORDER BY ?event" ;
+
+#Structural Features
+ lsqv:structuralFeatures lsqr:sf-q-1940256746 .
+ lsqr:sf-q-1940256746 lsqv:bgps 1 ;  lsqv:triplePatterns 2 ;  lsqv:joinVertices 1 ;  lsqv:meanJoinVerticesDegree 2.0 .
+ lsqr:sf-q-1940256746 lsqv:usesFeature  lsqv:Distinct ,  lsqv:OrderBy .
+ lsqr:sf-q-1940256746 lsqv:mentionsSubject "?event" .
+lsqr:sf-q-1940256746 lsqv:mentionsPredicate <http://data.semanticweb.org/ns/swc/ontology#completeGraph> , <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> .
+ lsqr:sf-q-1940256746 lsqv:mentionsObject "?event_acronym" , "?graph" .
+ lsqr:sf-q-1940256746 lsqv:joinVertex lsqr:sf-q-1940256746-event .
+ lsqr:sf-q-1940256746-event lsqv:joinVertexDegree 2 ; lsqv:joinVertexType lsqv:Star .
+
+#Local Execution
+ lsqr:q-1940256746 lsqv:hasLocalExecution lsqr:le-SWDF-q-1940256746 .
+     lsqr:le-SWDF-q-1940256746 lsqv:hasTriplePattern lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#completeGraph_graph  .
+       lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#completeGraph_graph lsqv:triplePatternSelectivity 3.2217587411401637E-4 .
+     lsqr:le-SWDF-q-1940256746 lsqv:hasTriplePattern lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#hasAcronym_event_acronym  .
+       lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#hasAcronym_event_acronym lsqv:triplePatternSelectivity 8.512225726591379E-4 .
+     lsqr:le-SWDF-q-1940256746 lsqv:meanTriplePatternSelectivity 5.866992233865771E-4 ;   lsqv:resultSize 97 ;  lsqv:runTimeMs 59 ;  prov:wasGeneratdBy lsqr:SWDF-2016-03-06 .
+  # Here suppose we have the same query executed over dbpedia
+ lsqr:q-1940256746 lsqv:hasLocalExecution lsqr:le-DBpedia-q-1940256746 .
+     lsqr:le-DBpedia-q-1940256746 lsqv:hasTriplePattern lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#completeGraph_graph  .
+       lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#completeGraph_graph lsqv:triplePatternSelectivity 3.2217587411401637E-4 .
+     lsqr:le-DBpedia-q-1940256746 lsqv:hasTriplePattern lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#hasAcronym_event_acronym  .
+       lsqr:q-1940256746-event_http://data.semanticweb.org/ns/swc/ontology#hasAcronym_event_acronym lsqv:triplePatternSelectivity 8.512225726591379E-4 .
+     lsqr:le-DBpedia-q-1940256746 lsqv:meanTriplePatternSelectivity 0.568233865771E-3 ;   lsqv:resultSize 1234 ;  lsqv:runTimeMs 345 ;  prov:wasGeneratdBy lsqr:DBpedia-2016-03-06 .
+
+#Remote Execution
+lsqr:q-1940256746 lsqv:hasRemoteExecution lsqr:q-1940256746-e-SWDF-2014-05-16T03-34-55-01-00 , lsqr:q-1940256746-e-SWDF-2014-05-16T00-29-09-01-00, lsqr:q-1940256746-e-DBpeida-2015-06-16T00-27-07-01-00 .
+
+lsqr:q-1940256746-e-SWDF-2014-05-16T03-34-55-01-00 lsqv:wasAssociatedWith lsqr:A-RlxRAVMMEk4AHAEASQUCSxBAAQEMDwlGBBwTHU4OQhVNGgYXQQUcClQBHRwOXFcJ  ; dct:atTime "2014-05-16T03:34:55+01:00"^^xsd:dateTimeStamp ; lsqv:endpoint <http://data.semanticweb.org/sparql> .
+
+lsqr:q-1940256746-e-SWDF-2014-05-16T00-29-09-01-00 lsqv:wasAssociatedWith lsqr:A-RlxRAVMMEk4AHAEASQUCSxBAAQEMDwlGBBwTHU4OQhVNGgYXQQUcClQBHRwOXFcJ  ; dct:atTime "2014-05-16T00:29:09+01:00"^^xsd:dateTimeStamp ; lsqv:endpoint <http://data.semanticweb.org/sparql> .
+
+lsqr:q-1940256746-e-DBpeida-2015-06-16T00-27-07-01-00 lsqv:wasAssociatedWith lsqr:A-SSDFSEk4AHAEASQUCSxBAAQEMDwlGBBwTHU4OQhVNGgYXQQUcClQBHRwOXFcJ  ; dct:atTime "2014-05-16T00:29:09+01:00"^^xsd:dateTimeStamp ; lsqv:endpoint <http://data.semanticweb.org/sparql> .
+
+
+#Spin
+ lsqr:q-1940256746   a                              <http://spinrdf.org/sp#Select> ;
+  <http://spinrdf.org/sp#distinct>
+          true ;
+  <http://spinrdf.org/sp#orderBy>
+          ( [ <http://spinrdf.org/sp#varName>
+                    "event"^^<http://www.w3.org/2001/XMLSchema#string> ] ) ;
+  <http://spinrdf.org/sp#resultVariables>
+          ( [ <http://spinrdf.org/sp#varName>
+                    "graph"^^<http://www.w3.org/2001/XMLSchema#string> ] [ <http://spinrdf.org/sp#varName>
+                    "event"^^<http://www.w3.org/2001/XMLSchema#string> ] [ <http://spinrdf.org/sp#varName>
+                    "event_acronym"^^<http://www.w3.org/2001/XMLSchema#string> ] ) ;
+  <http://spinrdf.org/sp#where>  ( [ <http://spinrdf.org/sp#object>  [ <http://spinrdf.org/sp#varName>
+                                                       "graph"^^<http://www.w3.org/2001/XMLSchema#string> ] ;
+                                     <http://spinrdf.org/sp#predicate>
+                                             <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
+                                     <http://spinrdf.org/sp#subject>
+                                             [ <http://spinrdf.org/sp#varName>
+                                                       "event"^^<http://www.w3.org/2001/XMLSchema#string> ]
+                                   ] [ <http://spinrdf.org/sp#object>  [ <http://spinrdf.org/sp#varName>
+                                                         "event_acronym"^^<http://www.w3.org/2001/XMLSchema#string> ] ;
+                                       <http://spinrdf.org/sp#predicate>
+                                               <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
+                                       <http://spinrdf.org/sp#subject>
+                                               [ <http://spinrdf.org/sp#varName>
+                                                         "event"^^<http://www.w3.org/2001/XMLSchema#string> ]
+                                     ] )
+ .
+
+#Local Execution Specs
+
+###SWDF
+lsqr:SWDF-2016-03-06
+lsqv:engine
+    [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] ;
+lsqv:dataset
+   [ prov:hadPrimarySource <http://data.semanticweb.org/sparql> ;
+  prov:atTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp ] ;
+prov:startedAtTime "2016-03-06T23:09:02+01:00"^^xsd:dateTimeStamp ;
+prov:endAtTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp .
+
+###DBpedia
+lsqr:DBpedia-2016-03-06
+lsqv:engine
+    [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] ;
+lsqv:dataset
+   [ prov:hadPrimarySource <http://data.semanticweb.org/sparql> ;
+  prov:atTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp ] ;
+prov:startedAtTime "2016-03-06T23:09:02+01:00"^^xsd:dateTimeStamp ;
+prov:endAtTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp .

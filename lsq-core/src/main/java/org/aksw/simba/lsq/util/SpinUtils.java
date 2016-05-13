@@ -87,7 +87,7 @@ public class SpinUtils {
         return result;
     }
 
-    public static void enrichModelWithHasTriplePattern(Resource queryRes) {
+    public static void enrichWithHasTriplePattern(Resource queryRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
@@ -97,7 +97,7 @@ public class SpinUtils {
     }
 
 
-    public static void enrichModelWithTriplePatternText(Resource queryRes) {
+    public static void enrichWithTriplePatternText(Resource queryRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 

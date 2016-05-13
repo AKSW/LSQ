@@ -82,9 +82,10 @@ public class ApacheLogParserUtils {
             if(n.find()) {
                 String pathStr = n.group("path");
 
-                inout.addLiteral(LSQ.protocol, n.group("protocol"));
-                inout.addLiteral(LSQ.path, pathStr);
-                inout.addLiteral(LSQ.verb, n.group("verb"));
+                inout
+                    .addLiteral(LSQ.protocol, n.group("protocol"))
+                    .addLiteral(LSQ.path, pathStr)
+                    .addLiteral(LSQ.verb, n.group("verb"));
 
 
                 pathStr = encodeUnsafeCharacters(pathStr);
@@ -97,8 +98,8 @@ public class ApacheLogParserUtils {
                     List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
                     String queryStr = qsArgs.stream()
                         .filter(x -> x.getName().equals("query"))
-                        .map(x -> x.getValue())
                         .findFirst()
+                        .map(x -> x.getValue())
                         .orElse(null);
 
                     if(queryStr != null) {
