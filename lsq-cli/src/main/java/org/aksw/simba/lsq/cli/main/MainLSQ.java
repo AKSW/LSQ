@@ -454,12 +454,12 @@ public class MainLSQ {
             queryRes.addProperty(LSQ.structuralFeatures, featureRes);
 
 
-            QueryStatistics2.enrichResourceWithQueryFeatures(queryRes, query);
-
-
             // Add used features
-            Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-            features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
+            QueryStatistics2.enrichResourceWithQueryFeatures(featureRes, query);
+
+
+//            Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
+//            features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
 
             // TODO These methods have to be ported
             //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
