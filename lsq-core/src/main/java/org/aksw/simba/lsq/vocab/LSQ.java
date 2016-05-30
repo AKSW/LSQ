@@ -18,7 +18,7 @@ public class LSQ {
 
     // Used internally for the hypergraph representation - not part of the public vocab
     public static final Resource Vertex = resource(ns + "Vertex");
-    public static final Resource Edge = resource(ns + "Vertex");
+    public static final Resource Edge = resource(ns + "Edge");
 
     public static final Property in = property("in");
     public static final Property out = property("out");
@@ -36,8 +36,12 @@ public class LSQ {
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
 
+    public static final Property bgps = property("bgps");
     public static final Property triplePatterns = property("triplePatterns");
+    public static final Property minBgpTriples = property("minBgpTriples");
+    public static final Property maxBgpTriples = property("maxBgpTriples");
     public static final Property joinVertices = property("joinVertices");
+    
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property avgJoinVertexDegree = property("avgJoinVertexDegree");
     public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");

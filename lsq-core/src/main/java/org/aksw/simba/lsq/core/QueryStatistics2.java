@@ -28,6 +28,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
@@ -37,8 +38,8 @@ import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.algebra.op.OpN;
 import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.core.BasicPattern;
-import org.apache.jena.sparql.core.PathBlock;
 import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -186,10 +187,7 @@ public class QueryStatistics2 {
             Resource px = nodeToResource.merge(p, result.createResource(), (x, y) -> x);
             Resource ox = nodeToResource.merge(o, result.createResource(), (x, y) -> x);
 
-            result.add(tx, RDF.type, LSQ.Edge);
-            result.add(sx, RDF.type, LSQ.Vertex);
-            result.add(px, RDF.type, LSQ.Vertex);
-            result.add(ox, RDF.type, LSQ.Vertex);
+                        
 
 
             // Add the orginal nodes as annotations
@@ -198,16 +196,26 @@ public class QueryStatistics2 {
             RDFNode oo = result.asRDFNode(t.getObject());
 
             sx
+                .addProperty(RDF.type, LSQ.Vertex)
                 .addProperty(RDF.subject, ss)
-                .addProperty(LSQ.proxyFor, ss);
-            px
-                .addProperty(RDF.predicate, pp)
-                .addProperty(LSQ.proxyFor, pp);
-            ox
-                .addProperty(RDF.object, oo)
-                .addProperty(LSQ.proxyFor, oo);
+                .addProperty(LSQ.proxyFor, ss)
+                .addLiteral(RDFS.label, "" + s);
 
-            tx.addLiteral(RDFS.label, "" + t);
+            px
+                .addProperty(RDF.type, LSQ.Vertex)
+                .addProperty(RDF.predicate, pp)
+                .addProperty(LSQ.proxyFor, pp)
+                .addLiteral(RDFS.label, "" + p);
+
+            ox
+                .addProperty(RDF.type, LSQ.Vertex)
+                .addProperty(RDF.object, oo)
+                .addProperty(LSQ.proxyFor, oo)
+                .addLiteral(RDFS.label, "" + p);
+
+            tx
+                .addProperty(RDF.type, LSQ.Edge)
+                .addLiteral(RDFS.label, "" + t);
 
 
             result.add(sx, LSQ.out, tx);
@@ -237,14 +245,23 @@ public class QueryStatistics2 {
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
                 .collect(Collectors.toList());
-
-        int totalBgpCount = bgps.size();
-
+        
+        
         // Find out minimum and maximum size of the bgpgs
+        int totalBgpCount = bgps.size();
         int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
         int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
-        int totalBgpTripleCount = bgpSizes.stream().mapToInt(x -> x).sum();
+        int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
+        queryRes
+            .addLiteral(LSQ.bgps, totalBgpCount)
+            .addLiteral(LSQ.minBgpTriples, minBgpTripleCount)
+            .addLiteral(LSQ.maxBgpTriples, maxBgpTripleCount)
+            .addLiteral(LSQ.triplePatterns, triplePatternCount)
+            ;
+            
+        
+        
         // Create the hypergraph model over all bgps
         // (Could be changed if individual stats are desired)
         Model hyperGraph = ModelFactory.createDefaultModel();
@@ -306,7 +323,8 @@ public class QueryStatistics2 {
         for(Resource v : joinVertices) {
             // TODO Allocate a resource for the join vertex
             //Resource queryRes = null;
-            RDFNode o = v.getProperty(RDFS.label).getObject();
+            Statement t = v.getProperty(RDFS.label);
+            RDFNode o = t.getObject();
             String name = "" + toPrettyString(o);
 
             //System.out.println(name);
@@ -382,12 +400,16 @@ public class QueryStatistics2 {
         Property[] props = new Property[] {LSQ.mentionsSubject, LSQ.mentionsPredicate, LSQ.mentionsObject };
         //IntStream.range(0, 3).
         for(int i = 0; i < 3; ++i) {
+            Property prop = props[i];
             Node node = nodes[i];
-            if(node != null && !node.isVariable()) {
-                Property prop = props[i];
-                RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
-            //NodeUtils.
-                queryRes.addProperty(prop, rdfNode);
+            if(node != null) {
+                if(!node.isVariable()) {
+                    RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
+                //NodeUtils.
+                    queryRes.addProperty(prop, rdfNode);                    
+                } else {
+                    queryRes.addLiteral(prop, ((Var)node).getName());
+                }
             }
         }
     }
