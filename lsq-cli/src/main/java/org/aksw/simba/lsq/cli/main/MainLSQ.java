@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,14 +34,13 @@ import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
-import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -274,13 +273,21 @@ public class MainLSQ {
 
                 // Function for creating resources that correspond to aspects of the query
                 // Pattern: http://base.org/res/{aspect}-q{queryHash}
-                Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q" + queryHash);
+                Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
 
                 // Create a resource with a certain namespace
 //                Function<String, NestedResource> nsToDataQueryRes = (ns) -> baseRes.nest(ns).nest(datasetLabel + "-").nest("q" + queryHash);
 
                 rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                
+
+                //lsqr:le-SWDF-q-1940256746 .
+                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).get();
+
+                //rdfizeQueryExecution(queryRes, nsToBaseRes, query, dataQef);
+                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef);   
+
 
                 System.out.println("STATUS OF " + queryRes.get());
                 queryRes.get().getModel().write(System.out, "TURTLE");
@@ -325,7 +332,7 @@ public class MainLSQ {
      * @throws QueryEvaluationException
      * @throws ParseException
      */
-    public static void rdfizeQueryExecution(
+    public static void rdfizeQueryExecutionOld(
             //OutputStream out,
             //Resource generatorRes,
             //NestedResource baseRes,
@@ -416,6 +423,26 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
+    
+    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef) {
+        Model subModel = ResourceUtils.reachableClosure(queryRes);
+        
+
+        Stopwatch sw = Stopwatch.createStarted();
+        long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
+        long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
+        
+        queryExecRes
+            .addLiteral(LSQ.resultSize, resultSetSize)
+            .addLiteral(LSQ.runTimeMs, runtimeInMs);
+
+        SpinUtils.enrichModelWithTriplePatternSelectivities(subModel, resultSetSize);
+        
+        //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
+        //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
+        //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
+        
+    }
 
 
     // QueryExecutionFactory dataQef
@@ -473,17 +500,7 @@ public class MainLSQ {
             QueryStatistics2.enrichWithPropertyPaths(queryRes, query);
             QueryStatistics2.enrichWithMentions(queryRes, query);
 
-        //	queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
-            long curTime = System.currentTimeMillis();
-            //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
-            //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
-            long resultSize = 0;
-            long exeTime = System.currentTimeMillis() - curTime ;
-
-            queryRes
-                .addLiteral(LSQ.resultSize, resultSize)
-                .addLiteral(LSQ.runTimeMs, exeTime);
-
+                        
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
             execRes.addLiteral(LSQ.runtimeError, msg);

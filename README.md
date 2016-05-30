@@ -25,3 +25,22 @@ The Linked Dataset, a SPARQL endpoint, and complete dumps are all available on t
 ## Example usage
 lsq -f lsq-core/src/test/resources/swdf.log -e http://localhost:8890/sparql -g http://aksw.org/benchmark -l swdf
 
+
+## Work in progress
+The LSQ tool can be used to RDFize SPARQL queries as well as execute them.
+
+### RDFization
+
+
+### Execution
+* -m local / remote
+* -e SPARQL endpoint
+  * -g default graph for query executions. Can be specified multiple times.
+* TODO environment URI
+
+
+
+### Environment creator
+Tool for easing the creation of RDF specification for a SPARQL execution environment.
+Actually, We could use a registry and use a mixture of dcat, service description, (host description), and void to combine all this information.
+E.g. if one specifies dbpedia, we could lookup the host description

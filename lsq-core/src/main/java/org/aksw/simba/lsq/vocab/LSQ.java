@@ -68,15 +68,19 @@ public class LSQ {
     public static final Property structuralFeatures = property("structuralFeatures");
     public static final Property hasTriplePattern = property("hasTriplePattern");
     public static final Property triplePatternText = property("triplePatternText");
-    public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
     public static final Property triplePatternExtensionSize = property("triplePatternExtensionSize");
-    public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
     public static final Property runtimeError = property("runtimeError");
     public static final Property runTimeMs = property("runTimeMs");
 
     public static final Property hasLocalExecution = property("hasLocalExecution");
     public static final Property hasRemoteExecution = property("hasRemoteExecution");
 
+    // Execution
+    public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
+    public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
+    
+    public static final Property wasAssociatedWith = property("wasAssociatedWith");
+    
     public static final Property usesFeature = property("usesFeature");
 
     public static final Property triplePath = property("triplePath");
