@@ -286,15 +286,22 @@ public class QueryStatistics2 {
         System.out.println("HYPER");
         hyperGraph.write(System.out, "TURTLE");
 
-        Set<Resource> joinVertices = hyperGraph
+        Set<Resource> rawJoinVertices = hyperGraph
                 .listResourcesWithProperty(RDF.type, LSQ.Vertex)
                 .toSet();
 
-        Map<Resource, Integer> joinVertexToDegree = joinVertices.stream()
+        Map<Resource, Integer> joinVertexToDegree = rawJoinVertices.stream()
                 .collect(Collectors.toMap(
                         r -> r,
                         r -> propertyDegree(r, LSQ.out, LSQ.in))
                 );
+
+        //.filter(x -> x != 1) // Remove vertices that do not join
+        joinVertexToDegree = joinVertexToDegree.entrySet().stream()
+                .filter(e -> e.getValue() != 1)
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
+        Set<Resource> joinVertices = joinVertexToDegree.keySet();
 
         List<Integer> degrees = joinVertexToDegree.values().stream()
                 .sorted().collect(Collectors.toList());

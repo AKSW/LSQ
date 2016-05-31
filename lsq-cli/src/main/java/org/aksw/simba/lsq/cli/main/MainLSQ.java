@@ -489,7 +489,7 @@ public class MainLSQ {
           ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
 
           // ... and skolemize the rest
-          //Skolemize.skolemize(queryRes);
+          Skolemize.skolemize(queryRes);
 
 
 
