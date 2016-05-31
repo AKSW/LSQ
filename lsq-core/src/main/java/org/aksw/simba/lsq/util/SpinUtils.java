@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.util;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -39,7 +40,7 @@ import org.topbraid.spin.vocabulary.SP;
 public class SpinUtils {
 
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
-    public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
+    public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?foo !rdf:rest ?x . ?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
 
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
@@ -63,7 +64,13 @@ public class SpinUtils {
     }
 
     public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
-        Map<Resource, BasicPattern> result = ConceptModelUtils.listResources(spinModel, basicPatterns)
+        spinModel.write(System.out, "NTRIPLES");
+
+        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
+
+        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
+
+        Map<Resource, BasicPattern> result = ress
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
@@ -73,6 +80,8 @@ public class SpinUtils {
                             tmp.values().forEach(r::add);
                             return r;
                         }));
+
+        result.entrySet().forEach(x -> System.out.println("GOT: " + x));
         return result;
     }
 

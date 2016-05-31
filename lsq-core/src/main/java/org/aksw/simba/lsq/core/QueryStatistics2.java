@@ -158,6 +158,19 @@ public class QueryStatistics2 {
 
 
 
+    public static String getLabel(Node node) {
+        String result;
+        if(node.isURI()) {
+            result = StringUtils.urlEncode(node.getURI()).replaceAll("\\%..", "-").replaceAll("\\-+", "-");
+        }
+        else if(node.isVariable()) {
+            result = ((Var)node).getName();
+        } else {
+            result = "" + node;
+        }
+        return result;
+    }
+
     /**
      * Creates a hypergraph model.
      *
@@ -199,19 +212,19 @@ public class QueryStatistics2 {
                 .addProperty(RDF.type, LSQ.Vertex)
                 .addProperty(RDF.subject, ss)
                 .addProperty(LSQ.proxyFor, ss)
-                .addLiteral(RDFS.label, "" + s);
+                .addLiteral(RDFS.label, getLabel(s));
 
             px
                 .addProperty(RDF.type, LSQ.Vertex)
                 .addProperty(RDF.predicate, pp)
                 .addProperty(LSQ.proxyFor, pp)
-                .addLiteral(RDFS.label, "" + p);
+                .addLiteral(RDFS.label, getLabel(p));
 
             ox
                 .addProperty(RDF.type, LSQ.Vertex)
                 .addProperty(RDF.object, oo)
                 .addProperty(LSQ.proxyFor, oo)
-                .addLiteral(RDFS.label, "" + p);
+                .addLiteral(RDFS.label, getLabel(o));
 
             tx
                 .addProperty(RDF.type, LSQ.Edge)
@@ -233,14 +246,14 @@ public class QueryStatistics2 {
      * @return stats Query Features as string
      * @throws MalformedQueryException
      */
-    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes) {
+    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Resource targetRes) {
         Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes);
-        getDirectQueryRelatedRDFizedStats(queryRes, resToBgp.values());
+        getDirectQueryRelatedRDFizedStats(targetRes, resToBgp.values());
     }
 
 
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Collection<BasicPattern> bgps) {
-        Model model = queryRes.getModel();
+        //Model model = queryRes.getModel();
 
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
@@ -328,15 +341,19 @@ public class QueryStatistics2 {
             String name = "" + toPrettyString(o);
 
             //System.out.println(name);
-            Resource joinVertexRes = joinVertexNres.nest("jv-" + name).get();//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
+            Resource joinVertexRes = joinVertexNres.nest("-jv-" + name).get();//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
 
             queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
             Resource joinVertexType = getJoinVertexType(joinVertexRes);
-            joinVertexRes.addProperty(LSQ.joinVertexType, joinVertexType);
-
             int degree = joinVertexToDegree.get(v);
-            joinVertexRes.addLiteral(LSQ.joinVertexDegree, degree);
+
+            joinVertexRes
+                .addLiteral(LSQ.joinVertexDegree, degree)
+                .addProperty(LSQ.joinVertexType, joinVertexType)
+                //.addProperty(LSQ.proxyFor, v)//v.getPropertyResourceValue(LSQ.proxyFor))
+                ;
+
         }
 
     }

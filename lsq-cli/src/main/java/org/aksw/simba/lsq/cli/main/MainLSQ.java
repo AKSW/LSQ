@@ -86,6 +86,7 @@ public class MainLSQ {
     public static void main(String[] args) throws Exception  {
         // Try to start - if something goes wrong print help
         // TODO Logic for when help is displayed could be improved
+        //System.out.println("aoeuaoeuoaeu%2Fnstaeouhaoet%xx".replaceAll("\\%..", "-"));
 
         try {
             run(args);
@@ -448,8 +449,6 @@ public class MainLSQ {
 
 
     public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef) {
-        Model subModel = ResourceUtils.reachableClosure(queryRes);
-
 
         Stopwatch sw = Stopwatch.createStarted();
         long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
@@ -472,7 +471,9 @@ public class MainLSQ {
     // QueryExecutionFactory dataQef
     public static void rdfizeQuery(Resource queryRes, Function<String, NestedResource> queryAspectFn, Query query) {
 
-        Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
+        //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
+
+        queryRes.addLiteral(LSQ.text, "" + query);
 
         try {
             query = query.cloneQuery();
@@ -488,7 +489,7 @@ public class MainLSQ {
           ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
 
           // ... and skolemize the rest
-          Skolemize.skolemize(queryRes);
+          //Skolemize.skolemize(queryRes);
 
 
 
@@ -522,7 +523,9 @@ public class MainLSQ {
             SpinUtils.enrichWithHasTriplePattern(queryRes);
             SpinUtils.enrichWithTriplePatternText(queryRes);
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
-            QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes);
+
+            //
+            QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes, featureRes);
 
             QueryStatistics2.enrichWithPropertyPaths(queryRes, query);
             QueryStatistics2.enrichWithMentions(queryRes, query);
@@ -530,7 +533,7 @@ public class MainLSQ {
 
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
-            execRes.addLiteral(LSQ.runtimeError, msg);
+            queryRes.addLiteral(LSQ.runtimeError, msg);
         }
 
         // TODO Add getRDFUserExecutions
