@@ -26,6 +26,8 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
+import org.aksw.jena_sparql_api.http.QueryExecutionHttpWrapper;
+import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -46,7 +48,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.WebContent;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +89,7 @@ public class MainLSQ {
     public static void main(String[] args) throws Exception  {
         // Try to start - if something goes wrong print help
         // TODO Logic for when help is displayed could be improved
+
         try {
             run(args);
         } catch(Exception e) {
@@ -192,6 +197,7 @@ public class MainLSQ {
                 .addProperty(LSQ.processor, "2.5GHz i7")
                 .addProperty(LSQ.ram,"8GB");
 
+
         generatorRes
             .addProperty(LSQ.engine, engineRes);
 
@@ -201,7 +207,6 @@ public class MainLSQ {
             .addLiteral(LSQ.dataset, datasetRes)
             .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
             .addLiteral(PROV.startedAtTime, startTime);
-
 
         Model logModel = ModelFactory.createDefaultModel();
         List<Resource> workloadResources = reader.lines()
@@ -280,13 +285,33 @@ public class MainLSQ {
 //                Function<String, NestedResource> nsToDataQueryRes = (ns) -> baseRes.nest(ns).nest(datasetLabel + "-").nest("q" + queryHash);
 
                 rdfizeQuery(queryRes.get(), queryAspectFn, query);
-                
+
 
                 //lsqr:le-SWDF-q-1940256746 .
-                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).get();
+                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").get();
+
+                // TODO Switch between local / remote execution
+                queryRes.get()
+                    .addProperty(LSQ.hasLocalExecution, queryExecRes);
+
+
+                Resource queryExecProvRes = queryAspectFn.apply("gen-" + datasetLabel + "-").get();
+
+
+                queryExecProvRes
+                    .addProperty(LSQ.engine, engineRes)
+                    .addProperty(LSQ.dataset, datasetRes)
+                    .addLiteral(PROV.startedAtTime, startTime)
+                    .addLiteral(PROV.endAtTime, endTime);
+
+
+                queryExecRes
+                    .addProperty(PROV.wasGeneratedBy, queryExecProvRes);
+
+
 
                 //rdfizeQueryExecution(queryRes, nsToBaseRes, query, dataQef);
-                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef);   
+                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef);
 
 
                 System.out.println("STATUS OF " + queryRes.get());
@@ -348,6 +373,7 @@ public class MainLSQ {
 
         logger.info("RDFization started...");
         long endpointSize = ServiceUtils.fetchInteger(dataQef.createQueryExecution("SELECT (COUNT(*) AS ?x) { ?s ?p ?o }"), Vars.x);
+
 
         // endpointSize = Selectivity.getEndpointTotalTriples(localEndpoint,
         // graph);
@@ -423,25 +449,26 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
-    
+
     public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef) {
         Model subModel = ResourceUtils.reachableClosure(queryRes);
-        
+
 
         Stopwatch sw = Stopwatch.createStarted();
         long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
         long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
-        
+
         queryExecRes
             .addLiteral(LSQ.resultSize, resultSetSize)
             .addLiteral(LSQ.runTimeMs, runtimeInMs);
 
+        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
         SpinUtils.enrichModelWithTriplePatternSelectivities(subModel, resultSetSize);
-        
+
         //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
         //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
         //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
-        
+
     }
 
 
@@ -500,7 +527,7 @@ public class MainLSQ {
             QueryStatistics2.enrichWithPropertyPaths(queryRes, query);
             QueryStatistics2.enrichWithMentions(queryRes, query);
 
-                        
+
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
             execRes.addLiteral(LSQ.runtimeError, msg);

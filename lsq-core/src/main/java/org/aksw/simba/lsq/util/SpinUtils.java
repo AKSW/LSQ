@@ -107,7 +107,7 @@ public class SpinUtils {
     }
 
 
-    public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, QueryExecutionFactory dataQef) {
+    public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, Resource queryExecRes, QueryExecutionFactory dataQef) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
@@ -120,7 +120,11 @@ public class SpinUtils {
     }
 
     public static void enrichModelWithTriplePatternSelectivities(Model spinModel, long totalTripleCount) {
+
+
         //double selectivity = tripleCount / (double)totalTripleCount;
+
+
     }
 
     /**

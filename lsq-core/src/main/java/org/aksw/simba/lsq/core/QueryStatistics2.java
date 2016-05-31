@@ -187,7 +187,7 @@ public class QueryStatistics2 {
             Resource px = nodeToResource.merge(p, result.createResource(), (x, y) -> x);
             Resource ox = nodeToResource.merge(o, result.createResource(), (x, y) -> x);
 
-                        
+
 
 
             // Add the orginal nodes as annotations
@@ -245,8 +245,8 @@ public class QueryStatistics2 {
         List<Integer> bgpSizes = bgps.stream()
                 .map(BasicPattern::size)
                 .collect(Collectors.toList());
-        
-        
+
+
         // Find out minimum and maximum size of the bgpgs
         int totalBgpCount = bgps.size();
         int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
@@ -259,9 +259,9 @@ public class QueryStatistics2 {
             .addLiteral(LSQ.maxBgpTriples, maxBgpTripleCount)
             .addLiteral(LSQ.triplePatterns, triplePatternCount)
             ;
-            
-        
-        
+
+
+
         // Create the hypergraph model over all bgps
         // (Could be changed if individual stats are desired)
         Model hyperGraph = ModelFactory.createDefaultModel();
@@ -406,9 +406,10 @@ public class QueryStatistics2 {
                 if(!node.isVariable()) {
                     RDFNode rdfNode = ModelUtils.convertGraphNodeToRDFNode(node, model);
                 //NodeUtils.
-                    queryRes.addProperty(prop, rdfNode);                    
+                    queryRes.addProperty(prop, rdfNode);
                 } else {
-                    queryRes.addLiteral(prop, ((Var)node).getName());
+                    // TODO I don't like turning variables into string literals ~ Claus
+                    queryRes.addLiteral(prop, "?" + ((Var)node).getName());
                 }
             }
         }
