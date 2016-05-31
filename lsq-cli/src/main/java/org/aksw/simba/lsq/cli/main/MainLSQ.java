@@ -26,8 +26,6 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
-import org.aksw.jena_sparql_api.http.QueryExecutionHttpWrapper;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -49,9 +47,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.WebContent;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -464,7 +460,7 @@ public class MainLSQ {
             .addLiteral(LSQ.runTimeMs, runtimeInMs);
 
         SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
-        SpinUtils.enrichModelWithTriplePatternSelectivities(subModel, resultSetSize);
+        SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, resultSetSize); //subModel, resultSetSize);
 
         //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
         //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);

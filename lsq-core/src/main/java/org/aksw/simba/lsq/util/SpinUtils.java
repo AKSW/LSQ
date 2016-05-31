@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.util;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -10,14 +11,17 @@ import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
+import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprAggregator;
@@ -119,7 +123,60 @@ public class SpinUtils {
         });
     }
 
-    public static void enrichModelWithTriplePatternSelectivities(Model spinModel, long totalTripleCount) {
+    public static long countTriplePattern(QueryExecutionFactory qef, Triple t) {
+        Query query = new Query();
+        query.setQuerySelectType();
+        query.getProject().add(Vars.c, new ExprAggregator(Vars.x, new AggCount()));
+        query.setQueryPattern(ElementUtils.createElement(t));
+
+        QueryExecution qe = qef.createQueryExecution(query);
+        long result = ServiceUtils.fetchInteger(qe, Vars.c);
+        return result;
+    }
+
+    /**
+     * :qe-123
+     *     tripleSelec
+     *
+     * tpqe-123-p1
+     *   forExec qe-123
+     *   ofPattern q-123-p1
+     *
+     * @param queryRes
+     * @param queryExecRes
+     * @param qef
+     * @param totalTripleCount
+     */
+    public static void enrichModelWithTriplePatternSelectivities(Resource queryRes, Resource queryExecRes, QueryExecutionFactory qef, long totalTripleCount) {
+
+        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
+
+        int i = 0;
+        //triplePatternIndex.entrySet().forEach(e -> {
+        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
+            ++i;
+            Resource r = e.getKey();
+            Triple t = e.getValue();
+            long count = countTriplePattern(qef, t);
+
+            Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
+
+            queryExecRes
+                .addProperty(LSQ.hasTriplePattern, queryTpExecRes);
+
+
+            double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
+
+            queryTpExecRes
+                .addProperty(LSQ.hasTriplePattern, r)
+                .addLiteral(LSQ.triplePatternExtensionSize, count)
+                .addLiteral(LSQ.triplePatternSelectivity, selectivity);
+        }
+
+//        triplePatternIndex.keySet().forEach(r ->
+//            queryRes.addProperty(LSQ.hasTriplePattern, r)
+//        );
 
 
         //double selectivity = tripleCount / (double)totalTripleCount;
