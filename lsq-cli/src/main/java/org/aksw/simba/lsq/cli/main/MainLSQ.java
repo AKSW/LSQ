@@ -42,6 +42,7 @@ import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -231,6 +232,9 @@ public class MainLSQ {
 //            ShellGraph x = new ShellGraph(graph, null, null) ;
 //            x.writeGraph() ;
 
+        long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), dataQef);
+
+        logger.info("Dataset size of " + endpointUrl + " / " + graph + ": " + datasetSize);
 
         //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
 
@@ -309,7 +313,7 @@ public class MainLSQ {
 
 
                 //rdfizeQueryExecution(queryRes, nsToBaseRes, query, dataQef);
-                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef);
+                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
 
 
                 System.out.println("STATUS OF " + queryRes.get());
@@ -448,7 +452,7 @@ public class MainLSQ {
     }
 
 
-    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef) {
+    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, long datasetSize) {
 
         Stopwatch sw = Stopwatch.createStarted();
         long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
@@ -459,7 +463,9 @@ public class MainLSQ {
             .addLiteral(LSQ.runTimeMs, runtimeInMs);
 
         SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
-        SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, resultSetSize); //subModel, resultSetSize);
+
+
+        SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
 
         //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
         //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);

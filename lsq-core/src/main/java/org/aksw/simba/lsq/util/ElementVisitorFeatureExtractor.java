@@ -61,6 +61,8 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
         List<Expr> exprs = ExprUtils.linearizePrefix(baseExpr, Collections.emptySet()).collect(Collectors.toList());
 
         for(Expr expr : exprs) {
+            features.add(LSQ.Functions);
+
             if(expr.isFunction()) {
                 // TODO Will use full URIs for custom sparql functions - may want to shorten them with prefixes
                 String fnName = ExprUtils.getFunctionId(expr.getFunction());

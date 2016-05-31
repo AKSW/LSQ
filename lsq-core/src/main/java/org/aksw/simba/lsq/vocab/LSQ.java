@@ -36,6 +36,7 @@ public class LSQ {
     public static final Resource OrderBy = resource("OrderBy");
     public static final Resource GroupBy = resource("GroupBy");
     public static final Resource Aggregators = resource("Aggregators");
+    public static final Resource Functions = resource("Functions");
 
 
     public static final Property joinVertex = property("joinVertex");
@@ -74,7 +75,7 @@ public class LSQ {
     public static final Property structuralFeatures = property("structuralFeatures");
     public static final Property hasTriplePattern = property("hasTriplePattern");
     public static final Property triplePatternText = property("triplePatternText");
-    public static final Property triplePatternExtensionSize = property("triplePatternExtensionSize");
+    public static final Property triplePatternResultSize = property("triplePatternResultSize");
     public static final Property runtimeError = property("runtimeError");
     public static final Property runTimeMs = property("runTimeMs");
 

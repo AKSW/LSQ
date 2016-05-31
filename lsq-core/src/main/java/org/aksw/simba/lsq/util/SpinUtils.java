@@ -128,7 +128,7 @@ public class SpinUtils {
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
             //double selectivity = tripleCount / (double)totalTripleCount;
 
-            spinModel.add(r, LSQ.triplePatternExtensionSize, spinModel.createTypedLiteral(tripleCount));
+            spinModel.add(r, LSQ.triplePatternResultSize, spinModel.createTypedLiteral(tripleCount));
         });
     }
 
@@ -179,7 +179,7 @@ public class SpinUtils {
 
             queryTpExecRes
                 .addProperty(LSQ.hasTriplePattern, r)
-                .addLiteral(LSQ.triplePatternExtensionSize, count)
+                .addLiteral(LSQ.triplePatternResultSize, count)
                 .addLiteral(LSQ.triplePatternSelectivity, selectivity);
         }
 
