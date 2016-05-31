@@ -35,6 +35,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
+import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -487,9 +488,12 @@ public class MainLSQ {
             Model spinModel = queryRes.getModel();
           LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
           Resource tmpQueryRes = arq2spin.createQuery(query, null);
-
           // ... and rename the blank node of the query
           ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
+
+          // ... and skolemize the rest
+          Skolemize.skolemize(queryRes);
+
 
 
 //          } catch (Exception ex) {
