@@ -32,6 +32,12 @@ public class LSQ {
     public static final Resource Path = resource("Path");
     public static final Resource Hybrid = resource("Hybrid");
 
+    public static final Resource Distinct = resource("Distinct");
+    public static final Resource OrderBy = resource("OrderBy");
+    public static final Resource GroupBy = resource("GroupBy");
+    public static final Resource Aggregators = resource("Aggregators");
+
+
     public static final Property joinVertex = property("joinVertex");
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
@@ -41,7 +47,7 @@ public class LSQ {
     public static final Property minBgpTriples = property("minBgpTriples");
     public static final Property maxBgpTriples = property("maxBgpTriples");
     public static final Property joinVertices = property("joinVertices");
-    
+
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property avgJoinVertexDegree = property("avgJoinVertexDegree");
     public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");
@@ -78,9 +84,9 @@ public class LSQ {
     // Execution
     public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
     public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
-    
+
     public static final Property wasAssociatedWith = property("wasAssociatedWith");
-    
+
     public static final Property usesFeature = property("usesFeature");
 
     public static final Property triplePath = property("triplePath");

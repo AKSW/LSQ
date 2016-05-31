@@ -324,6 +324,7 @@ public class QueryStatistics2 {
 //                .orElse(0.0);
 
         queryRes
+            .addLiteral(LSQ.joinVertices, joinVertices.size())
             .addLiteral(LSQ.avgJoinVertexDegree, avgJoinVertexDegree)
             .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
 

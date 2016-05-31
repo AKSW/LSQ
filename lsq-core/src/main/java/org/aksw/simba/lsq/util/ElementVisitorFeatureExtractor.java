@@ -2,12 +2,20 @@ package org.aksw.simba.lsq.util;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.utils.ExprUtils;
+import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpBGP;
 import org.apache.jena.sparql.expr.Expr;
+import org.apache.jena.sparql.expr.ExprAggregator;
+import org.apache.jena.sparql.path.PathLib;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementExists;
@@ -49,9 +57,17 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
     public void visit(ElementFilter el) {
         features.add(SP.Filter);
 
-        Expr exp =  el.getExpr();
-        if(exp.toString().startsWith("regex(")) {
-            features.add(SP.regex);
+        Expr baseExpr = el.getExpr();
+        List<Expr> exprs = ExprUtils.linearizePrefix(baseExpr, Collections.emptySet()).collect(Collectors.toList());
+
+        for(Expr expr : exprs) {
+            if(expr.isFunction()) {
+                // TODO Will use full URIs for custom sparql functions - may want to shorten them with prefixes
+                String fnName = ExprUtils.getFunctionId(expr.getFunction());
+
+                Resource fnRes = ResourceFactory.createResource(LSQ.ns + "fn-" + fnName);
+                features.add(fnRes);
+            }
         }
     }
 
@@ -87,7 +103,13 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 
     @Override
     public void visit(ElementPathBlock el) {
-        features.add(SP.TriplePath);
+        Op op = PathLib.pathToTriples(el.getPattern());
+
+        if(op instanceof OpBGP) {
+            features.add(SP.TriplePattern);
+        } else {
+            features.add(SP.TriplePath);
+        }
     }
 
     @Override
@@ -109,8 +131,30 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 
         if(query.isDistinct()) {
             // TODO We are hijacking the SP namespace here
-            result.add(ResourceFactory.createResource(SP.getURI() + "Distinct"));
+            result.add(LSQ.Distinct);
         }
+
+
+        if(query.hasOrderBy()) {
+            result.add(LSQ.OrderBy);
+        }
+
+        if(query.hasGroupBy()) {
+            result.add(LSQ.GroupBy);
+        }
+
+        if(query.hasAggregators()) {
+            result.add(LSQ.Aggregators);
+
+
+            List<ExprAggregator> aggs = query.getAggregators();
+            for(ExprAggregator agg : aggs) {
+                Resource fnRes = ResourceFactory.createResource(LSQ.ns + "agg-" + agg.getAggregator().getName().toLowerCase());
+                result.add(fnRes);
+            }
+
+        }
+
 
         return result;
     }
