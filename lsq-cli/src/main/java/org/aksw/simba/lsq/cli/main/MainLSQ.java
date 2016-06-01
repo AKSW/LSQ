@@ -11,17 +11,17 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import javax.crypto.EncryptedPrivateKeyInfo;
 
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -39,21 +39,19 @@ import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
-import org.aksw.simba.lsq.vocab.ALOG;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.jena.ext.com.google.common.base.Stopwatch;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceF;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.function.library.leviathan.md5hash;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -197,7 +195,7 @@ public class MainLSQ {
         // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
         Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
 
-        Resource envRes = envUri == null ? null : ResourceFactory.createResource(envUri);
+        Resource rawEnvRes = envUri == null ? null : ResourceFactory.createResource(envUri);
 
 
         Model specs = ModelFactory.createDefaultModel();
@@ -271,20 +269,18 @@ public class MainLSQ {
 
             if(stmt != null && stmt.isQuery()) {
 
-                String hashedIp = StringUtils.md5Hash("someSaltToPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-                System.out.println(hashedIp);
-
-
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
                 Query query = queryStmt.getQuery();
 
                 Model queryModel = ModelFactory.createDefaultModel();
 
+                Resource envRes = rawEnvRes == null ? null : rawEnvRes.inModel(queryModel);
+                
                 //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
                 NestedResource baseRes = new NestedResource(queryModel.createResource(LSQ.defaultLsqrNs));
 
                 String queryHash = StringUtils.md5Hash(query.toString()).substring(0, 8);
-                NestedResource queryRes = baseRes.nest("q" + queryHash);
+                NestedResource queryRes = baseRes.nest("q-" + queryHash);
 
 
                 //Resource queryRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
@@ -307,6 +303,33 @@ public class MainLSQ {
 
 
                 //lsqr:le-SWDF-q-1940256746 .
+                
+                // Deal with execution
+                //lsqr:le-SWDF-q-1940256746 .
+                
+                // Deal with execution
+                String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+                Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
+                Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
+                SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
+                String timestampStr = dt.format(timestamp.getTime()); 
+                //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+                
+
+                // Express that the query execution was recorded
+                // at some point in time by some user at some service
+                // according to some source (e.g. the log file)
+                Resource queryExecRecRes = queryAspectFn.apply("log-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
+                queryRes.get()
+                    .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
+                
+                queryExecRecRes
+                    .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
+                    .addProperty(LSQ.engine, envRes)
+                    ;
+                
+                
+                
                 Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").get();
 
                 // TODO Switch between local / remote execution
@@ -324,9 +347,14 @@ public class MainLSQ {
 //                    .addLiteral(PROV.startedAtTime, startTime)
 //                    .addLiteral(PROV.endAtTime, endTime);
 
+                //System.out.println(hashedIp);
 
                 queryExecRes
-                    .addProperty(PROV.wasGeneratedBy, queryExecProvRes);
+                    .addLiteral(LSQ.wasAssociatedWith, hashedIp)
+                    .addProperty(PROV.wasGeneratedBy, queryExecProvRes)
+                    ;
+                
+
 
 
 
@@ -469,16 +497,24 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
-
+    
     public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, long datasetSize) {
 
-        Stopwatch sw = Stopwatch.createStarted();
-        long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
-        long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
+//        Stopwatch sw = Stopwatch.createStarted();
+//      long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
 
+        Calendar start = Calendar.getInstance();
+        long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
+        Calendar end = Calendar.getInstance();
+        Duration duration = Duration.between(start.toInstant(), end.toInstant());
+
+        
         queryExecRes
             .addLiteral(LSQ.resultSize, resultSetSize)
-            .addLiteral(LSQ.runTimeMs, runtimeInMs);
+            .addLiteral(LSQ.runTimeMs, duration.getNano() / 1000000l)
+            .addLiteral(PROV.startedAtTime, start)
+            .addLiteral(PROV.endAtTime, end)
+            ;
 
         SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
 
