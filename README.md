@@ -23,7 +23,19 @@ The Linked Dataset, a SPARQL endpoint, and complete dumps are all available on t
 * -b baseUri for generated resources; defaults to http://lsq.aksw.org/res/
 
 ## Example usage
-lsq -f lsq-core/src/test/resources/swdf.log -e http://localhost:8890/sparql -g http://aksw.org/benchmark -l swdf
+
+From the repository root folder, run:
+
+```bash
+lsq \
+  -f lsq-core/src/test/resources/swdf.log \
+  -s http://localhost:8890/sparql \
+  -g http://aksw.org/benchmark \
+  -l swdf -b http://lsq.aksw.org/res/ \
+  -e http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql
+```
+
+Probably outdated lsq -f lsq-core/src/test/resources/swdf.log -e http://localhost:8890/sparql -g http://aksw.org/benchmark -l swdf
 
 
 ## Work in progress
