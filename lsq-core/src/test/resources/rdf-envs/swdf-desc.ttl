@@ -1,0 +1,72 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+@prefix owl: <http://www.w3.org/2002/07/owl#>
+@prefix lsqo: <http://lsq.aksw.org/vocab#>
+@prefix lsqr: <http://lsq.aksw.org/res/>
+
+@prefix se: <http://lsq.aksw.org/env/>
+@prefix dcat: <http://www.w3.org/ns/dcat#>.
+
+@prefix mvn: <http://ns.aksw.org/maven#>
+
+# There is related work for modeling computing infrastructure: https://ivi.fnwi.uva.nl/sne/ndl/
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#>
+@prefix hd: <http://ns.aksw.org/hardware-description#>
+@prefix id: <http://ns.aksw.org/infrastructure-description#>
+
+
+data:org.semanticweb.swdf_swdf-full_latest
+    a dcat:Dataset .
+    dcat:theme theme:primary ;
+    mvn:group "org.semanticweb.swdf" ;
+    mvn:artifact "swdf-full" ;
+    mvn:version "latest" ;
+    dcat:keyword "swdf" ;
+    dcat:primaryDistribution dist:org.semanticweb.swdf_swdf-full_latest_public ;
+    rdfs:label "The complete Semantic Web Conference Corpus" ;
+    rdfs:comment "The complete Semantic Web Conference Corpus a.k.a. Semantic Web Dog Food Corpus" ;
+    foaf:depiction <http://data.semanticweb.org/images/bones_small.png> ;
+    .
+
+dist:org.semanticweb.swdf_swdf-full_latest_public
+    a dcat:Distribution ;
+    o:priority 1 ;
+    dcat:distributionOf data:org.semanticweb.swdf_swdf-full_latest ;
+    dcat:accessURL <http://data.semanticweb.org/sparql> ;
+    .
+
+service:org.semanticweb.swdf_swdf-full_latest_public_sparql
+    a sd:Service ;
+    sd:endpoint <http://data.semanticweb.org/sparql> ;
+    id:provider infra:org.semanticweb ;
+    .
+
+# An infrastructure is comprised of a set of services powered by physical and virtual hosts, that have physical or virtual hardware specifications
+infra:org.semanticweb.swdf_swdf_sparql
+    a id:SingleNodeInfrastructure ;
+    id:app app:com.openlink_virtuoso_7.2.1 ;
+    id:host host:org.semanticweb.swdf_swdf-host ;
+    .
+    
+app:com.openlink_virtuoso_7.2.1
+    a doap:Project ;
+    doap:name "Virtuoso" ;
+    doap:vendor "OpenLink" ;
+    doap:version "7.2.1" ;
+    .
+
+host:org.semanticweb.swdf_swdf-host
+    a hd:Host ;
+#    a hd:PhysicalHost ;
+    hd:cpuType "i7" ;
+    hd:totalRam "8" ; # in GB ;
+    hd:avgCpuSpeed "4000" ;
+    hd:componentSpec cpu:intel-core-i7-6700K ;
+    .
+
+cpu:intel-core-i7-6700K
+    a hd:CPU ;
+    hd:product "Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" ;
+    hd:cpuSize "4000" ; # in Mhz ;
+    .
+ 

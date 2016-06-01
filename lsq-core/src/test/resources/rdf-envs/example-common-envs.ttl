@@ -1,0 +1,97 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+@prefix owl: <http://www.w3.org/2002/07/owl#>
+@prefix lsqo: <http://lsq.aksw.org/vocab#>
+@prefix lsqr: <http://lsq.aksw.org/res/>
+
+@prefix se: <http://lsq.aksw.org/env/>
+@prefix dcat: <http://www.w3.org/ns/dcat#>.
+
+
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#>
+@prefix hd: <http://ns.aksw.org/host-description#>
+@prefix id: <http://ns.aksw.org/infrastructure-description#>
+
+# Doapfile: https://github.com/edumbill/doap/blob/master/schema/doap.rdf
+
+
+# A sparql service is provided by an infrastructure comprising
+# (running instances of) software on certain pieces of (virtual) hardware
+ (running instance of a) of a piece of software
+# running on a certain infrastructure
+service:org.semanticweb_swdf-sparql
+    a sd:Service ;
+    sd:endpoint <http://data.semanticweb.org/sparql> ;
+    id:provider infra:org.semanticweb ; # infrastructure providing the service
+    .
+
+# An infrastructure is comprised of a set of services powered by physical and virtual hosts, that have physical or virtual hardware specifications
+infra:org.semanticweb_swdf_sparql
+    a SingleNodeInfrastructure ;
+    id:software software:org.semanticweb_swdf_sparql ; # Providing software of the sparql service
+    id:host host:org.semanticweb_swdf-host ;
+    .
+    
+software:com.openlink_virtuoso_7.2.1
+    a doap:Project ;
+    doap:name "Virtuoso" ;
+    doap:vendor "OpenLink" ;
+    doap:version "7.2.1" ;
+    .
+
+    
+host:org.semanticweb_swdf-host
+    a hd:Host ;
+    hd:cpuType "i7" ;
+    hd:totalRam "8" ; # in GB ;
+    hd:avgCpuSpeed "4000" ;
+#    hd:component host:org.semanticweb_swdf-host_component-cpu-1 ;
+    hd:componentSpec cpu:intel-core-i7-6700K ;
+    .
+
+# Note: This is a description of the host's instance of a CPU
+host:host:org.semanticweb_swdf-host_component-cpu-1
+    a hd:component ;
+    hd:spec cpu:intel-core-i7-6700K ;
+    .
+
+cpu:intel-core-i7-6700K
+    a hd:CPU ;
+    hd:product "Intel(R) Core(TM) i7-6700K CPU @ 4.00GHz" ;
+    hd:cpuSize "4000" ; # in Mhz ;
+    .
+  
+
+
+data:org.semanticweb_swdf_2016
+    a dcat:Dataset .
+    dcat:theme theme:primary ;
+    o:group "org.semanticweb" ;
+    o:artifact "swdf" ;
+    o:version "2016" ;
+    rdfs:label "The complete Semantic Web Conference Corpus" ;
+    rdfs:comment "The complete Semantic Web Conference Corpus a.k.a. Semantic Web Dog Food Corpus" ;
+    foaf:depiction <http://data.semanticweb.org/images/bones_small.png> ;
+    .
+  
+dist:org.semanticweb_swdf_2016_official
+    a dcat:Distribution ;
+    o:priority 1 ;
+    o:distributionOf data:org.semanticweb_swdf_2016 ;
+    dcat:accessURL <http://data.semanticweb.org/sparql> ;
+    .
+
+
+
+
+
+
+
+lsqr:SWDF
+    lsqv:acronym "swdf" ; #<-- lsq tool supports looking up uris based on the acronym
+lsqv:engine 
+    [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] ; 
+lsqv:dataset 
+   [ prov:hadPrimarySource <http://data.semanticweb.org/sparql> ; 
+
+   

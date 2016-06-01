@@ -1,0 +1,7 @@
+# I don't think we need an environment, but instead we can use the distribution:
+# A 
+env:org.aksw_lsq-swdf-official_2016
+    a envo:Environment ;
+    envo:distribution dist:org.semanticweb_swdf_2016_official ;
+    envo:systemSpecs sys:org.aksw_lsq-swdf-official_2016 ;
+    .
