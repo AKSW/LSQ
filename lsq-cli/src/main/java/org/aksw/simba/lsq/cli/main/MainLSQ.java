@@ -21,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.crypto.EncryptedPrivateKeyInfo;
+
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
@@ -37,6 +39,7 @@ import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.util.ApacheLogParserUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
+import org.aksw.simba.lsq.vocab.ALOG;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -47,8 +50,10 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceF;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.function.library.leviathan.md5hash;
 import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,7 +123,7 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> endpointUrlOs = parser
-                .acceptsAll(Arrays.asList("e", "endpoint"), "SPARQL endpoint URL")
+                .acceptsAll(Arrays.asList("s", "service"), "SPARQL service (endpoint) URL")
                 .withRequiredArg()
                 .defaultsTo("http://localhost:8890/sparql")
                 ;
@@ -137,7 +142,13 @@ public class MainLSQ {
         OptionSpec<String> baseUriOs = parser
                 .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
                 .withRequiredArg()
-                .defaultsTo("http://example.org/resource/")
+                .defaultsTo(LSQ.defaultLsqrNs)
+                ;
+
+        OptionSpec<String> envUriOs = parser
+                .acceptsAll(Arrays.asList("e", "environment"), "Environment URI which any query execution will be associated with")
+                .withRequiredArg()
+                //.defaultsTo(LSQ.defaultLsqrNs + "default-environment");
                 ;
 
         OptionSet options = parser.parse(args);
@@ -164,6 +175,8 @@ public class MainLSQ {
 
         String datasetLabel = datasetLabelOs.value(options);
         String endpointUrl = endpointUrlOs.value(options);
+        String baseUri = baseUriOs.value(options);
+        String envUri = envUriOs.value(options) ;
         List<String> graph = graphUriOs.values(options);
 
 //        These lines are just kept for reference in case we need something fancy
@@ -182,7 +195,9 @@ public class MainLSQ {
 
         // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
         // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
-        Resource baseGeneratorRes = ResourceFactory.createResource(LSQ.defaultLsqrNs + datasetLabel + "-" + prts[0]);
+        Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
+
+        Resource envRes = envUri == null ? null : ResourceFactory.createResource(envUri);
 
 
         Model specs = ModelFactory.createDefaultModel();
@@ -190,22 +205,19 @@ public class MainLSQ {
 
 
         // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
-        Resource engineRes = specs.createResource()
-                .addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"))
-                .addProperty(LSQ.version, "Virtuoso v.7.2")
-                .addProperty(LSQ.processor, "2.5GHz i7")
-                .addProperty(LSQ.ram,"8GB");
+//        Resource engineRes = specs.createResource()
+//                .addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"))
+//                .addProperty(LSQ.version, "Virtuoso v.7.2")
+//                .addProperty(LSQ.processor, "2.5GHz i7")
+//                .addProperty(LSQ.ram,"8GB");
+//        generatorRes
+//            .addProperty(LSQ.engine, engineRes);
 
-
-        generatorRes
-            .addProperty(LSQ.engine, engineRes);
-
-
-        Resource datasetRes = specs.createResource();
-        generatorRes
-            .addLiteral(LSQ.dataset, datasetRes)
-            .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
-            .addLiteral(PROV.startedAtTime, startTime);
+//        Resource datasetRes = specs.createResource();
+//        generatorRes
+//            .addLiteral(LSQ.dataset, datasetRes)
+//            .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
+//            .addLiteral(PROV.startedAtTime, startTime);
 
         Model logModel = ModelFactory.createDefaultModel();
         List<Resource> workloadResources = reader.lines()
@@ -240,7 +252,7 @@ public class MainLSQ {
 
 
         Calendar endTime = new GregorianCalendar();
-        specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
+        //specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
 
         specs.write(out, "NTRIPLES");
 
@@ -258,6 +270,11 @@ public class MainLSQ {
             logger.info("Processing: " + stmt.getOriginalString());
 
             if(stmt != null && stmt.isQuery()) {
+
+                String hashedIp = StringUtils.md5Hash("someSaltToPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+                System.out.println(hashedIp);
+
+
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
                 Query query = queryStmt.getQuery();
 
@@ -300,11 +317,12 @@ public class MainLSQ {
                 Resource queryExecProvRes = queryAspectFn.apply("gen-" + datasetLabel + "-").get();
 
 
-                queryExecProvRes
-                    .addProperty(LSQ.engine, engineRes)
-                    .addProperty(LSQ.dataset, datasetRes)
-                    .addLiteral(PROV.startedAtTime, startTime)
-                    .addLiteral(PROV.endAtTime, endTime);
+                if(envRes != null) {
+                    queryExecProvRes.addProperty(LSQ.engine, envRes);
+                }
+//                    .addProperty(LSQ.dataset, datasetRes)
+//                    .addLiteral(PROV.startedAtTime, startTime)
+//                    .addLiteral(PROV.endAtTime, endTime);
 
 
                 queryExecRes
