@@ -79,6 +79,7 @@ public class LSQ {
     public static final Property runtimeError = property("runtimeError");
     public static final Property runTimeMs = property("runTimeMs");
 
+    public static final Property hasExecution = property("hasExecution");
     public static final Property hasLocalExecution = property("hasLocalExecution");
     public static final Property hasRemoteExecution = property("hasRemoteExecution");
 
