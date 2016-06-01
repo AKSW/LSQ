@@ -52,6 +52,7 @@
     <modules>
         <module>lsq-core</module>
         <module>lsq-cli</module>
+        <module>lsq-debian-cli</module>
     </modules>
 
     <properties>
@@ -69,6 +70,12 @@
             <dependency>
                 <groupId>org.aksw.simba.lsq</groupId>
                 <artifactId>lsq-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.aksw.simba.lsq</groupId>
+                <artifactId>lsq-cli</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
