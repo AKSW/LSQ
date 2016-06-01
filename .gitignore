@@ -8,3 +8,6 @@ LSQ-SWDF-test.ttl
 
 hs_err*
 *.releaseBackup
+outfile.ttl
+out.ttl
+

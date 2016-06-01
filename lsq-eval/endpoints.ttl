@@ -1,0 +1,22 @@
+###SWDF
+lsqr:SWDF-2016-03-06 
+lsqv:engine 
+    [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] ; 
+lsqv:dataset 
+   [ prov:hadPrimarySource <http://data.semanticweb.org/sparql> ; 
+  prov:atTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp ] ;
+prov:startedAtTime "2016-03-06T23:09:02+01:00"^^xsd:dateTimeStamp ; 
+prov:endAtTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp . 
+
+
+
+###DBpedia
+lsqr:DBpedia-2016-03-06 
+lsqv:engine 
+    [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] ; 
+lsqv:dataset 
+   [ prov:hadPrimarySource <http://data.semanticweb.org/sparql> ; 
+  prov:atTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp ] ;
+prov:startedAtTime "2016-03-06T23:09:02+01:00"^^xsd:dateTimeStamp ; 
+prov:endAtTime "2016-03-06T23:09:10+01:00"^^xsd:dateTimeStamp . 
+
