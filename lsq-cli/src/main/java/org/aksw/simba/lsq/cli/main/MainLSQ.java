@@ -41,7 +41,6 @@ import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
-import org.apache.http.HttpException;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -52,6 +51,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.util.ResourceUtils;
@@ -376,9 +377,7 @@ public class MainLSQ {
                 }
 
 
-//                System.out.println("STATUS OF " + queryRes.get());
-                //queryRes.get().getModel().write(out, "TURTLE");
-                queryRes.get().getModel().write(out, "TURTLE");
+                RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
             }
 
             //.write(System.err, "TURTLE");
