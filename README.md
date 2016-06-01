@@ -32,7 +32,9 @@ lsq \
   -s http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf -b http://lsq.aksw.org/res/ \
-  -e http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql
+  -e http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
+  -h 10 \
+  -o outfile.ttl
 ```
 
 Probably outdated lsq -f lsq-core/src/test/resources/swdf.log -e http://localhost:8890/sparql -g http://aksw.org/benchmark -l swdf
