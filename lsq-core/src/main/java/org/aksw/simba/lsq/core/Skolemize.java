@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.ResourceUtils;
+import org.topbraid.spin.vocabulary.SP;
 
 public class Skolemize {
     public static void skolemize(Resource r) {
@@ -31,7 +32,12 @@ public class Skolemize {
     public static void skolemize(Resource baseResource, Resource targetResource, List<Property> path, BiFunction<Resource, List<Property>, String> fn, Map<Resource, String> map) {
         Set<Statement> stmts = targetResource.listProperties().toSet();
         for(Statement stmt : stmts) {
+            if(stmt.getPredicate().equals(SP.where)) {
+                System.out.println("STMT: " + stmt);
+            }
+
             RDFNode o = stmt.getObject();
+
             if(o.isAnon()) {
                 Resource or = o.asResource();
                 String uri = fn.apply(baseResource, path);

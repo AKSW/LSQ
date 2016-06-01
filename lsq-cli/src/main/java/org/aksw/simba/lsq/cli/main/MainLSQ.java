@@ -563,14 +563,20 @@ public class MainLSQ {
 //          queryNo++;
 
         // .. generate the spin model ...
-            Model spinModel = queryRes.getModel();
+            //Model spinModel = queryRes.getModel();
+            Model spinModel = ModelFactory.createDefaultModel();
           LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
           Resource tmpQueryRes = arq2spin.createQuery(query, null);
+
           // ... and rename the blank node of the query
           ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
 
+          queryRes.getModel().add(spinModel);
+
           // ... and skolemize the rest
           Skolemize.skolemize(queryRes);
+
+
 
 
 

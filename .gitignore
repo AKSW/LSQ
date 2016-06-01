@@ -11,3 +11,13 @@ hs_err*
 outfile.ttl
 out.ttl
 
+# some file names for testing
+a.nt
+a.ttl
+b.nt
+b.ttl
+c.nt
+c.ttl
+d.nt
+d.ttl
+
