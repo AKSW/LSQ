@@ -76,7 +76,9 @@ public class LSQ {
     public static final Property hasTriplePattern = property("hasTriplePattern");
     public static final Property triplePatternText = property("triplePatternText");
     public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property runtimeError = property("runtimeError");
+    public static final Property executionError = property("executionError");
+    public static final Property processingError = property("processingError");
+    public static final Property parseError = property("parseError");
     public static final Property runTimeMs = property("runTimeMs");
 
     public static final Property hasExecution = property("hasExecution");

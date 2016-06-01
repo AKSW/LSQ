@@ -120,7 +120,7 @@ public class ApacheLogParserUtils {
                 cal.setTime(date);
                 inout.addLiteral(PROV.atTime, cal);
             } catch (ParseException e) {
-                inout.addLiteral(LSQ.runtimeError, "Failed to parse timestamp: " + timestampStr);
+                inout.addLiteral(LSQ.processingError, "Failed to parse timestamp: " + timestampStr);
             }
 
         }

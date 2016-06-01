@@ -12,8 +12,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -45,18 +43,22 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.system.SPINModuleRegistry;
+import org.topbraid.spin.vocabulary.SP;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -268,53 +270,54 @@ public class MainLSQ {
             logger.info("Processing: " + stmt.getOriginalString());
 
             if(stmt != null && stmt.isQuery()) {
-
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
-                Query query = queryStmt.getQuery();
 
                 Model queryModel = ModelFactory.createDefaultModel();
 
+                QueryParseException parseException = stmt.getParseException();
+
+                String queryStr;
+                Query query;
+                if(!queryStmt.isParsed()) {
+                    query = queryStmt.getQuery();
+                    queryStr = queryStmt.getOriginalString();
+                } else {
+                    query = null;
+                    queryStr = "" + queryStmt.getQuery();
+                }
+
+
                 Resource envRes = rawEnvRes == null ? null : rawEnvRes.inModel(queryModel);
-                
+
                 //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
                 NestedResource baseRes = new NestedResource(queryModel.createResource(LSQ.defaultLsqrNs));
 
-                String queryHash = StringUtils.md5Hash(query.toString()).substring(0, 8);
+                String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
                 NestedResource queryRes = baseRes.nest("q-" + queryHash);
 
-
-                //Resource queryRes = model.createResource(LSQ.defaultLsqrNs + "q" + queryHash);
-
-                // The query resource represents the query and only depends on the (normalized) query string
-
-                // Function to create resources that correspond to aspects of a query
-//                Function<String, NestedResource> nsToQueryRes = (ns) -> baseRes.nest(ns).nest("q" + queryHash);
-//                NestedResource queryRes = baseRes.nest("q" + queryHash);
-
-                // Function for creating resources that correspond to aspects of the query
-                // Pattern: http://base.org/res/{aspect}-q{queryHash}
                 Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
-
-                // Create a resource with a certain namespace
-//                Function<String, NestedResource> nsToDataQueryRes = (ns) -> baseRes.nest(ns).nest(datasetLabel + "-").nest("q" + queryHash);
-
-                rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                queryRes.get()
+                    .addProperty(RDF.type, SP.Query)
+                    .addLiteral(LSQ.text, "" + queryStr);
 
 
-                //lsqr:le-SWDF-q-1940256746 .
-                
-                // Deal with execution
-                //lsqr:le-SWDF-q-1940256746 .
-                
-                // Deal with execution
+                if(!queryStmt.isParsed()) {
+                    String msg = queryStmt.getParseException().getMessage();
+                    queryRes.get()
+                        .addLiteral(LSQ.parseError, msg);
+                } else {
+                    rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                }
+
+                // Deal with log entry (remote execution)
                 String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
                 Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
                 Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
                 SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
-                String timestampStr = dt.format(timestamp.getTime()); 
+                String timestampStr = dt.format(timestamp.getTime());
                 //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-                
+
 
                 // Express that the query execution was recorded
                 // at some point in time by some user at some service
@@ -322,44 +325,27 @@ public class MainLSQ {
                 Resource queryExecRecRes = queryAspectFn.apply("log-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
                 queryRes.get()
                     .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
-                
+
                 queryExecRecRes
+                    //.addProperty(RDF.type, LSQ.)
                     .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
-                    .addProperty(LSQ.engine, envRes)
+                    .addProperty(LSQ.endpoint, envRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
+                    .addProperty(LSQ.wasAssociatedWith, hashedIp)
                     ;
-                
-                
-                
-                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").get();
+
+
+
+                Calendar now = Calendar.getInstance();
+                String nowStr = dt.format(now.getTime());
+                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest(nowStr).get();
 
                 // TODO Switch between local / remote execution
-                queryRes.get()
-                    .addProperty(LSQ.hasLocalExecution, queryExecRes);
+                if(query != null) {
+                    queryRes.get()
+                        .addProperty(LSQ.hasLocalExecution, queryExecRes);
 
-
-                Resource queryExecProvRes = queryAspectFn.apply("gen-" + datasetLabel + "-").get();
-
-
-                if(envRes != null) {
-                    queryExecProvRes.addProperty(LSQ.engine, envRes);
+                    rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
                 }
-//                    .addProperty(LSQ.dataset, datasetRes)
-//                    .addLiteral(PROV.startedAtTime, startTime)
-//                    .addLiteral(PROV.endAtTime, endTime);
-
-                //System.out.println(hashedIp);
-
-                queryExecRes
-                    .addLiteral(LSQ.wasAssociatedWith, hashedIp)
-                    .addProperty(PROV.wasGeneratedBy, queryExecProvRes)
-                    ;
-                
-
-
-
-
-                //rdfizeQueryExecution(queryRes, nsToBaseRes, query, dataQef);
-                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
 
 
                 System.out.println("STATUS OF " + queryRes.get());
@@ -497,34 +483,43 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
-    
+
     public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, long datasetSize) {
 
-//        Stopwatch sw = Stopwatch.createStarted();
-//      long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
+        try {
+    //        Stopwatch sw = Stopwatch.createStarted();
+    //      long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
 
-        Calendar start = Calendar.getInstance();
-        long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
-        Calendar end = Calendar.getInstance();
-        Duration duration = Duration.between(start.toInstant(), end.toInstant());
-
-        
-        queryExecRes
-            .addLiteral(LSQ.resultSize, resultSetSize)
-            .addLiteral(LSQ.runTimeMs, duration.getNano() / 1000000l)
-            .addLiteral(PROV.startedAtTime, start)
-            .addLiteral(PROV.endAtTime, end)
-            ;
-
-        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
+            Calendar start = Calendar.getInstance();
+            long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
+            Calendar end = Calendar.getInstance();
+            Duration duration = Duration.between(start.toInstant(), end.toInstant());
 
 
-        SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+            queryExecRes
+                .addLiteral(LSQ.resultSize, resultSetSize)
+                .addLiteral(LSQ.runTimeMs, duration.getNano() / 1000000l)
+                .addLiteral(PROV.startedAtTime, start)
+                .addLiteral(PROV.endAtTime, end)
+                ;
 
-        //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
-        //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
-        //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
+            SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
 
+
+            SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+
+            //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
+            //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
+            //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
+        }
+        catch(JenaException e) {
+            queryExecRes.addLiteral(LSQ.executionError, e.getMessage());
+            logger.warn("Failed to evaluate query execution of " + query, e);
+        }
+        //catch(Exception e) {
+            // We should never get here
+            //queryExecRes.addLiteral(LSQ.executionError, ExceptionUtils.getFullStackTrace(e));
+        //}
     }
 
 
@@ -533,7 +528,6 @@ public class MainLSQ {
 
         //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
 
-        queryRes.addLiteral(LSQ.text, "" + query);
 
         try {
             query = query.cloneQuery();
@@ -593,7 +587,8 @@ public class MainLSQ {
 
         } catch (Exception ex) {
             String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
-            queryRes.addLiteral(LSQ.runtimeError, msg);
+            queryRes.addLiteral(LSQ.processingError, msg);
+            logger.warn("Failed to process query " + query, ex);
         }
 
         // TODO Add getRDFUserExecutions
