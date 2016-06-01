@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -40,6 +41,7 @@ import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.http.HttpException;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -139,6 +141,12 @@ public class MainLSQ {
                 .defaultsTo("mydata")
                 ;
 
+        OptionSpec<Long> headOs = parser
+                .acceptsAll(Arrays.asList("h", "head"), "Only process n entries starting from the top")
+                .withRequiredArg()
+                .ofType(Long.class)
+                ;
+
         OptionSpec<String> baseUriOs = parser
                 .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
                 .withRequiredArg()
@@ -178,6 +186,8 @@ public class MainLSQ {
         String baseUri = baseUriOs.value(options);
         String envUri = envUriOs.value(options) ;
         List<String> graph = graphUriOs.values(options);
+        Long head = headOs.value(options);
+
 
 //        These lines are just kept for reference in case we need something fancy
 //        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
@@ -220,8 +230,14 @@ public class MainLSQ {
 //            .addLiteral(PROV.startedAtTime, startTime);
 
         Model logModel = ModelFactory.createDefaultModel();
-        List<Resource> workloadResources = reader.lines()
-                .limit(1)
+
+        Stream<String> stream = reader.lines();
+
+        if(head != null) {
+            stream = stream.limit(head);
+        }
+
+        List<Resource> workloadResources = stream
                 .map(line -> {
                 Resource r = logModel.createResource();
                 ApacheLogParserUtils.parseEntry(line, r);
@@ -246,6 +262,9 @@ public class MainLSQ {
 
         long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), dataQef);
 
+        int workloadSize = workloadResources.size();
+
+        logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + endpointUrl + " / " + graph + ": " + datasetSize);
 
         //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
@@ -260,6 +279,8 @@ public class MainLSQ {
         SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
+        int i = 0;
+        int batchSize = 10;
         for(Resource r : workloadResources) {
             //Model m = ResourceUtils.reachableClosure(r);
             SparqlStmt stmt = Optional.ofNullable(r.getProperty(LSQ.query))
@@ -267,24 +288,31 @@ public class MainLSQ {
                 .map(stmtParser)
                 .orElse(null);
 
-            logger.info("Processing: " + stmt.getOriginalString());
-
             if(stmt != null && stmt.isQuery()) {
+
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+
+                String queryStr;
+                Query query;
+                if(!queryStmt.isParsed()) {
+                    query = null;
+                    queryStr = queryStmt.getOriginalString();
+                } else {
+                    query = queryStmt.getQuery();
+                    queryStr = "" + queryStmt.getQuery();
+                }
+
+                if(i % batchSize == 0) {
+                    int batchEnd = Math.min(i + batchSize, workloadSize);
+                    logger.info("Processing query batch from " + i + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
+                }
+                ++i;
+
 
                 Model queryModel = ModelFactory.createDefaultModel();
 
                 QueryParseException parseException = stmt.getParseException();
 
-                String queryStr;
-                Query query;
-                if(!queryStmt.isParsed()) {
-                    query = queryStmt.getQuery();
-                    queryStr = queryStmt.getOriginalString();
-                } else {
-                    query = null;
-                    queryStr = "" + queryStmt.getQuery();
-                }
 
 
                 Resource envRes = rawEnvRes == null ? null : rawEnvRes.inModel(queryModel);
@@ -348,8 +376,9 @@ public class MainLSQ {
                 }
 
 
-                System.out.println("STATUS OF " + queryRes.get());
-                queryRes.get().getModel().write(System.out, "TURTLE");
+//                System.out.println("STATUS OF " + queryRes.get());
+                //queryRes.get().getModel().write(out, "TURTLE");
+                queryRes.get().getModel().write(out, "TURTLE");
             }
 
             //.write(System.err, "TURTLE");
@@ -513,13 +542,11 @@ public class MainLSQ {
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
         }
         catch(JenaException e) {
-            queryExecRes.addLiteral(LSQ.executionError, e.getMessage());
-            logger.warn("Failed to evaluate query execution of " + query, e);
+            String msg = e.getMessage();
+            queryExecRes.addLiteral(LSQ.executionError, msg);
+            String queryStr = ("" + query).replace("\n", " ");
+            logger.warn("Query execution exception [" + msg + "] for query " + queryStr);
         }
-        //catch(Exception e) {
-            // We should never get here
-            //queryExecRes.addLiteral(LSQ.executionError, ExceptionUtils.getFullStackTrace(e));
-        //}
     }
 
 

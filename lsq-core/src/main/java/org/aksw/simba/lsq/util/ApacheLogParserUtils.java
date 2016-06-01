@@ -106,7 +106,7 @@ public class ApacheLogParserUtils {
                         inout.addLiteral(LSQ.query, queryStr);
                     }
                 } catch (Exception e) {
-                    System.out.println(mockUri.substring(244));
+                    //System.out.println(mockUri.substring(244));
                     logger.warn("Could not parse URI: " + mockUri, e);
                 }
             }

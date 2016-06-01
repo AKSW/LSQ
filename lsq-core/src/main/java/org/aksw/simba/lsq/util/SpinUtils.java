@@ -64,11 +64,11 @@ public class SpinUtils {
     }
 
     public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
-        spinModel.write(System.out, "NTRIPLES");
+//        spinModel.write(System.out, "NTRIPLES");
 
         List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
 
-        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
+//        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
 
         Map<Resource, BasicPattern> result = ress
                 .stream()
@@ -81,7 +81,7 @@ public class SpinUtils {
                             return r;
                         }));
 
-        result.entrySet().forEach(x -> System.out.println("GOT: " + x));
+//        result.entrySet().forEach(x -> System.out.println("GOT: " + x));
         return result;
     }
 
