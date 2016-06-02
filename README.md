@@ -1,31 +1,45 @@
 ## LSQ: The Linked SPARQL Queries Dataset
 
-####Start-up
-
-The LSQ folder contains the source code. You can start-up with RDFising your own query log from:
-
-```
-Package: org.aksw.simba.dataset.lsq
-
-Class: LogRDFizer
+#### Building the command line client
+Build the whole project with
 
 ```
-Complete details given at [LogRDFizer](https://github.com/AKSW/LSQ/blob/gh-pages/LSQ/src/org/aksw/simba/dataset/lsq/LogRDFizer.java) class.
+mvn clean install
+```
+
+Build the command line client with
+```bash
+cd lsq-cli
+mvn assembly:assembly
+```
+
+A self-contained jar is then located under lsq-cli/target/lsq-cli-{version}-jar-with-dependencies.jar
+You can run it with
+
+```bash
+java -cp `find . -name 'lsq*jar-with-dependencies.jar'` org.aksw.simba.lsq.cli.main.MainLSQ
+```
+
+```bash
+alias lsq=java -cp `find {your-absolute-folder} -name 'lsq*jar-with-dependencies.jar'` org.aksw.simba.lsq.cli.main.MainLSQ
+```
+
+
+
+#### Building the debian package
+This happends when you build the project (under lsq-debian-cli/target)
+You can conveniently install it with
+
+```bash
+sudo dpkg -i `find . -name '*.deb'`
+```
 
 ####LSQ Homepage 
 The Linked Dataset, a SPARQL endpoint, and complete dumps are all available on the LSQ [homepage](http://aksw.github.io/LSQ/) along with pointers a VoID description, example LSQ queries, and various other dataset assets.
 
-## Command line arguments
-* -f apache log file to process
-* -e SPARQL endpoint
-  * -g default graph for query executions. Can be specified multiple times.
-* -l label for the dataset; will be used in URIs
-* -b baseUri for generated resources; defaults to http://lsq.aksw.org/res/
-
 ## Example usage
 
-From the repository root folder, run:
-
+The following options exist:
 ```bash
 Option                Description                                              
 ------                -----------                                              
@@ -46,6 +60,8 @@ Option                Description
 -x, --experiment      URI of the experiment environment                        
 ```
 
+From the repository root folder, run:
+
 ```bash
 lsq \
   -f lsq-core/src/test/resources/swdf.log \
@@ -53,7 +69,7 @@ lsq \
   -g http://aksw.org/benchmark \
   -l swdf \
   -b http://lsq.aksw.org/res/ \
-  -p http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
+  -p http://data.semanticweb.org/sparql \
   -h 10 \
   -r qel \
   -t 60000 \
@@ -67,32 +83,10 @@ lsq \
   -g http://aksw.org/benchmark \
   -l swdf \
   -b http://lsq.aksw.org/res/ \
-  -p http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
+  -p http://data.semanticweb.org/sparql \
   -h 10 \
   -t 60000 \
   -r qel | rapper -i turtle -o ntriples - http://foo | sort -u > a.ttl
 ```
 
 
-
-Probably outdated lsq -f lsq-core/src/test/resources/swdf.log -e http://localhost:8890/sparql -g http://aksw.org/benchmark -l swdf
-
-
-## Work in progress
-The LSQ tool can be used to RDFize SPARQL queries as well as execute them.
-
-### RDFization
-
-
-### Execution
-* -m local / remote
-* -e SPARQL endpoint
-  * -g default graph for query executions. Can be specified multiple times.
-* TODO environment URI
-
-
-
-### Environment creator
-Tool for easing the creation of RDF specification for a SPARQL execution environment.
-Actually, We could use a registry and use a mixture of dcat, service description, (host description), and void to combine all this information.
-E.g. if one specifies dbpedia, we could lookup the host description
