@@ -65,7 +65,7 @@ public class Skolemize {
         Map<Resource, String> map = blankNodes.stream()
                 .collect(Collectors.toMap(
                     n -> (Resource)ModelUtils.convertGraphNodeToRDFNode(n, model),
-                    n -> baseUri + "-bn" + nodeToGlobalHash.get(n)
+                    n -> baseUri + "-bn" + nodeToGlobalHash.get(n).substring(0, 8)
                 ));
 
 
@@ -74,7 +74,7 @@ public class Skolemize {
 
     public static String createSignature(Graph g, Node n, Function<? super Node, ? extends Node> nodeTransform) {
         List<Triple> rawSig = createRawSignature(g, n, nodeTransform);
-        String result = StringUtils.md5Hash("" + rawSig).substring(0, 8);
+        String result = StringUtils.md5Hash("" + rawSig);
         return result;
     }
 
