@@ -16,8 +16,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -315,6 +317,8 @@ public class MainLSQ {
         SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
+        Set<Query> executedQueries = new HashSet<>();
+
         int i = 0;
         int batchSize = 10;
         for(Resource r : workloadResources) {
@@ -405,16 +409,23 @@ public class MainLSQ {
 
 
                 if(rdfizer.contains("e")) {
-                    Calendar now = Calendar.getInstance();
-                    String nowStr = dt.format(now.getTime());
-                    Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
+                    boolean hasBeenExecuted = executedQueries.contains(query);
 
-                    // TODO Switch between local / remote execution
-                    if(query != null) {
-                        queryRes.get()
-                            .addProperty(LSQ.hasLocalExecution, queryExecRes);
+                    if(!hasBeenExecuted) {
+                        executedQueries.add(query);
 
-                        rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+
+                        Calendar now = Calendar.getInstance();
+                        String nowStr = dt.format(now.getTime());
+                        Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
+
+                        // TODO Switch between local / remote execution
+                        if(query != null) {
+                            queryRes.get()
+                                .addProperty(LSQ.hasLocalExecution, queryExecRes);
+
+                            rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+                        }
                     }
                 }
 
