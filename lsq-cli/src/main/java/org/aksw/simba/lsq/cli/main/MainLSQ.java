@@ -48,6 +48,7 @@ import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.Syntax;
@@ -58,7 +59,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
@@ -108,6 +108,7 @@ public class MainLSQ {
         } catch(Exception e) {
             logger.error("Error", e);
             parser.printHelpOn(System.err);
+            throw new RuntimeException(e);
         }
     }
 
@@ -570,8 +571,14 @@ public class MainLSQ {
     //        Stopwatch sw = Stopwatch.createStarted();
     //      long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
 
+
+
             Calendar start = Calendar.getInstance();
-            long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
+            //long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
+
+            QueryExecution qe = qef.createQueryExecution(query);
+            long resultSetSize = QueryExecutionUtils.consume(qe);
+
             Calendar end = Calendar.getInstance();
             Duration duration = Duration.between(start.toInstant(), end.toInstant());
 
@@ -592,7 +599,7 @@ public class MainLSQ {
             //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
         }
-        catch(JenaException e) {
+        catch(Exception e) {
             String msg = e.getMessage();
             queryExecRes.addLiteral(LSQ.executionError, msg);
             String queryStr = ("" + query).replace("\n", " ");
