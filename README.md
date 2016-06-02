@@ -32,7 +32,7 @@ lsq \
   -s http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf \
-   -b http://lsq.aksw.org/res/ \
+  -b http://lsq.aksw.org/res/ \
   -e http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
   -h 10 \
   -r qel \
