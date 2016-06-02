@@ -114,9 +114,10 @@ public class SpinUtils {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        triplePatternIndex.forEach((r, t) -> r
+        triplePatternIndex.forEach((r, t) -> r.inModel(queryRes.getModel())
                 .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
-                .addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
+                );
+                //.addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
     }
 
 
