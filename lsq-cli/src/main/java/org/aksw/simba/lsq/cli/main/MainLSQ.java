@@ -162,7 +162,7 @@ public class MainLSQ {
                 .withRequiredArg()
                 .ofType(Long.class)
                 //.defaultsTo(60000l)
-                .defaultsTo(null)
+                //.defaultsTo(null)
                 ;
 
         OptionSpec<String> baseUriOs = parser
@@ -270,6 +270,11 @@ public class MainLSQ {
 //        logger.info("Number of distinct queries in log: "
 
         // This is an abstraction that can execute SPARQL queries
+        QueryExecutionFactory countQef =
+                FluentQueryExecutionFactory
+                .http(endpointUrl, graph)
+                .create();
+
         QueryExecutionFactory dataQef =
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
@@ -288,7 +293,8 @@ public class MainLSQ {
 //            ShellGraph x = new ShellGraph(graph, null, null) ;
 //            x.writeGraph() ;
 
-        long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), dataQef);
+        logger.info("Counting triples in the endpoint ...");
+        long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
 
         int workloadSize = workloadResources.size();
 
@@ -399,7 +405,7 @@ public class MainLSQ {
                 if(rdfizer.contains("e")) {
                     Calendar now = Calendar.getInstance();
                     String nowStr = dt.format(now.getTime());
-                    Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest(nowStr).get();
+                    Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
 
                     // TODO Switch between local / remote execution
                     if(query != null) {
