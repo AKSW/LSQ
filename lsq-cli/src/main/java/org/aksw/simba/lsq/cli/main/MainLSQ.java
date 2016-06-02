@@ -120,9 +120,15 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> formatOs = parser
-                .acceptsAll(Arrays.asList("m", "format"), "Format of the input data. Apache log COMBINED format assumed by default.")
+                .acceptsAll(Arrays.asList("r", "format"), "Format of the input data. Apache log COMBINED format assumed by default.")
                 .withOptionalArg()
                 .defaultsTo("apache")
+                ;
+
+        OptionSpec<String> rdfizerOs = parser
+                .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og and (q)uery")
+                .withOptionalArg()
+                .defaultsTo("elq")
                 ;
 
         OptionSpec<String> endpointUrlOs = parser
@@ -188,6 +194,7 @@ public class MainLSQ {
         String envUri = envUriOs.value(options) ;
         List<String> graph = graphUriOs.values(options);
         Long head = headOs.value(options);
+        String rdfizer = rdfizerOs.value(options);
 
 
 //        These lines are just kept for reference in case we need something fancy
@@ -336,46 +343,52 @@ public class MainLSQ {
                     queryRes.get()
                         .addLiteral(LSQ.parseError, msg);
                 } else {
-                    rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                    if(rdfizer.contains("q")) { // TODO Replace with function call
+                        rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                    }
                 }
 
-                // Deal with log entry (remote execution)
-                String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-                Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
-                Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
                 SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
-                String timestampStr = dt.format(timestamp.getTime());
-                //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
+                if(rdfizer.contains("l")) {
+                    // Deal with log entry (remote execution)
+                    String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+                    Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
+                    Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
+                    String timestampStr = dt.format(timestamp.getTime());
+                    //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
-                // Express that the query execution was recorded
-                // at some point in time by some user at some service
-                // according to some source (e.g. the log file)
-                Resource queryExecRecRes = queryAspectFn.apply("log-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
-                queryRes.get()
-                    .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
+                    Resource queryExecRecRes = queryAspectFn.apply("log-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
 
-                queryExecRecRes
-                    //.addProperty(RDF.type, LSQ.)
-                    .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
-                    .addProperty(LSQ.endpoint, envRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
-                    .addProperty(LSQ.wasAssociatedWith, hashedIp)
-                    ;
-
-
-
-                Calendar now = Calendar.getInstance();
-                String nowStr = dt.format(now.getTime());
-                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest(nowStr).get();
-
-                // TODO Switch between local / remote execution
-                if(query != null) {
+                    // Express that the query execution was recorded
+                    // at some point in time by some user at some service
+                    // according to some source (e.g. the log file)
                     queryRes.get()
-                        .addProperty(LSQ.hasLocalExecution, queryExecRes);
+                        .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
 
-                    rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+                    queryExecRecRes
+                        //.addProperty(RDF.type, LSQ.)
+                        .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
+                        .addProperty(LSQ.endpoint, envRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
+                        .addProperty(LSQ.wasAssociatedWith, hashedIp)
+                        ;
+
                 }
 
+
+                if(rdfizer.contains("e")) {
+                    Calendar now = Calendar.getInstance();
+                    String nowStr = dt.format(now.getTime());
+                    Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest(nowStr).get();
+
+                    // TODO Switch between local / remote execution
+                    if(query != null) {
+                        queryRes.get()
+                            .addProperty(LSQ.hasLocalExecution, queryExecRes);
+
+                        rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+                    }
+                }
 
                 RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
             }
