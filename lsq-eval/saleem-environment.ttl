@@ -3,12 +3,12 @@
 @prefix lsqv: <http://lsq.aksw.org/vocab#> .
 
 
-lsqr:SWDF 
+lsqr:swdf
 lsqv:engine 
     [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] . 
 
 
 ###DBpedia
-lsqr:DBpedia
+lsqr:dbpedia
 lsqv:engine 
     [ lsqv:vendor lsqr:Virtuoso ; lsqv:version "Virtuoso v.7.2" ; lsqv:processor "2.5GHz i7" ; lsqv:ram "8GB"] .
