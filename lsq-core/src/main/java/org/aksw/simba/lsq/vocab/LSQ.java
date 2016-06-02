@@ -74,6 +74,7 @@ public class LSQ {
     public static final Property resultSize = property("resultSize");
     public static final Property structuralFeatures = property("structuralFeatures");
     public static final Property hasTriplePattern = property("hasTriplePattern");
+    public static final Property hasTriplePatternExecution = property("hasTriplePatternExecution");
     public static final Property triplePatternText = property("triplePatternText");
     public static final Property triplePatternResultSize = property("triplePatternResultSize");
     public static final Property executionError = property("executionError");

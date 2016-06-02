@@ -173,7 +173,7 @@ public class SpinUtils {
             Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
 
             queryExecRes
-                .addProperty(LSQ.hasTriplePattern, queryTpExecRes);
+                .addProperty(LSQ.hasTriplePatternExecution, queryTpExecRes);
 
 
             double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
