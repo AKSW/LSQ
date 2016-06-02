@@ -8,13 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
@@ -139,13 +137,14 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> endpointUrlOs = parser
-                .acceptsAll(Arrays.asList("s", "service"), "SPARQL service (endpoint) URL")
+                .acceptsAll(Arrays.asList("e", "endpoint"), "Local SPARQL service (endpoint) URL on which to execute queries")
                 .withRequiredArg()
                 .defaultsTo("http://localhost:8890/sparql")
                 ;
 
         OptionSpec<String> graphUriOs = parser
-                .acceptsAll(Arrays.asList("g", "graph"), "Graph(s) from which to retrieve the data")
+                .acceptsAll(Arrays.asList("g", "graph"), "Local graph(s) from which to retrieve the data")
+                .availableIf(endpointUrlOs)
                 .withRequiredArg()
                 ;
 
@@ -175,11 +174,21 @@ public class MainLSQ {
                 .defaultsTo(LSQ.defaultLsqrNs)
                 ;
 
-        OptionSpec<String> envUriOs = parser
-                .acceptsAll(Arrays.asList("e", "environment"), "Environment URI which any query execution will be associated with")
+        OptionSpec<String> logEndpointUriOs = parser
+                .acceptsAll(Arrays.asList("p", "public"), "Public endpoint URL - e.g. http://example.org/sparql")
                 .withRequiredArg()
+                //.defaultsTo("http://example.org/sparql")
                 //.defaultsTo(LSQ.defaultLsqrNs + "default-environment");
                 ;
+
+        OptionSpec<String> expBaseUriOs = parser
+                .acceptsAll(Arrays.asList("x", "experiment"), "URI of the experiment environment")
+                .withRequiredArg()
+                //.defaultsTo(LSQ.defaultLsqrNs)
+                ;
+
+
+
 
         OptionSet options = parser.parse(args);
 
@@ -206,11 +215,15 @@ public class MainLSQ {
         String datasetLabel = datasetLabelOs.value(options);
         String endpointUrl = endpointUrlOs.value(options);
         String baseUri = baseUriOs.value(options);
-        String envUri = envUriOs.value(options) ;
+        String logEndpointUri = logEndpointUriOs.value(options) ;
         List<String> graph = graphUriOs.values(options);
         Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
         Long timeoutInMs = timeoutInMsOs.value(options);
+        String expBaseUri = expBaseUriOs.value(options);
+
+
+        expBaseUri = expBaseUri == null ? baseUri + datasetLabel : expBaseUri;
 
 
 //        These lines are just kept for reference in case we need something fancy
@@ -220,22 +233,22 @@ public class MainLSQ {
 
         SPINModuleRegistry.get().init();
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Calendar startTime = new GregorianCalendar();
+        //DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //Calendar startTime = new GregorianCalendar();
 
-        Date date = startTime.getTime();
-        String prts []  = dateFormat.format(date).split(" ");
+        //Date date = startTime.getTime();
+        //String prts []  = dateFormat.format(date).split(" ");
 
 
         // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
         // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
-        Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
+        //Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
 
-        Resource rawEnvRes = envUri == null ? null : ResourceFactory.createResource(envUri);
+        Resource rawLogEndpointRes = logEndpointUri == null ? null : ResourceFactory.createResource(logEndpointUri);
 
 
         Model specs = ModelFactory.createDefaultModel();
-        Resource generatorRes = baseGeneratorRes.inModel(specs);
+        //Resource generatorRes = baseGeneratorRes.inModel(specs);
 
 
         // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
@@ -309,16 +322,46 @@ public class MainLSQ {
         //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
 
 
-        Calendar endTime = new GregorianCalendar();
+        //Calendar endTime = new GregorianCalendar();
         //specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
 
-        specs.write(out, "NTRIPLES");
+        //specs.write(out, "NTRIPLES");
 
         //SparqlQueryParser queryParser = SparqlQueryParserImpl.create(Syntax.syntaxARQ);
         SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
         Set<Query> executedQueries = new HashSet<>();
+
+        //.addLiteral(PROV.startedAtTime, start)
+        //.addLiteral(PROV.endAtTime, end)
+        SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
+
+        Calendar expStart = Calendar.getInstance();
+        String expStartStr = dt.format(expStart.getTime());
+
+        Model expModel = ModelFactory.createDefaultModel();
+        NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
+
+        Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+
+        expRes
+            .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+            .addLiteral(PROV.startedAtTime, expStart);
+
+        RDFDataMgr.write(out, expModel, RDFFormat.TURTLE_BLOCKS);
+
+
+//        myenv
+//            engine aeouaoeu
+//            dataset aeuaoeueoa
+//
+//
+//       myevn-1-1-2016
+//            basedOn myenv
+//            startedAtTime
+//            endAtTime
+
 
         int i = 0;
         int batchSize = 10;
@@ -356,10 +399,10 @@ public class MainLSQ {
 
 
 
-                Resource envRes = rawEnvRes == null ? null : rawEnvRes.inModel(queryModel);
+                Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
 
                 //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
-                NestedResource baseRes = new NestedResource(queryModel.createResource(LSQ.defaultLsqrNs));
+                NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
 
                 String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
                 NestedResource queryRes = baseRes.nest("q-" + queryHash);
@@ -381,11 +424,14 @@ public class MainLSQ {
                     }
                 }
 
-                SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
 
                 if(rdfizer.contains("l")) {
                     // Deal with log entry (remote execution)
                     String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+
+                    Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
+
+
                     Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
                     Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
                     String timestampStr = dt.format(timestamp.getTime());
@@ -402,8 +448,8 @@ public class MainLSQ {
                     queryExecRecRes
                         //.addProperty(RDF.type, LSQ.)
                         .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
-                        .addProperty(LSQ.endpoint, envRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
-                        .addProperty(LSQ.wasAssociatedWith, hashedIp)
+                        .addProperty(LSQ.endpoint, logEndpointRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
+                        .addProperty(LSQ.wasAssociatedWith, agentRes)
                         ;
 
                 }
@@ -423,7 +469,8 @@ public class MainLSQ {
                         // TODO Switch between local / remote execution
                         if(query != null) {
                             queryRes.get()
-                                .addProperty(LSQ.hasLocalExecution, queryExecRes);
+                                .addProperty(LSQ.hasLocalExecution, queryExecRes)
+                                .addProperty(PROV.wasGeneratedBy, expRes);
 
                             rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
                         }
@@ -435,6 +482,13 @@ public class MainLSQ {
 
             //.write(System.err, "TURTLE");
         }
+
+
+        Model tmpModel = ModelFactory.createDefaultModel();
+        expRes.inModel(tmpModel)
+            .addLiteral(PROV.endAtTime, Calendar.getInstance());
+
+        RDFDataMgr.write(out, tmpModel, RDFFormat.TURTLE_BLOCKS);
 
 
 
@@ -586,8 +640,8 @@ public class MainLSQ {
             queryExecRes
                 .addLiteral(LSQ.resultSize, resultSetSize)
                 .addLiteral(LSQ.runTimeMs, duration.getNano() / 1000000l)
-                .addLiteral(PROV.startedAtTime, start)
-                .addLiteral(PROV.endAtTime, end)
+                //.addLiteral(PROV.startedAtTime, start)
+                //.addLiteral(PROV.endAtTime, end)
                 ;
 
             SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
