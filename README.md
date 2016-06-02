@@ -31,9 +31,11 @@ lsq \
   -f lsq-core/src/test/resources/swdf.log \
   -s http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
-  -l swdf -b http://lsq.aksw.org/res/ \
+  -l swdf \
+   -b http://lsq.aksw.org/res/ \
   -e http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
   -h 10 \
+  -r qel \
   -o outfile.ttl
 ```
 
