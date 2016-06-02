@@ -50,7 +50,7 @@ public class LSQ {
     public static final Property joinVertices = property("joinVertices");
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
-    public static final Property avgJoinVertexDegree = property("avgJoinVertexDegree");
+    public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
     public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");
 
     public static final Property mentionsSubject = property("mentionsSubject");

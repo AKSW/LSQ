@@ -325,7 +325,7 @@ public class QueryStatistics2 {
 
         queryRes
             .addLiteral(LSQ.joinVertices, joinVertices.size())
-            .addLiteral(LSQ.avgJoinVertexDegree, avgJoinVertexDegree)
+            .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
             .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
 
 //        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";

@@ -27,6 +27,7 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
+import org.aksw.jena_sparql_api.http.QueryExecutionHttpWrapper;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -53,8 +54,10 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.WebContent;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -154,6 +157,14 @@ public class MainLSQ {
                 .ofType(Long.class)
                 ;
 
+        OptionSpec<Long> timeoutInMsOs = parser
+                .acceptsAll(Arrays.asList("t", "timeout"), "Timeout in milliseconds")
+                .withRequiredArg()
+                .ofType(Long.class)
+                //.defaultsTo(60000l)
+                .defaultsTo(null)
+                ;
+
         OptionSpec<String> baseUriOs = parser
                 .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
                 .withRequiredArg()
@@ -195,6 +206,7 @@ public class MainLSQ {
         List<String> graph = graphUriOs.values(options);
         Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
+        Long timeoutInMs = timeoutInMsOs.value(options);
 
 
 //        These lines are just kept for reference in case we need something fancy
@@ -261,6 +273,14 @@ public class MainLSQ {
         QueryExecutionFactory dataQef =
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
+                .config()
+                .withPostProcessor(qe -> {
+                    if(timeoutInMs != null) {
+                        ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
+                        .setTimeout(timeoutInMs);
+                    }
+                })
+                .end()
                 .create();
 
 //            RiotLib.writeBase(out, base) ;
