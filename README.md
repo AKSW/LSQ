@@ -52,19 +52,20 @@ Option                Description
 -h, --head <Long>     Only process n entries starting from the top             
 -l, --label           Label of the dataset, such as 'dbpedia' or 'lgd'. Will be
                         used in URI generation (default: mydata)               
+-m, --format          Format of the input data. Available options: [virtuoso,  
+                        apache] (default: apache)                              
 -o, --output <File>   File where to store the output data.                     
 -p, --public          Public endpoint URL - e.g. http://example.org/sparql     
 -r, --rdfizer         RDFizer selection: Any combination of the letters (e)    
                         xecution, (l)og and (q)uery (default: elq)             
 -t, --timeout <Long>  Timeout in milliseconds                                  
--x, --experiment      URI of the experiment environment                        
-```
+-x, --experiment      URI of the experiment environment ```
 
 From the repository root folder, run:
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/swdf.log \
+  -f lsq-core/src/test/resources/swdf.apache.log \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf \
@@ -78,7 +79,8 @@ lsq \
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/swdf.log \
+  -f lsq-core/src/test/resources/dbpedia.virtuoso.log \
+  -m virtuoso \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf \
