@@ -42,6 +42,10 @@ public class SpinUtils {
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
     public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?foo !rdf:rest ?x . ?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
 
+    public static final Concept subjects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:subject ?y");
+    public static final Concept predicates = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:predicate ?y");
+    public static final Concept objects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:object ?y");
+
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
         Var c = Var.alloc("_c_");

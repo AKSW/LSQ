@@ -22,6 +22,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.management.RuntimeErrorException;
+
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
@@ -38,8 +40,10 @@ import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.core.Skolemize;
-import org.aksw.simba.lsq.util.ApacheLogParserUtils;
+import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
+import org.aksw.simba.lsq.util.PatternMatcher;
+import org.aksw.simba.lsq.util.PatternMatcherImpl;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
@@ -124,8 +128,8 @@ public class MainLSQ {
                 .ofType(File.class)
                 ;
 
-        OptionSpec<String> formatOs = parser
-                .acceptsAll(Arrays.asList("r", "format"), "Format of the input data. Apache log COMBINED format assumed by default.")
+        OptionSpec<String> logFormatOs = parser
+                .acceptsAll(Arrays.asList("m", "format"), "Format of the input data. Available options: " + WebLogParser.getFormatRegistry().keySet())
                 .withOptionalArg()
                 .defaultsTo("apache")
                 ;
@@ -221,6 +225,7 @@ public class MainLSQ {
         String rdfizer = rdfizerOs.value(options);
         Long timeoutInMs = timeoutInMsOs.value(options);
         String expBaseUri = expBaseUriOs.value(options);
+        String logFormat = logFormatOs.value(options);
 
 
         expBaseUri = expBaseUri == null ? baseUri + datasetLabel : expBaseUri;
@@ -274,14 +279,25 @@ public class MainLSQ {
             stream = stream.limit(head);
         }
 
+        WebLogParser webLogParser = WebLogParser.getFormatRegistry().get(logFormat);
+        if(webLogParser == null) {
+            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+        }
+        //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
+       
         List<Resource> workloadResources = stream
                 .map(line -> {
                 Resource r = logModel.createResource();
-                ApacheLogParserUtils.parseEntry(line, r);
+                webLogParser.parseEntry(line, r);
                 return r;
             })
             .collect(Collectors.toList());
 
+        
+        
+        
+        
+        
 //        System.out.println(queryToSubmissions.keySet().size());
 
 //        logger.info("Number of distinct queries in log: "
@@ -448,9 +464,12 @@ public class MainLSQ {
                     queryExecRecRes
                         //.addProperty(RDF.type, LSQ.)
                         .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
-                        .addProperty(LSQ.endpoint, logEndpointRes) // TODO Make it possible to specify the dataset configuration that was used to execute the query
                         .addProperty(LSQ.wasAssociatedWith, agentRes)
                         ;
+
+                    if(logEndpointRes != null) {
+                        queryExecRecRes.addProperty(LSQ.endpoint, logEndpointRes); // TODO Make it possible to specify the dataset configuration that was used to execute the query
+                    }
 
                 }
 
@@ -466,11 +485,14 @@ public class MainLSQ {
                         String nowStr = dt.format(now.getTime());
                         Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
 
+                        queryExecRes
+                            .addProperty(PROV.wasGeneratedBy, expRes);
+                        
+                        
                         // TODO Switch between local / remote execution
                         if(query != null) {
                             queryRes.get()
-                                .addProperty(LSQ.hasLocalExecution, queryExecRes)
-                                .addProperty(PROV.wasGeneratedBy, expRes);
+                                .addProperty(LSQ.hasLocalExecution, queryExecRes);
 
                             rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
                         }
@@ -726,8 +748,8 @@ public class MainLSQ {
             //
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes, featureRes);
 
-            QueryStatistics2.enrichWithPropertyPaths(queryRes, query);
-            QueryStatistics2.enrichWithMentions(queryRes, query);
+            QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
+            QueryStatistics2.enrichWithMentions(featureRes, query);
 
 
         } catch (Exception ex) {
