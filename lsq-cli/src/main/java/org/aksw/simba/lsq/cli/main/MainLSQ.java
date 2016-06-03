@@ -453,7 +453,7 @@ public class MainLSQ {
                     String timestampStr = dt.format(timestamp.getTime());
                     //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
-                    Resource queryExecRecRes = queryAspectFn.apply("log-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
+                    Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
 
                     // Express that the query execution was recorded
                     // at some point in time by some user at some service
@@ -694,21 +694,25 @@ public class MainLSQ {
             query = query.cloneQuery();
             query.getGraphURIs().clear();
 
+            Resource spinRes = queryAspectFn.apply("spin-").get();
 //          queryNo++;
 
         // .. generate the spin model ...
             //Model spinModel = queryRes.getModel();
             Model spinModel = ModelFactory.createDefaultModel();
           LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
-          Resource tmpQueryRes = arq2spin.createQuery(query, null);
+          Resource tmpSpinRes = arq2spin.createQuery(query, null);
 
           // ... and rename the blank node of the query
-          ResourceUtils.renameResource(tmpQueryRes, queryRes.getURI());
+          ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
 
-          queryRes.getModel().add(spinModel);
+          spinRes.getModel().add(spinModel);
 
           // ... and skolemize the rest
-          Skolemize.skolemize(queryRes);
+          Skolemize.skolemize(spinRes);
+          
+          queryRes
+              .addProperty(LSQ.asSpin, spinRes);
 
 
 
@@ -741,12 +745,12 @@ public class MainLSQ {
             //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
             //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
 
-            SpinUtils.enrichWithHasTriplePattern(queryRes);
-            SpinUtils.enrichWithTriplePatternText(queryRes);
+            SpinUtils.enrichWithHasTriplePattern(featureRes, spinRes);
+            SpinUtils.enrichWithTriplePatternText(spinRes);
             //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
 
             //
-            QueryStatistics2.getDirectQueryRelatedRDFizedStats(queryRes, featureRes);
+            QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
 
             QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
             QueryStatistics2.enrichWithMentions(featureRes, query);

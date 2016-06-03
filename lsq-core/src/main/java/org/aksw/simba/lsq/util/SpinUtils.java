@@ -104,12 +104,12 @@ public class SpinUtils {
         return result;
     }
 
-    public static void enrichWithHasTriplePattern(Resource queryRes) {
-        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+    public static void enrichWithHasTriplePattern(Resource targetRes, Resource spinRes) {
+        Model spinModel = ResourceUtils.reachableClosure(spinRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.keySet().forEach(r ->
-            queryRes.addProperty(LSQ.hasTriplePattern, r)
+            targetRes.addProperty(LSQ.hasTriplePattern, r)
         );
     }
 

@@ -39,6 +39,7 @@ public class LSQ {
     public static final Resource Functions = resource("Functions");
 
 
+    
     public static final Property joinVertex = property("joinVertex");
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
@@ -73,6 +74,7 @@ public class LSQ {
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");
     public static final Property structuralFeatures = property("structuralFeatures");
+    public static final Property asSpin = property("asSpin");
     public static final Property hasTriplePattern = property("hasTriplePattern");
     public static final Property hasTriplePatternExecution = property("hasTriplePatternExecution");
     public static final Property triplePatternText = property("triplePatternText");
