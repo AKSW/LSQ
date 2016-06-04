@@ -1,757 +1,125 @@
-<http://lsq.aksw.org/res/q-6e48bcb0>
-        a       <http://spinrdf.org/sp#Query> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-6e48bcb0-8ab0c230a859bbe3-02014-29-16_01:29:09> ;
-        <http://lsq.aksw.org/vocab#parseError>
-                "Lexical error at line 2, column 14.  Encountered: \" \" (32), after : \"SELET\"" ;
-        <http://lsq.aksw.org/vocab#text>
-                "\tPREFIX swc: <http://data.semanticweb.org/ns/swc/ontology#> \n\tSELET DISTINCT ?graph ?event ?event_acronym  \n\tWHERE { \n\t\t?event swc:completeGraph ?graph . \n\t\t?event swc:hasAcronym ?event_acronym . \n\t} ORDER BY ?event" .
-
-<http://lsq.aksw.org/res/log-swdf-q-6e48bcb0-8ab0c230a859bbe3-02014-29-16_01:29:09>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "8ab0c230a859bbe3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-15T23:29:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-<http://lsq.aksw.org/res/log-swdf-q-3a9a82dd-8ab0c230a859bbe3-02014-30-16_01:30:13>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "8ab0c230a859bbe3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-15T23:30:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/sf-q-3a9a82dd>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                () .
-
-<http://lsq.aksw.org/res/q-3a9a82dd>
-        a                              <http://spinrdf.org/sp#Describe> , <http://spinrdf.org/sp#Query> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-3a9a82dd02016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-3a9a82dd-8ab0c230a859bbe3-02014-30-16_01:30:13> ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-3a9a82dd> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nDESCRIBE <http://data.semanticweb.org/conference/ekaw/2012/paper/demos/8>\n" ;
-        <http://spinrdf.org/sp#resultNodes>
-                ( <http://data.semanticweb.org/conference/ekaw/2012/paper/demos/8> ) ;
-        <http://spinrdf.org/sp#where>  () .
-
-<http://lsq.aksw.org/res/le-swdf-q-3a9a82dd02016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#executionError>
-                "null HTTP 400 error making the query: Bad Request" .
-<http://lsq.aksw.org/res/q-2e37c847-bn5>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn10>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn3>
-        <http://spinrdf.org/sp#varName>
-                "p" .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn1>
-        <http://spinrdf.org/sp#expression>
-                <http://lsq.aksw.org/res/q-2e37c847-bn2> ;
-        <http://spinrdf.org/sp#varName>
-                "max" .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn11>
-        <http://spinrdf.org/sp#varName>
-                "p" .
-
-<http://lsq.aksw.org/res/le-swdf-q-2e37c84702016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/le-swdf-q-2e37c84702016-38-01_09:38:04-tp-1> ;
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "8"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.07Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.062Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/log-swdf-q-2e37c847-21a0bba87cab29c3-02014-35-16_03:35:43>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "21a0bba87cab29c3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-16T01:35:43Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/sf-q-2e37c847>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                <http://lsq.aksw.org/vocab#GroupBy> , <http://lsq.aksw.org/vocab#agg-max> , <http://lsq.aksw.org/vocab#Aggregators> , <http://spinrdf.org/sp#TriplePattern> .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn9>
-        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/q-2e37c847-bn10> ;
-        <http://spinrdf.org/sp#predicate>
-                <http://lsq.aksw.org/res/q-2e37c847-bn11> ;
-        <http://spinrdf.org/sp#subject>
-                <http://data.semanticweb.org/ns/swc/ontology> .
-
-<http://lsq.aksw.org/res/q-2e37c847>
-        a                              <http://spinrdf.org/sp#Select> , <http://spinrdf.org/sp#Query> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-2e37c84702016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-2e37c847-21a0bba87cab29c3-02014-35-16_03:35:43> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-2e37c847-bn9> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                "?o" ;
-        <http://lsq.aksw.org/vocab#mentionsPredicate>
-                "?p" ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                <http://data.semanticweb.org/ns/swc/ontology> ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-2e37c847> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT  (MAX(?p) AS ?max) ?o\nWHERE\n  { <http://data.semanticweb.org/ns/swc/ontology>\n              ?p  ?o\n  }\nGROUP BY ?o\n" ;
-        <http://spinrdf.org/sp#groupBy>
-                ( <http://lsq.aksw.org/res/q-2e37c847-bn7> ) ;
-        <http://spinrdf.org/sp#resultVariables>
-                ( <http://lsq.aksw.org/res/q-2e37c847-bn1> <http://lsq.aksw.org/res/q-2e37c847-bn5> ) ;
-        <http://spinrdf.org/sp#where>  ( <http://lsq.aksw.org/res/q-2e37c847-bn9> ) .
-
-<http://lsq.aksw.org/res/le-swdf-q-2e37c84702016-38-01_09:38:04-tp-1>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-2e37c847-bn9> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn2>
-        a       <http://spinrdf.org/sp#Max> ;
-        <http://spinrdf.org/sp#expression>
-                <http://lsq.aksw.org/res/q-2e37c847-bn3> .
-
-<http://lsq.aksw.org/res/q-2e37c847-bn7>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-<http://lsq.aksw.org/res/q-b8fbbe2a>
-        a                              <http://spinrdf.org/sp#Query> , <http://spinrdf.org/sp#Select> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-b8fbbe2a02016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-b8fbbe2a-21a0bba87cab29c3-02014-35-16_03:35:43> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-b8fbbe2a-bn9> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                "?o" ;
-        <http://lsq.aksw.org/vocab#mentionsPredicate>
-                "?p" ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                <http://data.semanticweb.org/ns/swc/ontology> ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-b8fbbe2a> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT  (COUNT(?p) AS ?n) ?o\nWHERE\n  { <http://data.semanticweb.org/ns/swc/ontology>\n              ?p  ?o\n  }\nGROUP BY ?o\n" ;
-        <http://spinrdf.org/sp#groupBy>
-                ( <http://lsq.aksw.org/res/q-b8fbbe2a-bn1> ) ;
-        <http://spinrdf.org/sp#resultVariables>
-                ( <http://lsq.aksw.org/res/q-b8fbbe2a-bn3> <http://lsq.aksw.org/res/q-b8fbbe2a-bn7> ) ;
-        <http://spinrdf.org/sp#where>  ( <http://lsq.aksw.org/res/q-b8fbbe2a-bn9> ) .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn4>
-        a       <http://spinrdf.org/sp#Count> ;
-        <http://spinrdf.org/sp#expression>
-                <http://lsq.aksw.org/res/q-b8fbbe2a-bn5> .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn9>
-        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/q-b8fbbe2a-bn10> ;
-        <http://spinrdf.org/sp#predicate>
-                <http://lsq.aksw.org/res/q-b8fbbe2a-bn11> ;
-        <http://spinrdf.org/sp#subject>
-                <http://data.semanticweb.org/ns/swc/ontology> .
-
-<http://lsq.aksw.org/res/le-swdf-q-b8fbbe2a02016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/le-swdf-q-b8fbbe2a02016-38-01_09:38:04-tp-1> ;
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "6"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.11Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.104Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/log-swdf-q-b8fbbe2a-21a0bba87cab29c3-02014-35-16_03:35:43>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "21a0bba87cab29c3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-16T01:35:43Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn7>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn10>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn5>
-        <http://spinrdf.org/sp#varName>
-                "p" .
-
-<http://lsq.aksw.org/res/le-swdf-q-b8fbbe2a02016-38-01_09:38:04-tp-1>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-b8fbbe2a-bn9> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn3>
-        <http://spinrdf.org/sp#expression>
-                <http://lsq.aksw.org/res/q-b8fbbe2a-bn4> ;
-        <http://spinrdf.org/sp#varName>
-                "n" .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn11>
-        <http://spinrdf.org/sp#varName>
-                "p" .
-
-<http://lsq.aksw.org/res/q-b8fbbe2a-bn1>
-        <http://spinrdf.org/sp#varName>
-                "o" .
-
-<http://lsq.aksw.org/res/sf-q-b8fbbe2a>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                <http://lsq.aksw.org/vocab#GroupBy> , <http://spinrdf.org/sp#TriplePattern> , <http://lsq.aksw.org/vocab#agg-count> , <http://lsq.aksw.org/vocab#Aggregators> .
-@prefix sp:    <http://spinrdf.org/sp#> .
-
-<http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-2>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-686abf55-bn14> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/sf-q-686abf55-jv-workshop_uri>
-        <http://lsq.aksw.org/vocab#joinVertexDegree>
-                "5"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>
-                <http://lsq.aksw.org/vocab#Star> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn8>
-        a              sp:Filter ;
-        sp:expression  <http://lsq.aksw.org/res/q-686abf55-bn9> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn16>
-        sp:varName  "workshop_uri" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn29>
-        sp:varName  "workshop_acronym" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn10>
-        a        sp:bound ;
-        sp:arg1  <http://lsq.aksw.org/res/q-686abf55-bn11> .
-
-<http://lsq.aksw.org/res/sf-q-686abf55-jv-http-data.semanticweb.org-ns-swc-ontology-completeGraph>
-        <http://lsq.aksw.org/vocab#joinVertexDegree>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>
-                <http://lsq.aksw.org/vocab#Star> .
-
-<http://lsq.aksw.org/res/sf-q-686abf55-jv-complete_graph>
-        <http://lsq.aksw.org/vocab#joinVertexDegree>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>
-                <http://lsq.aksw.org/vocab#Star> .
-
-<http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-1>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-686abf55-bn20> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn15>
-        sp:varName  "complete_graph" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn14>
-        sp:object     <http://lsq.aksw.org/res/q-686abf55-bn15> ;
-        sp:predicate  <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
-        sp:subject    <http://lsq.aksw.org/res/q-686abf55-bn16> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn27>
-        sp:varName  "workshop_uri" .
-
-<http://lsq.aksw.org/res/q-686abf55>
-        a                   sp:Select , sp:Query ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-686abf55-8ab0c230a859bbe3-02014-22-16_04:22:52> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-686abf55-bn17> , <http://lsq.aksw.org/res/q-686abf55-bn3> , <http://lsq.aksw.org/res/q-686abf55-bn20> , <http://lsq.aksw.org/res/q-686abf55-bn14> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                "?workshop_acronym" , "?workshop_name" , "?complete_graph" ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                <http://data.semanticweb.org/ns/swc/ontology#WorkshopEvent> ;
-        <http://lsq.aksw.org/vocab#mentionsPredicate>
-                <http://www.w3.org/2000/01/rdf-schema#label> , <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> , <http://data.semanticweb.org/ns/swc/ontology#completeGraph> , <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                "?workshop_uri" ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-686abf55> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT DISTINCT  ?workshop_uri ?workshop_name ?workshop_acronym\nWHERE\n  { ?workshop_uri\n              a                     swc:WorkshopEvent ;\n              rdfs:label            ?workshop_name ;\n              swc:hasAcronym        ?workshop_acronym\n    OPTIONAL\n      { ?workshop_uri\n                  swc:completeGraph  ?complete_graph\n      }\n    FILTER ( ! bound(?complete_graph) )\n  }\nORDER BY ?workshop_acronym\n" ;
-        sp:distinct         true ;
-        sp:orderBy          ( <http://lsq.aksw.org/res/q-686abf55-bn29> ) ;
-        sp:resultVariables  ( <http://lsq.aksw.org/res/q-686abf55-bn27> <http://lsq.aksw.org/res/q-686abf55-bn26> <http://lsq.aksw.org/res/q-686abf55-bn25> ) ;
-        sp:where            ( <http://lsq.aksw.org/res/q-686abf55-bn20> <http://lsq.aksw.org/res/q-686abf55-bn17> <http://lsq.aksw.org/res/q-686abf55-bn3> <http://lsq.aksw.org/res/q-686abf55-bn12> <http://lsq.aksw.org/res/q-686abf55-bn8> ) .
-
-<http://lsq.aksw.org/res/log-swdf-q-686abf55-8ab0c230a859bbe3-02014-22-16_04:22:52>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "8ab0c230a859bbe3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-16T02:22:52Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn21>
-        sp:varName  "workshop_uri" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn19>
-        sp:varName  "workshop_name" .
-
-<http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-4> , <http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-3> , <http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-2> , <http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-1> ;
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "7"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.159Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.152Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn5>
-        sp:varName  "workshop_uri" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn26>
-        sp:varName  "workshop_name" .
-
-<http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-4>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-686abf55-bn17> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn20>
-        sp:object     <http://data.semanticweb.org/ns/swc/ontology#WorkshopEvent> ;
-        sp:predicate  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ;
-        sp:subject    <http://lsq.aksw.org/res/q-686abf55-bn21> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn18>
-        sp:varName  "workshop_uri" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn4>
-        sp:varName  "workshop_acronym" .
-
-<http://lsq.aksw.org/res/q-686abf55-bn12>
-        a            sp:Optional ;
-        sp:elements  ( <http://lsq.aksw.org/res/q-686abf55-bn14> ) .
-
-<http://lsq.aksw.org/res/q-686abf55-bn25>
-        sp:varName  "workshop_acronym" .
-
-<http://lsq.aksw.org/res/sf-q-686abf55>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "3.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertex>
-                <http://lsq.aksw.org/res/sf-q-686abf55-jv-workshop_uri> , <http://lsq.aksw.org/res/sf-q-686abf55-jv-complete_graph> , <http://lsq.aksw.org/res/sf-q-686abf55-jv-http-data.semanticweb.org-ns-swc-ontology-completeGraph> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "3"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "4"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "5"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                sp:Optional , <http://lsq.aksw.org/vocab#fn-!> , sp:TriplePattern , <http://lsq.aksw.org/vocab#Functions> , <http://lsq.aksw.org/vocab#Distinct> , <http://lsq.aksw.org/vocab#fn-bound> , <http://lsq.aksw.org/vocab#OrderBy> , sp:Filter .
-
-<http://lsq.aksw.org/res/le-swdf-q-686abf5502016-38-01_09:38:04-tp-3>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-686abf55-bn3> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn9>
-        a        sp:not ;
-        sp:arg1  <http://lsq.aksw.org/res/q-686abf55-bn10> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn17>
-        sp:object     <http://lsq.aksw.org/res/q-686abf55-bn19> ;
-        sp:predicate  <http://www.w3.org/2000/01/rdf-schema#label> ;
-        sp:subject    <http://lsq.aksw.org/res/q-686abf55-bn18> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn3>
-        sp:object     <http://lsq.aksw.org/res/q-686abf55-bn4> ;
-        sp:predicate  <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
-        sp:subject    <http://lsq.aksw.org/res/q-686abf55-bn5> .
-
-<http://lsq.aksw.org/res/q-686abf55-bn11>
-        sp:varName  "complete_graph" .
-<http://lsq.aksw.org/res/le-swdf-q-6008cac702016-38-01_09:38:04-tp-1>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-6008cac7-bn1> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/sf-q-6008cac7>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                <http://lsq.aksw.org/vocab#Distinct> , <http://spinrdf.org/sp#TriplePattern> .
-
-<http://lsq.aksw.org/res/q-6008cac7>
-        a                              <http://spinrdf.org/sp#Select> , <http://spinrdf.org/sp#Query> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-6008cac702016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-6008cac7-113ce446dfb9e36d-02014-29-16_01:29:09> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-6008cac7-bn1> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                <http://www.w3.org/2002/07/owl#Thing> ;
-        <http://lsq.aksw.org/vocab#mentionsPredicate>
-                <http://www.w3.org/2000/01/rdf-schema#subClassOf> ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                "?s" ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-6008cac7> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX  owl:  <http://www.w3.org/2002/07/owl#>\nPREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT DISTINCT  ?s\nWHERE\n  { ?s  rdfs:subClassOf  owl:Thing }\n" ;
-        <http://spinrdf.org/sp#distinct>
-                true ;
-        <http://spinrdf.org/sp#resultVariables>
-                ( <http://lsq.aksw.org/res/q-6008cac7-bn4> ) ;
-        <http://spinrdf.org/sp#where>  ( <http://lsq.aksw.org/res/q-6008cac7-bn1> ) .
-
-<http://lsq.aksw.org/res/q-6008cac7-bn1>
-        <http://spinrdf.org/sp#object>  <http://www.w3.org/2002/07/owl#Thing> ;
-        <http://spinrdf.org/sp#predicate>
-                <http://www.w3.org/2000/01/rdf-schema#subClassOf> ;
-        <http://spinrdf.org/sp#subject>
-                <http://lsq.aksw.org/res/q-6008cac7-bn2> .
-
-<http://lsq.aksw.org/res/log-swdf-q-6008cac7-113ce446dfb9e36d-02014-29-16_01:29:09>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "113ce446dfb9e36d" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-15T23:29:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/le-swdf-q-6008cac702016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/le-swdf-q-6008cac702016-38-01_09:38:04-tp-1> ;
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "4"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.22Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.216Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-6008cac7-bn4>
-        <http://spinrdf.org/sp#varName>
-                "s" .
-
-<http://lsq.aksw.org/res/q-6008cac7-bn2>
-        <http://spinrdf.org/sp#varName>
-                "s" .
-<http://lsq.aksw.org/res/le-swdf-q-8386534202016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "5"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.246Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.241Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-83865342-bn1>
-        a                               <http://spinrdf.org/sp#TriplePath> ;
-        <http://spinrdf.org/sp#object>  <http://www.w3.org/2002/07/owl#Thing> ;
-        <http://spinrdf.org/sp#path>    <http://lsq.aksw.org/res/q-83865342-bn2> ;
-        <http://spinrdf.org/sp#subject>
-                <http://lsq.aksw.org/res/q-83865342-bn3> .
-
-<http://lsq.aksw.org/res/log-swdf-q-83865342-113ce446dfb9e36d-02014-29-16_01:29:09>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "113ce446dfb9e36d" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-15T23:29:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-83865342-bn2>
-        a                               <http://spinrdf.org/sp#ModPath> ;
-        <http://spinrdf.org/sp#modMax>  -2 ;
-        <http://spinrdf.org/sp#modMin>  1 ;
-        <http://spinrdf.org/sp#subPath>
-                <http://www.w3.org/2000/01/rdf-schema#subClassOf> .
-
-<http://lsq.aksw.org/res/sf-q-83865342>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                <http://spinrdf.org/sp#TriplePath> , <http://lsq.aksw.org/vocab#Distinct> .
-
-<http://lsq.aksw.org/res/q-83865342-bn5>
-        <http://spinrdf.org/sp#varName>
-                "s" .
-
-<http://lsq.aksw.org/res/q-83865342>
-        a                              <http://spinrdf.org/sp#Query> , <http://spinrdf.org/sp#Select> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-8386534202016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-83865342-113ce446dfb9e36d-02014-29-16_01:29:09> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                <http://www.w3.org/2002/07/owl#Thing> ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                "?s" ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-83865342> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX  owl:  <http://www.w3.org/2002/07/owl#>\nPREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT DISTINCT  ?s\nWHERE\n  { ?s (rdfs:subClassOf)+ owl:Thing }\n" ;
-        <http://lsq.aksw.org/vocab#triplePath>
-                "(<http://www.w3.org/2000/01/rdf-schema#subClassOf>)+" ;
-        <http://spinrdf.org/sp#distinct>
-                true ;
-        <http://spinrdf.org/sp#resultVariables>
-                ( <http://lsq.aksw.org/res/q-83865342-bn5> ) ;
-        <http://spinrdf.org/sp#where>  ( <http://lsq.aksw.org/res/q-83865342-bn1> ) .
-
-<http://lsq.aksw.org/res/q-83865342-bn3>
-        <http://spinrdf.org/sp#varName>
-                "s" .
-<http://lsq.aksw.org/res/q-37509019-bn7>
-        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/q-37509019-bn8> ;
-        <http://spinrdf.org/sp#predicate>
-                <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
-        <http://spinrdf.org/sp#subject>
-                <http://lsq.aksw.org/res/q-37509019-bn9> .
-
-<http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04-tp-1>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-37509019-bn7> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-37509019-bn15>
-        <http://spinrdf.org/sp#varName>
-                "graph" .
-
-<http://lsq.aksw.org/res/log-swdf-q-37509019-8ab0c230a859bbe3-02014-29-16_01:29:09>
-        <http://lsq.aksw.org/vocab#endpoint>
-                <http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql> ;
-        <http://lsq.aksw.org/vocab#wasAssociatedWith>
-                "8ab0c230a859bbe3" ;
-        <http://www.w3.org/ns/prov#atTime>
-                "2014-05-15T23:29:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/q-37509019-bn6>
-        <http://spinrdf.org/sp#varName>
-                "event_acronym" .
-
-<http://lsq.aksw.org/res/sf-q-37509019-jv-event>
-        <http://lsq.aksw.org/vocab#joinVertexDegree>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>
-                <http://lsq.aksw.org/vocab#Star> .
-
-<http://lsq.aksw.org/res/q-37509019-bn14>
-        <http://spinrdf.org/sp#varName>
-                "event" .
-
-<http://lsq.aksw.org/res/q-37509019-bn5>
-        <http://spinrdf.org/sp#varName>
-                "event" .
-
-<http://lsq.aksw.org/res/q-37509019-bn13>
-        <http://spinrdf.org/sp#varName>
-                "event_acronym" .
-
-<http://lsq.aksw.org/res/q-37509019-bn4>
-        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/q-37509019-bn6> ;
-        <http://spinrdf.org/sp#predicate>
-                <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
-        <http://spinrdf.org/sp#subject>
-                <http://lsq.aksw.org/res/q-37509019-bn5> .
-
-<http://lsq.aksw.org/res/q-37509019-bn9>
-        <http://spinrdf.org/sp#varName>
-                "event" .
-
-<http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04-tp-2> , <http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04-tp-1> ;
-        <http://lsq.aksw.org/vocab#resultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>
-                "6"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#endAtTime>
-                "2016-06-01T19:38:04.266Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
-        <http://www.w3.org/ns/prov#startedAtTime>
-                "2016-06-01T19:38:04.26Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
-
-<http://lsq.aksw.org/res/sf-q-37509019>
-        <http://lsq.aksw.org/vocab#avgJoinVertexDegree>
-                "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#bgps>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#joinVertex>
-                <http://lsq.aksw.org/res/sf-q-37509019-jv-event> ;
-        <http://lsq.aksw.org/vocab#joinVertices>
-                "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBgpTriples>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>
-                "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#minBgpTriples>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatterns>
-                "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>
-                <http://lsq.aksw.org/vocab#OrderBy> , <http://lsq.aksw.org/vocab#Distinct> , <http://spinrdf.org/sp#TriplePattern> .
-
-<http://lsq.aksw.org/res/q-37509019-bn8>
-        <http://spinrdf.org/sp#varName>
-                "graph" .
-
-<http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04-tp-2>
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-37509019-bn4> ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>
-                "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>
-                "0.0"^^<http://www.w3.org/2001/XMLSchema#double> .
-
-<http://lsq.aksw.org/res/q-37509019>
-        a                              <http://spinrdf.org/sp#Select> , <http://spinrdf.org/sp#Query> ;
-        <http://lsq.aksw.org/vocab#hasLocalExecution>
-                <http://lsq.aksw.org/res/le-swdf-q-3750901902016-38-01_09:38:04> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExecution>
-                <http://lsq.aksw.org/res/log-swdf-q-37509019-8ab0c230a859bbe3-02014-29-16_01:29:09> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>
-                <http://lsq.aksw.org/res/q-37509019-bn7> , <http://lsq.aksw.org/res/q-37509019-bn4> ;
-        <http://lsq.aksw.org/vocab#mentionsObject>
-                "?graph" , "?event_acronym" ;
-        <http://lsq.aksw.org/vocab#mentionsPredicate>
-                <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> , <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
-        <http://lsq.aksw.org/vocab#mentionsSubject>
-                "?event" ;
-        <http://lsq.aksw.org/vocab#structuralFeatures>
-                <http://lsq.aksw.org/res/sf-q-37509019> ;
-        <http://lsq.aksw.org/vocab#text>
-                "PREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\nPREFIX  owl:  <http://www.w3.org/2002/07/owl#>\nPREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>\n\nSELECT DISTINCT  ?graph ?event ?event_acronym\nWHERE\n  { ?event  swc:completeGraph  ?graph ;\n            swc:hasAcronym     ?event_acronym\n  }\nORDER BY ?event\n" ;
-        <http://spinrdf.org/sp#distinct>
-                true ;
-        <http://spinrdf.org/sp#orderBy>
-                ( <http://lsq.aksw.org/res/q-37509019-bn1> ) ;
-        <http://spinrdf.org/sp#resultVariables>
-                ( <http://lsq.aksw.org/res/q-37509019-bn15> <http://lsq.aksw.org/res/q-37509019-bn14> <http://lsq.aksw.org/res/q-37509019-bn13> ) ;
-        <http://spinrdf.org/sp#where>  ( <http://lsq.aksw.org/res/q-37509019-bn7> <http://lsq.aksw.org/res/q-37509019-bn4> ) .
-
-<http://lsq.aksw.org/res/q-37509019-bn1>
-        <http://spinrdf.org/sp#varName>
-                "event" .
+<http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05>
+        <http://www.w3.org/ns/prov#startedAtTime>  "2016-06-04T03:28:05.627Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://www.w3.org/ns/prov#wasAssociatedWith>  <http://lsq.aksw.org/res/swdf> .
+<http://lsq.aksw.org/res/spin-q-2133d775-bne13c29da>
+        <http://spinrdf.org/sp#varName>  "event" .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981>
+        <http://www.w3.org/2000/01/rdf-schema#label>  "?event <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ?event_acronym ." ;
+        <http://spinrdf.org/sp#subject>  <http://lsq.aksw.org/res/spin-q-2133d775-bn9f11f105> ;
+        <http://spinrdf.org/sp#predicate>  <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
+        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/spin-q-2133d775-bn2ee23337> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn7014e1fb>
+        <http://spinrdf.org/sp#varName>  "event_acronym" .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn36fb7c6d>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bnadabcbcc> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn9f11f105>
+        <http://spinrdf.org/sp#varName>  "event" .
+
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06>
+        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-2> ;
+        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-1> ;
+        <http://lsq.aksw.org/vocab#runTimeMs>  "108"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#resultSize>  "43"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://www.w3.org/ns/prov#wasGeneratedBy>  <http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn8372809c>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bnd5c48867> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bn42ba8fcd> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn42ba8fcd>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bne13c29da> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bnb3a7d852> .
+
+<http://lsq.aksw.org/res/sf-q-2133d775>
+        <http://lsq.aksw.org/vocab#meanJoinVertexDegree>  "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Distinct> ;
+        <http://lsq.aksw.org/vocab#joinVertices>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#mentionsPredicate>  <http://data.semanticweb.org/ns/swc/ontology#hasAcronym> ;
+        <http://lsq.aksw.org/vocab#medianJoinVerticesDegree>  "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> ;
+        <http://lsq.aksw.org/vocab#mentionsPredicate>  <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
+        <http://lsq.aksw.org/vocab#joinVertex>  <http://lsq.aksw.org/res/sf-q-2133d775-jv-event> ;
+        <http://lsq.aksw.org/vocab#mentionsSubject>  "?event" ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#OrderBy> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://spinrdf.org/sp#TriplePattern> ;
+        <http://lsq.aksw.org/vocab#mentionsObject>  "?event_acronym" ;
+        <http://lsq.aksw.org/vocab#triplePatterns>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#minBgpTriples>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#mentionsObject>  "?graph" ;
+        <http://lsq.aksw.org/vocab#maxBgpTriples>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#bgps>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bnb3a7d852>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn7014e1fb> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn2ee23337>
+        <http://spinrdf.org/sp#varName>  "event_acronym" .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4>
+        <http://www.w3.org/2000/01/rdf-schema#label>  "?event <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ?graph ." ;
+        <http://spinrdf.org/sp#subject>  <http://lsq.aksw.org/res/spin-q-2133d775-bnd92a2071> ;
+        <http://spinrdf.org/sp#predicate>  <http://data.semanticweb.org/ns/swc/ontology#completeGraph> ;
+        <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/spin-q-2133d775-bn0029a293> .
+
+<http://lsq.aksw.org/res/q-2133d775>
+        <http://lsq.aksw.org/vocab#hasLocalExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06> ;
+        <http://lsq.aksw.org/vocab#hasRemoteExecution>  <http://lsq.aksw.org/res/re-swdf-q-2133d775-8ab0c230a859bbe3-02014-29-16_01:29:09> ;
+        <http://lsq.aksw.org/vocab#structuralFeatures>  <http://lsq.aksw.org/res/sf-q-2133d775> ;
+        <http://lsq.aksw.org/vocab#hasSpin>  <http://lsq.aksw.org/res/spin-q-2133d775> ;
+        <http://lsq.aksw.org/vocab#text>  "PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>  SELECT DISTINCT  ?graph ?event ?event_acronym WHERE   { ?event  swc:completeGraph  ?graph ;             swc:hasAcronym     ?event_acronym   } ORDER BY ?event " ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Query> .
+
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-2>
+        <http://lsq.aksw.org/vocab#triplePatternSelectivity>  "0.001271182565593935"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#triplePatternResultSize>  "139"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bnadabcbcc>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+<http://lsq.aksw.org/res/re-swdf-q-2133d775-8ab0c230a859bbe3-02014-29-16_01:29:09>
+        <http://lsq.aksw.org/vocab#endpoint>  <http://data.semanticweb.org/sparql> ;
+        <http://lsq.aksw.org/vocab#wasAssociatedWith>  <http://lsq.aksw.org/res/agent-8ab0c230a859bbe3> ;
+        <http://www.w3.org/ns/prov#atTime>  "2014-05-15T23:29:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bna712287e>
+        <http://spinrdf.org/sp#varName>  "event" .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bnd92a2071>
+        <http://spinrdf.org/sp#varName>  "event" .
+
+<http://lsq.aksw.org/res/sf-q-2133d775-jv-event>
+        <http://lsq.aksw.org/vocab#joinVertexType>  <http://lsq.aksw.org/vocab#Star> ;
+        <http://lsq.aksw.org/vocab#joinVertexDegree>  "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bn0029a293>
+        <http://spinrdf.org/sp#varName>  "graph" .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bnd5c48867>
+        <http://spinrdf.org/sp#varName>  "graph" .
+
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-1>
+        <http://lsq.aksw.org/vocab#triplePatternSelectivity>  3.749531308586427E-4 ;
+        <http://lsq.aksw.org/vocab#triplePatternResultSize>  "41"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775-bncd729d61>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bna712287e> .
+
+<http://lsq.aksw.org/res/spin-q-2133d775>
+        <http://spinrdf.org/sp#where>  <http://lsq.aksw.org/res/spin-q-2133d775-bn36fb7c6d> ;
+        <http://spinrdf.org/sp#resultVariables>  <http://lsq.aksw.org/res/spin-q-2133d775-bn8372809c> ;
+        <http://spinrdf.org/sp#distinct>  true ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Select> ;
+        <http://spinrdf.org/sp#orderBy>  <http://lsq.aksw.org/res/spin-q-2133d775-bncd729d61> .
+<http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05>
+        <http://www.w3.org/ns/prov#endAtTime>  "2016-06-04T03:28:06.215Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .

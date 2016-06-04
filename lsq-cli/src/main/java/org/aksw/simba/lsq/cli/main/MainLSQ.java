@@ -712,7 +712,7 @@ public class MainLSQ {
           Skolemize.skolemize(spinRes);
           
           queryRes
-              .addProperty(LSQ.asSpin, spinRes);
+              .addProperty(LSQ.hasSpin, spinRes);
 
 
 
