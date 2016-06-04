@@ -359,10 +359,10 @@ public class MainLSQ {
         Model expModel = ModelFactory.createDefaultModel();
         NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
 
-        Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-
+      //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr 
         expRes
-            .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+          //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
             .addLiteral(PROV.startedAtTime, expStart);
 
         RDFDataMgr.write(out, expModel, RDFFormat.TURTLE_BLOCKS);
@@ -712,7 +712,7 @@ public class MainLSQ {
           Skolemize.skolemize(spinRes);
           
           queryRes
-              .addProperty(LSQ.asSpin, spinRes);
+              .addProperty(LSQ.hasSpin, spinRes);
 
 
 
@@ -753,7 +753,7 @@ public class MainLSQ {
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
 
             QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
-            QueryStatistics2.enrichWithMentions(featureRes, query);
+            //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
 
 
         } catch (Exception ex) {
