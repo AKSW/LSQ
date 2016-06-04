@@ -1,6 +1,18 @@
-<http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05>
-        <http://www.w3.org/ns/prov#startedAtTime>  "2016-06-04T03:28:05.627Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+<http://lsq.aksw.org/res/swdf>
+        <http://www.w3.org/ns/prov#startedAtTime>  "2016-06-04T03:49:18.713Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://www.w3.org/ns/prov#wasAssociatedWith>  <http://lsq.aksw.org/res/swdf> .
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19>
+        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19-tp-2> ;
+        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19-tp-1> ;
+        <http://lsq.aksw.org/vocab#runTimeMs>  "99"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#resultSize>  "43"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://www.w3.org/ns/prov#wasGeneratedBy>  <http://lsq.aksw.org/res/swdf> .
+
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19-tp-1>
+        <http://lsq.aksw.org/vocab#triplePatternSelectivity>  3.749531308586427E-4 ;
+        <http://lsq.aksw.org/vocab#triplePatternResultSize>  "41"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
+
 <http://lsq.aksw.org/res/spin-q-2133d775-bne13c29da>
         <http://spinrdf.org/sp#varName>  "event" .
 
@@ -20,20 +32,13 @@
 <http://lsq.aksw.org/res/spin-q-2133d775-bn9f11f105>
         <http://spinrdf.org/sp#varName>  "event" .
 
-<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06>
-        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-2> ;
-        <http://lsq.aksw.org/vocab#hasTriplePatternExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-1> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>  "108"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#resultSize>  "43"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#wasGeneratedBy>  <http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05> .
-
 <http://lsq.aksw.org/res/spin-q-2133d775-bn8372809c>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bnd5c48867> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bn42ba8fcd> .
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bn42ba8fcd> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bnd5c48867> .
 
 <http://lsq.aksw.org/res/spin-q-2133d775-bn42ba8fcd>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bne13c29da> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bnb3a7d852> .
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-2133d775-bnb3a7d852> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bne13c29da> .
 
 <http://lsq.aksw.org/res/sf-q-2133d775>
         <http://lsq.aksw.org/vocab#meanJoinVertexDegree>  "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
@@ -56,8 +61,8 @@
         <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
 
 <http://lsq.aksw.org/res/spin-q-2133d775-bnb3a7d852>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn7014e1fb> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn7014e1fb> .
 
 <http://lsq.aksw.org/res/spin-q-2133d775-bn2ee23337>
         <http://spinrdf.org/sp#varName>  "event_acronym" .
@@ -69,21 +74,21 @@
         <http://spinrdf.org/sp#object>  <http://lsq.aksw.org/res/spin-q-2133d775-bn0029a293> .
 
 <http://lsq.aksw.org/res/q-2133d775>
-        <http://lsq.aksw.org/vocab#hasLocalExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06> ;
+        <http://lsq.aksw.org/vocab#hasLocalExecution>  <http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19> ;
         <http://lsq.aksw.org/vocab#hasRemoteExecution>  <http://lsq.aksw.org/res/re-swdf-q-2133d775-8ab0c230a859bbe3-02014-29-16_01:29:09> ;
         <http://lsq.aksw.org/vocab#structuralFeatures>  <http://lsq.aksw.org/res/sf-q-2133d775> ;
         <http://lsq.aksw.org/vocab#hasSpin>  <http://lsq.aksw.org/res/spin-q-2133d775> ;
         <http://lsq.aksw.org/vocab#text>  "PREFIX  swc:  <http://data.semanticweb.org/ns/swc/ontology#>  SELECT DISTINCT  ?graph ?event ?event_acronym WHERE   { ?event  swc:completeGraph  ?graph ;             swc:hasAcronym     ?event_acronym   } ORDER BY ?event " ;
         <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Query> .
 
-<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-2>
+<http://lsq.aksw.org/res/spin-q-2133d775-bnadabcbcc>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> .
+
+<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-49-04_05:49:19-tp-2>
         <http://lsq.aksw.org/vocab#triplePatternSelectivity>  "0.001271182565593935"^^<http://www.w3.org/2001/XMLSchema#double> ;
         <http://lsq.aksw.org/vocab#triplePatternResultSize>  "139"^^<http://www.w3.org/2001/XMLSchema#long> ;
         <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> .
-
-<http://lsq.aksw.org/res/spin-q-2133d775-bnadabcbcc>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bn00ec3981> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
 
 <http://lsq.aksw.org/res/re-swdf-q-2133d775-8ab0c230a859bbe3-02014-29-16_01:29:09>
         <http://lsq.aksw.org/vocab#endpoint>  <http://data.semanticweb.org/sparql> ;
@@ -106,20 +111,15 @@
 <http://lsq.aksw.org/res/spin-q-2133d775-bnd5c48867>
         <http://spinrdf.org/sp#varName>  "graph" .
 
-<http://lsq.aksw.org/res/le-swdf-q-2133d775-02016-28-04_05:28:06-tp-1>
-        <http://lsq.aksw.org/vocab#triplePatternSelectivity>  3.749531308586427E-4 ;
-        <http://lsq.aksw.org/vocab#triplePatternResultSize>  "41"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTriplePattern>  <http://lsq.aksw.org/res/spin-q-2133d775-bn6c4309a4> .
-
 <http://lsq.aksw.org/res/spin-q-2133d775-bncd729d61>
         <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
         <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-2133d775-bna712287e> .
 
 <http://lsq.aksw.org/res/spin-q-2133d775>
+        <http://spinrdf.org/sp#orderBy>  <http://lsq.aksw.org/res/spin-q-2133d775-bncd729d61> ;
         <http://spinrdf.org/sp#where>  <http://lsq.aksw.org/res/spin-q-2133d775-bn36fb7c6d> ;
-        <http://spinrdf.org/sp#resultVariables>  <http://lsq.aksw.org/res/spin-q-2133d775-bn8372809c> ;
         <http://spinrdf.org/sp#distinct>  true ;
         <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Select> ;
-        <http://spinrdf.org/sp#orderBy>  <http://lsq.aksw.org/res/spin-q-2133d775-bncd729d61> .
-<http://lsq.aksw.org/res/swdf-02016-28-04_05:28:05>
-        <http://www.w3.org/ns/prov#endAtTime>  "2016-06-04T03:28:06.215Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+        <http://spinrdf.org/sp#resultVariables>  <http://lsq.aksw.org/res/spin-q-2133d775-bn8372809c> .
+<http://lsq.aksw.org/res/swdf>
+        <http://www.w3.org/ns/prov#endAtTime>  "2016-06-04T03:49:19.209Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .

@@ -359,8 +359,8 @@ public class MainLSQ {
         Model expModel = ModelFactory.createDefaultModel();
         NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
 
-        Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-
+      //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr 
         expRes
             .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
             .addLiteral(PROV.startedAtTime, expStart);
