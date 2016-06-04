@@ -731,7 +731,7 @@ public class MainLSQ {
             //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
             Resource featureRes = queryAspectFn.apply("sf-").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
 
-            queryRes.addProperty(LSQ.structuralFeatures, featureRes);
+            queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
 
 
             // Add used features
