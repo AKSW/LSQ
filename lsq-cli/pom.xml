@@ -29,15 +29,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.aksw.simba.lsq</groupId>
-            <artifactId>lsq-core</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <scope>compile</scope>
         </dependency>
-
     </dependencies>
 </project>
