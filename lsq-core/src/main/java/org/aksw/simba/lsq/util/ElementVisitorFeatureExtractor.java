@@ -13,8 +13,10 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.OpBGP;
+import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprAggregator;
+import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.path.PathLib;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementBind;
@@ -30,6 +32,8 @@ import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitorBase;
 import org.apache.jena.sparql.syntax.ElementWalker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
 
 /**
@@ -41,6 +45,8 @@ import org.topbraid.spin.vocabulary.SP;
  */
 public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 {
+    private static final Logger logger = LoggerFactory.getLogger(ElementVisitorFeatureExtractor.class);
+
     protected Set<Resource> features = new HashSet<Resource>();
 
     @Override
@@ -109,8 +115,18 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 
         if(op instanceof OpBGP) {
             features.add(SP.TriplePattern);
-        } else {
+        } else if (op instanceof OpPath) {
+            OpPath opPath = (OpPath)op;
+            Path path = opPath.getTriplePath().getPath();
+
             features.add(SP.TriplePath);
+
+            Set<Resource> pathFeatures = PathVisitorFeatureExtractor.getFeatures(path);
+            features.addAll(pathFeatures);
+
+
+        } else {
+            logger.warn("Unexpected algebra expression: " + op);
         }
     }
 
@@ -136,6 +152,9 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
             result.add(LSQ.Distinct);
         }
 
+        if(query.isReduced()) {
+            result.add(LSQ.Reduced);
+        }
 
         if(query.hasOrderBy()) {
             result.add(LSQ.OrderBy);
@@ -143,6 +162,14 @@ public class ElementVisitorFeatureExtractor  extends ElementVisitorBase
 
         if(query.hasGroupBy()) {
             result.add(LSQ.GroupBy);
+        }
+
+        if(query.getLimit() != query.NOLIMIT) {
+            result.add(LSQ.Limit);
+        }
+
+        if(query.getOffset() != query.NOLIMIT && query.getOffset() != 0) {
+            result.add(LSQ.Offset);
         }
 
         if(query.hasAggregators()) {

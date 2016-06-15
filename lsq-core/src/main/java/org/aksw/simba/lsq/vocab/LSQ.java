@@ -32,14 +32,16 @@ public class LSQ {
     public static final Resource Path = resource("Path");
     public static final Resource Hybrid = resource("Hybrid");
 
+    public static final Resource Reduced = resource("Reduced");
     public static final Resource Distinct = resource("Distinct");
     public static final Resource OrderBy = resource("OrderBy");
     public static final Resource GroupBy = resource("GroupBy");
     public static final Resource Aggregators = resource("Aggregators");
     public static final Resource Functions = resource("Functions");
+    public static final Resource Offset = resource("Offset");
+    public static final Resource Limit = resource("Limit");
 
 
-    
     public static final Property joinVertex = property("joinVertex");
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
@@ -120,6 +122,23 @@ public class LSQ {
     public static final Property verb = property("verb");
 
 
+    // Paths
+    public static final Resource LinkPath = resource("LinkPath");
+    public static final Resource ReverseLinkPath = resource("ReverseLinkPath");
+    public static final Resource NegPropSetPath = resource("NegPropSetPath");
+    public static final Resource InversePath = resource("InversePath");
+    public static final Resource ModPath = resource("ModPath");
+    public static final Resource FixedLengthPath = resource("FixedLengthPath");
+    public static final Resource DistinctPath = resource("DistinctPath");
+    public static final Resource MultiPath = resource("MultiPath");
+    public static final Resource ShortestPath = resource("ShortestPath");
+    public static final Resource ZeroOrOnePath = resource("ZeroOrOnePath");
+    public static final Resource ZeroOrMore1Path = resource("ZeroOrMore1Path");
+    public static final Resource ZeroOrMoreNPath = resource("ZeroOrMoreNPath");
+    public static final Resource OneOrMore1Path = resource("oneOrMore1Path");
+    public static final Resource OneOrMoreNPath = resource("oneOrMoreNPath");
+    public static final Resource AltPath = resource("AltPath");
+    public static final Resource SeqPath = resource("SeqPath");
 
 
     public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
