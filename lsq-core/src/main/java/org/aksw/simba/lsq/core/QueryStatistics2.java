@@ -60,8 +60,7 @@ public class QueryStatistics2 {
         }
 
         if(features.isEmpty()) {
-            // TODO hack; use proper vocab
-            resource.addProperty(LSQ.usesFeature, RDF.nil);
+            resource.addProperty(LSQ.usesFeature, LSQ.None);
         }
     }
 

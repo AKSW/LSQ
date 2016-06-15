@@ -310,10 +310,6 @@ public class MainLSQ {
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
                 .config()
-                    .withCache(null)
-                    .withRetry(10, 10, TimeUnit.SECONDS)
-                    .withPagination(1000)
-                    .withDefaultLimit(1000, true)
                     .withPostProcessor(qe -> {
                         if(timeoutInMs != null) {
                             ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
@@ -321,6 +317,8 @@ public class MainLSQ {
                         }
                     })
                     .withCache(new CacheFrontendImpl(new CacheBackendMem()))
+//                    .withRetry(3, 30, TimeUnit.SECONDS)
+//                    .withPagination(1000)
                 .end()
                 .create();
 
@@ -362,7 +360,7 @@ public class MainLSQ {
         NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
 
       //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr 
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
         expRes
           //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
             .addLiteral(PROV.startedAtTime, expStart);
@@ -509,8 +507,8 @@ public class MainLSQ {
                     String varResUri = baseRes.nest("var-").nest(varName).str();
                     ResourceUtils.renameResource(s, varResUri);
                 }
-                
-                
+
+
                 RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
             }
 
@@ -691,7 +689,7 @@ public class MainLSQ {
             String msg = e.getMessage();
             queryExecRes.addLiteral(LSQ.executionError, msg);
             String queryStr = ("" + query).replace("\n", " ");
-            logger.warn("Query execution exception [" + msg + "] for query " + queryStr);
+            logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);
         }
     }
 

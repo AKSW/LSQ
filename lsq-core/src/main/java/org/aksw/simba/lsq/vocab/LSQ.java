@@ -114,8 +114,18 @@ public class LSQ {
     public static final Property verb = property("verb");
 
     // Query / Graph Pattern Features
+    // None indicates the absence of features; must not appear with any other features
+    public static final Resource None = resource("None");
 
-    public static final Resource Triples = resource("Triples");
+    public static final Resource Select = resource("Select");
+    public static final Resource Construct = resource("Construct");
+    public static final Resource Describe = resource("Describe");
+    public static final Resource Ask = resource("Ask");
+    public static final Resource Unknown = resource("Unknown");
+
+    public static final Resource TriplePattern = resource("TriplePattern");
+    public static final Resource TriplePath = resource("TriplePath");
+    public static final Resource Triple = resource("Triples");
     public static final Resource Group = resource("Group");
     public static final Resource Assign = resource("Assign");
     public static final Resource Dataset = resource("Dataset");
@@ -150,10 +160,13 @@ public class LSQ {
     public static final Resource MultiPath = resource("MultiPath");
     public static final Resource ShortestPath = resource("ShortestPath");
     public static final Resource ZeroOrOnePath = resource("ZeroOrOnePath");
-    public static final Resource ZeroOrMore1Path = resource("ZeroOrMore1Path");
-    public static final Resource ZeroOrMoreNPath = resource("ZeroOrMoreNPath");
-    public static final Resource OneOrMore1Path = resource("oneOrMore1Path");
-    public static final Resource OneOrMoreNPath = resource("oneOrMoreNPath");
+
+    // NOTE: We do not reflect syntactic differences of path expressions such as
+    // fooPath{1,} and fooPath+ in the vocab
+    public static final Resource ZeroOrMore1Path = resource("ZeroOrMorePath");
+    public static final Resource ZeroOrMoreNPath = resource("ZeroOrMorePath");
+    public static final Resource OneOrMore1Path = resource("oneOrMorePath");
+    public static final Resource OneOrMoreNPath = resource("oneOrMorePath");
     public static final Resource AltPath = resource("AltPath");
     public static final Resource SeqPath = resource("SeqPath");
 
