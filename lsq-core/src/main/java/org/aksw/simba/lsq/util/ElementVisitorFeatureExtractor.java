@@ -221,7 +221,6 @@ public class ElementVisitorFeatureExtractor
         }
 
         if(query.isDistinct()) {
-            // TODO We are hijacking the SP namespace here
             result.add(LSQ.Distinct);
         }
 
