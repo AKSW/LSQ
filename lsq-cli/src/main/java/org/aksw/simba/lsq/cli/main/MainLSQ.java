@@ -504,7 +504,8 @@ public class MainLSQ {
                 for(Statement st : stmts) {
                     Resource s = st.getSubject();
                     String varName = st.getLiteral().getString();
-                    String varResUri = baseRes.nest("var-").nest(varName).str();
+                    //String varResUri = baseRes.nest("var-").nest(varName).str();
+                    String varResUri = queryRes.nest("-var-").nest(varName).str();
                     ResourceUtils.renameResource(s, varResUri);
                 }
 
