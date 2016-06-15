@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -22,8 +21,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.management.RuntimeErrorException;
 
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
@@ -41,11 +38,9 @@ import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.core.Skolemize;
-import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
-import org.aksw.simba.lsq.util.PatternMatcher;
-import org.aksw.simba.lsq.util.PatternMatcherImpl;
 import org.aksw.simba.lsq.util.SpinUtils;
+import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -58,8 +53,10 @@ import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
@@ -364,10 +361,10 @@ public class MainLSQ {
         Model expModel = ModelFactory.createDefaultModel();
         NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
 
-        Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-
+      //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr 
         expRes
-            .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+          //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
             .addLiteral(PROV.startedAtTime, expStart);
 
         RDFDataMgr.write(out, expModel, RDFFormat.TURTLE_BLOCKS);
@@ -504,6 +501,16 @@ public class MainLSQ {
                     }
                 }
 
+                // Post processing: Craft global IRIs for SPIN variables
+                Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
+                for(Statement st : stmts) {
+                    Resource s = st.getSubject();
+                    String varName = st.getLiteral().getString();
+                    String varResUri = baseRes.nest("var-").nest(varName).str();
+                    ResourceUtils.renameResource(s, varResUri);
+                }
+                
+                
                 RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
             }
 
@@ -717,7 +724,7 @@ public class MainLSQ {
           Skolemize.skolemize(spinRes);
 
           queryRes
-              .addProperty(LSQ.asSpin, spinRes);
+              .addProperty(LSQ.hasSpin, spinRes);
 
 
 
@@ -736,7 +743,7 @@ public class MainLSQ {
             //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
             Resource featureRes = queryAspectFn.apply("sf-").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
 
-            queryRes.addProperty(LSQ.structuralFeatures, featureRes);
+            queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
 
 
             // Add used features
@@ -758,7 +765,7 @@ public class MainLSQ {
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
 
             QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
-            QueryStatistics2.enrichWithMentions(featureRes, query);
+            //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
 
 
         } catch (Exception ex) {
