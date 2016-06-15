@@ -32,14 +32,6 @@ public class LSQ {
     public static final Resource Path = resource("Path");
     public static final Resource Hybrid = resource("Hybrid");
 
-    public static final Resource Reduced = resource("Reduced");
-    public static final Resource Distinct = resource("Distinct");
-    public static final Resource OrderBy = resource("OrderBy");
-    public static final Resource GroupBy = resource("GroupBy");
-    public static final Resource Aggregators = resource("Aggregators");
-    public static final Resource Functions = resource("Functions");
-    public static final Resource Offset = resource("Offset");
-    public static final Resource Limit = resource("Limit");
 
 
     public static final Property joinVertex = property("joinVertex");
@@ -121,8 +113,33 @@ public class LSQ {
     public static final Property protocol = property("protocol");
     public static final Property verb = property("verb");
 
+    // Query / Graph Pattern Features
 
-    // Paths
+    public static final Resource Triples = resource("Triples");
+    public static final Resource Group = resource("Group");
+    public static final Resource Assign = resource("Assign");
+    public static final Resource Dataset = resource("Dataset");
+    public static final Resource SubQuery = resource("SubQuery");
+    public static final Resource Filter = resource("Filter");
+    public static final Resource Values = resource("Values");
+    public static final Resource Bind = resource("Bind");
+    public static final Resource Service = resource("Service");
+    public static final Resource Exists = resource("Exists");
+    public static final Resource NotExists = resource("NotExists");
+    public static final Resource Minus = resource("Minus");
+    public static final Resource NamedGraph = resource("NamedGraph");
+    public static final Resource Union = resource("Union");
+    public static final Resource Optional = resource("Optional");
+    public static final Resource Reduced = resource("Reduced");
+    public static final Resource Distinct = resource("Distinct");
+    public static final Resource OrderBy = resource("OrderBy");
+    public static final Resource GroupBy = resource("GroupBy");
+    public static final Resource Aggregators = resource("Aggregators");
+    public static final Resource Functions = resource("Functions");
+    public static final Resource Offset = resource("Offset");
+    public static final Resource Limit = resource("Limit");
+
+    // Path Features
     public static final Resource LinkPath = resource("LinkPath");
     public static final Resource ReverseLinkPath = resource("ReverseLinkPath");
     public static final Resource NegPropSetPath = resource("NegPropSetPath");
