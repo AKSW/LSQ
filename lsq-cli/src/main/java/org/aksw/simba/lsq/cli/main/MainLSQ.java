@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -284,7 +285,7 @@ public class MainLSQ {
             throw new RuntimeException("No log format parser found for '" + logFormat + "'");
         }
         //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
-       
+
         List<Resource> workloadResources = stream
                 .map(line -> {
                 Resource r = logModel.createResource();
@@ -293,11 +294,11 @@ public class MainLSQ {
             })
             .collect(Collectors.toList());
 
-        
-        
-        
-        
-        
+
+
+
+
+
 //        System.out.println(queryToSubmissions.keySet().size());
 
 //        logger.info("Number of distinct queries in log: "
@@ -312,13 +313,17 @@ public class MainLSQ {
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
                 .config()
-                .withPostProcessor(qe -> {
-                    if(timeoutInMs != null) {
-                        ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
-                        .setTimeout(timeoutInMs);
-                    }
-                })
-                .withCache(new CacheFrontendImpl(new CacheBackendMem()))
+                    .withCache(null)
+                    .withRetry(10, 10, TimeUnit.SECONDS)
+                    .withPagination(1000)
+                    .withDefaultLimit(1000, true)
+                    .withPostProcessor(qe -> {
+                        if(timeoutInMs != null) {
+                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
+                            .setTimeout(timeoutInMs);
+                        }
+                    })
+                    .withCache(new CacheFrontendImpl(new CacheBackendMem()))
                 .end()
                 .create();
 
@@ -487,8 +492,8 @@ public class MainLSQ {
 
                         queryExecRes
                             .addProperty(PROV.wasGeneratedBy, expRes);
-                        
-                        
+
+
                         // TODO Switch between local / remote execution
                         if(query != null) {
                             queryRes.get()
@@ -710,7 +715,7 @@ public class MainLSQ {
 
           // ... and skolemize the rest
           Skolemize.skolemize(spinRes);
-          
+
           queryRes
               .addProperty(LSQ.asSpin, spinRes);
 
