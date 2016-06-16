@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -524,7 +523,6 @@ public class MainLSQ {
         RDFDataMgr.write(out, tmpModel, RDFFormat.TURTLE_BLOCKS);
 
 
-
         out.flush();
 
         // If the output stream is based on a file then close it, but
@@ -764,6 +762,19 @@ public class MainLSQ {
             QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
 
             QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
+
+
+            // TODO Move to a util function
+            Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
+                    .mapWith(stmt -> stmt.getObject().asResource()).toSet();
+
+            for(Resource serviceUri : serviceUris) {
+                featureRes.addProperty(LSQ.usesService, serviceUri);
+            }
+
+
+
+
             //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
 
 

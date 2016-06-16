@@ -171,6 +171,9 @@ public class LSQ {
     public static final Resource SeqPath = resource("SeqPath");
 
 
+    public static final Property usesService = property("usesService");
+
+
     public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
 
     //public static final Property
