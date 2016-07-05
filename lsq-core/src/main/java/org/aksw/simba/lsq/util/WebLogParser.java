@@ -28,18 +28,19 @@ public class WebLogParser {
             .getLogger(WebLogParser.class);
 
     private static Map<String, WebLogParser> formatRegistry;
-    
+
     public static Map<String, WebLogParser> getFormatRegistry() {
         if(formatRegistry == null) {
             formatRegistry = new HashMap<>();
-            
+
             formatRegistry.put("apache", new WebLogParser(apacheLogEntryPattern, apacheDateFormat));
             formatRegistry.put("virtuoso", new WebLogParser(virtuosoLogEntryPattern, virtuosoDateFormat));
+            formatRegistry.put("distributed", new WebLogParser(distributedLogEntryPattern, apacheDateFormat));
         }
-        
+
         return formatRegistry;
     }
-    
+
 
     //9c6a991dbf3332fdc973c5b8461ba79f [30/Apr/2010 00:00:00 -0600] "R" "/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&should-sponge=&query=SELECT+DISTINCT+%3Fcity+%3Flatd%0D%0AFROM+%3Chttp%3A%2F%2Fdbpedia.org%3E%0D%0AWHERE+%7B%0D%0A+%3Fcity+%3Chttp%3A%2F%2Fdbpedia.org%2Fproperty%2FsubdivisionName%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2FNetherlands%3E.%0D%0A+%3Fcity+%3Chttp%3A%2F%2Fdbpedia.org%2Fproperty%2Flatd%3E+%3Flatd.%0D%0A%7D&format=text%2Fhtml&debug=on&timeout=2200"
     public static String virtuosoLogEntryPatternStr
@@ -49,6 +50,24 @@ public class WebLogParser {
             + "\"(?<unknown>.+?)\" "
             + "\"(?<path>.+?)\""
             ;
+
+//    cu.drugbank.bio2rdf.org 109.245.1.153 [13/Sep/2015:06:41:12 -0400] "GET /sparql?default-graph-uri=&query=PREFIX+drugbank%3A+%3Chttp%3A%2F%2Fbio2rdf.org%2Fdrugbank%3A%3E%0D%0ASELECT+%3FP+%3FO%0D%0AWHERE+%7B%0D%0A+drugbank%3ADB00125+%3FP+%3FO%0D%0A%7D&format=text%2Fhtml&timeout=0&debug=on HTTP/1.1" 200 3228 5305 "http://drugbank.bio2rdf.org/sparql" "Mozilla/5.0 (X11; Linux i686) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/38.0.2125.111 Safari/537.36" - "-"
+    public static String distributedLogEntryPatternStr
+        = "^"
+        + "((?<target>[^\\s]+)\\s+)?" // optional group
+        + "(?<host>[^\\s]+)\\s+"
+        + "\\[(?<time>[\\w:/ ]+\\s[+\\-]\\d{4})\\]\\s+"
+        //+ "(\\S+) "
+        //+ "\"(?<request>.+?)\" "
+        + "\""
+        +  "(?<verb>\\S+)\\s+"
+        +  "(?<path>\\S+)\\s+"
+        +  "(?<protocol>\\S+)"
+        + "\"\\s+"
+        + "(?<response>\\d{3})\\s+"
+        + "(?<bytecount>\\d+)\\s+"
+//        + "\"(?<referer>[^\"]+)\""
+        ;
 
     public static String apacheLogEntryPatternStr
             = "^"
@@ -74,12 +93,13 @@ public class WebLogParser {
 
     public static final Pattern apacheLogEntryPattern = Pattern.compile(apacheLogEntryPatternStr);
     public static final Pattern virtuosoLogEntryPattern = Pattern.compile(virtuosoLogEntryPatternStr);
+    public static final Pattern distributedLogEntryPattern = Pattern.compile(distributedLogEntryPatternStr);
 
     public static final Pattern requestParser = Pattern.compile(requestParserStr);
 
     // 17/Apr/2011:06:47:47 +0200
     public static final DateFormat apacheDateFormat = new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z");
-    
+
     // 30/Apr/2010 00:00:00 -0600
     public static final DateFormat virtuosoDateFormat = new SimpleDateFormat("dd/MMM/yyyy HH:mm:ss Z");
 
@@ -92,19 +112,19 @@ public class WebLogParser {
     private String referer;
     private String userAgent;
 */
-    
+
     protected PatternMatcher patternMatcher;
     protected DateFormat dateFormat;
-    
+
     public WebLogParser(Pattern pattern, DateFormat dateFormat) {
         this(new PatternMatcherImpl(pattern), dateFormat);
     }
-    
+
     public WebLogParser(PatternMatcher patternMatcher, DateFormat dateFormat) {
         this.patternMatcher = patternMatcher;
         this.dateFormat = dateFormat;
     }
-    
+
     public static String encodeUnsafeCharacters(String uri) {
         String result = uri
                 .replace("{", "%7B")
@@ -117,7 +137,7 @@ public class WebLogParser {
     public void parseEntry(String str, Resource inout) {
         //Matcher m = regexPattern.matcher(str);
         Map<String, String> m = patternMatcher.apply(str);
-        
+
         //List<String> groupNames = Arrays.asList("host", "user", "request", "path", "protocol", "verb"
 
         if(m != null) {
@@ -125,7 +145,7 @@ public class WebLogParser {
             ResourceUtils.addLiteral(inout, LSQ.user, m.get("user"));
 
 //            String request = m.get("request");
-//            ResourceUtils.addLiteral(inout, LSQ.request, request); 
+//            ResourceUtils.addLiteral(inout, LSQ.request, request);
 
             // Parse the request part into http verb, path and protocol
 //            if(request != null) {
@@ -138,7 +158,7 @@ public class WebLogParser {
             ResourceUtils.addLiteral(inout, LSQ.verb, m.get("veb"));
 
             if(pathStr != null) {
-    
+
                 pathStr = encodeUnsafeCharacters(pathStr);
 
 
@@ -161,7 +181,7 @@ public class WebLogParser {
                     logger.warn("Could not parse URI: " + mockUri, e);
                 }
             }
-    
+
             String timestampStr = m.get("time");
             if(timestampStr != null) {
                 Date date;

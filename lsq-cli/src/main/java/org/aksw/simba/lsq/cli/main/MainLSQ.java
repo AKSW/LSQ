@@ -377,10 +377,15 @@ public class MainLSQ {
 //            startedAtTime
 //            endAtTime
 
+        int logFailCount = 0;
 
-        int i = 0;
+        int logEntryIndex = 0;
         int batchSize = 10;
+
+        // TODO We should check beforehand whether there is a sufficient number of processable log entries
+        // available in order to consider the workload a query log
         for(Resource r : workloadResources) {
+
             //Model m = ResourceUtils.reachableClosure(r);
             SparqlStmt stmt = Optional.ofNullable(r.getProperty(LSQ.query))
                 .map(queryStmt -> queryStmt.getString())
@@ -401,11 +406,10 @@ public class MainLSQ {
                     queryStr = "" + queryStmt.getQuery();
                 }
 
-                if(i % batchSize == 0) {
-                    int batchEnd = Math.min(i + batchSize, workloadSize);
-                    logger.info("Processing query batch from " + i + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
+                if(logEntryIndex % batchSize == 0) {
+                    int batchEnd = Math.min(logEntryIndex + batchSize, workloadSize);
+                    logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
                 }
-                ++i;
 
 
                 Model queryModel = ModelFactory.createDefaultModel();
@@ -510,9 +514,19 @@ public class MainLSQ {
 
 
                 RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
+            } else {
+                ++logFailCount;
+                double ratio = logFailCount / workloadResources.size();
+                if(logEntryIndex <= 10 && ratio > 0.8) {
+                    throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");
+                }
+
+
+                logger.warn("Skipping a log entry ");
             }
 
             //.write(System.err, "TURTLE");
+            ++logEntryIndex;
         }
 
 
