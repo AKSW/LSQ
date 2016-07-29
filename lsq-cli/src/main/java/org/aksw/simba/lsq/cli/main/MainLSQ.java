@@ -58,13 +58,11 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -83,18 +81,18 @@ public class MainLSQ {
     public static final OptionParser parser = new OptionParser();
 
 
-    public static final PrefixMapping lsqPrefixes;
-
-    static {
-        try {
-            ClassPathResource r = new ClassPathResource("lsq-prefixes.ttl");
-            Model m = ModelFactory.createDefaultModel();
-            m.read(r.getInputStream(), "http://example.org/base/", "turtle");
-            lsqPrefixes = m;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static final PrefixMapping lsqPrefixes;
+//
+//    static {
+//        try {
+//            ClassPathResource r = new ClassPathResource("lsq-prefixes.ttl");
+//            Model m = ModelFactory.createDefaultModel();
+//            m.read(r.getInputStream(), "http://example.org/base/", "turtle");
+//            lsqPrefixes = m;
+//        } catch(Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 
     public static void main(String[] args) throws Exception  {

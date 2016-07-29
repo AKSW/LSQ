@@ -10,7 +10,6 @@ file=`find lsq-cli -name '*-jar-with-dependencies.jar'`
 #echo "$file"
 
 java -cp "$file" org.aksw.simba.lsq.cli.main.MainLSQ \
-#lsq \
   -f lsq-core/src/test/resources/swdf.apache.log \
   -e http://localhost:8890/sparql \
   -l swdf \
