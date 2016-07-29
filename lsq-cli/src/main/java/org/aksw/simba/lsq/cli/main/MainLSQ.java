@@ -44,6 +44,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -59,6 +60,9 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.system.InitJenaCore;
+import org.apache.jena.system.JenaSubsystemLifecycle;
+import org.apache.jena.system.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -230,9 +234,12 @@ public class MainLSQ {
 //        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
 //        ApplicationContext ctx = SpringApplication.run(ConfigLSQ.class, args);
 
-
+        JenaSystem.init();
+        InitJenaCore.init();
+        ARQ.init();
         SPINModuleRegistry.get().init();
 
+        
         //DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //Calendar startTime = new GregorianCalendar();
 
