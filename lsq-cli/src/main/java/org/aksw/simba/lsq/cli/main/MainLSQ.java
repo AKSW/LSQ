@@ -527,7 +527,7 @@ public class MainLSQ {
                 }
 
 
-                logger.warn("Skipping a log entry ");
+                logger.warn("Skipping log entry #" + logEntryIndex);
             }
 
             //.write(System.err, "TURTLE");

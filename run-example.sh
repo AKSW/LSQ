@@ -17,5 +17,6 @@ java -cp "$file" org.aksw.simba.lsq.cli.main.MainLSQ \
   -p http://localhost/service/org.semanticweb.swdf_swdf-full_latest_public_sparql \
   -h 100 \
   -r qel \
-  -t 10000 | rapper -i turtle -o turtle - http://foo
+  -t 10000 
+#| rapper -i turtle -o turtle - http://foo
 
