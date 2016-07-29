@@ -4,6 +4,7 @@
 .settings
 target
 
+debtree.txt
 LSQ-SWDF-test.ttl
 
 hs_err*
