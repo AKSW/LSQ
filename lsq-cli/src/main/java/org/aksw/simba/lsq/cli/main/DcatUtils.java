@@ -3,7 +3,6 @@ package org.aksw.simba.lsq.cli.main;
 import java.util.List;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.apache.jena.rdf.model.Resource;
 
 public class DcatUtils {
