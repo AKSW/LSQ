@@ -44,6 +44,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -58,13 +59,14 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.system.InitJenaCore;
+import org.apache.jena.system.JenaSubsystemLifecycle;
+import org.apache.jena.system.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -83,18 +85,18 @@ public class MainLSQ {
     public static final OptionParser parser = new OptionParser();
 
 
-    public static final PrefixMapping lsqPrefixes;
-
-    static {
-        try {
-            ClassPathResource r = new ClassPathResource("lsq-prefixes.ttl");
-            Model m = ModelFactory.createDefaultModel();
-            m.read(r.getInputStream(), "http://example.org/base/", "turtle");
-            lsqPrefixes = m;
-        } catch(Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+//    public static final PrefixMapping lsqPrefixes;
+//
+//    static {
+//        try {
+//            ClassPathResource r = new ClassPathResource("lsq-prefixes.ttl");
+//            Model m = ModelFactory.createDefaultModel();
+//            m.read(r.getInputStream(), "http://example.org/base/", "turtle");
+//            lsqPrefixes = m;
+//        } catch(Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
 
 
     public static void main(String[] args) throws Exception  {
@@ -232,9 +234,12 @@ public class MainLSQ {
 //        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
 //        ApplicationContext ctx = SpringApplication.run(ConfigLSQ.class, args);
 
-
+        JenaSystem.init();
+        InitJenaCore.init();
+        ARQ.init();
         SPINModuleRegistry.get().init();
 
+        
         //DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //Calendar startTime = new GregorianCalendar();
 
@@ -522,7 +527,7 @@ public class MainLSQ {
                 }
 
 
-                logger.warn("Skipping a log entry ");
+                logger.warn("Skipping log entry #" + logEntryIndex);
             }
 
             //.write(System.err, "TURTLE");

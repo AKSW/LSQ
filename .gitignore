@@ -4,6 +4,7 @@
 .settings
 target
 
+deptree.txt
 LSQ-SWDF-test.ttl
 
 hs_err*
