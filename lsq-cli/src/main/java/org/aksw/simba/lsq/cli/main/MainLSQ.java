@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.util.strings.StringUtils;
@@ -61,7 +60,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.system.InitJenaCore;
-import org.apache.jena.system.JenaSubsystemLifecycle;
 import org.apache.jena.system.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -276,7 +274,7 @@ public class MainLSQ {
         Model logModel = ModelFactory.createDefaultModel();
 
         Stream<String> stream = reader.lines();
-
+        
         if(head != null) {
             stream = stream.limit(head);
         }
@@ -287,13 +285,21 @@ public class MainLSQ {
         }
         //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
 
-        List<Resource> workloadResources = stream
+        Stream<Resource> workloadResourceStream = stream
                 .map(line -> {
                 Resource r = logModel.createResource();
                 webLogParser.parseEntry(line, r);
                 return r;
-            })
-            .collect(Collectors.toList());
+            });
+        
+        
+//        List<Resource> workloadResources = stream
+//                .map(line -> {
+//                Resource r = logModel.createResource();
+//                webLogParser.parseEntry(line, r);
+//                return r;
+//            })
+//            .collect(Collectors.toList());
 
 
 
@@ -334,8 +340,9 @@ public class MainLSQ {
         logger.info("Counting triples in the endpoint ...");
         long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
 
-        int workloadSize = workloadResources.size();
-
+        //int workloadSize = workloadResources.size();
+        Long workloadSize = null;
+        
         logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + endpointUrl + " / " + graph + ": " + datasetSize);
 
@@ -382,15 +389,15 @@ public class MainLSQ {
 //            startedAtTime
 //            endAtTime
 
-        int logFailCount = 0;
-
-        int logEntryIndex = 0;
+        // Small array hack in order to change the values while streaming
+        int logFailCount[] = new int[] {0};
+        long logEntryIndex[] = new long[] {0l};
         int batchSize = 10;
 
         // TODO We should check beforehand whether there is a sufficient number of processable log entries
         // available in order to consider the workload a query log
-        for(Resource r : workloadResources) {
-
+        //for(Resource r : workloadResources) {
+        workloadResourceStream.forEach(r -> {
             //Model m = ResourceUtils.reachableClosure(r);
             SparqlStmt stmt = Optional.ofNullable(r.getProperty(LSQ.query))
                 .map(queryStmt -> queryStmt.getString())
@@ -411,8 +418,9 @@ public class MainLSQ {
                     queryStr = "" + queryStmt.getQuery();
                 }
 
-                if(logEntryIndex % batchSize == 0) {
-                    int batchEnd = Math.min(logEntryIndex + batchSize, workloadSize);
+                if(logEntryIndex[0] % batchSize == 0) {
+                    long batchEndTmp = logEntryIndex[0] + batchSize;
+                    long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
                     logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
                 }
 
@@ -520,9 +528,9 @@ public class MainLSQ {
 
                 RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
             } else {
-                ++logFailCount;
-                double ratio = logFailCount / workloadResources.size();
-                if(logEntryIndex <= 10 && ratio > 0.8) {
+                ++logFailCount[0];
+                double ratio = logFailCount[0] / logEntryIndex[0];
+                if(logEntryIndex[0] <= 10 && ratio > 0.8) {
                     throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");
                 }
 
@@ -531,8 +539,8 @@ public class MainLSQ {
             }
 
             //.write(System.err, "TURTLE");
-            ++logEntryIndex;
-        }
+            ++logEntryIndex[0];
+        });
 
 
         Model tmpModel = ModelFactory.createDefaultModel();
