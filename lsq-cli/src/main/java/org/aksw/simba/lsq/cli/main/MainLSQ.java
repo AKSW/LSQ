@@ -326,7 +326,7 @@ public class MainLSQ {
                             .setTimeout(timeoutInMs);
                         }
                     })
-                    .withCache(new CacheFrontendImpl(new CacheBackendMem()))
+//                    .withCache(new CacheFrontendImpl(new CacheBackendMem()))
 //                    .withRetry(3, 30, TimeUnit.SECONDS)
 //                    .withPagination(1000)
                 .end()
