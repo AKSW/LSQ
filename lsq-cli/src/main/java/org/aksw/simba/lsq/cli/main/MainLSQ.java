@@ -540,7 +540,7 @@ public class MainLSQ {
                 }
                 
             } catch(Exception e) {
-                logger.warn("Unexpected exception encountered" + logEntryIndex[0] + " - " + str, e);
+                logger.warn("Unexpected exception encountered at item " + logEntryIndex[0] + " - " + str, e);
             }
 
             //.write(System.err, "TURTLE");
