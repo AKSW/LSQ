@@ -53,11 +53,13 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.RDFWriter;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.system.InitJenaCore;
 import org.apache.jena.system.JenaSystem;
@@ -131,6 +133,12 @@ public class MainLSQ {
                 .defaultsTo("apache")
                 ;
 
+        OptionSpec<String> outFormatOs = parser
+                .acceptsAll(Arrays.asList("w", "experiment"), "Format for (w)riting out data. Available options: " + RDFWriterRegistry.getJenaWriterNames())
+                .withRequiredArg()
+                .defaultsTo("N3-PLAIN")
+                ;
+        
         OptionSpec<String> rdfizerOs = parser
                 .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og and (q)uery")
                 .withOptionalArg()
@@ -223,7 +231,11 @@ public class MainLSQ {
         Long timeoutInMs = timeoutInMsOs.value(options);
         String expBaseUri = expBaseUriOs.value(options);
         String logFormat = logFormatOs.value(options);
-
+        String outFormatStr = outFormatOs.value(options);
+        RDFFormat outFormat = RDFWriterRegistry.getFormatForJenaWriter(outFormatStr);
+        if(outFormat == null) {
+            throw new RuntimeException("No Jena writer found for name: " + outFormatStr);
+        }
 
         expBaseUri = expBaseUri == null ? baseUri + datasetLabel : expBaseUri;
 
@@ -376,7 +388,7 @@ public class MainLSQ {
           //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
             .addLiteral(PROV.startedAtTime, expStart);
 
-        RDFDataMgr.write(out, expModel, RDFFormat.TURTLE_BLOCKS);
+        RDFDataMgr.write(out, expModel, outFormat);
 
 
 //        myenv
@@ -527,7 +539,7 @@ public class MainLSQ {
                     }
     
     
-                    RDFDataMgr.write(out, queryModel, RDFFormat.TURTLE_BLOCKS);
+                    RDFDataMgr.write(out, queryModel, outFormat);
                 } else {
                     ++logFailCount[0];
                     double ratio = logFailCount[0] / logEntryIndex[0];
@@ -552,7 +564,7 @@ public class MainLSQ {
         expRes.inModel(tmpModel)
             .addLiteral(PROV.endAtTime, Calendar.getInstance());
 
-        RDFDataMgr.write(out, tmpModel, RDFFormat.TURTLE_BLOCKS);
+        RDFDataMgr.write(out, tmpModel, outFormat); //RDFFormat.TURTLE_BLOCKS);
 
 
         out.flush();
