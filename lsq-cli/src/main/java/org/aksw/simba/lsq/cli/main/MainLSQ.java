@@ -451,7 +451,7 @@ public class MainLSQ {
                     if(logEntryIndex[0] % batchSize == 0) {
                         long batchEndTmp = logEntryIndex[0] + batchSize;
                         long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
-                        logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
+                        logger.info("Processing query batch from " + logEntryIndex[0] + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
                     }
     
     
