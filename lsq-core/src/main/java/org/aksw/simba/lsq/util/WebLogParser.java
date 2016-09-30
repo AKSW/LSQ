@@ -163,7 +163,7 @@ public class WebLogParser {
 
 
                 // Parse the path and extract sparql query string if present
-                String mockUri = "http://example.org" + pathStr;
+                String mockUri = "http://example.org/" + pathStr;
                 try {
                     URI uri = new URI(mockUri);
                     List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());

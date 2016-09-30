@@ -32,6 +32,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
+import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
@@ -421,6 +422,8 @@ public class MainLSQ {
         // available in order to consider the workload a query log
         //for(Resource r : workloadResources) {
         workloadResourceStream.forEach(r -> {
+
+            boolean fail = false;
             
             Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
                     .map(queryStmt -> queryStmt.getString());
@@ -553,19 +556,25 @@ public class MainLSQ {
                     RDFDataMgr.write(out, queryModel, outFormat);
                 } else {
                     ++logFailCount[0];
-                    double ratio = logFailCount[0] / logEntryIndex[0];
-                    if(logEntryIndex[0] <= 10 && ratio > 0.8) {
-                        throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");
+                    double ratio = logEntryIndex[0] == 0 ? 0.0 : logFailCount[0] / logEntryIndex[0];
+                    if(logEntryIndex[0] == 10 && ratio > 0.8) {
+                        fail = true;
                     }
-    
-    
-                    logger.warn("Skipping log entry #" + logEntryIndex);
+        
+                    logger.warn("Skipping log entry #" + logEntryIndex[0]);
+//                    Model m = ResourceUtils.reachableClosure(r);
+//                    String modelStr = ModelUtils.toString(m, "TTL");
+//                    logger.debug(modelStr);                    
                 }
                 
             } catch(Exception e) {
                 logger.warn("Unexpected exception encountered at item " + logEntryIndex[0] + " - " + str, e);
             }
 
+            if(fail) {
+                throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");                
+            }
+            
             //.write(System.err, "TURTLE");
             ++logEntryIndex[0];
         });
