@@ -43,17 +43,16 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.n3.N3JenaWriter;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.QueryParseException;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.RDFWriter;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
@@ -69,6 +68,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -115,6 +117,9 @@ public class MainLSQ {
 
     public static void run(String[] args) throws Exception  {
 
+        //RDFWriterRegistry.register(N3JenaWriter.n3WriterPlain, RDFFormat.TURTLE_BLOCKS);
+        //RDFWriterRegistry.ir
+        
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 .withRequiredArg()
@@ -134,9 +139,9 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> outFormatOs = parser
-                .acceptsAll(Arrays.asList("w", "experiment"), "Format for (w)riting out data. Available options: " + RDFWriterRegistry.getJenaWriterNames())
+                .acceptsAll(Arrays.asList("w", "outformat"), "Format for (w)riting out data. Available options: " + RDFWriterRegistry.registered())
                 .withRequiredArg()
-                .defaultsTo("N3-PLAIN")
+                .defaultsTo("Turtle/blocks")
                 ;
         
         OptionSpec<String> rdfizerOs = parser
@@ -232,7 +237,8 @@ public class MainLSQ {
         String expBaseUri = expBaseUriOs.value(options);
         String logFormat = logFormatOs.value(options);
         String outFormatStr = outFormatOs.value(options);
-        RDFFormat outFormat = RDFWriterRegistry.getFormatForJenaWriter(outFormatStr);
+        
+        RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equals(outFormatStr)).findFirst().orElse(null);
         if(outFormat == null) {
             throw new RuntimeException("No Jena writer found for name: " + outFormatStr);
         }
@@ -328,6 +334,11 @@ public class MainLSQ {
                 .http(endpointUrl, graph)
                 .create();
 
+        Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
+            .maximumSize(10000)
+            .build();
+        
+        
         QueryExecutionFactory dataQef =
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
@@ -338,7 +349,7 @@ public class MainLSQ {
                             .setTimeout(timeoutInMs);
                         }
                     })
-//                    .withCache(new CacheFrontendImpl(new CacheBackendMem()))
+                    .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
 //                    .withRetry(3, 30, TimeUnit.SECONDS)
 //                    .withPagination(1000)
                 .end()
@@ -377,7 +388,7 @@ public class MainLSQ {
         SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
 
         Calendar expStart = Calendar.getInstance();
-        String expStartStr = dt.format(expStart.getTime());
+        //String expStartStr = dt.format(expStart.getTime());
 
         Model expModel = ModelFactory.createDefaultModel();
         NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
