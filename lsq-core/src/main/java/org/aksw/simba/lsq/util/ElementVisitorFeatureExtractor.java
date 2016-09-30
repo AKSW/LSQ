@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Triple;
@@ -17,6 +18,7 @@ import org.apache.jena.sparql.core.PathBlock;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprAggregator;
+import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementAssign;
@@ -37,6 +39,7 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitor;
 import org.apache.jena.sparql.syntax.ElementWalker;
+import org.apache.jena.sparql.util.Symbol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -113,10 +116,21 @@ public class ElementVisitorFeatureExtractor
 
             if(expr.isFunction()) {
                 // TODO Will use full URIs for custom sparql functions - may want to shorten them with prefixes
-                String fnName = ExprUtils.getFunctionId(expr.getFunction());
-
-                Resource fnRes = ResourceFactory.createResource(LSQ.ns + "fn-" + fnName);
-                features.add(fnRes);
+                ExprFunction fn = expr.getFunction();
+                
+                Symbol symbol = fn.getFunctionSymbol();
+                String fnName = null;
+                fnName = fnName != null ? fnName : symbol.getSymbol(); 
+                fnName = fnName != null ? fnName : fn.getFunctionIRI();
+                fnName = fnName != null ? fnName : fn.getOpName();
+              
+                if(fnName != null) {
+                    fnName = StringUtils.urlEncode(fnName); 
+                    Resource fnRes = ResourceFactory.createResource(LSQ.ns + "fn-" + fnName);
+                    features.add(fnRes);
+                } else {
+                    logger.warn("Could not obtain any of {label/symbol/iri} for "+ expr);
+                }
             }
         }
     }
