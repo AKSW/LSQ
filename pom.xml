@@ -50,12 +50,15 @@
 
 
     <modules>
+        <module>lsq-vocab-jena</module>
         <module>lsq-core</module>
         <module>lsq-cli</module>
         <module>lsq-debian-cli</module>
     </modules>
 
     <properties>
+        <jena.version>3.1.0</jena.version>
+        <jsa.version>${jena.version}-2-SNAPSHOT</jsa.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
@@ -67,6 +70,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+        		<groupId>org.aksw.simba.lsq</groupId>
+        		<artifactId>lsq-vocab-jena</artifactId>
+                <version>${project.version}</version>
+        	</dependency>
+
             <dependency>
                 <groupId>org.aksw.simba.lsq</groupId>
                 <artifactId>lsq-core</artifactId>
@@ -82,7 +91,7 @@
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
                 <artifactId>jena-sparql-api-core</artifactId>
-                <version>3.1.0-2-SNAPSHOT</version>
+                <version>${jsa.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>org.quartz-scheduler</groupId>
