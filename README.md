@@ -21,7 +21,7 @@ java -cp `find . -name 'lsq*jar-with-dependencies.jar'` org.aksw.simba.lsq.cli.m
 ```
 
 ```bash
-alias lsq=java -cp `find {your-absolute-folder} -name 'lsq*jar-with-dependencies.jar'` org.aksw.simba.lsq.cli.main.MainLSQ
+alias lsq='java -cp `find "/path/to/lsq-cli/target/" -name "lsq*jar-with-dependencies.jar"` org.aksw.simba.lsq.cli.main.MainLSQ'
 ```
 
 
@@ -53,7 +53,7 @@ Option                Description
 -l, --label           Label of the dataset, such as 'dbpedia' or 'lgd'. Will be
                         used in URI generation (default: mydata)               
 -m, --format          Format of the input data. Available options: [virtuoso,  
-                        apache] (default: apache)                              
+                        apache, distributed] (default: apache)                              
 -o, --output <File>   File where to store the output data.                     
 -p, --public          Public endpoint URL - e.g. http://example.org/sparql     
 -r, --rdfizer         RDFizer selection: Any combination of the letters (e)    
