@@ -1,5 +1,11 @@
-Archive:  lsq_bio2rdf_logs.zip
-  inflating: media/ssd/logs/lsq/cu.bio2rdf.org.csv  
+103.31.200.170 [13/Sep/2015:07:57:48 -0400] "GET /robots.txt HTTP/1.0" 200 3485 4125 "http://cu.bio2rdf.org/robots.txt" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
+103.31.200.170 [13/Sep/2015:07:57:51 -0400] "GET / HTTP/1.0" 200 3991 23331 "http://cu.bio2rdf.org/" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
+209.249.5.248 [13/Sep/2015:20:35:46 -0400] "GET /robots.txt HTTP/1.1" 200 824 3776 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
+209.249.5.248 [13/Sep/2015:20:35:46 -0400] "GET / HTTP/1.1" 200 1814 10838 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
+209.249.5.248 [13/Sep/2015:20:35:56 -0400] "GET /cas:921-60-8 HTTP/1.1" 200 2108 7278793 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
+209.249.5.248 [13/Sep/2015:20:36:14 -0400] "GET /queryall/querybundle:hasQueryLiteral HTTP/1.1" 200 15840 226797 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
+209.249.5.248 [13/Sep/2015:20:36:24 -0400] "GET /queryall/querybundle:QueryBundle HTTP/1.1" 200 16032 171232 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
+209.249.5.248 [13/Sep/2015:20:36:34 -0400] "GET /queryall/provider:needsRdfNormalisation HTTP/1.1" 200 16202 113688 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"
 103.31.200.170 [13/Sep/2015:07:57:48 -0400] "GET /robots.txt HTTP/1.0" 200 3485 4125 "http://cu.bio2rdf.org/robots.txt" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
 103.31.200.170 [13/Sep/2015:07:57:51 -0400] "GET / HTTP/1.0" 200 3991 23331 "http://cu.bio2rdf.org/" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
 209.249.5.248 [13/Sep/2015:20:35:46 -0400] "GET /robots.txt HTTP/1.1" 200 824 3776 "-" "rogerbot/1.0 (http://moz.com/help/pro/what-is-rogerbot-, rogerbot-wherecat@moz.com)" - "-"

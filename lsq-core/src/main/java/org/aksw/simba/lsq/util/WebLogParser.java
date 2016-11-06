@@ -153,13 +153,24 @@ public class WebLogParser {
         return result;
     }
 
-    public void parseEntry(String str, Resource inout) {
+    /**
+     * Returns the provided resource if the string could be parsed.
+     * Otherwise, returns null
+     *
+     * @param str
+     * @param inout
+     * @return
+     */
+    public boolean parseEntry(String str, Resource inout) {
         //Matcher m = regexPattern.matcher(str);
         Map<String, String> m = patternMatcher.apply(str);
 //System.out.println(m);
         //List<String> groupNames = Arrays.asList("host", "user", "request", "path", "protocol", "verb"
 
+        boolean result;
         if(m != null) {
+        	result = true;
+
             ResourceUtils.addLiteral(inout, LSQ.host, m.get("host"));
             ResourceUtils.addLiteral(inout, LSQ.user, m.get("user"));
 
@@ -213,6 +224,10 @@ public class WebLogParser {
                     inout.addLiteral(LSQ.processingError, "Failed to parse timestamp: " + timestampStr);
                 }
             }
+        } else {
+        	result = false;
         }
+
+        return result;
     }
 }
