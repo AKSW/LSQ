@@ -118,7 +118,7 @@ public class MainLSQ {
 
         //RDFWriterRegistry.register(N3JenaWriter.n3WriterPlain, RDFFormat.TURTLE_BLOCKS);
         //RDFWriterRegistry.ir
-        
+
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 .withRequiredArg()
@@ -142,7 +142,7 @@ public class MainLSQ {
                 .withRequiredArg()
                 .defaultsTo("Turtle/blocks")
                 ;
-        
+
         OptionSpec<String> rdfizerOs = parser
                 .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og and (q)uery")
                 .withOptionalArg()
@@ -236,7 +236,7 @@ public class MainLSQ {
         String expBaseUri = expBaseUriOs.value(options);
         String logFormat = logFormatOs.value(options);
         String outFormatStr = outFormatOs.value(options);
-        
+
         RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equals(outFormatStr)).findFirst().orElse(null);
         if(outFormat == null) {
             throw new RuntimeException("No Jena writer found for name: " + outFormatStr);
@@ -249,12 +249,12 @@ public class MainLSQ {
 //        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
 //        ApplicationContext ctx = SpringApplication.run(ConfigLSQ.class, args);
 
-        JenaSystem.init();
-        InitJenaCore.init();
-        ARQ.init();
-        SPINModuleRegistry.get().init();
+//        JenaSystem.init();
+//        InitJenaCore.init();
+//        ARQ.init();
+//        SPINModuleRegistry.get().init();
 
-        
+
         //DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         //Calendar startTime = new GregorianCalendar();
 
@@ -291,7 +291,7 @@ public class MainLSQ {
         Model logModel = ModelFactory.createDefaultModel();
 
         Stream<String> stream = reader.lines();
-        
+
         if(head != null) {
             stream = stream.limit(head);
         }
@@ -308,8 +308,8 @@ public class MainLSQ {
                 webLogParser.parseEntry(line, r);
                 return r;
             });
-        
-        
+
+
 //        List<Resource> workloadResources = stream
 //                .map(line -> {
 //                Resource r = logModel.createResource();
@@ -336,8 +336,8 @@ public class MainLSQ {
         Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .build();
-        
-        
+
+
         QueryExecutionFactory dataQef =
                 FluentQueryExecutionFactory
                 .http(endpointUrl, graph)
@@ -364,7 +364,7 @@ public class MainLSQ {
 
         //int workloadSize = workloadResources.size();
         Long workloadSize = null;
-        
+
         logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + endpointUrl + " / " + graph + ": " + datasetSize);
 
@@ -422,7 +422,7 @@ public class MainLSQ {
         workloadResourceStream.forEach(r -> {
 
             boolean fail = false;
-            
+
             Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
                     .map(queryStmt -> queryStmt.getString());
 
@@ -433,9 +433,9 @@ public class MainLSQ {
                         .orElse(null);
 
                 if(stmt != null && stmt.isQuery()) {
-     
+
                     SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
-    
+
                     String queryStr;
                     Query query;
                     if(!queryStmt.isParsed()) {
@@ -445,32 +445,32 @@ public class MainLSQ {
                         query = queryStmt.getQuery();
                         queryStr = "" + queryStmt.getQuery();
                     }
-    
+
                     if(logEntryIndex[0] % batchSize == 0) {
                         long batchEndTmp = logEntryIndex[0] + batchSize;
                         long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
                         logger.info("Processing query batch from " + logEntryIndex[0] + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
                     }
-    
-    
+
+
                     Model queryModel = ModelFactory.createDefaultModel();
-    
-    
+
+
                     Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
-    
+
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
                     NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
-    
+
                     String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
                     NestedResource queryRes = baseRes.nest("q-" + queryHash);
-    
+
                     Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
-    
+
                     queryRes.get()
                         .addProperty(RDF.type, SP.Query)
                         .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
-    
-    
+
+
                     if(!queryStmt.isParsed()) {
                         String msg = queryStmt.getParseException().getMessage();
                         queryRes.get()
@@ -480,66 +480,66 @@ public class MainLSQ {
                             rdfizeQuery(queryRes.get(), queryAspectFn, query);
                         }
                     }
-    
-    
+
+
                     if(rdfizer.contains("l")) {
                         // Deal with log entry (remote execution)
                         String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-    
+
                         Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
-    
-    
+
+
                         Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
                         Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
                         String timestampStr = dt.format(timestamp.getTime());
                         //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-    
+
                         Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
-    
+
                         // Express that the query execution was recorded
                         // at some point in time by some user at some service
                         // according to some source (e.g. the log file)
                         queryRes.get()
                             .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
-    
+
                         queryExecRecRes
                             //.addProperty(RDF.type, LSQ.)
                             .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
                             .addProperty(LSQ.wasAssociatedWith, agentRes)
                             ;
-    
+
                         if(logEndpointRes != null) {
                             queryExecRecRes.addProperty(LSQ.endpoint, logEndpointRes); // TODO Make it possible to specify the dataset configuration that was used to execute the query
                         }
-    
+
                     }
-    
-    
+
+
                     if(rdfizer.contains("e")) {
                         boolean hasBeenExecuted = executedQueries.contains(query);
-    
+
                         if(!hasBeenExecuted) {
                             executedQueries.add(query);
-    
-    
+
+
                             Calendar now = Calendar.getInstance();
                             String nowStr = dt.format(now.getTime());
                             Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
-    
+
                             queryExecRes
                                 .addProperty(PROV.wasGeneratedBy, expRes);
-    
-    
+
+
                             // TODO Switch between local / remote execution
                             if(query != null) {
                                 queryRes.get()
                                     .addProperty(LSQ.hasLocalExecution, queryExecRes);
-    
+
                                 rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
                             }
                         }
                     }
-    
+
                     // Post processing: Craft global IRIs for SPIN variables
                     Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
                     for(Statement st : stmts) {
@@ -549,8 +549,8 @@ public class MainLSQ {
                         String varResUri = queryRes.nest("-var-").nest(varName).str();
                         ResourceUtils.renameResource(s, varResUri);
                     }
-    
-    
+
+
                     RDFDataMgr.write(out, queryModel, outFormat);
                 } else {
                     ++logFailCount[0];
@@ -558,21 +558,21 @@ public class MainLSQ {
                     if(logEntryIndex[0] == 10 && ratio > 0.8) {
                         fail = true;
                     }
-        
+
                     logger.warn("Skipping log entry #" + logEntryIndex[0]);
 //                    Model m = ResourceUtils.reachableClosure(r);
 //                    String modelStr = ModelUtils.toString(m, "TTL");
-//                    logger.debug(modelStr);                    
+//                    logger.debug(modelStr);
                 }
-                
+
             } catch(Exception e) {
                 logger.warn("Unexpected exception encountered at item " + logEntryIndex[0] + " - " + str, e);
             }
 
             if(fail) {
-                throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");                
+                throw new RuntimeException("Encountered too many non processable log entries. Probably not a log file.");
             }
-            
+
             //.write(System.err, "TURTLE");
             ++logEntryIndex[0];
         });
