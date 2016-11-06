@@ -36,10 +36,27 @@ public class WebLogParser {
             formatRegistry.put("apache", new WebLogParser(apacheLogEntryPattern, apacheDateFormat));
             formatRegistry.put("virtuoso", new WebLogParser(virtuosoLogEntryPattern, virtuosoDateFormat));
             formatRegistry.put("distributed", new WebLogParser(distributedLogEntryPattern, apacheDateFormat));
+            formatRegistry.put("bio2rdf", new WebLogParser(bio2rdfLogEntryPattern, apacheDateFormat));
         }
 
         return formatRegistry;
     }
+
+    // 10.0.0.0 [13/Sep/2015:07:57:48 -0400] "GET /robots.txt HTTP/1.0" 200 3485 4125 "http://cu.bio2rdf.org/robots.txt" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
+    public static String bio2rdfLogEntryPatternStr
+	    = "^"
+	    + "(?<host>[^\\s]+) "
+	    + "\\[(?<time>[^]]*)\\] "
+	    + "\""
+	    +  "(?<verb>\\S+)\\s+"
+	    +  "(?<path>\\S+)\\s+"
+	    +  "(?<protocol>\\S+)"
+	    + "\" "
+	    + "(?<response>\\d+) "
+	    + "(?<bytecount>\\d+) "
+	    + "(?<unknown>\\d+) "
+	    + "\"(?<referer>[^\"]+)\""
+	    ;
 
 
     //9c6a991dbf3332fdc973c5b8461ba79f [30/Apr/2010 00:00:00 -0600] "R" "/sparql?default-graph-uri=http%3A%2F%2Fdbpedia.org&should-sponge=&query=SELECT+DISTINCT+%3Fcity+%3Flatd%0D%0AFROM+%3Chttp%3A%2F%2Fdbpedia.org%3E%0D%0AWHERE+%7B%0D%0A+%3Fcity+%3Chttp%3A%2F%2Fdbpedia.org%2Fproperty%2FsubdivisionName%3E+%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2FNetherlands%3E.%0D%0A+%3Fcity+%3Chttp%3A%2F%2Fdbpedia.org%2Fproperty%2Flatd%3E+%3Flatd.%0D%0A%7D&format=text%2Fhtml&debug=on&timeout=2200"
@@ -69,6 +86,7 @@ public class WebLogParser {
 //        + "\"(?<referer>[^\"]+)\""
         ;
 
+    // 127.0.0.1 - - [06/Nov/2016:05:12:49 +0100] "GET /icons/ubuntu-logo.png HTTP/1.1" 200 3623 "http://localhost/" "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0"
     public static String apacheLogEntryPatternStr
             = "^"
             + "(?<host>[^\\s]+) "
@@ -94,6 +112,7 @@ public class WebLogParser {
     public static final Pattern apacheLogEntryPattern = Pattern.compile(apacheLogEntryPatternStr);
     public static final Pattern virtuosoLogEntryPattern = Pattern.compile(virtuosoLogEntryPatternStr);
     public static final Pattern distributedLogEntryPattern = Pattern.compile(distributedLogEntryPatternStr);
+    public static final Pattern bio2rdfLogEntryPattern = Pattern.compile(bio2rdfLogEntryPatternStr);
 
     public static final Pattern requestParser = Pattern.compile(requestParserStr);
 
@@ -155,7 +174,7 @@ public class WebLogParser {
 
             ResourceUtils.addLiteral(inout, LSQ.protocol, m.get("protocol"));
             ResourceUtils.addLiteral(inout, LSQ.path, pathStr);
-            ResourceUtils.addLiteral(inout, LSQ.verb, m.get("veb"));
+            ResourceUtils.addLiteral(inout, LSQ.verb, m.get("verb"));
 
             if(pathStr != null) {
 

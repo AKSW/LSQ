@@ -218,6 +218,7 @@ public class MainLSQ {
         InputStream in;
         if(options.has(inputOs)) {
             File file = inputOs.value(options);
+            file = file.getAbsoluteFile();
             in = new FileInputStream(file);
         } else {
             in = System.in;
