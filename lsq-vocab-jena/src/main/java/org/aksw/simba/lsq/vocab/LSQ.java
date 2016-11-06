@@ -33,7 +33,6 @@ public class LSQ {
     public static final Resource Hybrid = resource("Hybrid");
 
 
-
     public static final Property joinVertex = property("joinVertex");
     public static final Property joinVertexType = property("joinVertexType");
     public static final Property joinVertexDegree = property("joinVertexDegree");
@@ -86,6 +85,7 @@ public class LSQ {
     public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
     public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
 
+    // TODO This is PROV vocab
     public static final Property wasAssociatedWith = property("wasAssociatedWith");
 
     public static final Property usesFeature = property("usesFeature");
@@ -93,6 +93,7 @@ public class LSQ {
     public static final Property triplePath = property("triplePath");
 
     // TODO Not sure if the following metadata really belongs here ~ Claus
+    // TODO This is covered by the MEX ontology
     public static final Property engine = property("engine");
     public static final Property vendor = property("vendor");
     public static final Property version = property("version");
@@ -112,11 +113,13 @@ public class LSQ {
     public static final Property path = property("uri");
     public static final Property protocol = property("protocol");
     public static final Property verb = property("verb");
+    public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
     // Query / Graph Pattern Features
     // None indicates the absence of features; must not appear with any other features
     public static final Resource None = resource("None");
 
+    // TODO These terms can be found in SP instead of SPIN
     public static final Resource Select = resource("Select");
     public static final Resource Construct = resource("Construct");
     public static final Resource Describe = resource("Describe");

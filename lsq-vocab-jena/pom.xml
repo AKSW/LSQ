@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>lsq-core</artifactId>
+    <artifactId>lsq-vocab-jena</artifactId>
     <packaging>jar</packaging>
 
     <parent>
@@ -14,18 +14,10 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.topbraid</groupId>
-            <artifactId>spin</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.aksw.jena-sparql-api</groupId>
-            <artifactId>jena-sparql-api-core</artifactId>
-        </dependency>
-
-        <dependency>
-        	<groupId>org.aksw.simba.lsq</groupId>
-        	<artifactId>lsq-vocab-jena</artifactId>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>jena-core</artifactId>
+            <version>${jena.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

@@ -14,7 +14,7 @@
 
     <properties>
         <deb.packageName>lsq-cli</deb.packageName>
-        <deb.jarFile>${project.artifactId}-${project.version}.jar</deb.jarFile>
+        <deb.jarFile>${project.artifactId}-${project.version}-jar-with-dependencies.jar</deb.jarFile>
     </properties>
 
     <profiles>
@@ -24,60 +24,19 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <project.description>A middleware featuring SPARQL to SQL rewriting
-                    over relational databases.</project.description>
+                <project.description>A framework for RDFizing and annotating SPARQL queries based on SPIN</project.description>
             </properties>
         </profile>
-        <!-- <profile> <id>lod2</id> <properties> <project.description>A middleware
-            featuring SPARQL to SQL rewriting over relational databases. . LOD2 is a
-            large-scale integrating project co-funded by the European Commission within
-            the FP7 Information and Communication Technologies Work Programme (Grant
-            Agreement No. 257943). Commencing in September 2010, this 4-year project
-            comprises leading Linked Open Data technology researchers, companies, and
-            service providers from across 7 European countries and is coordinated by
-            the AKSW research group at the University of Leipzig.</project.description>
-            </properties> </profile> -->
     </profiles>
 
     <!-- <description>${project.description}</description> -->
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.4.2</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                            <!-- <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml</dependencyReducedPomLocation> -->
-                            <transformers>
-                                <!-- use transformer to handle merge of META-INF/services - see http://java.net/jira/browse/JERSEY-440?focusedCommentId=14822&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#action_14822 -->
-                                <transformer
-                                    implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-                            </transformers>
-                            <filters>
-                                <!-- filter to address "Invalid signature file" issue - see http://stackoverflow.com/a/6743609/589215 -->
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/*.SF</exclude>
-                                        <exclude>META-INF/*.DSA</exclude>
-                                        <exclude>META-INF/*.RSA</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
 
             <plugin>
                 <artifactId>jdeb</artifactId>
@@ -158,6 +117,11 @@
             <groupId>org.aksw.simba.lsq</groupId>
             <artifactId>lsq-cli</artifactId>
         </dependency>
+    	<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>compile</scope>
+		</dependency>
     </dependencies>
 </project>
 
