@@ -156,7 +156,7 @@ public class WebLogParser {
     public void parseEntry(String str, Resource inout) {
         //Matcher m = regexPattern.matcher(str);
         Map<String, String> m = patternMatcher.apply(str);
-
+//System.out.println(m);
         //List<String> groupNames = Arrays.asList("host", "user", "request", "path", "protocol", "verb"
 
         if(m != null) {

@@ -32,6 +32,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
+import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
@@ -43,7 +44,6 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -59,13 +59,10 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
-import org.apache.jena.system.InitJenaCore;
-import org.apache.jena.system.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.system.SPINModuleRegistry;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
@@ -560,10 +557,11 @@ public class MainLSQ {
                         fail = true;
                     }
 
-                    logger.warn("Skipping log entry #" + logEntryIndex[0]);
-//                    Model m = ResourceUtils.reachableClosure(r);
-//                    String modelStr = ModelUtils.toString(m, "TTL");
-//                    logger.debug(modelStr);
+                    logger.warn("Skipping non-sparql-query log entry #" + logEntryIndex[0]);
+                    Model m = ResourceUtils.reachableClosure(r);
+                    m.setNsPrefix("lsq", LSQ.ns);
+                    String modelStr = ModelUtils.toString(m, "TTL");
+                    logger.debug(modelStr);
                 }
 
             } catch(Exception e) {
