@@ -58,7 +58,8 @@ Option                Description
 -p, --public          Public endpoint URL - e.g. http://example.org/sparql     
 -r, --rdfizer         RDFizer selection: Any combination of the letters (e)    
                         xecution, (l)og and (q)uery (default: elq)             
--t, --timeout <Long>  Timeout in milliseconds                                  
+-t, --timeout <Long>  Timeout in milliseconds  
+-w --write            output serialization, e.g., "N-Triples/ascii" default is turtle
 -x, --experiment      URI of the experiment environment ```
 
 From the repository root folder, run:
