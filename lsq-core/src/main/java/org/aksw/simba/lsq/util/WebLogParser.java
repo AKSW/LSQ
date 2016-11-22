@@ -100,8 +100,8 @@ public class WebLogParser {
             +  "(?<protocol>\\S+)"
             + "\" "
             + "(?<response>\\d{3}) "
-            + "(?<bytecount>\\d+) "
-            + "\"(?<referer>[^\"]+)\""
+            //+ "(?<bytecount>\\d+) "
+            //+ "\"(?<referer>[^\"]+)\""
             ;
 //    String foo = ""
 //            + "\"(?<agent>[^\"]*)\""

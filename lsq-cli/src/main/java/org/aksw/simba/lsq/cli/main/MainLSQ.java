@@ -7,10 +7,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -58,7 +61,6 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
-import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -577,6 +579,9 @@ public class MainLSQ {
 
 
 	                    RDFDataMgr.write(out, queryModel, outFormat);
+
+	                    // TODO Frequent flushing may decrease performance
+	                    // out.flush();
 	            	} else {
 	            		logger.debug("Skipping non-sparql-query log entry #" + logEntryIndex[0]);
 	                    logger.debug(toString(r));
