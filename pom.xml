@@ -57,8 +57,9 @@
 	</modules>
 
 	<properties>
-		<jena.version>3.1.0</jena.version>
-		<jsa.version>${jena.version}-2-SNAPSHOT</jsa.version>
+		<jena.version>3.1.1</jena.version>
+                <jsa.subversion>1-SNAPSHOT</jsa.subversion>
+		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
