@@ -14,8 +14,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.aksw.jena_sparql_api.utils.model.ResourceUtils;
+import org.aksw.jena_sparql_api.vocabs.PROV;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.rdf.model.Resource;

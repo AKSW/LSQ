@@ -117,15 +117,15 @@ public class ElementVisitorFeatureExtractor
             if(expr.isFunction()) {
                 // TODO Will use full URIs for custom sparql functions - may want to shorten them with prefixes
                 ExprFunction fn = expr.getFunction();
-                
+
                 Symbol symbol = fn.getFunctionSymbol();
                 String fnName = null;
-                fnName = fnName != null ? fnName : symbol.getSymbol(); 
+                fnName = fnName != null ? fnName : symbol.getSymbol();
                 fnName = fnName != null ? fnName : fn.getFunctionIRI();
                 fnName = fnName != null ? fnName : fn.getOpName();
-              
+
                 if(fnName != null) {
-                    fnName = StringUtils.urlEncode(fnName); 
+                    fnName = StringUtils.urlEncode(fnName);
                     Resource fnRes = ResourceFactory.createResource(LSQ.ns + "fn-" + fnName);
                     features.add(fnRes);
                 } else {
