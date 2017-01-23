@@ -11,6 +11,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,7 +28,9 @@ import org.slf4j.LoggerFactory;
 public class WebLogParser {
 
     public static void main(String[] args) {
+        Map<String, Function<String, String>> map = createDefaultFormatFlagMap();
 
+        System.out.println(assembleRegex("%h %l %u %t \"%r\" %>s %b", map::get));
     }
 
     private static final Logger logger = LoggerFactory
@@ -78,16 +81,23 @@ public class WebLogParser {
         return result;
     }
 
-    public static Pattern tokenPattern = Pattern.compile("\\%(\\s+)");
+    // Pattern: percent followed by any non-white space char sequence that ends on alphanumeric chars
+    public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
-    public String assembleRegex(String str) {
+    public static String assembleRegex(String str, Function<String, Function<String, String>> map) {
 
         Matcher m = tokenPattern.matcher(str);
 
         StringBuffer sb = new StringBuffer();
         while(m.find()) {
-            //String token = m.group(1);
-            String replacement = "test";
+            String arg = m.group(2);
+            String token = m.group(3);
+
+            Function<String, String> argToRegex = map.apply(token);
+            Objects.requireNonNull(argToRegex);
+
+            String replacement = argToRegex.apply(arg);
+
             m.appendReplacement(sb, replacement);
         }
         m.appendTail(sb);
