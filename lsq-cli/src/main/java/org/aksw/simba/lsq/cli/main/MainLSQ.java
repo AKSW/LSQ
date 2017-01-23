@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.aksw.beast.vocabs.PROV;
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
@@ -34,7 +35,6 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
-import org.aksw.jena_sparql_api.vocabs.PROV;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.core.Skolemize;

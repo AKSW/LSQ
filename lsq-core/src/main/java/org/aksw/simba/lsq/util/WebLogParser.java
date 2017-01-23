@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import org.aksw.beast.vocabs.PROV;
 import org.aksw.jena_sparql_api.utils.model.ResourceUtils;
-import org.aksw.jena_sparql_api.vocabs.PROV;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
