@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -12,23 +13,330 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.aksw.beast.vocabs.PROV;
+import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeDelegate;
 import org.aksw.jena_sparql_api.utils.model.ResourceUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.AtomicLongMap;
+
+class Item {
+	protected boolean isField;
+	protected String str;
+
+	public Item(boolean isField, String str) {
+		super();
+		this.isField = isField;
+		this.str = str;
+	}
+
+	public boolean isField() {
+		return isField;
+	}
+
+	public String getValue() {
+		return str;
+	}
+}
+
+class StringMapper
+	implements Mapper
+{
+	// The pattern is composed of string parts and
+	protected List<Item> pattern = new ArrayList<>();
+	protected Map<String, Mapper> fieldToMapper = new HashMap<>();
+	protected Map<String, Pattern> fieldToPattern = new HashMap<>();
+
+	protected AtomicLongMap<String> fieldTypeToIndex = AtomicLongMap.create();
+
+	public void ignoreField(String str) {
+		String fieldCat = "ignored";
+		Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
+
+		String fieldName = fieldCat + "[" + index + "]";
+
+		pattern.add(new Item(true, fieldName));
+		Pattern p = Pattern.compile(str);
+		fieldToPattern.put(fieldName, p);
+	}
+
+	public void addString(String str) {
+		if(!Strings.isNullOrEmpty(str)) {
+			pattern.add(new Item(false, str));
+		}
+	}
+
+	public void addField(Property property, String patternStr, Class<?> clazz) {
+		RDFDatatype rdfDatatype = TypeMapper.getInstance().getTypeByClass(clazz);
+		addField(property, patternStr, rdfDatatype);
+	}
+
+	public void addField(Property property, String patternStr, RDFDatatype rdfDatatype) {
+		String fieldName = property.getLocalName();
+		addField(fieldName, property, patternStr, rdfDatatype);
+	}
+
+	public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
+		Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
+
+		String fieldName = fieldCat + "[" + index + "]";
+
+		Pattern pat = Pattern.compile(patternStr);
+		Mapper mapper = new PropertyMapper(property, rdfDatatype);
+		pattern.add(new Item(true, fieldName));
+		fieldToPattern.put(fieldName, pat);
+		fieldToMapper.put(fieldName, mapper);
+	}
+
+	//protected PatternMatcher patternMatcher;
+
+
+
+
+//	protected Map<Property, >
+//
+//	@Override
+//	public void accept(Resource r, String source) {
+//		Map<String, String> groupToValue = patternMatcher.apply(source);
+//
+//		groupToValue.forEach((group, v) -> {
+//			BiConsumer<Resource, String> parser = groupToParser.get(group);
+//			if(parser == null) {
+//				throw new RuntimeException("No parser for: " + group);
+//			}
+//			parser.accept(r, v);
+//		});
+//	}
+	//addParser('%')
+
+	public void parse(Resource r, String str) {
+		StringBuilder tmp = new StringBuilder();
+		for(Item item : pattern) {
+			String fieldValue = item.getValue();
+
+			String contrib = item.isField()
+				? "(<?" + fieldValue + ">" + fieldToPattern.get(fieldValue) + ")"
+				: Pattern.quote(fieldValue);
+
+			tmp.append(contrib);
+		}
+
+		String patternStr = tmp.toString();
+		Pattern pattern = Pattern.compile(patternStr);
+		PatternMatcher matcher = new PatternMatcherImpl(pattern);
+
+		Map<String, String> fieldToValue = matcher.apply(str);
+		fieldToValue.forEach((k, v) -> {
+			Mapper mapper = fieldToMapper.get(k);
+			if(mapper != null) {
+				mapper.parse(r, v);
+			}
+		});
+
+		//r.addLiteral(property, result);
+	}
+
+	public String unparse(Resource r) {
+		StringBuilder sb = new StringBuilder();
+		for(Item item : pattern) {
+			String fieldValue = item.getValue();
+
+			String contrib = item.isField()
+				? fieldToMapper.get(fieldValue).unparse(r)
+				: fieldValue;
+
+			sb.append(contrib);
+		}
+
+		String result = sb.toString();
+		return result;
+	}
+
+	@Override
+	public String toString() {
+		String result = pattern.stream()
+				.map(item -> {
+					String val = item.getValue();
+					return item.isField()
+							? "{" + val + ":" + fieldToPattern.get(val) + "}"
+							: val;
+				})
+				.collect(Collectors.joining());
+		return result;
+	}
+
+
+}
+
+interface Mapper {
+	void parse(Resource r, String lexicalForm);
+	String unparse(Resource r);
+}
+
+class FixMapper
+	implements Mapper {
+
+	protected Mapper delegate;
+	protected String prefix;
+	protected String suffix;
+
+	public FixMapper(Mapper delegate, String prefix, String suffix) {
+		super();
+		this.delegate = delegate;
+		this.prefix = prefix;
+		this.suffix = suffix;
+	}
+
+	@Override
+	public void parse(Resource r, String lexicalForm) {
+		boolean isPrefixMatch = prefix == null || lexicalForm.startsWith(prefix);
+		boolean isSuffixMatch = suffix == null || lexicalForm.endsWith(suffix);
+
+		boolean isAccepted = isPrefixMatch && isSuffixMatch;
+
+		if(isAccepted) {
+			delegate.parse(r, lexicalForm);
+		}
+	}
+
+	@Override
+	public String unparse(Resource r) {
+		StringBuilder sb = new StringBuilder();
+		if(prefix != null) {
+			sb.append(prefix);
+		}
+
+		String s = delegate.unparse(r);
+		sb.append(s);
+
+		if(suffix != null) {
+			sb.append(suffix);
+		}
+
+		String result = sb.toString();
+		return result;
+	}
+}
+
+class PropertyMapper
+	implements Mapper
+{
+	protected Property property;
+	protected RDFDatatype rdfDatatype;
+
+	public PropertyMapper(Property property, RDFDatatype rdfDatatype) {
+		super();
+		this.property = property;
+		this.rdfDatatype = rdfDatatype;
+	}
+
+	public void parse(Resource r, String lexicalForm) {
+		Object value = rdfDatatype.parse(lexicalForm);
+		r.addLiteral(property, value);
+	}
+
+	public String unparse(Resource r) {
+		Object value = r.getProperty(property).getLiteral().getValue();
+		String result = rdfDatatype.unparse(value);
+		return result;
+	}
+}
+
+/**
+ * Wrapper around an underlying rdf datatype where the lexical value is restricted
+ * by a regex pattern
+ *
+ * @author raven
+ *
+ */
+class RDFDatatypeRestricted
+	extends RDFDatatypeDelegate
+{
+	protected Pattern pattern;
+
+    public RDFDatatypeRestricted(RDFDatatype delegate, Pattern pattern) {
+        super(delegate);
+        this.pattern = pattern;
+    }
+
+    @Override
+    public boolean isValid(String lexicalForm) {
+    	boolean result = pattern.matcher(lexicalForm).find();
+    	result = result && super.isValid(lexicalForm);
+    	return result;
+    }
+}
+
+
+class RDFDatatypeDateFormat
+	extends RDFDatatypeDelegate
+{
+    protected Class<?> clazz;
+	protected DateFormat dateFormat;
+
+    public RDFDatatypeDateFormat(DateFormat dateFormat) {
+        super(new XSDDateTimeType("dateTime"));
+        this.clazz = Date.class;
+        this.dateFormat = dateFormat;
+    }
+
+    @Override
+    public Class<?> getJavaClass() {
+        return clazz;
+    }
+
+    public String unparse(Object value) {
+        Date date = (Date) value;
+        String result = dateFormat.format(date);
+//        Calendar cal = new GregorianCalendar();
+//        cal.setTime(date);
+//        XSDDateTime tmp = new XSDDateTime(cal);
+//        String result = super.unparse(tmp);
+        return result;
+    }
+
+    @Override
+    public Object parse(String lexicalForm) {
+    	try {
+    	Date date = dateFormat.parse(lexicalForm);
+	        //Object tmp = super.parse(lexicalForm);
+	        //XSDDateTime xsd = (XSDDateTime) tmp;
+	        //Calendar cal = xsd.asCalendar();
+	    	Calendar calendar = new GregorianCalendar();//Calendar.getInstance();
+	    	calendar.setTime(date);
+
+	        Date result = calendar.getTime();
+	        return result;
+    	} catch(Exception e) {
+    		throw new RuntimeException(e);
+    	}
+    }
+}
+
+
+
+
 public class WebLogParser {
 
     public static void main(String[] args) {
-        Map<String, Function<String, String>> map = createDefaultFormatFlagMap();
+    	StringMapper mapper = new StringMapper();
+        Map<String, BiConsumer<StringMapper, String>> map = createDefaultFormatFlagMap();
 
         System.out.println(assembleRegex("%h %l %u %t \"%r\" %>s %b", map::get));
     }
@@ -65,17 +373,52 @@ public class WebLogParser {
      *
      * @return
      */
-    public static Map<String, Function<String, String>> createDefaultFormatFlagMap() {
-        Map<String, Function<String, String>> result = new HashMap<>();
+    public static Map<String, BiConsumer<StringMapper, String>> createDefaultFormatFlagMap() {
+    	Map<String, BiConsumer<StringMapper, String>> result = new HashMap<>();
 
-        result.put("h", (x) -> "(?<host>[^\\s]+)");
-        result.put("l", (x) -> "(\\S+)"); // TODO define proper regex
-        result.put("u", (x) -> "(?<user>\\S+)");
-        result.put("t", (x) -> "(\\[(?<time>[\\w:/]+\\s[+\\-]\\d{4})\\])");
+        result.put("h", (m, x) -> m.addField(LSQ.host, "[^\\s]+", String.class));
+        result.put("l", (m, x) -> m.ignoreField("\\S+"));
+        result.put("u", (m, x) -> m.addField(LSQ.user, "\\S+", String.class));
+        result.put("t", (m, x) -> {
+        	DateFormat dateFormat = x == null
+        			? apacheDateFormat
+        			: new SimpleDateFormat(x);
 
-        result.put("r", (x) -> requestPattern);
-        result.put(">s", (x) -> "(?<response>\\d{3})");
-        result.put("b", (x) -> "(?<bytecount>\\d+)");
+        	RDFDatatype rdfDatatype = new RDFDatatypeDateFormat(dateFormat);
+        	PropertyMapper mapper = new PropertyMapper(PROV.atTime, rdfDatatype);
+
+        	m.addString("[");
+        	m.addField(PROV.atTime, "[^]]*", rdfDatatype);
+        	//addField("timestamp", mapper); // The field name is optional - it is used in the generated regex
+        	m.addString("]");
+        });
+
+
+        result.put("r", (m, x) -> {
+        	m.addField(LSQ.verb, "\\S+", String.class);
+        	m.addString(" ");
+        	m.addField(LSQ.path, "\\S+", String.class);
+        	m.addString(" ");
+        	m.addField(LSQ.protocol, "\\S+", String.class);
+        });
+
+        result.put(">s", (m, x) -> m.ignoreField("d{3}"));
+        result.put("b", (m, x) -> m.ignoreField("d+"));
+
+//      result.put("b", (x) -> "(?<bytecount>\\d+)");
+
+
+
+//        result.put("h", (x) -> "(?<host>[^\\s]+)");
+//        result.put("l", (x) -> "(\\S+)"); // TODO define proper regex
+//        result.put("u", (x) -> "(?<user>\\S+)");
+//        result.put("t", (x) -> "\\[(?<time>)[^]]*\\]");   //"(\\[(?<time>[\\w:/]+\\s[+\\-]\\d{4})\\])");
+//
+//        result.put("r", (x) -> requestPattern);
+//        result.put(">s", (x) -> "(?<response>\\d{3})");
+//        result.put("b", (x) -> "(?<bytecount>\\d+)");
+
+
         //result.put("i", (x) -> "(\\[(?<time>[\\w:/]+\\s[+\\-]\\d{4})\\])");
 
         return result;
@@ -84,26 +427,48 @@ public class WebLogParser {
     // Pattern: percent followed by any non-white space char sequence that ends on alphanumeric chars
     public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
-    public static String assembleRegex(String str, Function<String, Function<String, String>> map) {
+    public static StringMapper assembleRegex(String str, Function<String, BiConsumer<StringMapper, String>> map) {
+
+    	StringMapper result = new StringMapper();
 
         Matcher m = tokenPattern.matcher(str);
-
-        StringBuffer sb = new StringBuffer();
+        int s = 0;
         while(m.find()) {
-            String arg = m.group(2);
-            String token = m.group(3);
+        	String sp = str.substring(s, m.start());
+        	result.addString(sp);
 
-            Function<String, String> argToRegex = map.apply(token);
-            Objects.requireNonNull(argToRegex);
+        	String arg = m.group(2);
+        	String token = m.group(3);
 
-            String replacement = argToRegex.apply(arg);
+        	BiConsumer<StringMapper, String> argToRegex = map.apply(token);
+        	//Objects.requireNonNull(argToRegex);
+        	if(argToRegex == null) {
+        		System.out.println("No entry for: " + token);
+        	}
 
-            m.appendReplacement(sb, replacement);
+        	BiConsumer<StringMapper, String> xxx = map.apply(token);
+        	xxx.accept(result, arg);
+
+        	s = m.end();
         }
-        m.appendTail(sb);
+    	String sp = str.substring(s, str.length());
+    	result.addString(sp);
 
-        String result = sb.toString();
-        return result;
+    	return result;
+        //StringBuffer sb = new StringBuffer();
+//        StringMapper result = new StringMapper();
+//        while(m.find()) {
+//            String arg = m.group(2);
+//            String token = m.group(3);
+//
+//            BiConsumer<StringMapper, String> argToRegex = map.apply(token);
+//            Objects.requireNonNull(argToRegex);
+//
+//            String replacement = argToRegex.apply(arg);
+//
+//            m.appendReplacement(sb, replacement);
+//        }
+//        m.appendTail(sb);
     }
 
     // 10.0.0.0 [13/Sep/2015:07:57:48 -0400] "GET /robots.txt HTTP/1.0" 200 3485 4125 "http://cu.bio2rdf.org/robots.txt" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
@@ -245,7 +610,7 @@ public class WebLogParser {
 //            if(request != null) {
 //                Matcher n = requestParser.matcher(request);
 //                if(n.find()) {
-            String pathStr = m.get("path");
+            String pathStr = Objects.toString(m.get("path"));
 
             ResourceUtils.addLiteral(inout, LSQ.protocol, m.get("protocol"));
             ResourceUtils.addLiteral(inout, LSQ.path, pathStr);
