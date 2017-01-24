@@ -31,6 +31,8 @@ import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,7 +128,7 @@ class StringMapper
 //	}
 	//addParser('%')
 
-	public void parse(Resource r, String str) {
+	public Resource parse(Resource r, String str) {
 		StringBuilder tmp = new StringBuilder();
 		for(Item item : pattern) {
 			String fieldValue = item.getValue();
@@ -150,6 +152,7 @@ class StringMapper
 			}
 		});
 
+		return r;
 		//r.addLiteral(property, result);
 	}
 
@@ -186,11 +189,41 @@ class StringMapper
 		return result;
 	}
 
+    public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
+    public static StringMapper create(String str, Function<String, BiConsumer<StringMapper, String>> map) {
+
+    	StringMapper result = new StringMapper();
+
+        Matcher m = tokenPattern.matcher(str);
+        int s = 0;
+        while(m.find()) {
+        	String sp = str.substring(s, m.start());
+        	result.addString(sp);
+
+        	String arg = m.group(2);
+        	String token = m.group(3);
+
+        	BiConsumer<StringMapper, String> argToRegex = map.apply(token);
+        	//Objects.requireNonNull(argToRegex);
+        	if(argToRegex == null) {
+        		System.out.println("No entry for: " + token);
+        	}
+
+        	BiConsumer<StringMapper, String> xxx = map.apply(token);
+        	xxx.accept(result, arg);
+
+        	s = m.end();
+        }
+    	String sp = str.substring(s, str.length());
+    	result.addString(sp);
+
+    	return result;
+    }
 }
 
 interface Mapper {
-	void parse(Resource r, String lexicalForm);
+	Resource parse(Resource r, String lexicalForm);
 	String unparse(Resource r);
 }
 
@@ -209,7 +242,7 @@ class FixMapper
 	}
 
 	@Override
-	public void parse(Resource r, String lexicalForm) {
+	public Resource parse(Resource r, String lexicalForm) {
 		boolean isPrefixMatch = prefix == null || lexicalForm.startsWith(prefix);
 		boolean isSuffixMatch = suffix == null || lexicalForm.endsWith(suffix);
 
@@ -218,6 +251,8 @@ class FixMapper
 		if(isAccepted) {
 			delegate.parse(r, lexicalForm);
 		}
+
+		return r;
 	}
 
 	@Override
@@ -251,9 +286,11 @@ class PropertyMapper
 		this.rdfDatatype = rdfDatatype;
 	}
 
-	public void parse(Resource r, String lexicalForm) {
+	public Resource parse(Resource r, String lexicalForm) {
 		Object value = rdfDatatype.parse(lexicalForm);
 		r.addLiteral(property, value);
+
+		return r;
 	}
 
 	public String unparse(Resource r) {
@@ -345,13 +382,22 @@ class RDFDatatypeDateFormat
 public class WebLogParser {
 
     public static void main(String[] args) {
-        Map<String, BiConsumer<StringMapper, String>> map = createDefaultFormatFlagMap();
+        Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
 
-        StringMapper mapper = assembleRegex("%h %l %u %t \"%r\" %>s %b", map::get);
+        String logLine = "127.0.0.1 - - [06/Nov/2016:05:12:49 +0100] \"GET /icons/ubuntu-logo.png HTTP/1.1\" 200 3623 \"http://localhost/\" \"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0\"";
+
+        StringMapper mapper = StringMapper.create("%h %l %u %t \"%r\" %>s %b", map::get);
+
+        Resource x = mapper.parse(ModelFactory.createDefaultModel().createResource(), logLine);
+        RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
+
         System.out.println(mapper);
 
         Resource r = ModelFactory.createDefaultModel().createResource();
         r
+        	.removeAll(PROV.atTime)
+        	.removeAll(LSQ.verb)
+        	.removeAll(LSQ.host)
         	.addLiteral(PROV.atTime, new Date())
         	.addLiteral(LSQ.verb, "GET")
         	.addLiteral(LSQ.host, "0.0.0.0");
@@ -391,7 +437,7 @@ public class WebLogParser {
      *
      * @return
      */
-    public static Map<String, BiConsumer<StringMapper, String>> createDefaultFormatFlagMap() {
+    public static Map<String, BiConsumer<StringMapper, String>> createWebServerLogStringMapperConfig() {
     	Map<String, BiConsumer<StringMapper, String>> result = new HashMap<>();
 
         result.put("h", (m, x) -> m.addField(LSQ.host, "[^\\s]+", String.class));
@@ -443,51 +489,8 @@ public class WebLogParser {
     }
 
     // Pattern: percent followed by any non-white space char sequence that ends on alphanumeric chars
-    public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
-    public static StringMapper assembleRegex(String str, Function<String, BiConsumer<StringMapper, String>> map) {
 
-    	StringMapper result = new StringMapper();
-
-        Matcher m = tokenPattern.matcher(str);
-        int s = 0;
-        while(m.find()) {
-        	String sp = str.substring(s, m.start());
-        	result.addString(sp);
-
-        	String arg = m.group(2);
-        	String token = m.group(3);
-
-        	BiConsumer<StringMapper, String> argToRegex = map.apply(token);
-        	//Objects.requireNonNull(argToRegex);
-        	if(argToRegex == null) {
-        		System.out.println("No entry for: " + token);
-        	}
-
-        	BiConsumer<StringMapper, String> xxx = map.apply(token);
-        	xxx.accept(result, arg);
-
-        	s = m.end();
-        }
-    	String sp = str.substring(s, str.length());
-    	result.addString(sp);
-
-    	return result;
-        //StringBuffer sb = new StringBuffer();
-//        StringMapper result = new StringMapper();
-//        while(m.find()) {
-//            String arg = m.group(2);
-//            String token = m.group(3);
-//
-//            BiConsumer<StringMapper, String> argToRegex = map.apply(token);
-//            Objects.requireNonNull(argToRegex);
-//
-//            String replacement = argToRegex.apply(arg);
-//
-//            m.appendReplacement(sb, replacement);
-//        }
-//        m.appendTail(sb);
-    }
 
     // 10.0.0.0 [13/Sep/2015:07:57:48 -0400] "GET /robots.txt HTTP/1.0" 200 3485 4125 "http://cu.bio2rdf.org/robots.txt" "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 5.1; Trident/4.0; .NET CLR 2.0.50727; .NET CLR 3.0.4506.2152; .NET CLR 3.5.30729)" - "-"
     public static String bio2rdfLogEntryPatternStr
