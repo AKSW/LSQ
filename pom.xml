@@ -58,7 +58,7 @@
 
 	<properties>
 		<jena.version>3.1.1</jena.version>
-                <jsa.subversion>2-SNAPSHOT</jsa.subversion>
+		<jsa.subversion>2-SNAPSHOT</jsa.subversion>
 		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
@@ -143,6 +143,12 @@
 				<artifactId>slf4j-log4j12</artifactId>
 				<version>1.7.10</version>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.fedx</groupId>
+				<artifactId>fedx-jsa</artifactId>
+				<version>3.1.0-1-SNAPSHOT</version>
 			</dependency>
 
 		</dependencies>
@@ -281,13 +287,14 @@
 									</filter>
 								</filters>
 								<transformers>
-									<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-<!-- 									<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> -->
-<!-- 										<manifestEntries> -->
-<!-- 											<mainClass>foo.bar.Main</mainClass> -->
-<!-- 											<Class-Path>.</Class-Path> -->
-<!-- 										</manifestEntries> -->
-<!-- 									</transformer> -->
+									<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
+									<!-- <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> -->
+									<!-- <manifestEntries> -->
+									<!-- <mainClass>foo.bar.Main</mainClass> -->
+									<!-- <Class-Path>.</Class-Path> -->
+									<!-- </manifestEntries> -->
+									<!-- </transformer> -->
 								</transformers>
 							</configuration>
 						</execution>

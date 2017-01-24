@@ -33,6 +33,11 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<scope>compile</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.fedx</groupId>
+			<artifactId>fedx-jsa</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

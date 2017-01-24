@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
 import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -62,12 +64,16 @@ import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.io.Files;
 
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -213,7 +219,14 @@ public class MainLSQ {
                 //.defaultsTo(LSQ.defaultLsqrNs)
                 ;
 
+        OptionSpec<String> fedEndpointsOs = parser
+        		.acceptsAll(Arrays.asList("fed"), "URIs of federated endpoints")
+				.withRequiredArg();
 
+        OptionSpec<File> fedEndpointsFileOs = parser
+        		.acceptsAll(Arrays.asList("fedf"), "URIs of federated endpoints")
+				.withRequiredArg()
+				.ofType(File.class);
 
 
         OptionSet options = parser.parse(args);
@@ -257,6 +270,21 @@ public class MainLSQ {
         }
 
         expBaseUri = expBaseUri == null ? baseUri + datasetLabel : expBaseUri;
+
+        List<String> fedEndpoints = new ArrayList<>();
+        if(options.has(fedEndpointsFileOs)) {
+        	File fedEndpointsFile = fedEndpointsFileOs.value(options);
+        	Files.readLines(fedEndpointsFile, StandardCharsets.UTF_8).stream()
+            		.map(String::trim)
+            		.filter(line -> line.startsWith("#"))
+            		.forEach(fedEndpoints::add);
+        }
+
+        if(options.has(fedEndpointsOs)) {
+        	List<String> tmp = fedEndpointsOs.values(options);
+        	fedEndpoints.addAll(tmp);
+        }
+
 
 
 //        These lines are just kept for reference in case we need something fancy
@@ -339,28 +367,39 @@ public class MainLSQ {
 //            .collect(Collectors.toList());
 
 
-
-
-
-
-//        System.out.println(queryToSubmissions.keySet().size());
-
-//        logger.info("Number of distinct queries in log: "
-
-        // This is an abstraction that can execute SPARQL queries
-        QueryExecutionFactory countQef =
-                FluentQueryExecutionFactory
-                .http(endpointUrl, graph)
-                .create();
-
         Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
             .maximumSize(10000)
             .build();
 
+        Cache<String, Boolean> queryTimeoutCache = CacheBuilder.newBuilder()
+                .maximumSize(10000)
+                .build();
+
+
+        QueryExecutionFactory countQef;
+
+        QueryExecutionFactory baseDataQef;
+        boolean isNormalMode = fedEndpoints.isEmpty();
+        //boolean isFederatedMode = !isNormalMode;
+
+        if(isNormalMode) {
+            countQef =
+                    FluentQueryExecutionFactory
+                    .http(endpointUrl, graph)
+                    .create();
+
+            baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, graph).create();
+
+        } else {
+        	countQef = null;
+
+        	baseDataQef = FedXFactory.create(fedEndpoints);
+        }
 
         QueryExecutionFactory dataQef =
                 FluentQueryExecutionFactory
-                .http(endpointUrl, graph)
+                //.http(endpointUrl, graph)
+                .from(baseDataQef)
                 .config()
                     .withPostProcessor(qe -> {
                         if(timeoutInMs != null) {
@@ -374,13 +413,22 @@ public class MainLSQ {
                 .end()
                 .create();
 
+
+
+//        System.out.println(queryToSubmissions.keySet().size());
+
+//        logger.info("Number of distinct queries in log: "
+
+        // This is an abstraction that can execute SPARQL queries
+
+
 //            RiotLib.writeBase(out, base) ;
 //            RiotLib.writePrefixes(out, prefixMap) ;
 //            ShellGraph x = new ShellGraph(graph, null, null) ;
 //            x.writeGraph() ;
 
         logger.info("Counting triples in the endpoint ...");
-        long datasetSize = QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
+        Long datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
 
         //int workloadSize = workloadResources.size();
         Long workloadSize = null;
@@ -743,7 +791,7 @@ public class MainLSQ {
     }
 
 
-    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, long datasetSize) {
+    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, Long datasetSize) {
 
         try {
     //        Stopwatch sw = Stopwatch.createStarted();
@@ -771,7 +819,9 @@ public class MainLSQ {
             SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
 
 
-            SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+            if(datasetSize != null) {
+            	SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+            }
 
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
