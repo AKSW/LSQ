@@ -40,74 +40,74 @@ import com.google.common.base.Strings;
 import com.google.common.util.concurrent.AtomicLongMap;
 
 class Item {
-	protected boolean isField;
-	protected String str;
+    protected boolean isField;
+    protected String str;
 
-	public Item(boolean isField, String str) {
-		super();
-		this.isField = isField;
-		this.str = str;
-	}
+    public Item(boolean isField, String str) {
+        super();
+        this.isField = isField;
+        this.str = str;
+    }
 
-	public boolean isField() {
-		return isField;
-	}
+    public boolean isField() {
+        return isField;
+    }
 
-	public String getValue() {
-		return str;
-	}
+    public String getValue() {
+        return str;
+    }
 }
 
 class StringMapper
-	implements Mapper
+    implements Mapper
 {
-	// The pattern is composed of string parts and
-	protected List<Item> pattern = new ArrayList<>();
-	protected Map<String, Mapper> fieldToMapper = new HashMap<>();
-	protected Map<String, Pattern> fieldToPattern = new HashMap<>();
+    // The pattern is composed of string parts and
+    protected List<Item> pattern = new ArrayList<>();
+    protected Map<String, Mapper> fieldToMapper = new HashMap<>();
+    protected Map<String, Pattern> fieldToPattern = new HashMap<>();
 
-	protected AtomicLongMap<String> fieldTypeToIndex = AtomicLongMap.create();
+    protected AtomicLongMap<String> fieldTypeToIndex = AtomicLongMap.create();
 
-	public void ignoreField(String str) {
-		String fieldCat = "ignored";
-		Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
+    public void ignoreField(String str) {
+        String fieldCat = "ignored";
+        Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
 
-		String fieldName = fieldCat + "[" + index + "]";
+        String fieldName = fieldCat + "[" + index + "]";
 
-		pattern.add(new Item(true, fieldName));
-		Pattern p = Pattern.compile(str);
-		fieldToPattern.put(fieldName, p);
-	}
+        pattern.add(new Item(true, fieldName));
+        Pattern p = Pattern.compile(str);
+        fieldToPattern.put(fieldName, p);
+    }
 
-	public void addString(String str) {
-		if(!Strings.isNullOrEmpty(str)) {
-			pattern.add(new Item(false, str));
-		}
-	}
+    public void addString(String str) {
+        if(!Strings.isNullOrEmpty(str)) {
+            pattern.add(new Item(false, str));
+        }
+    }
 
-	public void addField(Property property, String patternStr, Class<?> clazz) {
-		RDFDatatype rdfDatatype = TypeMapper.getInstance().getTypeByClass(clazz);
-		addField(property, patternStr, rdfDatatype);
-	}
+    public void addField(Property property, String patternStr, Class<?> clazz) {
+        RDFDatatype rdfDatatype = TypeMapper.getInstance().getTypeByClass(clazz);
+        addField(property, patternStr, rdfDatatype);
+    }
 
-	public void addField(Property property, String patternStr, RDFDatatype rdfDatatype) {
-		String fieldName = property.getLocalName();
-		addField(fieldName, property, patternStr, rdfDatatype);
-	}
+    public void addField(Property property, String patternStr, RDFDatatype rdfDatatype) {
+        String fieldName = property.getLocalName();
+        addField(fieldName, property, patternStr, rdfDatatype);
+    }
 
-	public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
-		Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
+    public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
+        Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
 
-		String fieldName = fieldCat + "[" + index + "]";
+        String fieldName = fieldCat + "[" + index + "]";
 
-		Pattern pat = Pattern.compile(patternStr);
-		Mapper mapper = new PropertyMapper(property, rdfDatatype);
-		pattern.add(new Item(true, fieldName));
-		fieldToPattern.put(fieldName, pat);
-		fieldToMapper.put(fieldName, mapper);
-	}
+        Pattern pat = Pattern.compile("^" + patternStr);
+        Mapper mapper = new PropertyMapper(property, rdfDatatype);
+        pattern.add(new Item(true, fieldName));
+        fieldToPattern.put(fieldName, pat);
+        fieldToMapper.put(fieldName, mapper);
+    }
 
-	//protected PatternMatcher patternMatcher;
+    //protected PatternMatcher patternMatcher;
 
 
 
@@ -126,183 +126,218 @@ class StringMapper
 //			parser.accept(r, v);
 //		});
 //	}
-	//addParser('%')
+    //addParser('%')
 
-	public Resource parse(Resource r, String str) {
-		StringBuilder tmp = new StringBuilder();
-		for(Item item : pattern) {
-			String fieldValue = item.getValue();
+    public Resource parse(Resource r, String str) {
 
-			String contrib = item.isField()
-				? "(<?" + fieldValue + ">" + fieldToPattern.get(fieldValue) + ")"
-				: Pattern.quote(fieldValue);
+        String remaining = str;
 
-			tmp.append(contrib);
-		}
+        for(Item item : pattern) {
+            String fieldValue = item.getValue();
 
-		String patternStr = tmp.toString();
-		Pattern pattern = Pattern.compile(patternStr);
-		PatternMatcher matcher = new PatternMatcherImpl(pattern);
+            String contrib = null;
+            if(item.isField()) {
+                Pattern pattern = fieldToPattern.get(fieldValue);
+                Matcher m = pattern.matcher(remaining);
+                if(m.find()) {
+                    contrib = m.group();
 
-		Map<String, String> fieldToValue = matcher.apply(str);
-		fieldToValue.forEach((k, v) -> {
-			Mapper mapper = fieldToMapper.get(k);
-			if(mapper != null) {
-				mapper.parse(r, v);
-			}
-		});
+                    Mapper mapper = fieldToMapper.get(fieldValue);
+                    if(mapper != null) {
+                        mapper.parse(r, contrib);
+                    }
 
-		return r;
-		//r.addLiteral(property, result);
-	}
+                    remaining = remaining.substring(m.end());
+                } else {
+                    throw new RuntimeException("Field '" + fieldValue + "' with pattern '" + pattern + "' does not match '" + remaining + "'");
+                }
+            } else {
+                if(!remaining.startsWith(fieldValue)) {
+                    throw new RuntimeException("Separator '" + fieldValue + "' is not a prefix of '" + remaining + "'");
+                }
 
-	public String unparse(Resource r) {
-		StringBuilder sb = new StringBuilder();
-		for(Item item : pattern) {
-			String fieldValue = item.getValue();
+                remaining = remaining.substring(fieldValue.length());
+            }
+        }
 
-			String contrib;
-			if(item.isField()) {
-				Mapper mapper = fieldToMapper.get(fieldValue);
-				contrib = mapper == null ? "" : mapper.unparse(r);
-			} else {
-				contrib = fieldValue;
-			}
+        return r;
 
-			sb.append(contrib);
-		}
+        /*
+        StringBuilder tmp = new StringBuilder();
+        for(Item item : pattern) {
+            String fieldValue = item.getValue();
 
-		String result = sb.toString();
-		return result;
-	}
+            String contrib = item.isField()
+                ? "(<?" + fieldValue + ">" + fieldToPattern.get(fieldValue) + ")"
+                : Pattern.quote(fieldValue);
 
-	@Override
-	public String toString() {
-		String result = pattern.stream()
-				.map(item -> {
-					String val = item.getValue();
-					return item.isField()
-							? "{" + val + ":" + fieldToPattern.get(val) + "}"
-							: val;
-				})
-				.collect(Collectors.joining());
-		return result;
-	}
+            tmp.append(contrib);
+        }
+
+        String patternStr = tmp.toString();
+        Pattern pattern = Pattern.compile(patternStr);
+        PatternMatcher matcher = new PatternMatcherImpl(pattern);
+
+        Map<String, String> fieldToValue = matcher.apply(str);
+        fieldToValue.forEach((k, v) -> {
+            Mapper mapper = fieldToMapper.get(k);
+            if(mapper != null) {
+                mapper.parse(r, v);
+            }
+        });
+
+        return r;
+        //r.addLiteral(property, result);
+        */
+    }
+
+    public String unparse(Resource r) {
+        StringBuilder sb = new StringBuilder();
+        for(Item item : pattern) {
+            String fieldValue = item.getValue();
+
+            String contrib;
+            if(item.isField()) {
+                Mapper mapper = fieldToMapper.get(fieldValue);
+                contrib = mapper == null ? "" : mapper.unparse(r);
+            } else {
+                contrib = fieldValue;
+            }
+
+            sb.append(contrib);
+        }
+
+        String result = sb.toString();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        String result = pattern.stream()
+                .map(item -> {
+                    String val = item.getValue();
+                    return item.isField()
+                            ? "{" + val + ":" + fieldToPattern.get(val) + "}"
+                            : val;
+                })
+                .collect(Collectors.joining());
+        return result;
+    }
 
     public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
     public static StringMapper create(String str, Function<String, BiConsumer<StringMapper, String>> map) {
 
-    	StringMapper result = new StringMapper();
+        StringMapper result = new StringMapper();
 
         Matcher m = tokenPattern.matcher(str);
         int s = 0;
         while(m.find()) {
-        	String sp = str.substring(s, m.start());
-        	result.addString(sp);
+            String sp = str.substring(s, m.start());
+            result.addString(sp);
 
-        	String arg = m.group(2);
-        	String token = m.group(3);
+            String arg = m.group(2);
+            String token = m.group(3);
 
-        	BiConsumer<StringMapper, String> argToRegex = map.apply(token);
-        	//Objects.requireNonNull(argToRegex);
-        	if(argToRegex == null) {
-        		System.out.println("No entry for: " + token);
-        	}
+            BiConsumer<StringMapper, String> argToRegex = map.apply(token);
+            //Objects.requireNonNull(argToRegex);
+            if(argToRegex == null) {
+                System.out.println("No entry for: " + token);
+            }
 
-        	BiConsumer<StringMapper, String> xxx = map.apply(token);
-        	xxx.accept(result, arg);
+            BiConsumer<StringMapper, String> xxx = map.apply(token);
+            xxx.accept(result, arg);
 
-        	s = m.end();
+            s = m.end();
         }
-    	String sp = str.substring(s, str.length());
-    	result.addString(sp);
+        String sp = str.substring(s, str.length());
+        result.addString(sp);
 
-    	return result;
+        return result;
     }
 }
 
 interface Mapper {
-	Resource parse(Resource r, String lexicalForm);
-	String unparse(Resource r);
+    Resource parse(Resource r, String lexicalForm);
+    String unparse(Resource r);
 }
 
 class FixMapper
-	implements Mapper {
+    implements Mapper {
 
-	protected Mapper delegate;
-	protected String prefix;
-	protected String suffix;
+    protected Mapper delegate;
+    protected String prefix;
+    protected String suffix;
 
-	public FixMapper(Mapper delegate, String prefix, String suffix) {
-		super();
-		this.delegate = delegate;
-		this.prefix = prefix;
-		this.suffix = suffix;
-	}
+    public FixMapper(Mapper delegate, String prefix, String suffix) {
+        super();
+        this.delegate = delegate;
+        this.prefix = prefix;
+        this.suffix = suffix;
+    }
 
-	@Override
-	public Resource parse(Resource r, String lexicalForm) {
-		boolean isPrefixMatch = prefix == null || lexicalForm.startsWith(prefix);
-		boolean isSuffixMatch = suffix == null || lexicalForm.endsWith(suffix);
+    @Override
+    public Resource parse(Resource r, String lexicalForm) {
+        boolean isPrefixMatch = prefix == null || lexicalForm.startsWith(prefix);
+        boolean isSuffixMatch = suffix == null || lexicalForm.endsWith(suffix);
 
-		boolean isAccepted = isPrefixMatch && isSuffixMatch;
+        boolean isAccepted = isPrefixMatch && isSuffixMatch;
 
-		if(isAccepted) {
-			delegate.parse(r, lexicalForm);
-		}
+        if(isAccepted) {
+            delegate.parse(r, lexicalForm);
+        }
 
-		return r;
-	}
+        return r;
+    }
 
-	@Override
-	public String unparse(Resource r) {
-		StringBuilder sb = new StringBuilder();
-		if(prefix != null) {
-			sb.append(prefix);
-		}
+    @Override
+    public String unparse(Resource r) {
+        StringBuilder sb = new StringBuilder();
+        if(prefix != null) {
+            sb.append(prefix);
+        }
 
-		String s = delegate.unparse(r);
-		sb.append(s);
+        String s = delegate.unparse(r);
+        sb.append(s);
 
-		if(suffix != null) {
-			sb.append(suffix);
-		}
+        if(suffix != null) {
+            sb.append(suffix);
+        }
 
-		String result = sb.toString();
-		return result;
-	}
+        String result = sb.toString();
+        return result;
+    }
 }
 
 class PropertyMapper
-	implements Mapper
+    implements Mapper
 {
-	protected Property property;
-	protected RDFDatatype rdfDatatype;
+    protected Property property;
+    protected RDFDatatype rdfDatatype;
 
-	public PropertyMapper(Property property, RDFDatatype rdfDatatype) {
-		super();
-		this.property = property;
-		this.rdfDatatype = rdfDatatype;
-	}
+    public PropertyMapper(Property property, RDFDatatype rdfDatatype) {
+        super();
+        this.property = property;
+        this.rdfDatatype = rdfDatatype;
+    }
 
-	public Resource parse(Resource r, String lexicalForm) {
-		Object value = rdfDatatype.parse(lexicalForm);
-		r.addLiteral(property, value);
+    public Resource parse(Resource r, String lexicalForm) {
+        Object value = rdfDatatype.parse(lexicalForm);
+        r.addLiteral(property, value);
 
-		return r;
-	}
+        return r;
+    }
 
-	public String unparse(Resource r) {
-		String result;
-		if(r.hasProperty(property)) {
-			Object value = r.getProperty(property).getLiteral().getValue();
-			result = rdfDatatype.unparse(value);
-		} else {
-			result = "";
-		}
-		return result;
-	}
+    public String unparse(Resource r) {
+        String result;
+        if(r.hasProperty(property)) {
+            Object value = r.getProperty(property).getLiteral().getValue();
+            result = rdfDatatype.unparse(value);
+        } else {
+            result = "";
+        }
+        return result;
+    }
 }
 
 /**
@@ -313,9 +348,9 @@ class PropertyMapper
  *
  */
 class RDFDatatypeRestricted
-	extends RDFDatatypeDelegate
+    extends RDFDatatypeDelegate
 {
-	protected Pattern pattern;
+    protected Pattern pattern;
 
     public RDFDatatypeRestricted(RDFDatatype delegate, Pattern pattern) {
         super(delegate);
@@ -324,18 +359,18 @@ class RDFDatatypeRestricted
 
     @Override
     public boolean isValid(String lexicalForm) {
-    	boolean result = pattern.matcher(lexicalForm).find();
-    	result = result && super.isValid(lexicalForm);
-    	return result;
+        boolean result = pattern.matcher(lexicalForm).find();
+        result = result && super.isValid(lexicalForm);
+        return result;
     }
 }
 
 
 class RDFDatatypeDateFormat
-	extends RDFDatatypeDelegate
+    extends RDFDatatypeDelegate
 {
     protected Class<?> clazz;
-	protected DateFormat dateFormat;
+    protected DateFormat dateFormat;
 
     public RDFDatatypeDateFormat(DateFormat dateFormat) {
         super(new XSDDateTimeType("dateTime"));
@@ -360,19 +395,19 @@ class RDFDatatypeDateFormat
 
     @Override
     public Object parse(String lexicalForm) {
-    	try {
-    	Date date = dateFormat.parse(lexicalForm);
-	        //Object tmp = super.parse(lexicalForm);
-	        //XSDDateTime xsd = (XSDDateTime) tmp;
-	        //Calendar cal = xsd.asCalendar();
-	    	Calendar calendar = new GregorianCalendar();//Calendar.getInstance();
-	    	calendar.setTime(date);
+        try {
+        Date date = dateFormat.parse(lexicalForm);
+            //Object tmp = super.parse(lexicalForm);
+            //XSDDateTime xsd = (XSDDateTime) tmp;
+            //Calendar cal = xsd.asCalendar();
+            Calendar calendar = new GregorianCalendar();//Calendar.getInstance();
+            calendar.setTime(date);
 
-	        Date result = calendar.getTime();
-	        return result;
-    	} catch(Exception e) {
-    		throw new RuntimeException(e);
-    	}
+            Date result = calendar.getTime();
+            return result;
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
 
@@ -388,21 +423,24 @@ public class WebLogParser {
 
         StringMapper mapper = StringMapper.create("%h %l %u %t \"%r\" %>s %b", map::get);
 
+        System.out.println(logLine);
+        System.out.println(mapper);
+
         Resource x = mapper.parse(ModelFactory.createDefaultModel().createResource(), logLine);
         RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
 
         System.out.println(mapper);
 
-        Resource r = ModelFactory.createDefaultModel().createResource();
-        r
-        	.removeAll(PROV.atTime)
-        	.removeAll(LSQ.verb)
-        	.removeAll(LSQ.host)
-        	.addLiteral(PROV.atTime, new Date())
-        	.addLiteral(LSQ.verb, "GET")
-        	.addLiteral(LSQ.host, "0.0.0.0");
+        //Resource r = ModelFactory.createDefaultModel().createResource();
+        x
+            .removeAll(PROV.atTime)
+            .removeAll(LSQ.verb)
+            .removeAll(LSQ.host)
+            .addLiteral(PROV.atTime, new Date())
+            .addLiteral(LSQ.verb, "GET")
+            .addLiteral(LSQ.host, "0.0.0.0");
 
-        System.out.println(mapper.unparse(r));
+        System.out.println(mapper.unparse(x));
     }
 
     private static final Logger logger = LoggerFactory
@@ -438,36 +476,36 @@ public class WebLogParser {
      * @return
      */
     public static Map<String, BiConsumer<StringMapper, String>> createWebServerLogStringMapperConfig() {
-    	Map<String, BiConsumer<StringMapper, String>> result = new HashMap<>();
+        Map<String, BiConsumer<StringMapper, String>> result = new HashMap<>();
 
         result.put("h", (m, x) -> m.addField(LSQ.host, "[^\\s]+", String.class));
         result.put("l", (m, x) -> m.ignoreField("\\S+"));
         result.put("u", (m, x) -> m.addField(LSQ.user, "\\S+", String.class));
         result.put("t", (m, x) -> {
-        	DateFormat dateFormat = x == null
-        			? apacheDateFormat
-        			: new SimpleDateFormat(x);
+            DateFormat dateFormat = x == null
+                    ? apacheDateFormat
+                    : new SimpleDateFormat(x);
 
-        	RDFDatatype rdfDatatype = new RDFDatatypeDateFormat(dateFormat);
-        	PropertyMapper mapper = new PropertyMapper(PROV.atTime, rdfDatatype);
+            RDFDatatype rdfDatatype = new RDFDatatypeDateFormat(dateFormat);
+            PropertyMapper mapper = new PropertyMapper(PROV.atTime, rdfDatatype);
 
-        	m.addString("[");
-        	m.addField(PROV.atTime, "[^]]*", rdfDatatype);
-        	//addField("timestamp", mapper); // The field name is optional - it is used in the generated regex
-        	m.addString("]");
+            m.addString("[");
+            m.addField(PROV.atTime, "[^]]*", rdfDatatype);
+            //addField("timestamp", mapper); // The field name is optional - it is used in the generated regex
+            m.addString("]");
         });
 
 
         result.put("r", (m, x) -> {
-        	m.addField(LSQ.verb, "\\S+", String.class);
-        	m.addString(" ");
-        	m.addField(LSQ.path, "\\S+", String.class);
-        	m.addString(" ");
-        	m.addField(LSQ.protocol, "\\S+", String.class);
+            m.addField(LSQ.verb, "\\S*", String.class);
+            m.addString(" ");
+            m.addField(LSQ.path, "\\S*", String.class);
+            m.addString(" ");
+            m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
 
-        result.put(">s", (m, x) -> m.ignoreField("d{3}"));
-        result.put("b", (m, x) -> m.ignoreField("d+"));
+        result.put(">s", (m, x) -> m.ignoreField("\\d{3}"));
+        result.put("b", (m, x) -> m.ignoreField("\\d+"));
 
 //      result.put("b", (x) -> "(?<bytecount>\\d+)");
 
