@@ -28,6 +28,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
@@ -157,9 +158,13 @@ class StringMapper
 		for(Item item : pattern) {
 			String fieldValue = item.getValue();
 
-			String contrib = item.isField()
-				? fieldToMapper.get(fieldValue).unparse(r)
-				: fieldValue;
+			String contrib;
+			if(item.isField()) {
+				Mapper mapper = fieldToMapper.get(fieldValue);
+				contrib = mapper == null ? "" : mapper.unparse(r);
+			} else {
+				contrib = fieldValue;
+			}
 
 			sb.append(contrib);
 		}
@@ -252,8 +257,13 @@ class PropertyMapper
 	}
 
 	public String unparse(Resource r) {
-		Object value = r.getProperty(property).getLiteral().getValue();
-		String result = rdfDatatype.unparse(value);
+		String result;
+		if(r.hasProperty(property)) {
+			Object value = r.getProperty(property).getLiteral().getValue();
+			result = rdfDatatype.unparse(value);
+		} else {
+			result = "";
+		}
 		return result;
 	}
 }
@@ -335,10 +345,18 @@ class RDFDatatypeDateFormat
 public class WebLogParser {
 
     public static void main(String[] args) {
-    	StringMapper mapper = new StringMapper();
         Map<String, BiConsumer<StringMapper, String>> map = createDefaultFormatFlagMap();
 
-        System.out.println(assembleRegex("%h %l %u %t \"%r\" %>s %b", map::get));
+        StringMapper mapper = assembleRegex("%h %l %u %t \"%r\" %>s %b", map::get);
+        System.out.println(mapper);
+
+        Resource r = ModelFactory.createDefaultModel().createResource();
+        r
+        	.addLiteral(PROV.atTime, new Date())
+        	.addLiteral(LSQ.verb, "GET")
+        	.addLiteral(LSQ.host, "0.0.0.0");
+
+        System.out.println(mapper.unparse(r));
     }
 
     private static final Logger logger = LoggerFactory
