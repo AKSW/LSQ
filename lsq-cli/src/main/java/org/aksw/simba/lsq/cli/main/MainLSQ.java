@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -40,6 +41,7 @@ import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.core.Skolemize;
+import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.util.WebLogParser;
@@ -138,6 +140,13 @@ public class MainLSQ {
         //RDFWriterRegistry.register(N3JenaWriter.n3WriterPlain, RDFFormat.TURTLE_BLOCKS);
         //RDFWriterRegistry.ir
 
+
+    	// Load the default web access log formats
+
+    	Model webLogFormatsModel = RDFDataMgr.loadModel("classpath://default-formats.ttl");
+    	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(webLogFormatsModel);
+
+
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 .withRequiredArg()
@@ -151,7 +160,7 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> logFormatOs = parser
-                .acceptsAll(Arrays.asList("m", "format"), "Format of the input data. Available options: " + WebLogParser.getFormatRegistry().keySet())
+                .acceptsAll(Arrays.asList("m", "format"), "Format of the input data. Available options: " + logFmtRegistry.keySet())
                 .withOptionalArg()
                 .defaultsTo("apache")
                 ;
@@ -338,7 +347,7 @@ public class MainLSQ {
             stream = stream.limit(head);
         }
 
-        WebLogParser webLogParser = WebLogParser.getFormatRegistry().get(logFormat);
+        Mapper webLogParser = logFmtRegistry.get(logFormat);
         if(webLogParser == null) {
             throw new RuntimeException("No log format parser found for '" + logFormat + "'");
         }
@@ -349,7 +358,7 @@ public class MainLSQ {
                 .map(line -> {
                 Resource r = logModel.createResource();
                 r.addLiteral(RDFS.label, line);
-                boolean parsed = webLogParser.parseEntry(line, r);
+                boolean parsed = webLogParser.parse(r, line) != 0;
                 if(!parsed) {
                 	r.addLiteral(LSQ.processingError, "Failed to parse log line");
                 }

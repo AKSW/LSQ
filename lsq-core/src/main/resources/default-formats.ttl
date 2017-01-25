@@ -1,0 +1,24 @@
+@prefix lsq: <http://lsq.aksw.org/vocab#> .
+@prefix fmt: <http://example.org/format/> .
+
+# TODO Transition to a proper vocabulary
+
+fmt:apache
+  lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:virtuoso
+  lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:distributed
+  lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:bio2rdf
+  lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .

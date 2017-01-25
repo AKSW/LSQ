@@ -106,6 +106,9 @@ public class LSQ {
 
 
     // TODO This is actually the vocab for apache log parsing - move it elsewhere
+    public static final Resource WebAccessLogFormat = resource("WebAccessLogFormat");
+    public static final Property pattern = property("pattern");
+
     public static final Property host = property("host");
     public static final Property user = property("user");
     public static final Property request = property("request");
