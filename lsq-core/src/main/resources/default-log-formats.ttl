@@ -30,5 +30,6 @@ fmt:distributed
 
 fmt:bio2rdf
   a lsq:WebAccessLogFormat ;
-  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  lsq:pattern "%h %t \"%r\" %>s" ;
   .
+

@@ -43,6 +43,8 @@ public class WebServerAccessLogParserTests {
 
     		try(BufferedReader br = new BufferedReader(new InputStreamReader(r.getInputStream()))) {
     			br.lines().forEach(line -> {
+    				logger.debug("Parse attempt: " + line);
+
     				Resource x = ModelFactory.createDefaultModel().createResource();
     				mapper.parse(x, line);
 

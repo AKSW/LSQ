@@ -68,9 +68,10 @@ public class WebLogParser {
     public static Mapper create(String pattern) {
     	Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
 
-        Mapper mapper = StringMapper.create("%h %l %u %t \"%r\" %>s %b", map::get);
+    	Mapper result = StringMapper.create(pattern, map::get);
+        //Mapper mapper = StringMapper.create("%h %l %u %t \"%r\" %>s %b", map::get);
 
-        return mapper;
+        return result;
     }
 
 
