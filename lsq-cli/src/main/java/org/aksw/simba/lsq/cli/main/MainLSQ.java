@@ -111,6 +111,7 @@ public class MainLSQ {
         // TODO Logic for when help is displayed could be improved
         //System.out.println("aoeuaoeuoaeu%2Fnstaeouhaoet%xx".replaceAll("\\%..", "-"));
 
+
         try {
             run(args);
         } catch(Exception e) {
@@ -143,9 +144,14 @@ public class MainLSQ {
 
     	// Load the default web access log formats
 
-    	Model webLogFormatsModel = RDFDataMgr.loadModel("classpath://default-formats.ttl");
+    	Model webLogFormatsModel = RDFDataMgr.loadModel("default-formats.ttl");
     	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(webLogFormatsModel);
 
+    	System.out.println(logFmtRegistry);
+
+    	if(true) {
+    		return;
+    	}
 
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
