@@ -20,7 +20,7 @@ fmt:combined
 
 fmt:virtuoso
   a lsq:WebAccessLogFormat ;
-  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  lsq:pattern "%h %{dd/MMM/yyyy HH:mm:ss Z}t %u \"%r\"" ;
   .
 
 fmt:distributed
