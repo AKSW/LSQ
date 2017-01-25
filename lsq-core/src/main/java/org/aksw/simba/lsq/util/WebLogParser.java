@@ -105,10 +105,10 @@ public class WebLogParser {
 
 
         result.put("r", (m, x) -> {
-            m.addField(LSQ.verb, "\\S*", String.class);
-            m.addString(" ");
-            m.addField(LSQ.path, "\\S*", String.class);
-            m.addString(" ");
+            m.addField(LSQ.verb, "[^\\s\"]*", String.class);
+            m.skipPattern("\\s*");
+            m.addField(LSQ.path, "[^\\s\"]*", String.class);
+            m.skipPattern("\\s*");
             m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
 

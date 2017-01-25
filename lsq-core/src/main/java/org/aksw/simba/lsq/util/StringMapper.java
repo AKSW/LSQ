@@ -30,6 +30,14 @@ public class StringMapper
 
     protected AtomicLongMap<String> fieldTypeToIndex = AtomicLongMap.create();
 
+    public void skipPattern(String str) {
+        String fieldName = allocateFieldName("ignored");
+
+        pattern.add(fieldName);
+        Pattern p = Pattern.compile("^" + str);
+        fieldToPattern.put(fieldName, p);
+    }
+
     public void ignoreField(String str) {
         String fieldCat = "ignored";
         Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
