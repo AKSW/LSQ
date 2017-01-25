@@ -23,12 +23,9 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,37 +72,6 @@ public class WebLogParser {
         return result;
     }
 
-
-    public static void main(String[] args) {
-        Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
-
-        String logLine = "127.0.0.1 - - [06/Nov/2016:05:12:49 +0100] \"GET /icons/ubuntu-logo.png HTTP/1.1\" 200 3623 \"http://localhost/\" \"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0\"";
-
-        StringMapper mapper = StringMapper.create("%h %l %u %{dd/MMM/yyyy:HH:mm:ss Z}t \"%r\" %>s %b", map::get);
-
-        System.out.println(logLine);
-        System.out.println(mapper);
-
-        Resource x = ModelFactory.createDefaultModel().createResource();
-        mapper.parse(x, logLine);
-        RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
-
-        System.out.println(mapper);
-
-        //Resource r = ModelFactory.createDefaultModel().createResource();
-        x
-            .removeAll(PROV.atTime)
-            .removeAll(LSQ.verb)
-            .removeAll(LSQ.host)
-            .addLiteral(PROV.atTime, new Date())
-            .addLiteral(LSQ.verb, "GET")
-            .addLiteral(LSQ.host, "0.0.0.0");
-
-        System.out.println(mapper.unparse(x));
-    }
-
-
-
     public static final String requestPattern
             =  "(?<verb>\\S+)\\s+"
             +  "(?<path>\\S+)\\s+"
@@ -146,8 +112,8 @@ public class WebLogParser {
             m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
 
-        result.put(">s", (m, x) -> m.ignoreField("\\d{3}"));
-        result.put("b", (m, x) -> m.ignoreField("\\d+"));
+        result.put(">s", (m, x) -> m.ignoreField("-|\\d{3}"));
+        result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
 
 
         // Headers
@@ -155,7 +121,7 @@ public class WebLogParser {
         	Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
         	Mapper subMapper = PropertyMapper.create(p, String.class);
 
-        	m.addField(LSQ.headers, "[^\\s\"]*", subMapper);
+        	m.addField(LSQ.headers, "[^\"]*", subMapper);
         });
 
         // %v The canonical ServerName of the server serving the request.

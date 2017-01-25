@@ -94,27 +94,6 @@ public class StringMapper
         fieldToMapper.put(fieldName, mapper);
     }
 
-    //protected PatternMatcher patternMatcher;
-
-
-
-
-//	protected Map<Property, >
-//
-//	@Override
-//	public void accept(Resource r, String source) {
-//		Map<String, String> groupToValue = patternMatcher.apply(source);
-//
-//		groupToValue.forEach((group, v) -> {
-//			BiConsumer<Resource, String> parser = groupToParser.get(group);
-//			if(parser == null) {
-//				throw new RuntimeException("No parser for: " + group);
-//			}
-//			parser.accept(r, v);
-//		});
-//	}
-    //addParser('%')
-
     public int parse(Resource r, String str) {
 
         String remaining = str;
@@ -128,6 +107,8 @@ public class StringMapper
                 Matcher m = pattern.matcher(remaining);
                 if(m.find()) {
                     contrib = m.group();
+
+                    System.out.println("contrib: " + fieldValue + " -> " + contrib);
 
                     Mapper mapper = fieldToMapper.get(fieldValue);
                     if(mapper != null) {
@@ -148,34 +129,6 @@ public class StringMapper
         }
 
         return 1;
-
-        /*
-        StringBuilder tmp = new StringBuilder();
-        for(Item item : pattern) {
-            String fieldValue = item.getValue();
-
-            String contrib = item.isField()
-                ? "(<?" + fieldValue + ">" + fieldToPattern.get(fieldValue) + ")"
-                : Pattern.quote(fieldValue);
-
-            tmp.append(contrib);
-        }
-
-        String patternStr = tmp.toString();
-        Pattern pattern = Pattern.compile(patternStr);
-        PatternMatcher matcher = new PatternMatcherImpl(pattern);
-
-        Map<String, String> fieldToValue = matcher.apply(str);
-        fieldToValue.forEach((k, v) -> {
-            Mapper mapper = fieldToMapper.get(k);
-            if(mapper != null) {
-                mapper.parse(r, v);
-            }
-        });
-
-        return r;
-        //r.addLiteral(property, result);
-        */
     }
 
     public String unparse(Resource r) {
