@@ -24,7 +24,9 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.RDF;
@@ -69,7 +71,6 @@ public class WebLogParser {
     	Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
 
     	Mapper result = StringMapper.create(pattern, map::get);
-        //Mapper mapper = StringMapper.create("%h %l %u %t \"%r\" %>s %b", map::get);
 
         return result;
     }
@@ -147,6 +148,21 @@ public class WebLogParser {
 
         result.put(">s", (m, x) -> m.ignoreField("\\d{3}"));
         result.put("b", (m, x) -> m.ignoreField("\\d+"));
+
+
+        // Headers
+        result.put("i", (m, x) -> {
+        	Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
+        	Mapper subMapper = PropertyMapper.create(p, String.class);
+
+        	m.addField(LSQ.headers, "[^\\s\"]*", subMapper);
+        });
+
+        // %v The canonical ServerName of the server serving the request.
+        result.put("v", (m, x) -> {
+        	m.addField(LSQ.property("serverName"), "[^\\s\"]*", String.class);
+        });
+
 
 //      result.put("b", (x) -> "(?<bytecount>\\d+)");
 

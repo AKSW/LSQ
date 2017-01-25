@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-
 import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.WebLogParser;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -43,7 +41,7 @@ public class WebServerAccessLogParserTests {
 
     		try(BufferedReader br = new BufferedReader(new InputStreamReader(r.getInputStream()))) {
     			br.lines().forEach(line -> {
-    				logger.debug("Parse attempt: " + line);
+    				logger.debug("Parse attempt [" + fmtName + "]: "  + line);
 
     				Resource x = ModelFactory.createDefaultModel().createResource();
     				mapper.parse(x, line);

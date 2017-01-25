@@ -49,6 +49,17 @@ public class StringMapper
         }
     }
 
+    public void addField(Property property, String patternStr, Mapper mapper) {
+    	Mapper m = new NestedPropertyMapper(property, mapper);
+
+    	String fieldCat = property.getLocalName();
+    	String fieldName = allocateFieldName(fieldCat);
+
+    	Pattern pat = Pattern.compile("^" + patternStr);
+
+    	addField(fieldName, pat, m);
+    }
+
     public void addField(Property property, String patternStr, Class<?> clazz) {
         RDFDatatype rdfDatatype = TypeMapper.getInstance().getTypeByClass(clazz);
         addField(property, patternStr, rdfDatatype);
@@ -59,13 +70,24 @@ public class StringMapper
         addField(fieldName, property, patternStr, rdfDatatype);
     }
 
-    public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
+    public String allocateFieldName(String fieldCat) {
         Long index = fieldTypeToIndex.getAndIncrement(fieldCat);
 
-        String fieldName = fieldCat + "[" + index + "]";
+        String result = fieldCat + "[" + index + "]";
+
+        return result;
+    }
+
+    public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
+        String fieldName = allocateFieldName(fieldCat);
 
         Pattern pat = Pattern.compile("^" + patternStr);
         Mapper mapper = new PropertyMapper(property, rdfDatatype);
+
+        addField(fieldName, pat, mapper);
+    }
+
+    public void addField(String fieldName, Pattern pat, Mapper mapper) {
         //pattern.add(new Item(true, fieldName));
         pattern.add(fieldName);
         fieldToPattern.put(fieldName, pat);
@@ -218,8 +240,11 @@ public class StringMapper
                 System.out.println("No entry for: " + token);
             }
 
-            BiConsumer<StringMapper, String> xxx = map.apply(token);
-            xxx.accept(result, arg);
+            BiConsumer<StringMapper, String> tokenProcessor = map.apply(token);
+            if(tokenProcessor == null) {
+            	throw new RuntimeException("No processor for: " + token);
+            }
+            tokenProcessor.accept(result, arg);
 
             s = m.end();
         }

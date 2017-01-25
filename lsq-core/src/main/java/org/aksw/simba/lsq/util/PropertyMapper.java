@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.util;
 
 import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 
@@ -33,5 +34,11 @@ public class PropertyMapper
             result = "";
         }
         return result;
+    }
+
+    public static PropertyMapper create(Property property, Class<?> clazz) {
+    	RDFDatatype rdfDatatype = TypeMapper.getInstance().getTypeByClass(clazz);
+    	PropertyMapper result = new PropertyMapper(property, rdfDatatype);
+    	return result;
     }
 }
