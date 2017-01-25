@@ -141,11 +141,9 @@ public class MainLSQ {
         //RDFWriterRegistry.register(N3JenaWriter.n3WriterPlain, RDFFormat.TURTLE_BLOCKS);
         //RDFWriterRegistry.ir
 
-
     	// Load the default web access log formats
 
-    	Model webLogFormatsModel = RDFDataMgr.loadModel("default-formats.ttl");
-    	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(webLogFormatsModel);
+    	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
     	System.out.println(logFmtRegistry);
 

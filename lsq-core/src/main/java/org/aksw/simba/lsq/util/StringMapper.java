@@ -25,6 +25,8 @@ public class StringMapper
     protected List<String> pattern = new ArrayList<>();
     protected Map<String, Mapper> fieldToMapper = new HashMap<>();
     protected Map<String, Pattern> fieldToPattern = new HashMap<>();
+    //protected ReversibleMap<String, String> fieldToCat = new ReversibleMapImpl<>();
+
 
     protected AtomicLongMap<String> fieldTypeToIndex = AtomicLongMap.create();
 
@@ -178,10 +180,18 @@ public class StringMapper
     public String toString() {
         String result = pattern.stream()
                 .map(item -> {
+                	boolean isIgnored = !fieldToMapper.containsKey(item);
+
+                	String prefix = isIgnored
+                		? ""
+                		: item + ":";
+
                 	Pattern pat = fieldToPattern.get(item);
-                    return pat != null
-                            ? "{" + item + ":" + pat + "}"
+                    String r = pat != null
+                            ? "{" + prefix + pat + "}"
                             : item;
+
+                    return r;
                 })
                 .collect(Collectors.joining());
         return result;

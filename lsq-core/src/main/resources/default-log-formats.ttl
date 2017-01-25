@@ -3,9 +3,19 @@
 
 # TODO Transition to a proper vocabulary
 
-fmt:apache
+fmt:common
   a lsq:WebAccessLogFormat ;
   lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:commonVHost
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%v %h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:combined
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" ;
   .
 
 fmt:virtuoso
