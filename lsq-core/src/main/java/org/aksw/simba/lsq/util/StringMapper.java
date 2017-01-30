@@ -2,8 +2,10 @@ package org.aksw.simba.lsq.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -14,6 +16,8 @@ import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
 import com.google.common.util.concurrent.AtomicLongMap;
@@ -21,10 +25,13 @@ import com.google.common.util.concurrent.AtomicLongMap;
 public class StringMapper
     implements Mapper
 {
+	private static final Logger logger = LoggerFactory.getLogger(StringMapper.class);
+
     // The pattern is composed of string parts and
     protected List<String> pattern = new ArrayList<>();
     protected Map<String, Mapper> fieldToMapper = new HashMap<>();
     protected Map<String, Pattern> fieldToPattern = new HashMap<>();
+    protected Set<String> isOptional = new HashSet<>();
     //protected ReversibleMap<String, String> fieldToCat = new ReversibleMapImpl<>();
 
 
@@ -57,7 +64,7 @@ public class StringMapper
         }
     }
 
-    public void addField(Property property, String patternStr, Mapper mapper) {
+    public void addField(Property property, String patternStr, Mapper mapper, boolean optional) {
     	Mapper m = new NestedPropertyMapper(property, mapper);
 
     	String fieldCat = property.getLocalName();
@@ -65,7 +72,7 @@ public class StringMapper
 
     	Pattern pat = Pattern.compile("^" + patternStr);
 
-    	addField(fieldName, pat, m);
+    	addField(fieldName, pat, m, optional);
     }
 
     public void addField(Property property, String patternStr, Class<?> clazz) {
@@ -75,7 +82,7 @@ public class StringMapper
 
     public void addField(Property property, String patternStr, RDFDatatype rdfDatatype) {
         String fieldName = property.getLocalName();
-        addField(fieldName, property, patternStr, rdfDatatype);
+        addField(fieldName, property, patternStr, rdfDatatype, false);
     }
 
     public String allocateFieldName(String fieldCat) {
@@ -86,20 +93,24 @@ public class StringMapper
         return result;
     }
 
-    public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype) {
+    public void addField(String fieldCat, Property property, String patternStr, RDFDatatype rdfDatatype, boolean optional) {
         String fieldName = allocateFieldName(fieldCat);
 
         Pattern pat = Pattern.compile("^" + patternStr);
         Mapper mapper = new PropertyMapper(property, rdfDatatype);
 
-        addField(fieldName, pat, mapper);
+        addField(fieldName, pat, mapper, optional);
     }
 
-    public void addField(String fieldName, Pattern pat, Mapper mapper) {
+    public void addField(String fieldName, Pattern pat, Mapper mapper, boolean optional) {
         //pattern.add(new Item(true, fieldName));
         pattern.add(fieldName);
         fieldToPattern.put(fieldName, pat);
         fieldToMapper.put(fieldName, mapper);
+
+        if(optional) {
+        	isOptional.add(fieldName);
+        }
     }
 
     public int parse(Resource r, String str) {
@@ -116,7 +127,7 @@ public class StringMapper
                 if(m.find()) {
                     contrib = m.group();
 
-                    System.out.println("contrib: " + fieldValue + " -> " + contrib);
+                    logger.trace("contrib: " + fieldValue + " -> " + contrib);
 
                     Mapper mapper = fieldToMapper.get(fieldValue);
                     if(mapper != null) {
@@ -125,7 +136,10 @@ public class StringMapper
 
                     remaining = remaining.substring(m.end());
                 } else {
-                    throw new RuntimeException("Field '" + fieldValue + "' with pattern '" + pattern + "' does not match '" + remaining + "'");
+                	boolean optional = isOptional.contains(fieldValue);
+                	if(!optional) {
+                		throw new RuntimeException("Field '" + fieldValue + "' with pattern '" + pattern + "' does not match '" + remaining + "'");
+                	}
                 }
             } else {
                 if(!remaining.startsWith(fieldValue)) {
@@ -180,7 +194,7 @@ public class StringMapper
         return result;
     }
 
-    public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?(\\S*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
+    public static Pattern tokenPattern = Pattern.compile("%(\\{([^}]*)\\})?([^% ]*\\w+)"); //, Pattern.MULTILINE | Pattern.DOTALL);
 
     public static StringMapper create(String str, Function<String, BiConsumer<StringMapper, String>> map) {
 

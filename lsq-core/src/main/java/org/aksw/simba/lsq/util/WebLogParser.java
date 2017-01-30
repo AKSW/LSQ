@@ -26,6 +26,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,13 +116,24 @@ public class WebLogParser {
         result.put(">s", (m, x) -> m.ignoreField("-|\\d{3}"));
         result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
 
+        result.put("U", (m, x) -> {
+            m.addField(LSQ.path, "[^\\s\"?]*", String.class);
+        });
+//
+        result.put("q", (m, x) -> {
+        	Mapper mapper = new FixMapper(new PropertyMapper(LSQ.queryString, String.class), "?", "");
+
+        	m.addField(LSQ.queryString, "[^\\s\"]*", mapper, true);
+        });
+//
+
 
         // Headers
         result.put("i", (m, x) -> {
         	Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
         	Mapper subMapper = PropertyMapper.create(p, String.class);
 
-        	m.addField(LSQ.headers, "[^\"]*", subMapper);
+        	m.addField(LSQ.headers, "[^\"]*", subMapper, false);
         });
 
         // %v The canonical ServerName of the server serving the request.
@@ -341,4 +353,48 @@ public class WebLogParser {
 
         return result;
     }
+
+
+    public static void extractQuery(Resource r) {
+    	Statement stmt = r.getProperty(LSQ.path);
+    	if(stmt != null) {
+    		String str = stmt.getString();
+    		String queryStr = extractQueryString(str);
+    		if(queryStr != null) {
+    			r.addLiteral(LSQ.query, queryStr);
+    		}
+    	}
+    }
+
+    // TODO extract the query also from referrer fields
+    public static String extractQueryString(String pathStr) {
+    	String result = null;
+
+    	if(pathStr != null) {
+
+            pathStr = encodeUnsafeCharacters(pathStr);
+
+
+            // Parse the path and extract sparql query string if present
+            //String mockUri = "http://example.org/" + pathStr;
+            try {
+                URI uri = new URI(pathStr);
+
+                List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
+                result = qsArgs.stream()
+                    .filter(x -> x.getName().equals("query"))
+                    .findFirst()
+                    .map(x -> x.getValue())
+                    .orElse(null);
+
+            } catch (Exception e) {
+                //System.out.println(mockUri.substring(244));
+            	logger.warn("Could not parse URI: " + pathStr, e);
+                //logger.warn("Could not parse URI: " + mockUri, e);
+            }
+        }
+
+    	return result;
+    }
+
 }

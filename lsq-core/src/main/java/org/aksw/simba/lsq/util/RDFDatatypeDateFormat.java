@@ -26,10 +26,12 @@ public class RDFDatatypeDateFormat
     }
 
     public String unparse(Object value) {
-        Date date = (Date) value;
-        String result = dateFormat.format(date);
-//        Calendar cal = new GregorianCalendar();
-//        cal.setTime(date);
+    	Calendar cal = (Calendar)value;
+//      Calendar cal = new GregorianCalendar();
+//      cal.setTime(date);
+    	//Date date = (Date) value;
+    	Date date = cal.getTime();
+      String result = dateFormat.format(date);
 //        XSDDateTime tmp = new XSDDateTime(cal);
 //        String result = super.unparse(tmp);
         return result;
@@ -38,15 +40,16 @@ public class RDFDatatypeDateFormat
     @Override
     public Object parse(String lexicalForm) {
         try {
-        Date date = dateFormat.parse(lexicalForm);
+        	Date date = dateFormat.parse(lexicalForm);
             //Object tmp = super.parse(lexicalForm);
             //XSDDateTime xsd = (XSDDateTime) tmp;
             //Calendar cal = xsd.asCalendar();
             Calendar calendar = new GregorianCalendar();//Calendar.getInstance();
             calendar.setTime(date);
 
-            Date result = calendar.getTime();
-            return result;
+            return calendar;
+            //Date result = calendar.getTime();
+            //return result;
         } catch(Exception e) {
             throw new RuntimeException(e);
         }

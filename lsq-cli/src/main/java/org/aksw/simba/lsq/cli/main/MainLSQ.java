@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,7 +32,6 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
-import org.aksw.jena_sparql_api.http.QueryExecutionHttpWrapper;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -62,7 +62,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
-import org.apache.jena.sparql.engine.http.QueryEngineHTTP;
+import org.apache.jena.sparql.function.library.e;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -145,12 +145,6 @@ public class MainLSQ {
 
     	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
-    	System.out.println(logFmtRegistry);
-
-    	if(true) {
-    		return;
-    	}
-
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 .withRequiredArg()
@@ -166,7 +160,7 @@ public class MainLSQ {
         OptionSpec<String> logFormatOs = parser
                 .acceptsAll(Arrays.asList("m", "format"), "Format of the input data. Available options: " + logFmtRegistry.keySet())
                 .withOptionalArg()
-                .defaultsTo("apache")
+                .defaultsTo("combined")
                 ;
 
         OptionSpec<String> outFormatOs = parser
@@ -201,6 +195,12 @@ public class MainLSQ {
 
         OptionSpec<Long> headOs = parser
                 .acceptsAll(Arrays.asList("h", "head"), "Only process n entries starting from the top")
+                .withRequiredArg()
+                .ofType(Long.class)
+                ;
+
+        OptionSpec<Long> datasetSizeOs = parser
+                .acceptsAll(Arrays.asList("d", "dsize"), "Dataset size. Used in some computations. If not given, it will be queried (which might fail). Negative values disable dependent computations.")
                 .withRequiredArg()
                 .ofType(Long.class)
                 ;
@@ -273,6 +273,12 @@ public class MainLSQ {
         Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
         Long timeoutInMs = timeoutInMsOs.value(options);
+
+        boolean queryDatasetSize = !options.has(datasetSizeOs);
+
+        Long datasetSize = options.has(datasetSizeOs) ? datasetSizeOs.value(options) : null;
+        datasetSize = datasetSize == null ? null : (datasetSize < 0 ? null : datasetSize);
+
         String expBaseUri = expBaseUriOs.value(options);
         String logFormat = logFormatOs.value(options);
         String outFormatStr = outFormatOs.value(options);
@@ -384,7 +390,7 @@ public class MainLSQ {
             .maximumSize(10000)
             .build();
 
-        Cache<String, Boolean> queryTimeoutCache = CacheBuilder.newBuilder()
+        Cache<String, Exception> exceptionCache = CacheBuilder.newBuilder()
                 .maximumSize(10000)
                 .build();
 
@@ -416,11 +422,15 @@ public class MainLSQ {
                 .config()
                     .withPostProcessor(qe -> {
                         if(timeoutInMs != null) {
-                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
-                            .setTimeout(timeoutInMs);
+                        	qe.setTimeout(timeoutInMs);
+//                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
+//                            .setTimeout(timeoutInMs);
                         }
                     })
+                    //.onTimeout((qef, queryStmt) -> )
                     .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
+//                    .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
+                    //)
 //                    .withRetry(3, 30, TimeUnit.SECONDS)
 //                    .withPagination(1000)
                 .end()
@@ -440,8 +450,11 @@ public class MainLSQ {
 //            ShellGraph x = new ShellGraph(graph, null, null) ;
 //            x.writeGraph() ;
 
-        logger.info("Counting triples in the endpoint ...");
-        Long datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
+
+    	if(queryDatasetSize) {
+    		logger.info("Counting triples in the endpoint ...");
+    		datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
+    	}
 
         //int workloadSize = workloadResources.size();
         Long workloadSize = null;
@@ -493,14 +506,23 @@ public class MainLSQ {
 //            endAtTime
 
         // Small array hack in order to change the values while streaming
-        int logFailCount[] = new int[] {0};
-        long logEntryIndex[] = new long[] {0l};
+        //int logFailCount[] = new int[] {0};
+        //long logEntryIndex[] = new long[] {0l};
+        int logFailCount = 0;
+        long logEntryIndex = 0l;
         int batchSize = 10;
 
         // TODO We should check beforehand whether there is a sufficient number of processable log entries
         // available in order to consider the workload a query log
         //for(Resource r : workloadResources) {
-        workloadResourceStream.forEach(r -> {
+        //workloadResourceStream.forEach(r -> {
+        Iterator<Resource> it = workloadResourceStream.iterator();
+        while(it.hasNext()) {
+        	Resource r = it.next();
+
+        	// Extract the query and add it with the lsq:query property
+        	WebLogParser.extractQuery(r);
+
         	// If the resource is null, we could not parse the log entry
         	// therefore count this as an error
 
@@ -531,10 +553,13 @@ public class MainLSQ {
 	                        queryStr = "" + queryStmt.getQuery();
 	                    }
 
-	                    if(logEntryIndex[0] % batchSize == 0) {
-	                        long batchEndTmp = logEntryIndex[0] + batchSize;
+	                    queryStr = "Select COUNT(*) { ?s ?p ?o }";
+
+
+	                    if(logEntryIndex % batchSize == 0) {
+	                        long batchEndTmp = logEntryIndex + batchSize;
 	                        long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
-	                        logger.info("Processing query batch from " + logEntryIndex[0] + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
+	                        logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
 	                    }
 
 
@@ -641,23 +666,23 @@ public class MainLSQ {
 	                    // TODO Frequent flushing may decrease performance
 	                    // out.flush();
 	            	} else {
-	            		logger.debug("Skipping non-sparql-query log entry #" + logEntryIndex[0]);
+	            		logger.debug("Skipping non-sparql-query log entry #" + logEntryIndex);
 	                    logger.debug(toString(r));
 	            	}
 
                 } else {
-                    ++logFailCount[0];
-                    double ratio = logEntryIndex[0] == 0 ? 0.0 : logFailCount[0] / logEntryIndex[0];
-                    if(logEntryIndex[0] == 10 && ratio > 0.8) {
+                    ++logFailCount;
+                    double ratio = logEntryIndex == 0 ? 0.0 : logFailCount / logEntryIndex;
+                    if(logEntryIndex == 10 && ratio > 0.8) {
                         fail = true;
                     }
 
-                    logger.warn("Skipping non-parsable log entry #" + logEntryIndex[0]);
+                    logger.warn("Skipping non-parsable log entry #" + logEntryIndex);
                     logger.warn(toString(r));
                 }
 
             } catch(Exception e) {
-                logger.warn("Unexpected exception encountered at item " + logEntryIndex[0] + " - ", e);
+                logger.warn("Unexpected exception encountered at item " + logEntryIndex + " - ", e);
                 logger.warn(toString(r));
             }
 
@@ -666,8 +691,8 @@ public class MainLSQ {
             }
 
             //.write(System.err, "TURTLE");
-            ++logEntryIndex[0];
-        });
+            ++logEntryIndex;
+        }
 
 
         Model tmpModel = ModelFactory.createDefaultModel();

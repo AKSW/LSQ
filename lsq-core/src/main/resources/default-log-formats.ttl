@@ -8,6 +8,12 @@ fmt:common
   lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
   .
 
+fmt:commonVirtuoso
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %{dd/MMM/yyyy HH:mm:ss Z}t \"%r\" %>s %b" ;
+  .
+
+
 fmt:commonVHost
   a lsq:WebAccessLogFormat ;
   lsq:pattern "%v %h %l %u %t \"%r\" %>s %b" ;
@@ -20,7 +26,7 @@ fmt:combined
 
 fmt:virtuoso
   a lsq:WebAccessLogFormat ;
-  lsq:pattern "%h %{dd/MMM/yyyy HH:mm:ss Z}t %u \"%r\"" ;
+  lsq:pattern "%h %{dd/MMM/yyyy HH:mm:ss Z}t %u \"%U%q\"" ;
   .
 
 fmt:distributed

@@ -11,6 +11,11 @@ public class PropertyMapper
     protected Property property;
     protected RDFDatatype rdfDatatype;
 
+    public PropertyMapper(Property property, Class<?> clazz) {
+        this(property, TypeMapper.getInstance().getTypeByClass(clazz));
+    }
+
+
     public PropertyMapper(Property property, RDFDatatype rdfDatatype) {
         super();
         this.property = property;

@@ -114,6 +114,7 @@ public class LSQ {
     public static final Property request = property("request");
     public static final Property query = property("query");
     public static final Property path = property("uri");
+    public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
     public static final Property headers = property("headers");
     public static final Property verb = property("verb");

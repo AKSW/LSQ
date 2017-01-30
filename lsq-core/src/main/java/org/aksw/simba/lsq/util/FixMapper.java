@@ -1,5 +1,7 @@
 package org.aksw.simba.lsq.util;
 
+import java.util.Objects;
+
 import org.apache.jena.rdf.model.Resource;
 
 public class FixMapper
@@ -11,20 +13,25 @@ public class FixMapper
 
     public FixMapper(Mapper delegate, String prefix, String suffix) {
         super();
+        Objects.requireNonNull(prefix);
+        Objects.requireNonNull(suffix);
+
         this.delegate = delegate;
         this.prefix = prefix;
         this.suffix = suffix;
+        //this.prefix = prefix != null ? prefix : "";
+        //this.suffix = suffix != null ? suffix : "";
     }
 
     @Override
     public int parse(Resource r, String lexicalForm) {
-        boolean isPrefixMatch = prefix == null || lexicalForm.startsWith(prefix);
-        boolean isSuffixMatch = suffix == null || lexicalForm.endsWith(suffix);
+        boolean isPrefixMatch = lexicalForm.startsWith(prefix);
+        boolean isSuffixMatch = lexicalForm.endsWith(suffix);
 
         boolean isAccepted = isPrefixMatch && isSuffixMatch;
 
         int result = isAccepted
-        		? delegate.parse(r, lexicalForm)
+        		? delegate.parse(r, lexicalForm.substring(prefix.length(), lexicalForm.length() - suffix.length()))
         		: 0;
 
         return result;
