@@ -17,8 +17,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -150,6 +150,21 @@ public class MainLSQ {
 
     	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
+//    	{
+//    		for(Entry<String, Mapper> e : logFmtRegistry.entrySet()) {
+//    			String name = e.getKey();
+//		    	Mapper mapper = e.getValue();
+//		    	Resource r = ModelFactory.createDefaultModel().createResource();
+//		    	try {
+//		    		mapper.parse(r, "d4bec8a9ff6a49f36e2d44718c619461 - - [10/Apr/2016 03:00:00 +0200] \"GET /sparql?query=%0A++++++++++++select+%3Ftype+where+%7B%0A++++++++++++%3Chttp%3A%2F%2Fdbpedia.org%2Fresource%2FUnder_Voluntary%3E+%3Chttp%3A%2F%2Fwww.w3.org%2F1999%2F02%2F22-rdf-syntax-ns%23type%3E+%3Ftype+.%0A++++++++++++%7D HTTP/1.1\" 200 115 \"-\" \"R\" \"-\"");
+//		    	} catch(Exception x) {
+//		    		continue;
+//		    	}
+//		    	System.out.println("Match: " + name);
+//		    	RDFDataMgr.write(System.out, r.getModel(), RDFFormat.TURTLE);
+//    		}
+//    	}
+
         OptionSpec<File> inputOs = parser
                 .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 .withRequiredArg()
@@ -252,12 +267,28 @@ public class MainLSQ {
         // Write to file or sysout depending on arguments
         PrintStream out;
         File outFile = null;
+        boolean[] outNeedsClosing = { true };
         if(options.has(outputOs)) {
             outFile = outputOs.value(options);
             out = new PrintStream(outFile);
         } else {
             out = System.out;
+            outNeedsClosing[0] = false;
         }
+
+
+
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+        	public void run() {
+        		if(outNeedsClosing[0]) {
+        			logger.info("Shutdown hook: Flushing output");
+        			out.flush();
+        			out.close();
+        		}
+        	};
+        });
+
+
 
         InputStream in;
         if(options.has(inputOs)) {
@@ -713,7 +744,8 @@ public class MainLSQ {
 
         // If the output stream is based on a file then close it, but
         // don't close stdout
-        if(outFile != null) {
+        if(outNeedsClosing[0]) {
+        	outNeedsClosing[0] = false;
             out.close();
             logger.info("Done. Output written to: " + outFile.getAbsolutePath());
         } else {
