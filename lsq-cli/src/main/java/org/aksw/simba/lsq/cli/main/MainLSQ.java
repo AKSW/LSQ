@@ -14,18 +14,20 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
+import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.fedx.jsa.FedXFactory;
+import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -62,7 +64,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
-import org.apache.jena.sparql.function.library.e;
+import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -111,6 +113,9 @@ public class MainLSQ {
         // TODO Logic for when help is displayed could be improved
         //System.out.println("aoeuaoeuoaeu%2Fnstaeouhaoet%xx".replaceAll("\\%..", "-"));
 
+//    	QueryExecution xxx = org.apache.jena.query.QueryExecutionFactory.sparqlService("http://localhost:8890/sparql", "select * { ?s ?p ?o }");
+//    	xxx.setTimeout(1, 1);
+//    	ResultSetFormatter.consume(xxx.execSelect());
 
         try {
             run(args);
@@ -422,14 +427,14 @@ public class MainLSQ {
                 .config()
                     .withPostProcessor(qe -> {
                         if(timeoutInMs != null) {
-                        	qe.setTimeout(timeoutInMs);
+                        	qe.setTimeout(0, timeoutInMs);
 //                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
 //                            .setTimeout(timeoutInMs);
                         }
                     })
                     //.onTimeout((qef, queryStmt) -> )
                     .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
-//                    .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
+                    .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
                     //)
 //                    .withRetry(3, 30, TimeUnit.SECONDS)
 //                    .withPagination(1000)
@@ -474,7 +479,7 @@ public class MainLSQ {
         SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
-        Set<Query> executedQueries = new HashSet<>();
+        //Set<Query> executedQueries = new HashSet<>();
 
         //.addLiteral(PROV.startedAtTime, start)
         //.addLiteral(PROV.endAtTime, end)
@@ -553,8 +558,9 @@ public class MainLSQ {
 	                        queryStr = "" + queryStmt.getQuery();
 	                    }
 
-	                    queryStr = "Select COUNT(*) { ?s ?p ?o }";
-
+//	                    long rnd = (new Random()).nextLong();
+//	                    query = QueryFactory.create("SELECT COUNT(*) { ?s ?p ?o . ?o ?x ?y } Order By ?y Limit 10", Syntax.syntaxARQ);
+//	                    queryStr = "" + query;
 
 	                    if(logEntryIndex % batchSize == 0) {
 	                        long batchEndTmp = logEntryIndex + batchSize;
@@ -626,10 +632,11 @@ public class MainLSQ {
 
 
 	                    if(rdfizer.contains("e")) {
-	                        boolean hasBeenExecuted = executedQueries.contains(query);
+	                        //boolean hasBeenExecuted = executedQueries.contains(query);
 
+	                    	boolean hasBeenExecuted = false;
 	                        if(!hasBeenExecuted) {
-	                            executedQueries.add(query);
+	                            //executedQueries.add(query);
 
 
 	                            Calendar now = Calendar.getInstance();
@@ -866,7 +873,8 @@ public class MainLSQ {
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
         }
         catch(Exception e) {
-            String msg = e.getMessage();
+        	Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
+            String msg = f.getMessage();
             queryExecRes.addLiteral(LSQ.executionError, msg);
             String queryStr = ("" + query).replace("\n", " ");
             logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);
