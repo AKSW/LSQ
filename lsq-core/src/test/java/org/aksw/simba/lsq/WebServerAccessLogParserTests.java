@@ -48,10 +48,22 @@ public class WebServerAccessLogParserTests {
     			br.lines().forEach(line -> {
     				logger.debug("Parse attempt [" + fmtName + ", " + rName + "]: "  + line);
 
+//    				if("virtuoso.dbpedia351.log".equals(rName)) {
+//    					System.out.println("problematic entry found");
+//    				}
+
     				Resource x = ModelFactory.createDefaultModel().createResource();
     				mapper.parse(x, line);
 
-    				RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
+//    				RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
+//
+//    				WebLogParser.extractQuery(x);
+//
+////    				if(!x.hasProperty(LSQ.query)) {
+////    					throw new RuntimeException("Could not obtain query");
+////    				}
+//
+//    				RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
     			});
     		}
 

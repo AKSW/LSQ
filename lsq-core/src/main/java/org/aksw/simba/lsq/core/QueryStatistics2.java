@@ -111,7 +111,8 @@ public class QueryStatistics2 {
     }
 
     public static int propertyDegree(Resource r, Property... ps) {
-        int result = new HashSet<>(Arrays.asList(ps)).stream()
+        int result = Arrays.asList(ps).stream()
+        	.distinct()
             .mapToInt(p -> r.listProperties(p).toList().size())
             .sum();
 
@@ -195,10 +196,12 @@ public class QueryStatistics2 {
             // triple and nodes - needed because RDF literals cannot appear in subject position
             // TODO We treat each triple different from the other even if they happen to be equal - is this desired?
             Resource tx = result.createResource();
-            Resource sx = nodeToResource.merge(s, result.createResource(), (x, y) -> x);
-            Resource px = nodeToResource.merge(p, result.createResource(), (x, y) -> x);
-            Resource ox = nodeToResource.merge(o, result.createResource(), (x, y) -> x);
-
+//            Resource sx = nodeToResource.merge(s, result.createResource(), (x, y) -> x);
+//            Resource px = nodeToResource.merge(p, result.createResource(), (x, y) -> x);
+//            Resource ox = nodeToResource.merge(o, result.createResource(), (x, y) -> x);
+            Resource sx = nodeToResource.computeIfAbsent(s, (x) -> result.createResource());
+            Resource px = nodeToResource.computeIfAbsent(p, (x) -> result.createResource());
+            Resource ox = nodeToResource.computeIfAbsent(o, (x) -> result.createResource());
 
 
 
@@ -252,6 +255,7 @@ public class QueryStatistics2 {
 
 
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Collection<BasicPattern> bgps) {
+    	//bgps = bgps.stream().limit(1).collect(Collectors.toList());
         //Model model = queryRes.getModel();
 
         List<Integer> bgpSizes = bgps.stream()
@@ -282,8 +286,8 @@ public class QueryStatistics2 {
             enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
         }
 
-//        System.out.println("HYPER");
-//        hyperGraph.write(System.out, "TURTLE");
+        System.out.println("HYPER");
+        hyperGraph.write(System.out, "TURTLE");
 
         Set<Resource> rawJoinVertices = hyperGraph
                 .listResourcesWithProperty(RDF.type, LSQ.Vertex)
@@ -303,7 +307,8 @@ public class QueryStatistics2 {
         Set<Resource> joinVertices = joinVertexToDegree.keySet();
 
         List<Integer> degrees = joinVertexToDegree.values().stream()
-                .sorted().collect(Collectors.toList());
+                .sorted()
+                .collect(Collectors.toList());
         int n = degrees.size();
         int nhalf = n / 2;
 
@@ -352,7 +357,7 @@ public class QueryStatistics2 {
 
             queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
-            Resource joinVertexType = getJoinVertexType(joinVertexRes);
+            Resource joinVertexType = getJoinVertexType(v);
             int degree = joinVertexToDegree.get(v);
 
             joinVertexRes

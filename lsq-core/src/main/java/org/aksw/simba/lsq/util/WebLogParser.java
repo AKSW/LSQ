@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,7 +28,6 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -123,7 +124,7 @@ public class WebLogParser {
         result.put("q", (m, x) -> {
         	Mapper mapper = new FixMapper(new PropertyMapper(LSQ.queryString, String.class), "?", "");
 
-        	m.addField(LSQ.queryString, "[^\\s\"]*", mapper, true);
+        	m.addFieldNoNest(LSQ.queryString, "[^\\s\"]*", mapper, true);
         });
 //
 
@@ -356,14 +357,26 @@ public class WebLogParser {
 
 
     public static void extractQuery(Resource r) {
-    	Statement stmt = r.getProperty(LSQ.path);
-    	if(stmt != null) {
-    		String str = stmt.getString();
-    		String queryStr = extractQueryString(str);
-    		if(queryStr != null) {
-    			r.addLiteral(LSQ.query, queryStr);
-    		}
-    	}
+    	List<Function<Resource, String>> extractors = Arrays.asList(
+    			x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
+    			x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null
+		);
+
+		extractors.stream()
+			.map(e -> e.apply(r))
+			.filter(s -> s != null)
+			.findFirst()
+			.ifPresent(s -> r.addLiteral(LSQ.query, s));
+    }
+
+    public static String extractQueryString2(String uri) {
+        List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+        String result = qsArgs.stream()
+            .filter(x -> x.getName().equals("query"))
+            .findFirst()
+            .map(x -> x.getValue())
+            .orElse(null);
+        return result;
     }
 
     // TODO extract the query also from referrer fields
@@ -378,15 +391,10 @@ public class WebLogParser {
             // Parse the path and extract sparql query string if present
             //String mockUri = "http://example.org/" + pathStr;
             try {
-                URI uri = new URI(pathStr);
+                //URI uri = new URI(pathStr);
+            	int queryStrOffset = pathStr.indexOf("?");
 
-                List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
-                result = qsArgs.stream()
-                    .filter(x -> x.getName().equals("query"))
-                    .findFirst()
-                    .map(x -> x.getValue())
-                    .orElse(null);
-
+                result = queryStrOffset >= 0 ? extractQueryString2(pathStr.substring(queryStrOffset)) : null;
             } catch (Exception e) {
                 //System.out.println(mockUri.substring(244));
             	logger.warn("Could not parse URI: " + pathStr, e);

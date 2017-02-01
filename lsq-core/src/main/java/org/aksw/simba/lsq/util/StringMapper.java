@@ -113,6 +113,15 @@ public class StringMapper
         }
     }
 
+    public void addFieldNoNest(Property property, String patternStr, Mapper m, boolean optional) {
+    	String fieldCat = property.getLocalName();
+    	String fieldName = allocateFieldName(fieldCat);
+
+    	Pattern pat = Pattern.compile("^" + patternStr);
+
+    	addField(fieldName, pat, m, optional);
+    }
+
     public int parse(Resource r, String str) {
 
         String remaining = str;
@@ -127,7 +136,7 @@ public class StringMapper
                 if(m.find()) {
                     contrib = m.group();
 
-                    logger.trace("contrib: " + fieldValue + " -> " + contrib);
+                    logger.trace("Contribution: " + fieldValue + " -> " + contrib);
 
                     Mapper mapper = fieldToMapper.get(fieldValue);
                     if(mapper != null) {
