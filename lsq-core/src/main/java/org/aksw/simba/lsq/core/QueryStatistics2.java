@@ -124,7 +124,7 @@ public class QueryStatistics2 {
         int outdeg = propertyDegree(r, LSQ.out);
 
         Resource result;
-        if(indeg == 0) {
+        if(indeg == 0) { //  && outdeg > 0
             result = LSQ.Star;
         } else if(outdeg == 0) {
             result = LSQ.Sink;
@@ -286,8 +286,8 @@ public class QueryStatistics2 {
             enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
         }
 
-        System.out.println("HYPER");
-        hyperGraph.write(System.out, "TURTLE");
+        //System.out.println("HYPER");
+        //hyperGraph.write(System.out, "TURTLE");
 
         Set<Resource> rawJoinVertices = hyperGraph
                 .listResourcesWithProperty(RDF.type, LSQ.Vertex)
