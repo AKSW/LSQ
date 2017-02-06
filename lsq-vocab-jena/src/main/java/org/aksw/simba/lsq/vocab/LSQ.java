@@ -45,7 +45,7 @@ public class LSQ {
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
-    public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");
+    public static final Property medianJoinVertexsDegree = property("medianJoinVertexDegree");
 
     public static final Property mentionsSubject = property("mentionsSubject");
     public static final Property mentionsPredicate = property("mentionsPredicate");
@@ -69,6 +69,7 @@ public class LSQ {
     public static final Property hasStructuralFeatures = property("hasStructuralFeatures");
     public static final Property hasSpin = property("hasSpin");
     public static final Property hasTriplePattern = property("hasTriplePattern");
+    public static final Property hasBGP = property("hasBGP");
     public static final Property hasTriplePatternExecution = property("hasTriplePatternExecution");
     public static final Property triplePatternText = property("triplePatternText");
     public static final Property triplePatternResultSize = property("triplePatternResultSize");

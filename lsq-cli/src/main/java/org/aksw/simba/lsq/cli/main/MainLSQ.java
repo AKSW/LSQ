@@ -146,9 +146,9 @@ public class MainLSQ {
         //RDFWriterRegistry.register(N3JenaWriter.n3WriterPlain, RDFFormat.TURTLE_BLOCKS);
         //RDFWriterRegistry.ir
 
-    	// Load the default web access log formats
+        // Load the default web access log formats
 
-    	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
+        Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
 //    	{
 //    		for(Entry<String, Mapper> e : logFmtRegistry.entrySet()) {
@@ -253,13 +253,13 @@ public class MainLSQ {
                 ;
 
         OptionSpec<String> fedEndpointsOs = parser
-        		.acceptsAll(Arrays.asList("fed"), "URIs of federated endpoints")
-				.withRequiredArg();
+                .acceptsAll(Arrays.asList("fed"), "URIs of federated endpoints")
+                .withRequiredArg();
 
         OptionSpec<File> fedEndpointsFileOs = parser
-        		.acceptsAll(Arrays.asList("fedf"), "URIs of federated endpoints")
-				.withRequiredArg()
-				.ofType(File.class);
+                .acceptsAll(Arrays.asList("fedf"), "URIs of federated endpoints")
+                .withRequiredArg()
+                .ofType(File.class);
 
 
         OptionSet options = parser.parse(args);
@@ -279,15 +279,14 @@ public class MainLSQ {
 
 
         Runtime.getRuntime().addShutdownHook(new Thread() {
-        	public void run() {
-        		if(outNeedsClosing[0]) {
-        			logger.info("Shutdown hook: Flushing output");
-        			out.flush();
-        			out.close();
-        		}
-        	};
+            public void run() {
+                if(outNeedsClosing[0]) {
+                    logger.info("Shutdown hook: Flushing output");
+                    out.flush();
+                    out.close();
+                }
+            };
         });
-
 
 
         InputStream in;
@@ -315,6 +314,8 @@ public class MainLSQ {
         Long datasetSize = options.has(datasetSizeOs) ? datasetSizeOs.value(options) : null;
         datasetSize = datasetSize == null ? null : (datasetSize < 0 ? null : datasetSize);
 
+        boolean isExecutionEnabled = rdfizer.contains("e");
+
         String expBaseUri = expBaseUriOs.value(options);
         String logFormat = logFormatOs.value(options);
         String outFormatStr = outFormatOs.value(options);
@@ -328,16 +329,16 @@ public class MainLSQ {
 
         List<String> fedEndpoints = new ArrayList<>();
         if(options.has(fedEndpointsFileOs)) {
-        	File fedEndpointsFile = fedEndpointsFileOs.value(options);
-        	Files.readLines(fedEndpointsFile, StandardCharsets.UTF_8).stream()
-            		.map(String::trim)
-            		.filter(line -> line.startsWith("#"))
-            		.forEach(fedEndpoints::add);
+            File fedEndpointsFile = fedEndpointsFileOs.value(options);
+            Files.readLines(fedEndpointsFile, StandardCharsets.UTF_8).stream()
+                    .map(String::trim)
+                    .filter(line -> line.startsWith("#"))
+                    .forEach(fedEndpoints::add);
         }
 
         if(options.has(fedEndpointsOs)) {
-        	List<String> tmp = fedEndpointsOs.values(options);
-        	fedEndpoints.addAll(tmp);
+            List<String> tmp = fedEndpointsOs.values(options);
+            fedEndpoints.addAll(tmp);
         }
 
 
@@ -406,7 +407,7 @@ public class MainLSQ {
                 r.addLiteral(RDFS.label, line);
                 boolean parsed = webLogParser.parse(r, line) != 0;
                 if(!parsed) {
-                	r.addLiteral(LSQ.processingError, "Failed to parse log line");
+                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
                 }
 
                 return r;
@@ -432,46 +433,53 @@ public class MainLSQ {
 
 
         QueryExecutionFactory countQef;
-
         QueryExecutionFactory baseDataQef;
-        boolean isNormalMode = fedEndpoints.isEmpty();
-        //boolean isFederatedMode = !isNormalMode;
+        QueryExecutionFactory dataQef = null;
 
-        if(isNormalMode) {
-            countQef =
+        if(isExecutionEnabled) {
+            boolean isNormalMode = fedEndpoints.isEmpty();
+            //boolean isFederatedMode = !isNormalMode;
+
+            if(isNormalMode) {
+                countQef =
+                        FluentQueryExecutionFactory
+                        .http(endpointUrl, graph)
+                        .create();
+
+                baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, graph).create();
+
+            } else {
+                countQef = null;
+
+                baseDataQef = FedXFactory.create(fedEndpoints);
+            }
+
+            dataQef =
                     FluentQueryExecutionFactory
-                    .http(endpointUrl, graph)
+                    //.http(endpointUrl, graph)
+                    .from(baseDataQef)
+                    .config()
+                        .withPostProcessor(qe -> {
+                            if(timeoutInMs != null) {
+                                qe.setTimeout(0, timeoutInMs);
+    //                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
+    //                            .setTimeout(timeoutInMs);
+                            }
+                        })
+                        //.onTimeout((qef, queryStmt) -> )
+                        .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
+                        .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
+                        //)
+    //                    .withRetry(3, 30, TimeUnit.SECONDS)
+    //                    .withPagination(1000)
+                    .end()
                     .create();
 
-            baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, graph).create();
-
-        } else {
-        	countQef = null;
-
-        	baseDataQef = FedXFactory.create(fedEndpoints);
+            if(queryDatasetSize) {
+                logger.info("Counting triples in the endpoint ...");
+                datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
+            }
         }
-
-        QueryExecutionFactory dataQef =
-                FluentQueryExecutionFactory
-                //.http(endpointUrl, graph)
-                .from(baseDataQef)
-                .config()
-                    .withPostProcessor(qe -> {
-                        if(timeoutInMs != null) {
-                        	qe.setTimeout(0, timeoutInMs);
-//                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
-//                            .setTimeout(timeoutInMs);
-                        }
-                    })
-                    //.onTimeout((qef, queryStmt) -> )
-                    .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
-                    .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
-                    //)
-//                    .withRetry(3, 30, TimeUnit.SECONDS)
-//                    .withPagination(1000)
-                .end()
-                .create();
-
 
 
 //        System.out.println(queryToSubmissions.keySet().size());
@@ -486,11 +494,6 @@ public class MainLSQ {
 //            ShellGraph x = new ShellGraph(graph, null, null) ;
 //            x.writeGraph() ;
 
-
-    	if(queryDatasetSize) {
-    		logger.info("Counting triples in the endpoint ...");
-    		datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
-    	}
 
         //int workloadSize = workloadResources.size();
         Long workloadSize = null;
@@ -554,159 +557,159 @@ public class MainLSQ {
         //workloadResourceStream.forEach(r -> {
         Iterator<Resource> it = workloadResourceStream.iterator();
         while(it.hasNext()) {
-        	Resource r = it.next();
+            Resource r = it.next();
 
-        	// Extract the query and add it with the lsq:query property
-        	WebLogParser.extractQuery(r);
+            // Extract the query and add it with the lsq:query property
+            WebLogParser.extractQuery(r);
 
-        	// If the resource is null, we could not parse the log entry
-        	// therefore count this as an error
+            // If the resource is null, we could not parse the log entry
+            // therefore count this as an error
 
             boolean fail = false;
             boolean parsed = r.getProperty(LSQ.processingError) == null ? true : false;
 
             try {
-            	if(parsed) {
+                if(parsed) {
                     Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
                             .map(queryStmt -> queryStmt.getString());
 
                     //Model m = ResourceUtils.reachableClosure(r);
-	                SparqlStmt stmt = str
-	                        .map(stmtParser)
-	                        .orElse(null);
+                    SparqlStmt stmt = str
+                            .map(stmtParser)
+                            .orElse(null);
 
-	                if(stmt != null && stmt.isQuery()) {
+                    if(stmt != null && stmt.isQuery()) {
 
-	                    SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+                        SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
-	                    String queryStr;
-	                    Query query;
-	                    if(!queryStmt.isParsed()) {
-	                        query = null;
-	                        queryStr = queryStmt.getOriginalString();
-	                    } else {
-	                        query = queryStmt.getQuery();
-	                        queryStr = "" + queryStmt.getQuery();
-	                    }
+                        String queryStr;
+                        Query query;
+                        if(!queryStmt.isParsed()) {
+                            query = null;
+                            queryStr = queryStmt.getOriginalString();
+                        } else {
+                            query = queryStmt.getQuery();
+                            queryStr = "" + queryStmt.getQuery();
+                        }
 
 //	                    long rnd = (new Random()).nextLong();
 //	                    query = QueryFactory.create("SELECT COUNT(*) { ?s ?p ?o . ?o ?x ?y } Order By ?y Limit 10", Syntax.syntaxARQ);
 //	                    queryStr = "" + query;
 
-	                    if(logEntryIndex % batchSize == 0) {
-	                        long batchEndTmp = logEntryIndex + batchSize;
-	                        long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
-	                        logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
-	                    }
+                        if(logEntryIndex % batchSize == 0) {
+                            long batchEndTmp = logEntryIndex + batchSize;
+                            long batchEnd = workloadSize == null ? batchEndTmp : Math.min(batchEndTmp, workloadSize);
+                            logger.info("Processing query batch from " + logEntryIndex + " - "+ batchEnd); // + ": " + queryStr.replace("\n", " ").substr);
+                        }
 
 
-	                    Model queryModel = ModelFactory.createDefaultModel();
+                        Model queryModel = ModelFactory.createDefaultModel();
 
 
-	                    Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
+                        Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
 
-	                    //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
-	                    NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
+                        //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
+                        NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
 
-	                    String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
-	                    NestedResource queryRes = baseRes.nest("q-" + queryHash);
+                        String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
+                        NestedResource queryRes = baseRes.nest("q-" + queryHash);
 
-	                    Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
+                        Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
-	                    queryRes.get()
-	                        .addProperty(RDF.type, SP.Query)
-	                        .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
-
-
-	                    if(!queryStmt.isParsed()) {
-	                        String msg = queryStmt.getParseException().getMessage();
-	                        queryRes.get()
-	                            .addLiteral(LSQ.parseError, msg);
-	                    } else {
-	                        if(rdfizer.contains("q")) { // TODO Replace with function call
-	                            rdfizeQuery(queryRes.get(), queryAspectFn, query);
-	                        }
-	                    }
+                        queryRes.get()
+                            .addProperty(RDF.type, SP.Query)
+                            .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
 
 
-	                    if(rdfizer.contains("l")) {
-	                        // Deal with log entry (remote execution)
-	                        String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-
-	                        Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
-
-
-	                        Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
-	                        Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
-	                        String timestampStr = dt.format(timestamp.getTime());
-	                        //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
-
-	                        Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
-
-	                        // Express that the query execution was recorded
-	                        // at some point in time by some user at some service
-	                        // according to some source (e.g. the log file)
-	                        queryRes.get()
-	                            .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
-
-	                        queryExecRecRes
-	                            //.addProperty(RDF.type, LSQ.)
-	                            .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
-	                            .addProperty(LSQ.wasAssociatedWith, agentRes)
-	                            ;
-
-	                        if(logEndpointRes != null) {
-	                            queryExecRecRes.addProperty(LSQ.endpoint, logEndpointRes); // TODO Make it possible to specify the dataset configuration that was used to execute the query
-	                        }
-
-	                    }
+                        if(!queryStmt.isParsed()) {
+                            String msg = queryStmt.getParseException().getMessage();
+                            queryRes.get()
+                                .addLiteral(LSQ.parseError, msg);
+                        } else {
+                            if(rdfizer.contains("q")) { // TODO Replace with function call
+                                rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                            }
+                        }
 
 
-	                    if(rdfizer.contains("e")) {
-	                        //boolean hasBeenExecuted = executedQueries.contains(query);
+                        if(rdfizer.contains("l")) {
+                            // Deal with log entry (remote execution)
+                            String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
-	                    	boolean hasBeenExecuted = false;
-	                        if(!hasBeenExecuted) {
-	                            //executedQueries.add(query);
-
-
-	                            Calendar now = Calendar.getInstance();
-	                            String nowStr = dt.format(now.getTime());
-	                            Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
-
-	                            queryExecRes
-	                                .addProperty(PROV.wasGeneratedBy, expRes);
+                            Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
 
 
-	                            // TODO Switch between local / remote execution
-	                            if(query != null) {
-	                                queryRes.get()
-	                                    .addProperty(LSQ.hasLocalExecution, queryExecRes);
+                            Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
+                            Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
+                            String timestampStr = dt.format(timestamp.getTime());
+                            //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
-	                                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
-	                            }
-	                        }
-	                    }
+                            Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
 
-	                    // Post processing: Craft global IRIs for SPIN variables
-	                    Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
-	                    for(Statement st : stmts) {
-	                        Resource s = st.getSubject();
-	                        String varName = st.getLiteral().getString();
-	                        //String varResUri = baseRes.nest("var-").nest(varName).str();
-	                        String varResUri = queryRes.nest("-var-").nest(varName).str();
-	                        ResourceUtils.renameResource(s, varResUri);
-	                    }
+                            // Express that the query execution was recorded
+                            // at some point in time by some user at some service
+                            // according to some source (e.g. the log file)
+                            queryRes.get()
+                                .addProperty(LSQ.hasRemoteExecution, queryExecRecRes);
+
+                            queryExecRecRes
+                                //.addProperty(RDF.type, LSQ.)
+                                .addLiteral(PROV.atTime, timestampLiteral.inModel(queryModel))
+                                .addProperty(LSQ.wasAssociatedWith, agentRes)
+                                ;
+
+                            if(logEndpointRes != null) {
+                                queryExecRecRes.addProperty(LSQ.endpoint, logEndpointRes); // TODO Make it possible to specify the dataset configuration that was used to execute the query
+                            }
+
+                        }
 
 
-	                    RDFDataMgr.write(out, queryModel, outFormat);
+                        if(isExecutionEnabled) {
+                            //boolean hasBeenExecuted = executedQueries.contains(query);
 
-	                    // TODO Frequent flushing may decrease performance
-	                    // out.flush();
-	            	} else {
-	            		logger.debug("Skipping non-sparql-query log entry #" + logEntryIndex);
-	                    logger.debug(toString(r));
-	            	}
+                            boolean hasBeenExecuted = false;
+                            if(!hasBeenExecuted) {
+                                //executedQueries.add(query);
+
+
+                                Calendar now = Calendar.getInstance();
+                                String nowStr = dt.format(now.getTime());
+                                Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
+
+                                queryExecRes
+                                    .addProperty(PROV.wasGeneratedBy, expRes);
+
+
+                                // TODO Switch between local / remote execution
+                                if(query != null) {
+                                    queryRes.get()
+                                        .addProperty(LSQ.hasLocalExecution, queryExecRes);
+
+                                    rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+                                }
+                            }
+                        }
+
+                        // Post processing: Craft global IRIs for SPIN variables
+                        Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
+                        for(Statement st : stmts) {
+                            Resource s = st.getSubject();
+                            String varName = st.getLiteral().getString();
+                            //String varResUri = baseRes.nest("var-").nest(varName).str();
+                            String varResUri = queryRes.nest("-var-").nest(varName).str();
+                            ResourceUtils.renameResource(s, varResUri);
+                        }
+
+
+                        RDFDataMgr.write(out, queryModel, outFormat);
+
+                        // TODO Frequent flushing may decrease performance
+                        // out.flush();
+                    } else {
+                        logger.debug("Skipping non-sparql-query log entry #" + logEntryIndex);
+                        logger.debug(toString(r));
+                    }
 
                 } else {
                     ++logFailCount;
@@ -745,7 +748,7 @@ public class MainLSQ {
         // If the output stream is based on a file then close it, but
         // don't close stdout
         if(outNeedsClosing[0]) {
-        	outNeedsClosing[0] = false;
+            outNeedsClosing[0] = false;
             out.close();
             logger.info("Done. Output written to: " + outFile.getAbsolutePath());
         } else {
@@ -897,7 +900,7 @@ public class MainLSQ {
 
 
             if(datasetSize != null) {
-            	SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+                SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
             }
 
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
@@ -905,7 +908,7 @@ public class MainLSQ {
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
         }
         catch(Exception e) {
-        	Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
+            Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
             String msg = f.getMessage();
             queryExecRes.addLiteral(LSQ.executionError, msg);
             String queryStr = ("" + query).replace("\n", " ");

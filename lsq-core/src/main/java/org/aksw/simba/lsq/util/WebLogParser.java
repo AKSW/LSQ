@@ -34,18 +34,18 @@ import org.slf4j.LoggerFactory;
 
 public class WebLogParser {
 
-	public static Map<String, Mapper> loadRegistry(Model model) {
-		List<Resource> rs = model.listResourcesWithProperty(RDF.type, LSQ.WebAccessLogFormat).toList();
+    public static Map<String, Mapper> loadRegistry(Model model) {
+        List<Resource> rs = model.listResourcesWithProperty(RDF.type, LSQ.WebAccessLogFormat).toList();
 
-		Map<String, Mapper> result = rs.stream()
-			.filter(r -> r.hasProperty(LSQ.pattern))
-			.collect(Collectors.toMap(
-					r -> r.getLocalName(),
-					r -> create(r.getProperty(LSQ.pattern).getString())
-			));
+        Map<String, Mapper> result = rs.stream()
+            .filter(r -> r.hasProperty(LSQ.pattern))
+            .collect(Collectors.toMap(
+                    r -> r.getLocalName(),
+                    r -> create(r.getProperty(LSQ.pattern).getString())
+            ));
 
-		return result;
-	}
+        return result;
+    }
 
 
     private static final Logger logger = LoggerFactory
@@ -67,9 +67,9 @@ public class WebLogParser {
     }
 
     public static Mapper create(String pattern) {
-    	Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
+        Map<String, BiConsumer<StringMapper, String>> map = createWebServerLogStringMapperConfig();
 
-    	Mapper result = StringMapper.create(pattern, map::get);
+        Mapper result = StringMapper.create(pattern, map::get);
 
         return result;
     }
@@ -122,24 +122,24 @@ public class WebLogParser {
         });
 //
         result.put("q", (m, x) -> {
-        	Mapper mapper = new FixMapper(new PropertyMapper(LSQ.queryString, String.class), "?", "");
+            Mapper mapper = new FixMapper(new PropertyMapper(LSQ.queryString, String.class), "?", "");
 
-        	m.addFieldNoNest(LSQ.queryString, "[^\\s\"]*", mapper, true);
+            m.addFieldNoNest(LSQ.queryString, "[^\\s\"]*", mapper, true);
         });
 //
 
 
         // Headers
         result.put("i", (m, x) -> {
-        	Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
-        	Mapper subMapper = PropertyMapper.create(p, String.class);
+            Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
+            Mapper subMapper = PropertyMapper.create(p, String.class);
 
-        	m.addField(LSQ.headers, "[^\"]*", subMapper, false);
+            m.addField(LSQ.headers, "[^\"]*", subMapper, false);
         });
 
         // %v The canonical ServerName of the server serving the request.
         result.put("v", (m, x) -> {
-        	m.addField(LSQ.property("serverName"), "[^\\s\"]*", String.class);
+            m.addField(LSQ.property("serverName"), "[^\\s\"]*", String.class);
         });
 
 
@@ -357,16 +357,16 @@ public class WebLogParser {
 
 
     public static void extractQuery(Resource r) {
-    	List<Function<Resource, String>> extractors = Arrays.asList(
-    			x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
-    			x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null
-		);
+        List<Function<Resource, String>> extractors = Arrays.asList(
+                x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
+                x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null
+        );
 
-		extractors.stream()
-			.map(e -> e.apply(r))
-			.filter(s -> s != null)
-			.findFirst()
-			.ifPresent(s -> r.addLiteral(LSQ.query, s));
+        extractors.stream()
+            .map(e -> e.apply(r))
+            .filter(s -> s != null)
+            .findFirst()
+            .ifPresent(s -> r.addLiteral(LSQ.query, s));
     }
 
     public static String extractQueryString2(String uri) {
@@ -381,9 +381,9 @@ public class WebLogParser {
 
     // TODO extract the query also from referrer fields
     public static String extractQueryString(String pathStr) {
-    	String result = null;
+        String result = null;
 
-    	if(pathStr != null) {
+        if(pathStr != null) {
 
             pathStr = encodeUnsafeCharacters(pathStr);
 
@@ -392,17 +392,17 @@ public class WebLogParser {
             //String mockUri = "http://example.org/" + pathStr;
             try {
                 //URI uri = new URI(pathStr);
-            	int queryStrOffset = pathStr.indexOf("?");
+                int queryStrOffset = pathStr.indexOf("?");
 
-                result = queryStrOffset >= 0 ? extractQueryString2(pathStr.substring(queryStrOffset)) : null;
+                result = queryStrOffset >= 0 ? extractQueryString2(pathStr.substring(queryStrOffset + 1)) : null;
             } catch (Exception e) {
                 //System.out.println(mockUri.substring(244));
-            	logger.warn("Could not parse URI: " + pathStr, e);
+                logger.warn("Could not parse URI: " + pathStr, e);
                 //logger.warn("Could not parse URI: " + mockUri, e);
             }
         }
 
-    	return result;
+        return result;
     }
 
 }

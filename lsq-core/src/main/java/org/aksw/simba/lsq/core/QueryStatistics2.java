@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -112,7 +112,7 @@ public class QueryStatistics2 {
 
     public static int propertyDegree(Resource r, Property... ps) {
         int result = Arrays.asList(ps).stream()
-        	.distinct()
+            .distinct()
             .mapToInt(p -> r.listProperties(p).toList().size())
             .sum();
 
@@ -249,13 +249,29 @@ public class QueryStatistics2 {
      * @throws MalformedQueryException
      */
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Resource targetRes) {
-        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes);
+        //Map<RDFNode, Node> modelToNode = new HashMap<>();
+        Map<RDFNode, Node> modelToNode = new HashMap<>();
+        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes, modelToNode);
+        Map<Node, RDFNode> nodeToModel = new IdentityHashMap<>();
+        modelToNode.forEach((k, v) -> nodeToModel.put(v, k));
+
+        // Make sure the BGP resources exist in the target model
+        resToBgp = resToBgp.entrySet().stream()
+            .collect(Collectors.toMap(
+                    e -> e.getKey().inModel(targetRes.getModel()),
+                    Entry::getValue));
+
+
+        resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
+
         getDirectQueryRelatedRDFizedStats(targetRes, resToBgp.values());
+
+        resToBgp.forEach((bgpRes, bgp) -> getBGPRelatedRDFizedStats(bgpRes, bgp, nodeToModel));
     }
 
 
-    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Collection<BasicPattern> bgps) {
-    	//bgps = bgps.stream().limit(1).collect(Collectors.toList());
+    public static void getDirectQueryRelatedRDFizedStats(Resource targetRes, Collection<BasicPattern> bgps) {
+        //bgps = bgps.stream().limit(1).collect(Collectors.toList());
         //Model model = queryRes.getModel();
 
         List<Integer> bgpSizes = bgps.stream()
@@ -269,22 +285,25 @@ public class QueryStatistics2 {
         int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
         int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
-        queryRes
+        targetRes
             .addLiteral(LSQ.bgps, totalBgpCount)
             .addLiteral(LSQ.minBgpTriples, minBgpTripleCount)
             .addLiteral(LSQ.maxBgpTriples, maxBgpTripleCount)
             .addLiteral(LSQ.triplePatterns, triplePatternCount)
             ;
+    }
 
+    public static void getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp, Map<Node, RDFNode> nodeToModel) {
 
+        //int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
 
         // Create the hypergraph model over all bgps
         // (Could be changed if individual stats are desired)
         Model hyperGraph = ModelFactory.createDefaultModel();
         Map<Node, Resource> nodeToResource = new HashMap<Node, Resource>();
-        for(BasicPattern bgp : bgps) {
+        //for(BasicPattern bgp : bgps) {
             enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
-        }
+        //}
 
         //System.out.println("HYPER");
         //hyperGraph.write(System.out, "TURTLE");
@@ -327,7 +346,7 @@ public class QueryStatistics2 {
 //                ???
 //                .orElse(0.0);
 
-        queryRes
+        bgpRes
             .addLiteral(LSQ.joinVertices, joinVertices.size())
             .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
             .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
@@ -342,7 +361,7 @@ public class QueryStatistics2 {
 //        stats = stats + getMentionsTuple(predicates); // subjects and objects
 //ModelUtils.
         //ResourceUtils.
-        NestedResource joinVertexNres = new NestedResource(queryRes);
+        NestedResource joinVertexNres = new NestedResource(bgpRes);
 
 
         for(Resource v : joinVertices) {
@@ -355,7 +374,7 @@ public class QueryStatistics2 {
             //System.out.println(name);
             Resource joinVertexRes = joinVertexNres.nest("-jv-" + name).get();//lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
 
-            queryRes.addProperty(LSQ.joinVertex, joinVertexRes);
+            bgpRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
             Resource joinVertexType = getJoinVertexType(v);
             int degree = joinVertexToDegree.get(v);
@@ -363,6 +382,7 @@ public class QueryStatistics2 {
             joinVertexRes
                 .addLiteral(LSQ.joinVertexDegree, degree)
                 .addProperty(LSQ.joinVertexType, joinVertexType)
+                .addProperty(LSQ.proxyFor, nodeToModel.get(v.getProperty(LSQ.proxyFor).getObject().asNode()))
                 //.addProperty(LSQ.proxyFor, v)//v.getPropertyResourceValue(LSQ.proxyFor))
                 ;
 

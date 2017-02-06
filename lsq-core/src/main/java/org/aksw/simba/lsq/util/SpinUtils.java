@@ -60,13 +60,13 @@ public class SpinUtils {
         return result;
     }
 
-    public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r) {
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r, Map<RDFNode, Node> modelToNode) {
         Model spinModel = ResourceUtils.reachableClosure(r);
-        Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel);
+        Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel, modelToNode);
         return result;
     }
 
-    public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel, Map<RDFNode, Node> modelToNode) {
 //        spinModel.write(System.out, "NTRIPLES");
 
         List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
@@ -78,7 +78,7 @@ public class SpinUtils {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         t -> {
-                            Map<Resource, Triple> tmp = indexTriplePatterns(t);
+                            Map<Resource, Triple> tmp = indexTriplePatterns(t, modelToNode);
                             BasicPattern r = new BasicPattern();
                             tmp.values().forEach(r::add);
                             return r;
@@ -88,24 +88,24 @@ public class SpinUtils {
         return result;
     }
 
-    public static Map<Resource, Triple> indexTriplePatterns(Resource res) {
+    public static Map<Resource, Triple> indexTriplePatterns(Resource res, Map<RDFNode, Node> modelToNode) {
         Model spinModel = ResourceUtils.reachableClosure(res);
-        Map<Resource, Triple> result = indexTriplePatterns(spinModel);
+        Map<Resource, Triple> result = indexTriplePatterns(spinModel, modelToNode);
         return result;
     }
 
-    public static Map<Resource, Triple> indexTriplePatterns(Model spinModel) {
+    public static Map<Resource, Triple> indexTriplePatterns(Model spinModel, Map<RDFNode, Node> modelToNode) {
         Map<Resource, Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
                 .stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        t -> readTriple(t).get()));
+                        t -> readTriple(t, modelToNode).get()));
         return result;
     }
 
     public static void enrichWithHasTriplePattern(Resource targetRes, Resource spinRes) {
         Model spinModel = ResourceUtils.reachableClosure(spinRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         triplePatternIndex.keySet().forEach(r ->
             targetRes.addProperty(LSQ.hasTriplePattern, r)
@@ -115,7 +115,7 @@ public class SpinUtils {
 
     public static void enrichWithTriplePatternText(Resource queryRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         triplePatternIndex.forEach((r, t) -> r.inModel(queryRes.getModel())
                 .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
@@ -126,7 +126,7 @@ public class SpinUtils {
 
     public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, Resource queryExecRes, QueryExecutionFactory dataQef) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         triplePatternIndex.forEach((r, t) -> {
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
@@ -163,7 +163,7 @@ public class SpinUtils {
     public static void enrichModelWithTriplePatternSelectivities(Resource queryRes, Resource queryExecRes, QueryExecutionFactory qef, long totalTripleCount) {
 
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         int i = 0;
         //triplePatternIndex.entrySet().forEach(e -> {
@@ -228,7 +228,7 @@ public class SpinUtils {
      * @param node
      * @return
      */
-    public static Node readNode(RDFNode node) {
+    public static Node readNode(RDFNode node, Map<RDFNode, Node> modelToNode) {
         Model model = node.getModel();
 
         Node result;
@@ -247,13 +247,17 @@ public class SpinUtils {
                 ? node.asNode()
                 : tmp;
 
+        if(modelToNode != null) {
+            modelToNode.putIfAbsent(node, result);
+        }
+
         return result;
     }
 
-    public static Optional<Triple> readTriple(Resource r) {
-        Node s = readObject(r, SP.subject).map(x -> readNode(x)).orElse(null);
-        Node p = readObject(r, SP.predicate).map(x -> readNode(x)).orElse(null);
-        Node o = readObject(r, SP.object).map(x -> readNode(x)).orElse(null);
+    public static Optional<Triple> readTriple(Resource r, Map<RDFNode, Node> modelToNode) {
+        Node s = readObject(r, SP.subject).map(x -> readNode(x, modelToNode)).orElse(null);
+        Node p = readObject(r, SP.predicate).map(x -> readNode(x, modelToNode)).orElse(null);
+        Node o = readObject(r, SP.object).map(x -> readNode(x, modelToNode)).orElse(null);
 
         Optional<Triple> result = s == null || p == null || o == null
                 ? Optional.empty()
