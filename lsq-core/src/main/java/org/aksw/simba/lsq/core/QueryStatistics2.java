@@ -26,6 +26,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -266,7 +267,34 @@ public class QueryStatistics2 {
 
         getDirectQueryRelatedRDFizedStats(targetRes, resToBgp.values());
 
-        resToBgp.forEach((bgpRes, bgp) -> getBGPRelatedRDFizedStats(bgpRes, bgp, nodeToModel));
+        List<Integer> degrees = resToBgp.entrySet().stream()
+                .flatMap(e -> getBGPRelatedRDFizedStats(e.getKey(), e.getValue(), nodeToModel).stream())
+                .sorted()
+                .collect(Collectors.toList());
+
+
+        int n = degrees.size();
+        int nhalf = n / 2;
+
+        double avgJoinVertexDegree = degrees.stream()
+                .mapToInt(x -> x).average().orElse(0.0);
+
+        // 1 2 3 4
+        double medianJoinVertexDegree = n == 0 ? 0 : (n % 2 == 0
+                ? (degrees.get(nhalf - 1) + degrees.get(nhalf)) / 2
+                : degrees.get(nhalf));
+
+//LSQ.me
+        //queryRes.addProperty(LSQ.joinVert, o)
+//        double meanJoinVertexDegree = joinVertexToDegree.values().stream()
+//                .mapToInt(x -> x)
+//                ???
+//                .orElse(0.0);
+
+        targetRes
+            .addLiteral(LSQ.joinVertices, degrees.size())
+            .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
+            .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
     }
 
 
@@ -293,7 +321,7 @@ public class QueryStatistics2 {
             ;
     }
 
-    public static void getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp, Map<Node, RDFNode> nodeToModel) {
+    public static List<Integer> getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp, Map<Node, RDFNode> nodeToModel) {
 
         //int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
 
@@ -328,29 +356,9 @@ public class QueryStatistics2 {
         List<Integer> degrees = joinVertexToDegree.values().stream()
                 .sorted()
                 .collect(Collectors.toList());
-        int n = degrees.size();
-        int nhalf = n / 2;
 
-        double avgJoinVertexDegree = degrees.stream()
-                .mapToInt(x -> x).average().orElse(0.0);
 
-        // 1 2 3 4
-        double medianJoinVertexDegree = n == 0 ? 0 : (n % 2 == 0
-                ? (degrees.get(nhalf - 1) + degrees.get(nhalf)) / 2
-                : degrees.get(nhalf));
-
-//LSQ.me
-        //queryRes.addProperty(LSQ.joinVert, o)
-//        double meanJoinVertexDegree = joinVertexToDegree.values().stream()
-//                .mapToInt(x -> x)
-//                ???
-//                .orElse(0.0);
-
-        bgpRes
-            .addLiteral(LSQ.joinVertices, joinVertices.size())
-            .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
-            .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
-
+        //list.add(value);
 //        stats = stats + " lsqv:triplePatterns "+totalTriplePatterns  +" ; ";
 //        stats = stats + " lsqv:joinVertices "+joinVertices.size()  +" ; ";
 //        stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";
@@ -388,6 +396,7 @@ public class QueryStatistics2 {
 
         }
 
+        return degrees;
     }
 
     public static String toPrettyString(RDFNode node) {
