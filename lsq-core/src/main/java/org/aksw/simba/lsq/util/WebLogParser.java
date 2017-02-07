@@ -143,6 +143,10 @@ public class WebLogParser {
         });
 
 
+        result.put("sparql", (m, x) -> {
+        	m.addField(LSQ.query, ".*", String.class);
+        });
+        
 //      result.put("b", (x) -> "(?<bytecount>\\d+)");
 
 

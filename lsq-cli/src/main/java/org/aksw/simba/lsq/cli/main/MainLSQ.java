@@ -618,6 +618,7 @@ public class MainLSQ {
 
                         queryRes.get()
                             .addProperty(RDF.type, SP.Query)
+                            //.addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
                             .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
 
 

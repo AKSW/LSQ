@@ -39,3 +39,10 @@ fmt:bio2rdf
   lsq:pattern "%h %t \"%r\" %>s" ;
   .
 
+# Format for one sparql query per line
+fmt:sparql
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%sparql" ;
+  .
+
+
