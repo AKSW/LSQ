@@ -153,8 +153,6 @@ public class SpinUtils {
     }
 
     public static Triple toJenaTriple(org.topbraid.spin.model.Triple t) {
-        System.out.println(t.toString());
-
         Triple result = new Triple(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
         return result;
     }

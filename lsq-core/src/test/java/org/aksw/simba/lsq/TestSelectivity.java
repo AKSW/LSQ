@@ -26,7 +26,7 @@ public class TestSelectivity {
         Model dataModel = RDFDataMgr.loadModel("test-data.ttl");
 
         Model spinModel = ModelFactory.createDefaultModel();
-        Query q = ARQ2SPIN.parseQuery("Select * { ?s ?p ?o }", spinModel);
+        Query q = ARQ2SPIN.parseQuery("PREFIX ex:<http://example.org/> SELECT * { ?s ex:p1 ?o1 ; ex:p2 ?o2 }", spinModel);
         //spinModel = q.getModel();
 
         QueryExecutionFactory qef = FluentQueryExecutionFactory.from(dataModel).create();

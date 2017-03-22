@@ -19,7 +19,6 @@ import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.MapUtils;
@@ -49,7 +48,7 @@ import org.apache.jena.sparql.algebra.op.OpPath;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.TriplePath;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.expr.ExprAggregator;
+import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
@@ -59,6 +58,8 @@ import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+
+import com.google.common.collect.Sets;
 
 class ElementJoin {
     protected Element lhs;
@@ -88,8 +89,13 @@ public class QueryStatistics2 {
      * @param rhs
      * @param lhsVars
      */
-    public static long computeSelectivity(QueryExecutionFactory qef, Element lhs, Element rhs, Set<Var> lhsVars) {
-        Concept c = generateSelectivityQuery(lhs, rhs, lhsVars);
+    public static long computeSelectivity(QueryExecutionFactory qef, Element e, Set<Var> lhsVars) {
+        Concept c = generateSelectivityQuery(e, lhsVars);
+
+//        Query q = ((ElementSubQuery)c.getElement()).getQuery();
+//        System.out.println(q);
+//        System.out.println(ResultSetFormatter.asText(qef.createQueryExecution(q).execSelect()));
+
         //ServiceUtils.fetchCountConcept(sparqlService, concept, itemLimit, rowLimit)L
         Integer tmp = ServiceUtils.fetchInteger(qef, ConceptUtils.createQueryList(c), c.getVar());
         Long result = tmp.longValue();
@@ -97,19 +103,20 @@ public class QueryStatistics2 {
         return result;
     }
 
-    public static Concept generateSelectivityQuery(Element lhs, Element rhs, Set<Var> lhsVars) {
+    public static Concept generateSelectivityQuery(Element lhs, Set<Var> lhsVars) {
         Query sub = new Query();
         lhsVars = lhsVars == null ? new HashSet<>(PatternVars.vars(lhs)) : lhsVars;
         sub.setQuerySelectType();
         sub.setDistinct(true);
         sub.addProjectVars(lhsVars);
-        ElementGroup pattern = new ElementGroup();
-        pattern.addElement(lhs);
-        pattern.addElement(rhs);
-        sub.setQueryPattern(pattern);
+        //ElementGroup pattern = new ElementGroup();
+        //pattern.addElement(lhs);
+        //pattern.addElement(rhs);
+        sub.setQueryPattern(lhs);
 
         Query query = new Query();
-        query.getAggregators().add(new ExprAggregator(Vars.c, new AggCount()));
+        Expr agg = query.allocAggregate(new AggCount());
+        query.getProject().add(Vars.c, agg);
         query.setQuerySelectType();
         query.setQueryPattern(new ElementSubQuery(sub));
 
@@ -141,7 +148,8 @@ public class QueryStatistics2 {
 
         map.entrySet().forEach(e -> {
             Element el = e.getValue();
-            Long value = computeSelectivity(qef, el, group, null);
+            Set<Var> vars = Sets.newLinkedHashSet(PatternVars.vars(el));
+            Long value = computeSelectivity(qef, group, vars);
             result.put(e.getKey(), value);
         });
 
