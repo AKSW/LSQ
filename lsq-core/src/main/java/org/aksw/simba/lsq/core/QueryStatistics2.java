@@ -114,6 +114,7 @@ public class QueryStatistics2 {
         query.setQueryPattern(new ElementSubQuery(sub));
 
         Concept result = new Concept(new ElementSubQuery(query), Vars.c);
+        System.out.println(result);
         return result;
         // TODO - wrap the query as a concept for the result?
         // return query

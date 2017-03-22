@@ -29,6 +29,7 @@ import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
+import org.topbraid.spin.model.Variable;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -144,8 +145,17 @@ public class SpinUtils {
         return result;
     }
 
+    public static Node toNode(RDFNode node) {
+        Node result = node.canAs(Variable.class)
+            ? Var.alloc(node.as(Variable.class).getName())
+            : node.asNode();
+        return result;
+    }
+
     public static Triple toJenaTriple(org.topbraid.spin.model.Triple t) {
-        Triple result = new Triple(t.getSubject().asNode(), t.getPredicate().asNode(), t.getObject().asNode());
+        System.out.println(t.toString());
+
+        Triple result = new Triple(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
         return result;
     }
 
@@ -157,7 +167,9 @@ public class SpinUtils {
     public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
         Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
                 .stream()
-                .map(r -> r.as(org.topbraid.spin.model.Triple.class))
+                .map(r -> r.as(org.topbraid.spin.model.TriplePattern.class))
+                //.peek(x -> System.out.println(x.getSubject()))
+                //.map(r -> {System.out.println(r + ": " + r.getModel()); return r.as(org.topbraid.spin.model.TriplePattern.class); })
                 .collect(Collectors.toSet());
         return result;
     }
