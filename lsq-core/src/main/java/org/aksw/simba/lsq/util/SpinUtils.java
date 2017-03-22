@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,11 @@ import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.vocabulary.SP;
+
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 
 /**
  * SPIN utils - mainly for extracting Jena Triple and BasicPattern objects from SPIN RDF.
@@ -60,6 +66,26 @@ public class SpinUtils {
         return result;
     }
 
+
+    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Resource r, Map<RDFNode, Node> modelToNode) {
+        Model spinModel = ResourceUtils.reachableClosure(r);
+        Multimap<Resource, org.topbraid.spin.model.Triple> result = indexBasicPatterns2(spinModel);
+        return result;
+    }
+
+    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
+        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
+
+        Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
+
+        ress.forEach(t -> {
+            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(t);
+            result.putAll(t, tmp);
+        });
+
+        return result;
+    }
+
     public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r, Map<RDFNode, Node> modelToNode) {
         Model spinModel = ResourceUtils.reachableClosure(r);
         Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel, modelToNode);
@@ -88,6 +114,21 @@ public class SpinUtils {
         return result;
     }
 
+
+
+//    public static Set<org.topbraid.spin.model.Triple> itp(Resource res) {
+//        Set<org.topbraid.spin.model.Triple> result = new HashSet<>();
+//        org.topbraid.spin.model.Query q = res.as(org.topbraid.spin.model.Query.class);
+//        for(Element e : q.getWhereElements()) {
+//            if(e.canAs(org.topbraid.spin.model.Triple.class)) {
+//                result.add(e.as(org.topbraid.spin.model.Triple.class));
+//            }
+//        }
+//        return result;
+//        //e = res.as(Element.class);
+//    }
+
+
     public static Map<Resource, Triple> indexTriplePatterns(Resource res, Map<RDFNode, Node> modelToNode) {
         Model spinModel = ResourceUtils.reachableClosure(res);
         Map<Resource, Triple> result = indexTriplePatterns(spinModel, modelToNode);
@@ -100,6 +141,24 @@ public class SpinUtils {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         t -> readTriple(t, modelToNode).get()));
+        return result;
+    }
+
+    public static Triple toJenaTriple(org.topbraid.spin.model.Triple t) {
+        Triple result = new Triple(t.getSubject().asNode(), t.getPredicate().asNode(), t.getObject().asNode());
+        return result;
+    }
+
+    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Resource res) {
+        Model spinModel = ResourceUtils.reachableClosure(res);
+        Set<org.topbraid.spin.model.Triple> result = indexTriplePatterns2(spinModel);
+        return result;
+    }
+    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
+        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
+                .stream()
+                .map(r -> r.as(org.topbraid.spin.model.Triple.class))
+                .collect(Collectors.toSet());
         return result;
     }
 

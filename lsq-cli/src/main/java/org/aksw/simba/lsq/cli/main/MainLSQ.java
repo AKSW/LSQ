@@ -17,7 +17,6 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -634,6 +633,7 @@ public class MainLSQ {
 
 
                         if(rdfizer.contains("l")) {
+
                             // Deal with log entry (remote execution)
                             String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
@@ -936,6 +936,17 @@ public class MainLSQ {
             Model spinModel = ModelFactory.createDefaultModel();
           LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
           Resource tmpSpinRes = arq2spin.createQuery(query, null);
+
+
+
+//          System.out.println("TEST {");
+//          SpinUtils.indexTriplePatterns2(tmpSpinRes.getModel()).forEach(System.out::println);
+//          SpinUtils.itp(tmpSpinRes).forEach(System.out::println);
+//          System.out.println("}");
+//tmpSpinRes.as(org.topbraid.spin.model.Query.class).getWhereElements().forEach(e -> {
+//    System.out.println("XXElement: " + e.asResource().getId() + ": " + e);
+//});
+
 
           // ... and rename the blank node of the query
           ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
