@@ -59,6 +59,8 @@ import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 class ElementJoin {
@@ -90,7 +92,7 @@ public class QueryStatistics2 {
      * @param lhsVars
      */
     public static long computeSelectivity(QueryExecutionFactory qef, Element e, Set<Var> lhsVars) {
-        Concept c = generateSelectivityQuery(e, lhsVars);
+        Concept c = createConceptCountDistinctVar(e, lhsVars);
 
 //        Query q = ((ElementSubQuery)c.getElement()).getQuery();
 //        System.out.println(q);
@@ -103,7 +105,7 @@ public class QueryStatistics2 {
         return result;
     }
 
-    public static Concept generateSelectivityQuery(Element lhs, Set<Var> lhsVars) {
+    public static Concept createConceptCountDistinctVar(Element lhs, Set<Var> lhsVars) {
         Query sub = new Query();
         lhsVars = lhsVars == null ? new HashSet<>(PatternVars.vars(lhs)) : lhsVars;
         sub.setQuerySelectType();
@@ -123,14 +125,50 @@ public class QueryStatistics2 {
         Concept result = new Concept(new ElementSubQuery(query), Vars.c);
         System.out.println(result);
         return result;
-        // TODO - wrap the query as a concept for the result?
-        // return query
     }
 
     public static Map<org.topbraid.spin.model.Triple, Long> computeSelectivity(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
         Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)));
 
         Map<org.topbraid.spin.model.Triple, Long> result = computeSelectivity(qef, map);
+        return result;
+    }
+
+
+    public static Map<Var, Long> fetchCountVarJoin(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
+        Set<Element> map = triples.stream()
+                .map(t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)))
+                .collect(Collectors.toSet());
+
+        Map<Var, Long>  result = fetchCountVarJoin2(qef, map);
+        return result;
+    }
+
+    public static <T> Map<Var, Long> fetchCountVarJoin2(QueryExecutionFactory qef, Collection<Element> elements) { //Collection<T> items, Function<T, Element> itemToElement) {
+        // Index the elements by variable
+        Multimap<Var, Element> varToElements = ArrayListMultimap.create();
+
+        for(Element e : elements) {
+            Collection<Var> vars = PatternVars.vars(e);
+            for(Var var : vars) {
+                varToElements.put(var, e);
+            }
+        }
+
+        //Map<Var, Long> result = new Ha
+        Map<Var, Long> result = varToElements.asMap().entrySet().stream()
+            .filter(e -> e.getValue().size() > 1)
+            .collect(Collectors.toMap(
+                Entry::getKey,
+                e -> {
+                    ElementGroup group = new ElementGroup();
+                    e.getValue().forEach(group::addElement);
+
+                    Long value = computeSelectivity(qef, group, Collections.singleton(e.getKey()));
+
+                    return value;
+                }));
+
         return result;
     }
 

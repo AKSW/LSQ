@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.sparql.core.Var;
 import org.junit.Test;
 import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.Query;
@@ -35,7 +36,11 @@ public class TestSelectivity {
 
         for(Entry<Resource, Collection<Triple>> e : bgpToTps.asMap().entrySet()) {
             Map<Triple, Long> sel = QueryStatistics2.computeSelectivity(qef, e.getValue());
-            System.out.println(sel);
+            System.out.println("TP Var Combo counts: " + sel);
+
+            Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
+            System.out.println("JoinVars: " + joinVarCounts);
+
         }
 
     }
