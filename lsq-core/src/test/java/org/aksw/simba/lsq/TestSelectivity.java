@@ -36,10 +36,10 @@ public class TestSelectivity {
 
         for(Entry<Resource, Collection<Triple>> e : bgpToTps.asMap().entrySet()) {
             Map<Triple, Long> sel = QueryStatistics2.computeSelectivity(qef, e.getValue());
-            System.out.println("TP Var Combo counts: " + sel);
+            System.out.println("TP/BGP compatibility counts: " + sel);
 
             Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
-            System.out.println("JoinVars: " + joinVarCounts);
+            System.out.println("TP/BGP join var counts " + joinVarCounts);
 
         }
 
