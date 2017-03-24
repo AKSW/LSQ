@@ -40,7 +40,6 @@ public class TestSelectivity {
 
             Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
             System.out.println("TP/BGP join var counts " + joinVarCounts);
-
         }
 
     }

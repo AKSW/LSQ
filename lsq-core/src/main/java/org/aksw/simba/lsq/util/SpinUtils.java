@@ -1,5 +1,7 @@
 package org.aksw.simba.lsq.util;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,6 +16,7 @@ import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -28,14 +31,13 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.Variable;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder.ListMultimapBuilder;
 
 /**
  * SPIN utils - mainly for extracting Jena Triple and BasicPattern objects from SPIN RDF.
@@ -68,7 +70,7 @@ public class SpinUtils {
     }
 
 
-    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Resource r, Map<RDFNode, Node> modelToNode) {
+    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Resource r) {
         Model spinModel = ResourceUtils.reachableClosure(r);
         Multimap<Resource, org.topbraid.spin.model.Triple> result = indexBasicPatterns2(spinModel);
         return result;
@@ -216,6 +218,83 @@ public class SpinUtils {
         return result;
     }
 
+//
+//    public static void allocateTriplePatternResources(Resource queryRes, Resource queryExecRes) {
+//
+//        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+//        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+//
+//        int i = 0;
+//        //triplePatternIndex.entrySet().forEach(e -> {
+//        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
+//            ++i;
+//            Resource r = e.getKey();
+//            Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
+//
+//            queryExecRes
+//                .addProperty(LSQ.hasTriplePatternExecution, queryTpExecRes);
+//
+//
+//            queryTpExecRes
+//                .addProperty(LSQ.hasTriplePattern, r);
+//        }
+//
+//
+//    }
+
+
+    public static Set<Resource> createJoinVarExecutions(Resource queryRes, Resource queryExecRes) {
+//        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+        Set<Resource> result = queryExecRes.getModel().listObjectsOfProperty(LSQ.joinVertex)
+                .mapWith(o -> o.asResource()).toSet();
+
+        return result;
+    }
+
+
+    public static Set<Resource> createTriplePatternExecutions(Resource queryRes, Resource queryExecRes) {
+        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+
+        Set<Resource> result = new HashSet<>();
+
+        int i = 0;
+        //triplePatternIndex.entrySet().forEach(e -> {
+        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
+            ++i;
+            Resource r = e.getKey();
+
+            Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
+
+            queryExecRes.addProperty(LSQ.hasTriplePatternExecution, queryTpExecRes);
+
+            queryTpExecRes
+                .addProperty(RDF.type, LSQ.TriplePatternExecution)
+                .addProperty(LSQ.hasTriplePattern, r);
+
+
+            result.add(queryTpExecRes);
+        }
+
+        return result;
+    }
+
+    public static void enrichModelWithTriplePatternSelectivities(Set<Resource> tpExecRess, QueryExecutionFactory qef, long totalTripleCount) {
+
+        for(Resource tpExecRes : tpExecRess) {
+            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTriplePattern).getObject().as(org.topbraid.spin.model.TriplePattern.class);
+            Triple triple = toJenaTriple(spinTriple);
+
+            long count = countTriplePattern(qef, triple);
+
+            double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
+
+            tpExecRes
+                .addLiteral(LSQ.triplePatternResultSize, count)
+                .addLiteral(LSQ.tpSelectivity, selectivity);
+        }
+    }
+
     /**
      * :qe-123
      *     tripleSelec
@@ -229,6 +308,7 @@ public class SpinUtils {
      * @param qef
      * @param totalTripleCount
      */
+    @Deprecated
     public static void enrichModelWithTriplePatternSelectivities(Resource queryRes, Resource queryExecRes, QueryExecutionFactory qef, long totalTripleCount) {
 
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
@@ -253,7 +333,7 @@ public class SpinUtils {
             queryTpExecRes
                 .addProperty(LSQ.hasTriplePattern, r)
                 .addLiteral(LSQ.triplePatternResultSize, count)
-                .addLiteral(LSQ.triplePatternSelectivity, selectivity);
+                .addLiteral(LSQ.tpSelectivity, selectivity);
         }
 
 //        triplePatternIndex.keySet().forEach(r ->
@@ -265,6 +345,62 @@ public class SpinUtils {
 
 
     }
+
+
+    public static void enrichModelWithJoinRestrictedTPSelectivities(
+        QueryExecutionFactory qef,
+        Model observationModel,
+        Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps)
+    {
+
+        Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
+        System.out.println("TP/BGP join var counts " + joinVarCounts);
+    }
+
+
+
+    /**
+     * TODO How to link to the join variable?
+     * @param tpExecResource
+     */
+    public static void enrichModelWithBGPRestrictedTPSelectivities(
+            QueryExecutionFactory qef,
+            Model observationModel,
+            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps) {
+
+        // Map each triple pattern to the resource which will carry the observed metrics
+        Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTriplePatternExecution).toSet().stream()
+            .map(o -> o.asResource())
+            .collect(Collectors.toMap(
+                    o -> o.getPropertyResourceValue(LSQ.hasTriplePattern).as(org.topbraid.spin.model.TriplePattern.class),
+                    o -> o));
+
+        //Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = indexBasicPatterns2(queryRes);
+
+        // TODO We need the absolute count for reference of the (unconstrained/filtered) TP
+        //for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+
+        // Compute the absolute counts for each triple in the bgp
+        Map<org.topbraid.spin.model.Triple, Long> sels = QueryStatistics2.computeSelectivity(qef, tpToObservation.keySet());
+
+        for(Entry<org.topbraid.spin.model.Triple, Long> e : sels.entrySet()) {
+            Resource observation = tpToObservation.get(e.getKey());
+            Long count = e.getValue();
+
+            long tpResultSetSize = observation.getProperty(LSQ.triplePatternResultSize).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
+            double tpSelectivity = count / (double)tpResultSetSize;
+
+            observation
+                .addLiteral(LSQ.tpSelectivityBgpRestricted, tpSelectivity);
+
+        }
+
+            //Map<org.topbraid.spin.model.Triple, Long> sel = QueryStatistics2.computeSelectivity(qef, e.getValue());
+            //System.out.println("TP/BGP compatibility counts: " + sel);
+            //Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
+            //System.out.println("TP/BGP join var counts " + joinVarCounts);
+    }
+
 
     /**
      * Reads a single object for a given subject - predicate pair and

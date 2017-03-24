@@ -72,10 +72,12 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.model.Triple;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
 import joptsimple.OptionParser;
@@ -901,7 +903,27 @@ public class MainLSQ {
 
 
             if(datasetSize != null) {
-                SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+
+                Set<Resource> tpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
+                SpinUtils.enrichModelWithTriplePatternSelectivities(tpExecRess, qef, datasetSize);
+
+
+                Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
+                SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+
+                // Now create the resources for stats on the join vars
+                Set<Resource> joinVarRess = SpinUtils.createJoinVarExecutions(queryRes, queryExecRes);
+
+                // And now compute selectivities of the join variables
+
+
+
+
+
+                //SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+
+                //SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(queryRes, queryExecRes, qef, totalTripleCount);
+
             }
 
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
@@ -911,6 +933,7 @@ public class MainLSQ {
         catch(Exception e) {
             Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
             String msg = f.getMessage();
+            msg = msg == null ? "" + ExceptionUtils.getStackTrace(f) : msg;
             queryExecRes.addLiteral(LSQ.executionError, msg);
             String queryStr = ("" + query).replace("\n", " ");
             logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);

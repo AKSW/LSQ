@@ -63,6 +63,9 @@ public class LSQ {
 //    public static final Resource Describe = resource(org.topbraid.spin.vocabulary.SP));
 
 
+    // Type so that all triple pattern executions in a query can be retrieved
+    public static final Resource TriplePatternExecution = resource("TriplePatternExecution");
+
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");
@@ -83,7 +86,21 @@ public class LSQ {
     public static final Property hasRemoteExecution = property("hasRemoteExecution");
 
     // Execution
-    public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
+    // Selectivity of a triple pattern in regard to the whole data set
+    // TODO Rename to tpSelectivity(GraphRestricted)
+    public static final Property tpSelectivity = property("triplePatternSelectivity");
+
+    // Selectivity of a triple pattern in regard to the BGP in which it occurrs
+    public static final Property tpSelectivityBgpRestricted = property("tpSelectivityBgpRestricted");
+
+    // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
+    public static final Property tpSelectivityJoinRestricted = property("tpSelectivityJoinRestricted");
+
+    // Similar to tpSelectivity, but considering immediate filters present on it
+    // (maybe only those filters for which indexes can be used)
+    //public static final Property fTpSelectivityBgpRestricted = property("fTpSelectivityBgpRestricted");
+
+
     public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
 
     // TODO This is PROV vocab
