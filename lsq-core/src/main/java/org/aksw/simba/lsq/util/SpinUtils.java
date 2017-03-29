@@ -243,13 +243,29 @@ public class SpinUtils {
 //    }
 
 
-    public static Set<Resource> createJoinVarExecutions(Resource queryRes, Resource queryExecRes) {
+    /**
+     *
+     * @param queryRes
+     * @param queryExecRes
+     * @return
+     */
+    public static Map<Resource, Map<Var, Resource>> createJoinVarObservations(Resource queryRes, Resource queryExecRes) {
 //        Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Set<Resource> result = queryExecRes.getModel().listObjectsOfProperty(LSQ.joinVertex)
+        Set<Resource> result = queryRes.getModel().listObjectsOfProperty(LSQ.joinVertex)
                 .mapWith(o -> o.asResource()).toSet();
 
-        return result;
+        // Note: the initial bgp resource is at present allocated by spin; so the name is just a hash
+
+        // For each join vertex, determine the BGP in which it appears and the var name
+        // then allocate a resource with (bgp-id, varName)
+
+
+        return null;
+//        return result;
     }
+
+
+
 
 
     public static Set<Resource> createTriplePatternExecutions(Resource queryRes, Resource queryExecRes) {
@@ -353,8 +369,13 @@ public class SpinUtils {
         Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps)
     {
 
-        Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
-        System.out.println("TP/BGP join var counts " + joinVarCounts);
+        for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+            // For each bgp, we now have a mapping for the vars
+            Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
+            System.out.println("TP/BGP join var counts " + joinVarCounts);
+
+
+        }
     }
 
 

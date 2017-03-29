@@ -14,7 +14,9 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.util.Closure;
@@ -23,6 +25,8 @@ import org.apache.jena.sparql.util.graph.GraphUtils;
 import org.apache.jena.util.ResourceUtils;
 
 public class Skolemize {
+    // Property for the skolemized id (without uri prefix and such)
+    public static final Property skolemId = ResourceFactory.createProperty("http://tmp.aksw.org/skolemId");
 
     /**
      * Skolemizes blank nodes using a two phase approach:
@@ -65,11 +69,13 @@ public class Skolemize {
         Map<Resource, String> map = blankNodes.stream()
                 .collect(Collectors.toMap(
                     n -> (Resource)ModelUtils.convertGraphNodeToRDFNode(n, model),
-                    n -> baseUri + "-bn" + nodeToGlobalHash.get(n).substring(0, 8)
+                    n -> nodeToGlobalHash.get(n).substring(0, 8)
                 ));
 
 
-        map.entrySet().forEach(e -> ResourceUtils.renameResource(e.getKey(), e.getValue()));
+        map.entrySet().forEach(e -> e.getKey().addLiteral(skolemId, e.getValue()));
+
+        map.entrySet().forEach(e -> ResourceUtils.renameResource(e.getKey(), baseUri + "-bn" + e.getValue()));
     }
 
     public static String createSignature(Graph g, Node n, Function<? super Node, ? extends Node> nodeTransform) {

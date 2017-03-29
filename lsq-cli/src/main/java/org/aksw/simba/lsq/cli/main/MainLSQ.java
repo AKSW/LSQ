@@ -14,12 +14,15 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
@@ -49,6 +52,8 @@ import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.ext.com.google.common.base.Functions;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -63,7 +68,9 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
+import org.apache.jena.sparql.util.VarUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -704,6 +711,9 @@ public class MainLSQ {
                             ResourceUtils.renameResource(s, varResUri);
                         }
 
+                        // Post processing: Remove skolem identifiers
+                        queryModel.removeAll(null, Skolemize.skolemId, null);
+
 
                         RDFDataMgr.write(out, queryModel, outFormat);
 
@@ -911,12 +921,87 @@ public class MainLSQ {
                 Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
                 SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
 
+                // For the id part, we can index the structural bgps, tps, joinVars
+                //
+
+                // BGP restricted triple pattern selectivity
+                // These selectivities can be related directly to the TP executions
+                // - [[bgp-vars]] / [[tp-vars]]
+
+                // Join restricted triple pattern selectivity
+                // For these selectivities we need to introduce _observation_ resources for
+                // (1) each (join) var in the bgp
+                // (2) each (join) var in a tp
+                // - [[join-bgp-var]] / [[tp-var]]
+
+                // Note, that there are resources for structural information on (join) bgp-vars
+                // but I suppose there is no structural information for tp-vars
+                // So the latter does not have a correspondence - TODO: how are var-resources allocated by topbraid's spin?
+                //
+                // We also need an API for working with LSQ data, otherwise it seems to me its too
+                // cumbersome - for this we need some use cases, such as
+
+                // - getLatestObservation(bgpRes); but instead of java methods,
+                // we would also benefit from more powerful navigation and filtering of resources:
+                // bgpRes.as(ResourceEnh.class).in(LSQ.onBGP).orderBy(LSQ.date).first()
+                // .startOrder().newItem().in(LSQ.date).endItem().endOrder()
+                // - getBGPStats(bgpRes)
+
+
+                // For each variable in the BGP create a new resource
+                for(Entry<Resource, Collection<Triple>> e : bgpToTps.asMap().entrySet()) {
+                    Set<Var> bgpVars = e.getValue().stream()
+                            .flatMap(tp -> VarUtils.getVars(SpinUtils.toJenaTriple(tp)).stream())
+                            .collect(Collectors.toSet());
+
+                    //String queryId = "";
+                    String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
+
+                    Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + bgpId);
+
+                    Map<Var, Resource> varToBgpVar = bgpVars.stream()
+                            .collect(Collectors.toMap(
+                                    v -> v,
+                                    v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
+
+                    // Link the var occurrence
+                    varToBgpVar.values().forEach(v -> bgpCtxRes.addProperty(LSQ.hasVar, v));
+                }
+
+                // For each triple in the BGP create a new resource
+
+
+                // We need to create observation resources for each variable in each bgp
+                for(Entry<Resource, Triple> e : bgpToTps.entries()) {
+                    Triple t = e.getValue();
+                    org.apache.jena.graph.Triple tr = SpinUtils.toJenaTriple(t);
+
+                    Set<Var> vars;
+
+                    // allocate iris for each variable in the bgp
+                    queryExecRes.getModel().createResource(queryExecRes.getURI() + "");
+
+
+                    //queryExecRes + tp-id + var
+
+
+
+
+                    // create the
+
+
+
+                }
+                //bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
+
+
+
                 // Now create the resources for stats on the join vars
-                Set<Resource> joinVarRess = SpinUtils.createJoinVarExecutions(queryRes, queryExecRes);
+                //Set<Resource> joinVarRess = SpinUtils.createJoinVarObservations(queryRes, queryExecRes);
 
                 // And now compute selectivities of the join variables
-
-
+                SpinUtils.enrichModelWithJoinRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+            }
 
 
 
@@ -924,7 +1009,6 @@ public class MainLSQ {
 
                 //SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(queryRes, queryExecRes, qef, totalTripleCount);
 
-            }
 
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);

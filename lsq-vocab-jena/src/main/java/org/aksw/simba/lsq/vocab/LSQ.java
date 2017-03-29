@@ -202,6 +202,17 @@ public class LSQ {
 
     public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
 
+
+    public static final Property hasVar = property("hasVar");
+
+    // Temporary id attributes - used to craft final IRIs
+    public static final Property queryId = property("queryId");
+    public static final Property bgpId = property("bgpId");
+    public static final Property bgpVarId = property("bgpVarId");
+
+    public static final Property tpId = property("tpId");
+    public static final Property tpVarId = property("tpVarId");
+
     //public static final Property
 
     //lsqv:resultSize

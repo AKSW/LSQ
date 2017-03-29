@@ -53,4 +53,9 @@ public class NestedResource {
 
         return result;
     }
+
+
+    public static NestedResource from(Resource r) {
+        return new NestedResource(r);
+    }
 }
