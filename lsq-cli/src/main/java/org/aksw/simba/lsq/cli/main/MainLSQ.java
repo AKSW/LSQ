@@ -40,6 +40,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
+import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
@@ -52,8 +53,6 @@ import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.ext.com.google.common.base.Functions;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -70,6 +69,8 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
+import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.util.VarUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -79,7 +80,6 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.model.Triple;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
@@ -918,7 +918,7 @@ public class MainLSQ {
                 SpinUtils.enrichModelWithTriplePatternSelectivities(tpExecRess, qef, datasetSize);
 
 
-                Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
+                Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
                 SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
 
                 // For the id part, we can index the structural bgps, tps, joinVars
@@ -949,10 +949,20 @@ public class MainLSQ {
 
 
                 // For each variable in the BGP create a new resource
-                for(Entry<Resource, Collection<Triple>> e : bgpToTps.asMap().entrySet()) {
-                    Set<Var> bgpVars = e.getValue().stream()
-                            .flatMap(tp -> VarUtils.getVars(SpinUtils.toJenaTriple(tp)).stream())
+                for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+
+                    // Map each resource to the corresponding jena element
+                    Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
+                            .collect(Collectors.toMap(
+                                    r -> r,
+                                    r -> ElementUtils.createElement(SpinUtils.toJenaTriple(r))));
+
+
+                    Set<Var> bgpVars = resToEl.values().stream()
+                            .flatMap(el -> PatternVars.vars(el).stream())
                             .collect(Collectors.toSet());
+
+
 
                     //String queryId = "";
                     String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
@@ -966,14 +976,36 @@ public class MainLSQ {
 
                     // Link the var occurrence
                     varToBgpVar.values().forEach(v -> bgpCtxRes.addProperty(LSQ.hasVar, v));
+
+
+                    // Obtain the selectivity for the variable in that tp
+                    //for(e.getValue())
+                    Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(qef, resToEl.values());
+
+                    Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
+
+                    System.out.println(varToCount);
+                    System.out.println(elToVarToCount);
+
+                    /*
+                    bgp hasTp tp1
+                    tp1 hasJoinVar tp1-jv-x
+                    tp1-jv-x hasEval e1-tp1-jv-x
+                    e1-tp1-jv-x selectivity 0.5
+                    e1 inExperiment/onDataset DBpedia
+
+
+
+
+                    */
                 }
 
                 // For each triple in the BGP create a new resource
 
 
                 // We need to create observation resources for each variable in each bgp
-                for(Entry<Resource, Triple> e : bgpToTps.entries()) {
-                    Triple t = e.getValue();
+                for(Entry<Resource, org.topbraid.spin.model.Triple> e : bgpToTps.entries()) {
+                    org.topbraid.spin.model.Triple t = e.getValue();
                     org.apache.jena.graph.Triple tr = SpinUtils.toJenaTriple(t);
 
                     Set<Var> vars;

@@ -91,8 +91,8 @@ public class QueryStatistics2 {
      * @param rhs
      * @param lhsVars
      */
-    public static long computeSelectivity(QueryExecutionFactory qef, Element e, Set<Var> lhsVars) {
-        Concept c = createConceptCountDistinctVar(e, lhsVars);
+    public static long fetchCountDistinctBindings(QueryExecutionFactory qef, Element e, Set<Var> lhsVars) {
+        Concept c = createConceptCountDistinctBindings(e, lhsVars);
 
 //        Query q = ((ElementSubQuery)c.getElement()).getQuery();
 //        System.out.println(q);
@@ -105,7 +105,7 @@ public class QueryStatistics2 {
         return result;
     }
 
-    public static Concept createConceptCountDistinctVar(Element lhs, Set<Var> lhsVars) {
+    public static Concept createConceptCountDistinctBindings(Element lhs, Set<Var> lhsVars) {
         Query sub = new Query();
         lhsVars = lhsVars == null ? new HashSet<>(PatternVars.vars(lhs)) : lhsVars;
         sub.setQuerySelectType();
@@ -140,31 +140,78 @@ public class QueryStatistics2 {
                 .map(t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)))
                 .collect(Collectors.toSet());
 
-        Map<Var, Long>  result = fetchCountVarJoin2(qef, map);
+        Map<Var, Long>  result = fetchCountJoinVarGroup(qef, map);
         return result;
     }
 
-    public static <T> Map<Var, Long> fetchCountVarJoin2(QueryExecutionFactory qef, Collection<Element> elements) { //Collection<T> items, Function<T, Element> itemToElement) {
-        // Index the elements by variable
-        Multimap<Var, Element> varToElements = ArrayListMultimap.create();
+
+    // TODO: For each element we might need a function to the set of variables we are counting for
+    /**
+     * Return for each element the number of bindings for every incident join variable
+     *
+     * @param qef
+     * @param itemToElement
+     * @return
+     */
+    public static <T> Map<T, Map<Var, Long>> fetchCountJoinVarElement(QueryExecutionFactory qef, Map<T, Element> itemToElement) {
+        Multimap<Var, Element> varToEls = indexElementsByVar(itemToElement.values());
+
+        Set<Var> joinVars = varToEls.asMap().entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(Entry::getKey)
+                .collect(Collectors.toSet());
+
+        Map<T, Map<Var, Long>> result = itemToElement.entrySet().stream()
+            .collect(Collectors.toMap(
+                Entry::getKey,
+                // for each var of the element that is a join var...
+                e -> Sets.intersection(new HashSet<>(PatternVars.vars(e.getValue())), joinVars).stream()
+                    .collect(Collectors.toMap(
+                        jv -> jv,
+                        jv -> fetchCountDistinctBindings(qef, e.getValue(), Collections.singleton(jv))
+                    ))
+            ));
+
+        return result;
+    }
+
+
+    // Note: join vars are those mapping to more than 1 element
+    public static Multimap<Var, Element> indexElementsByVar(Collection<Element> elements) {
+        Multimap<Var, Element> result = ArrayListMultimap.create();
 
         for(Element e : elements) {
             Collection<Var> vars = PatternVars.vars(e);
             for(Var var : vars) {
-                varToElements.put(var, e);
+                result.put(var, e);
             }
         }
 
-        //Map<Var, Long> result = new Ha
+        return result;
+    }
+
+    /**
+     * Fetches the number of distinct bindings for each join variable in the given collection of elements
+     *
+     * @param qef
+     * @param elements
+     * @return
+     */
+    public static Map<Var, Long> fetchCountJoinVarGroup(QueryExecutionFactory qef, Collection<Element> elements) { //Collection<T> items, Function<T, Element> itemToElement) {
+        // Index the elements by their mentioned variables
+        Multimap<Var, Element> varToElements = indexElementsByVar(elements);
+
+        // For each variable, get the number of bindings based on all elements in which the var occurs
         Map<Var, Long> result = varToElements.asMap().entrySet().stream()
             .filter(e -> e.getValue().size() > 1)
             .collect(Collectors.toMap(
                 Entry::getKey,
                 e -> {
+                    Var v = e.getKey();
                     ElementGroup group = new ElementGroup();
                     e.getValue().forEach(group::addElement);
 
-                    Long value = computeSelectivity(qef, group, Collections.singleton(e.getKey()));
+                    Long value = fetchCountDistinctBindings(qef, group, Collections.singleton(v));
 
                     return value;
                 }));
@@ -187,7 +234,7 @@ public class QueryStatistics2 {
         map.entrySet().forEach(e -> {
             Element el = e.getValue();
             Set<Var> vars = Sets.newLinkedHashSet(PatternVars.vars(el));
-            Long value = computeSelectivity(qef, group, vars);
+            Long value = fetchCountDistinctBindings(qef, group, vars);
             result.put(e.getKey(), value);
         });
 
