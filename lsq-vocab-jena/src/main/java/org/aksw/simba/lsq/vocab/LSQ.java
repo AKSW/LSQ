@@ -85,6 +85,8 @@ public class LSQ {
     public static final Property hasLocalExecution = property("hasLocalExecution");
     public static final Property hasRemoteExecution = property("hasRemoteExecution");
 
+    public static final Property hasJoinVarExecution = property("hasJoinVarExecution");
+
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
     // TODO Rename to tpSelectivity(GraphRestricted)

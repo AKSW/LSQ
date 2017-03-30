@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,8 @@ import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -71,7 +74,6 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.PatternVars;
-import org.apache.jena.sparql.util.VarUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -84,6 +86,7 @@ import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 import com.google.common.io.Files;
 
@@ -883,7 +886,6 @@ public class MainLSQ {
 //                + runtimeErrorCount);
     }
 
-
     public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, Long datasetSize) {
 
         try {
@@ -914,8 +916,8 @@ public class MainLSQ {
 
             if(datasetSize != null) {
 
-                Set<Resource> tpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
-                SpinUtils.enrichModelWithTriplePatternSelectivities(tpExecRess, qef, datasetSize);
+                BiMap<org.topbraid.spin.model.Triple, Resource> tpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
+                SpinUtils.enrichModelWithTriplePatternSelectivities(tpExecRess.values(), qef, datasetSize);
 
 
                 Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
@@ -966,7 +968,7 @@ public class MainLSQ {
                     //String queryId = "";
                     String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
 
-                    Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + bgpId);
+                    Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp" + bgpId);
 
                     Map<Var, Resource> varToBgpVar = bgpVars.stream()
                             .collect(Collectors.toMap(
@@ -974,8 +976,9 @@ public class MainLSQ {
                                     v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
 
                     // Link the var occurrence
-                    varToBgpVar.values().forEach(v -> bgpCtxRes.addProperty(LSQ.hasVar, v));
+                    varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVar, vr));
 
+                    queryExecRes.addProperty(LSQ.hasBGP, bgpCtxRes);
 
                     // Obtain the selectivity for the variable in that tp
                     //for(e.getValue())
@@ -984,9 +987,9 @@ public class MainLSQ {
 
                     // Add the BGP var statistics
                     varToCount.forEach((v, c) -> {
-                        Resource vr = varToBgpVar.get(v);
+                        Resource bgpVar = varToBgpVar.get(v);
 
-                        vr.addLiteral(LSQ.resultSize, c);
+                        bgpVar.addLiteral(LSQ.resultSize, c);
                     });
                         //
 
@@ -996,20 +999,34 @@ public class MainLSQ {
                     Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
 
                     elToVarToCount.forEach((t, vToC) -> {
+                        Triple jt = SpinUtils.toJenaTriple(t);
+                        Map<Node, RDFNode> varToRes = new HashMap<>();
+                        varToRes.put(jt.getSubject(), t.getSubject());
+                        varToRes.put(jt.getPredicate(), t.getPredicate());
+                        varToRes.put(jt.getObject(), t.getObject());
+
+
+                        Resource execTp = tpExecRess.get(t);
+
                         String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
 
-                        String tpResBase = queryExecRes.getURI() + "-" + tpId;
+                        //String tpResBase = queryExecRes.getURI() + "-tp-" + tpId;
+                        String tpResBase = execTp.getURI();
 
                         vToC.forEach((v, c) -> {
-                            Resource tpVarRes = queryExecRes.getModel().createResource(tpResBase + "-" + v.getName());
+                            Resource execTpVarRes = queryExecRes.getModel().createResource(tpResBase + "-var-" + v.getName());
 
                             long bgpJoinVarCount = varToCount.get(v);
 
                             double selectivity = c == 0 ? 0d : bgpJoinVarCount / (double)c;
-                            tpVarRes
+                            execTpVarRes
                                 .addLiteral(LSQ.resultSize, c)
-                                .addLiteral(LSQ.tpSelectivity, selectivity);
+                                .addLiteral(LSQ.tpSelectivity, selectivity)
+                                .addProperty(LSQ.hasVar, varToRes.get(v))
+                                //.addLiteral(LSQ.hasVar, )
+                                ;
 
+                            execTp.addProperty(LSQ.hasJoinVarExecution, execTpVarRes);
                         });
 
                         //Resource tpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + tpId);
@@ -1017,8 +1034,8 @@ public class MainLSQ {
 
                     });
 
-                    System.out.println(varToCount);
-                    System.out.println(elToVarToCount);
+//                    System.out.println(varToCount);
+//                    System.out.println(elToVarToCount);
 
 
                     /*

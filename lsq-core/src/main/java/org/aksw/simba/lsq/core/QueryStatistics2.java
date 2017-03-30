@@ -123,7 +123,7 @@ public class QueryStatistics2 {
         query.setQueryPattern(new ElementSubQuery(sub));
 
         Concept result = new Concept(new ElementSubQuery(query), Vars.c);
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 

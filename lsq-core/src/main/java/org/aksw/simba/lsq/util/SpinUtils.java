@@ -1,7 +1,6 @@
 package org.aksw.simba.lsq.util;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,10 +32,13 @@ import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.model.Variable;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
 
 /**
@@ -268,11 +270,19 @@ public class SpinUtils {
 
 
 
-    public static Set<Resource> createTriplePatternExecutions(Resource queryRes, Resource queryExecRes) {
+    /**
+     * Maps each triple pattern resource to the corresponding execution ressource
+     *
+     * @param queryRes
+     * @param queryExecRes
+     * @return
+     */
+    public static BiMap<org.topbraid.spin.model.Triple, Resource> createTriplePatternExecutions(Resource queryRes, Resource queryExecRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
-        Set<Resource> result = new HashSet<>();
+        //Set<Resource> result = new HashSet<>();
+        BiMap<org.topbraid.spin.model.Triple, Resource> result = HashBiMap.create();
 
         int i = 0;
         //triplePatternIndex.entrySet().forEach(e -> {
@@ -289,7 +299,8 @@ public class SpinUtils {
                 .addProperty(LSQ.hasTriplePattern, r);
 
 
-            result.add(queryTpExecRes);
+            //result.add(queryTpExecRes);
+            result.put(r.as(TriplePattern.class), queryTpExecRes);
         }
 
         return result;
