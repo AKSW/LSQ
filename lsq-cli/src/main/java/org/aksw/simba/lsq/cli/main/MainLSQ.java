@@ -999,12 +999,7 @@ public class MainLSQ {
                     Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
 
                     elToVarToCount.forEach((t, vToC) -> {
-                        Triple jt = SpinUtils.toJenaTriple(t);
-                        Map<Node, RDFNode> varToRes = new HashMap<>();
-                        varToRes.put(jt.getSubject(), t.getSubject());
-                        varToRes.put(jt.getPredicate(), t.getPredicate());
-                        varToRes.put(jt.getObject(), t.getObject());
-
+                        Map<Node, RDFNode> varToRes = SpinUtils.indexTripleNodes(t);
 
                         Resource execTp = tpExecRess.get(t);
 

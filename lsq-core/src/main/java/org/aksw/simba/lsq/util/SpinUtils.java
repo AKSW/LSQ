@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.util;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +56,16 @@ public class SpinUtils {
     public static final Concept subjects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:subject ?y");
     public static final Concept predicates = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:predicate ?y");
     public static final Concept objects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:object ?y");
+
+    public static Map<Node, RDFNode> indexTripleNodes(org.topbraid.spin.model.Triple t) {
+        Triple jt = SpinUtils.toJenaTriple(t);
+        Map<Node, RDFNode> varToRes = new HashMap<>();
+        varToRes.put(jt.getSubject(), t.getSubject());
+        varToRes.put(jt.getPredicate(), t.getPredicate());
+        varToRes.put(jt.getObject(), t.getObject());
+
+        return result;
+    }
 
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
