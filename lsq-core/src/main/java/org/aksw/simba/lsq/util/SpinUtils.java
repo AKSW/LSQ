@@ -409,7 +409,7 @@ public class SpinUtils {
             Long count = e.getValue();
 
             long tpResultSetSize = observation.getProperty(LSQ.triplePatternResultSize).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
-            double tpSelectivity = count / (double)tpResultSetSize;
+            double tpSelectivity = tpResultSetSize == 0 ? 0d : count / (double)tpResultSetSize;
 
             observation
                 .addLiteral(LSQ.tpSelectivityBgpRestricted, tpSelectivity);

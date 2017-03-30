@@ -963,7 +963,6 @@ public class MainLSQ {
                             .collect(Collectors.toSet());
 
 
-
                     //String queryId = "";
                     String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
 
@@ -982,10 +981,45 @@ public class MainLSQ {
                     //for(e.getValue())
                     Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(qef, resToEl.values());
 
+
+                    // Add the BGP var statistics
+                    varToCount.forEach((v, c) -> {
+                        Resource vr = varToBgpVar.get(v);
+
+                        vr.addLiteral(LSQ.resultSize, c);
+                    });
+                        //
+
+                        //vr.addLiteral(LSQ.tpSelectivity, o);
+
+
                     Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
+
+                    elToVarToCount.forEach((t, vToC) -> {
+                        String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
+
+                        String tpResBase = queryExecRes.getURI() + "-" + tpId;
+
+                        vToC.forEach((v, c) -> {
+                            Resource tpVarRes = queryExecRes.getModel().createResource(tpResBase + "-" + v.getName());
+
+                            long bgpJoinVarCount = varToCount.get(v);
+
+                            double selectivity = c == 0 ? 0d : bgpJoinVarCount / (double)c;
+                            tpVarRes
+                                .addLiteral(LSQ.resultSize, c)
+                                .addLiteral(LSQ.tpSelectivity, selectivity);
+
+                        });
+
+                        //Resource tpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + tpId);
+
+
+                    });
 
                     System.out.println(varToCount);
                     System.out.println(elToVarToCount);
+
 
                     /*
                     bgp hasTp tp1
