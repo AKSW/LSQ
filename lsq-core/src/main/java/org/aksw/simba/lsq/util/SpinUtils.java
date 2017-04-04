@@ -59,10 +59,10 @@ public class SpinUtils {
 
     public static Map<Node, RDFNode> indexTripleNodes(org.topbraid.spin.model.Triple t) {
         Triple jt = SpinUtils.toJenaTriple(t);
-        Map<Node, RDFNode> varToRes = new HashMap<>();
-        varToRes.put(jt.getSubject(), t.getSubject());
-        varToRes.put(jt.getPredicate(), t.getPredicate());
-        varToRes.put(jt.getObject(), t.getObject());
+        Map<Node, RDFNode> result = new HashMap<>();
+        result.put(jt.getSubject(), t.getSubject());
+        result.put(jt.getPredicate(), t.getPredicate());
+        result.put(jt.getObject(), t.getObject());
 
         return result;
     }
@@ -226,8 +226,10 @@ public class SpinUtils {
         query.getProject().add(Vars.c, new ExprAggregator(Vars.x, new AggCount()));
         query.setQueryPattern(ElementUtils.createElement(t));
 
+        System.out.println("Querying: " + query);
         QueryExecution qe = qef.createQueryExecution(query);
         long result = ServiceUtils.fetchInteger(qe, Vars.c);
+        System.out.println("Querying done.");
         return result;
     }
 

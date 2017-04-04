@@ -37,6 +37,8 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
+import org.aksw.jena_sparql_api.stmt.SparqlQueryParser;
+import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -59,6 +61,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -470,6 +473,7 @@ public class MainLSQ {
                     //.http(endpointUrl, graph)
                     .from(baseDataQef)
                     .config()
+                        .withParser(SparqlQueryParserImpl.create())
                         .withPostProcessor(qe -> {
                             if(timeoutInMs != null) {
                                 qe.setTimeout(0, timeoutInMs);
@@ -485,6 +489,14 @@ public class MainLSQ {
     //                    .withPagination(1000)
                     .end()
                     .create();
+
+//            for(int i = 0; i < 1000; ++i) {
+//                int x = i % 10;
+//                String qs = "Select count(*) { ?s" + i + " ?p ?o }";
+//                QueryExecution qe = dataQef.createQueryExecution(qs);
+//                System.out.println("loop " + i + ": " + ResultSetFormatter.asText(qe.execSelect()));
+//                qe.close();
+//            }
 
             if(queryDatasetSize) {
                 logger.info("Counting triples in the endpoint ...");
@@ -896,7 +908,7 @@ public class MainLSQ {
 
             Calendar start = Calendar.getInstance();
             //long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
-
+//System.out.println(query);
             QueryExecution qe = qef.createQueryExecution(query);
             long resultSetSize = QueryExecutionUtils.consume(qe);
 
