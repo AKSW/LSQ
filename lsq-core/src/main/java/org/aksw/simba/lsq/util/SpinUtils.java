@@ -226,10 +226,8 @@ public class SpinUtils {
         query.getProject().add(Vars.c, new ExprAggregator(Vars.x, new AggCount()));
         query.setQueryPattern(ElementUtils.createElement(t));
 
-        System.out.println("Querying: " + query);
         QueryExecution qe = qef.createQueryExecution(query);
         long result = ServiceUtils.fetchInteger(qe, Vars.c);
-        System.out.println("Querying done.");
         return result;
     }
 
