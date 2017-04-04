@@ -1090,7 +1090,7 @@ public class MainLSQ {
                 //Set<Resource> joinVarRess = SpinUtils.createJoinVarObservations(queryRes, queryExecRes);
 
                 // And now compute selectivities of the join variables
-                SpinUtils.enrichModelWithJoinRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+                //SpinUtils.enrichModelWithJoinRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
             }
 
 
