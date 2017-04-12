@@ -38,9 +38,9 @@ public class LSQ {
     public static final Property joinVertexDegree = property("joinVertexDegree");
 
     public static final Property bgps = property("bgps");
-    public static final Property triplePatterns = property("triplePatterns");
-    public static final Property minBgpTriples = property("minBgpTriples");
-    public static final Property maxBgpTriples = property("maxBgpTriples");
+    public static final Property tps = property("tps");
+    public static final Property minBGPTriples = property("minBGPTriples");
+    public static final Property maxBGPTriles = property("maxBGPTriples");
     public static final Property joinVertices = property("joinVertices");
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
@@ -64,46 +64,47 @@ public class LSQ {
 
 
     // Type so that all triple pattern executions in a query can be retrieved
-    public static final Resource TriplePatternExecution = resource("TriplePatternExecution");
+    //public static final Resource TPExec = resource("TPExec");
 
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");
     public static final Property hasStructuralFeatures = property("hasStructuralFeatures");
     public static final Property hasSpin = property("hasSpin");
-    public static final Property hasTriplePattern = property("hasTriplePattern");
+    public static final Property hasTP = property("hasTP");
     public static final Property hasBGP = property("hasBGP");
-    public static final Property hasTriplePatternExecution = property("hasTriplePatternExecution");
-    public static final Property triplePatternText = property("triplePatternText");
-    public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property executionError = property("executionError");
+    public static final Property tpText = property("tpText");
+    //public static final Property triplePatternResultSize = property("triplePatternResultSize");
+    public static final Property execError = property("execError");
     public static final Property processingError = property("processingError");
     public static final Property parseError = property("parseError");
     public static final Property runTimeMs = property("runTimeMs");
 
-    public static final Property hasExecution = property("hasExecution");
-    public static final Property hasLocalExecution = property("hasLocalExecution");
-    public static final Property hasRemoteExecution = property("hasRemoteExecution");
+    public static final Property hasExec = property("hasExec");
+    public static final Property hasLocalExec = property("hasLocalExec");
+    public static final Property hasRemoteExec = property("hasRemoteExec");
 
-    public static final Property hasJoinVarExecution = property("hasJoinVarExecution");
+    public static final Property hasBGPExec = property("hasBGPExec");
+    public static final Property hasTPExec = property("hasTPExec");
+    public static final Property hasJoinVarExec = property("hasJoinVarExec");
 
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
     // TODO Rename to tpSelectivity(GraphRestricted)
-    public static final Property tpSelectivity = property("triplePatternSelectivity");
+    public static final Property tpSel = property("tpSel");
 
     // Selectivity of a triple pattern in regard to the BGP in which it occurrs
-    public static final Property tpSelectivityBgpRestricted = property("tpSelectivityBgpRestricted");
+    public static final Property tpSelBGPRestricted = property("tpSelBGPRestricted");
 
     // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
-    public static final Property tpSelectivityJoinRestricted = property("tpSelectivityJoinRestricted");
+    public static final Property tpSelJoinVarRestricted = property("tpSelJoinVarRestricted");
 
     // Similar to tpSelectivity, but considering immediate filters present on it
     // (maybe only those filters for which indexes can be used)
     //public static final Property fTpSelectivityBgpRestricted = property("fTpSelectivityBgpRestricted");
 
 
-    public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
+    public static final Property meanTPSelectivity = property("meanTPSelectivity");
 
     // TODO This is PROV vocab
     public static final Property wasAssociatedWith = property("wasAssociatedWith");

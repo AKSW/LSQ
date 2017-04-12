@@ -1,0 +1,23 @@
+@prefix : <http://example.org/> .
+
+:Anne
+  a :Person ;
+  :age 20 ;
+  :knows :Bob ;
+  .
+
+:Bob
+  a :Person ;
+  :age 22 ;
+  :knows :Colin ;
+  .
+
+
+:Colin
+  a :Person ;
+  :age 24 ;
+  :knows :Anne ;
+  .
+
+
+

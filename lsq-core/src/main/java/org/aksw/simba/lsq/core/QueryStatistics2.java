@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -127,10 +128,16 @@ public class QueryStatistics2 {
         return result;
     }
 
-    public static Map<org.topbraid.spin.model.Triple, Long> computeSelectivity(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
+    /**
+     * For each triple, return its corresponding number of distinct bindings in regard to the other triples (or element in general)
+     * @param qef
+     * @param triples
+     * @return
+     */
+    public static Map<org.topbraid.spin.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
         Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)));
 
-        Map<org.topbraid.spin.model.Triple, Long> result = computeSelectivity(qef, map);
+        Map<org.topbraid.spin.model.Triple, Long> result = fetchRestrictedResultSetRowCount(qef, map);
         return result;
     }
 
@@ -223,13 +230,20 @@ public class QueryStatistics2 {
 
     // public static Map<org.topbraid.spin.model.Triple, Long>
     // computeSelectivity(Collection<) {
-    public static <T> Map<T, Long> computeSelectivity(QueryExecutionFactory qef, Map<T, Element> map) { //Collection<T> items, Function<T, Element> itemToElement) {
+    /**
+     * The restricted result set row count per element is for each element the number of distinct bindings for its mentioned variables
+     *
+     * @param qef
+     * @param map
+     * @return
+     */
+    public static <T> Map<T, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Map<T, Element> map) { //Collection<T> items, Function<T, Element> itemToElement) {
         ElementGroup group = new ElementGroup();
         map.values().forEach(group::addElement);
 
         // TODO flatten group
 
-        Map<T, Long> result = new IdentityHashMap<>();
+        Map<T, Long> result = new LinkedHashMap<>();//new IdentityHashMap<>();
 
         map.entrySet().forEach(e -> {
             Element el = e.getValue();
@@ -506,8 +520,8 @@ public class QueryStatistics2 {
         int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
         int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
-        targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBgpTriples, minBgpTripleCount)
-                .addLiteral(LSQ.maxBgpTriples, maxBgpTripleCount).addLiteral(LSQ.triplePatterns, triplePatternCount);
+        targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
+                .addLiteral(LSQ.maxBGPTriles, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
     }
 
     public static List<Integer> getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp,

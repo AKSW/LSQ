@@ -192,7 +192,7 @@ public class SpinUtils {
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         triplePatternIndex.keySet().forEach(r ->
-            targetRes.addProperty(LSQ.hasTriplePattern, r)
+            targetRes.addProperty(LSQ.hasTP, r)
         );
     }
 
@@ -216,7 +216,7 @@ public class SpinUtils {
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
             //double selectivity = tripleCount / (double)totalTripleCount;
 
-            spinModel.add(r, LSQ.triplePatternResultSize, spinModel.createTypedLiteral(tripleCount));
+            spinModel.add(r, LSQ.resultSize, spinModel.createTypedLiteral(tripleCount));
         });
     }
 
@@ -303,11 +303,11 @@ public class SpinUtils {
 
             Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
 
-            queryExecRes.addProperty(LSQ.hasTriplePatternExecution, queryTpExecRes);
+            queryExecRes.addProperty(LSQ.hasTPExec, queryTpExecRes);
 
             queryTpExecRes
-                .addProperty(RDF.type, LSQ.TriplePatternExecution)
-                .addProperty(LSQ.hasTriplePattern, r);
+                //.addProperty(RDF.type, LSQ.tpExec)
+                .addProperty(LSQ.hasTP, r);
 
 
             //result.add(queryTpExecRes);
@@ -320,7 +320,7 @@ public class SpinUtils {
     public static void enrichModelWithTriplePatternSelectivities(Set<Resource> tpExecRess, QueryExecutionFactory qef, long totalTripleCount) {
 
         for(Resource tpExecRes : tpExecRess) {
-            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTriplePattern).getObject().as(org.topbraid.spin.model.TriplePattern.class);
+            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTP).getObject().as(org.topbraid.spin.model.TriplePattern.class);
             Triple triple = toJenaTriple(spinTriple);
 
             long count = countTriplePattern(qef, triple);
@@ -328,8 +328,8 @@ public class SpinUtils {
             double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
 
             tpExecRes
-                .addLiteral(LSQ.triplePatternResultSize, count)
-                .addLiteral(LSQ.tpSelectivity, selectivity);
+                .addLiteral(LSQ.resultSize, count)
+                .addLiteral(LSQ.tpSel, selectivity);
         }
     }
 
@@ -363,15 +363,15 @@ public class SpinUtils {
             Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
 
             queryExecRes
-                .addProperty(LSQ.hasTriplePatternExecution, queryTpExecRes);
+                .addProperty(LSQ.hasTPExec, queryTpExecRes);
 
 
             double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
 
             queryTpExecRes
-                .addProperty(LSQ.hasTriplePattern, r)
-                .addLiteral(LSQ.triplePatternResultSize, count)
-                .addLiteral(LSQ.tpSelectivity, selectivity);
+                .addProperty(LSQ.hasTP, r)
+                .addLiteral(LSQ.resultSize, count)
+                .addLiteral(LSQ.tpSel, selectivity);
         }
 
 //        triplePatternIndex.keySet().forEach(r ->
@@ -412,10 +412,10 @@ public class SpinUtils {
             Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps) {
 
         // Map each triple pattern to the resource which will carry the observed metrics
-        Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTriplePatternExecution).toSet().stream()
+        Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTPExec).toSet().stream()
             .map(o -> o.asResource())
             .collect(Collectors.toMap(
-                    o -> o.getPropertyResourceValue(LSQ.hasTriplePattern).as(org.topbraid.spin.model.TriplePattern.class),
+                    o -> o.getPropertyResourceValue(LSQ.hasTP).as(org.topbraid.spin.model.TriplePattern.class),
                     o -> o));
 
         //Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = indexBasicPatterns2(queryRes);
@@ -424,17 +424,17 @@ public class SpinUtils {
         //for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 
         // Compute the absolute counts for each triple in the bgp
-        Map<org.topbraid.spin.model.Triple, Long> sels = QueryStatistics2.computeSelectivity(qef, tpToObservation.keySet());
+        Map<org.topbraid.spin.model.Triple, Long> sels = QueryStatistics2.fetchRestrictedResultSetRowCount(qef, tpToObservation.keySet());
 
         for(Entry<org.topbraid.spin.model.Triple, Long> e : sels.entrySet()) {
             Resource observation = tpToObservation.get(e.getKey());
             Long count = e.getValue();
 
-            long tpResultSetSize = observation.getProperty(LSQ.triplePatternResultSize).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
+            long tpResultSetSize = observation.getProperty(LSQ.resultSize).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
             double tpSelectivity = tpResultSetSize == 0 ? 0d : count / (double)tpResultSetSize;
 
             observation
-                .addLiteral(LSQ.tpSelectivityBgpRestricted, tpSelectivity);
+                .addLiteral(LSQ.tpSelBGPRestricted, tpSelectivity);
 
         }
 

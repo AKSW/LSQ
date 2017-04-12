@@ -1,6 +1,47 @@
-## LSQ: The Linked SPARQL Queries Dataset
+# The Linked SPARQL Queries (LSQ) Framework
+LSQ is a framework for RDFizing arbitrary SPARQL query logs with support for several types of analysis.
+This project page describes the framework; information about the Linked Dataset, a SPARQL endpoint, and complete dumps are all available on the LSQ [homepage](http://aksw.github.io/LSQ/) along with pointers a VoID description, example LSQ queries, and various other dataset assets.
 
-#### Building the command line client
+
+## Architecture
+LSQ's architecture is based on a classic batch processing one.
+
+* An item reader reads each entry of the input log file, normalizes the data by converting it to an RDF representation (based on the log format)
+* An item processor performs the analysis steps according to the provided configuration.
+* An output writer serializes each target resource to a file or STDOUT.
+
+### Supported Analysis Types
+* Structural features: This comprises metrics directly from a SPARQL query, such as the number of triple patterns, BGPs, projection variables.
+* Executions analysis measures aspects of a query and its parts, such as BGPs and TPs, in regard to a dataset hosted in an RDF store. These aspects are:
+ * Performance analysis
+ * Result set sizes and selectivity
+
+Executions can be marked as local and remote: a remote execution of a query takes place at the SPARQL endpoint whose log file contained the query, whereas a local execution take place on a 'local' instance of that RDF store setup.
+
+
+### Supported log formats
+Default log formats are configured in the [default-log-formats.ttl](lsq-core/src/main/resources/default-log-formats.ttl) file, which contains entries such as:
+```rdf
+fmt:combined
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" ;
+.
+```
+At present, LSQ performs lookup of patterns by their local name, such as _combined_ in this example.
+
+The pattern definitions follow the specification of Apache's [mod_log_config](http://httpd.apache.org/docs/current/mod/mod_log_config.html).
+Custom log formats can thus be easily added by simply extending the underlying RDF model.
+
+
+## Vocabulary
+![LSQ Vocabulary Depiction](lsq-docs/lsq-vocab.png "")
+
+
+## Java API
+
+## The command line client (CLI)
+
+#### Building the CLI Jar
 Build the whole project with
 
 ```
@@ -26,7 +67,7 @@ alias lsq='java -cp `find "/path/to/lsq-cli/target/" -name "lsq*jar-with-depende
 
 
 
-#### Building the debian package
+#### Building the CLI debian package
 This happends when you build the project (under lsq-debian-cli/target)
 You can conveniently install it with
 
@@ -34,8 +75,6 @@ You can conveniently install it with
 sudo dpkg -i `find . -name '*.deb'`
 ```
 
-####LSQ Homepage 
-The Linked Dataset, a SPARQL endpoint, and complete dumps are all available on the LSQ [homepage](http://aksw.github.io/LSQ/) along with pointers a VoID description, example LSQ queries, and various other dataset assets.
 
 ## Example usage
 

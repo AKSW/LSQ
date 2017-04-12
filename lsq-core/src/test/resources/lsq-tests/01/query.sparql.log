@@ -1,0 +1,2 @@
+PREFIX : <http://example.org/> SELECT * { ?s a :Person . ?s :knows ?o . ?o a :Person . ?o :age ?a . }
+
