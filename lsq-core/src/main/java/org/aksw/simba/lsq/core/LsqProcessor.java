@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.core;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -20,9 +20,6 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
-import org.aksw.simba.lsq.core.LSQARQ2SPIN;
-import org.aksw.simba.lsq.core.QueryStatistics2;
-import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.util.WebLogParser;
@@ -77,7 +74,7 @@ public class LsqProcessor
 
     protected Long workloadSize;
 
-    protected Function<String, NestedResource> queryAspectFn;
+    //protected Function<String, NestedResource> queryAspectFn;
     protected Resource rawLogEndpointRes; // TODO Rename to remoteEndpointRes?
 
 
@@ -93,6 +90,149 @@ public class LsqProcessor
     protected long logEntryIndex = 0l;
     protected int batchSize = 10;
 
+    public Function<String, SparqlStmt> getStmtParser() {
+        return stmtParser;
+    }
+
+    public void setStmtParser(Function<String, SparqlStmt> stmtParser) {
+        this.stmtParser = stmtParser;
+    }
+
+    public SimpleDateFormat getDt() {
+        return dt;
+    }
+
+    public void setDt(SimpleDateFormat dt) {
+        this.dt = dt;
+    }
+
+    public String getBaseUri() {
+        return baseUri;
+    }
+
+    public void setBaseUri(String baseUri) {
+        this.baseUri = baseUri;
+    }
+
+    public boolean isDoRdfizeQuery() {
+        return doRdfizeQuery;
+    }
+
+    public void setDoRdfizeQuery(boolean doRdfizeQuery) {
+        this.doRdfizeQuery = doRdfizeQuery;
+    }
+
+    public boolean isDoRemoteExecution() {
+        return doRemoteExecution;
+    }
+
+    public void setDoRemoteExecution(boolean doRemoteExecution) {
+        this.doRemoteExecution = doRemoteExecution;
+    }
+
+    public boolean isDoLocalExecution() {
+        return doLocalExecution;
+    }
+
+    public void setDoLocalExecution(boolean doLocalExecution) {
+        this.doLocalExecution = doLocalExecution;
+    }
+
+    public Long getWorkloadSize() {
+        return workloadSize;
+    }
+
+    public void setWorkloadSize(Long workloadSize) {
+        this.workloadSize = workloadSize;
+    }
+
+//    public Function<String, NestedResource> getQueryAspectFn() {
+//        return queryAspectFn;
+//    }
+//
+//    public void setQueryAspectFn(Function<String, NestedResource> queryAspectFn) {
+//        this.queryAspectFn = queryAspectFn;
+//    }
+
+    public Resource getRawLogEndpointRes() {
+        return rawLogEndpointRes;
+    }
+
+    public void setRawLogEndpointRes(Resource rawLogEndpointRes) {
+        this.rawLogEndpointRes = rawLogEndpointRes;
+    }
+
+    public QueryExecutionFactory getDataQef() {
+        return dataQef;
+    }
+
+    public void setDataQef(QueryExecutionFactory dataQef) {
+        this.dataQef = dataQef;
+    }
+
+    public String getDatasetLabel() {
+        return datasetLabel;
+    }
+
+    public void setDatasetLabel(String datasetLabel) {
+        this.datasetLabel = datasetLabel;
+    }
+
+    public Resource getExpRes() {
+        return expRes;
+    }
+
+    public void setExpRes(Resource expRes) {
+        this.expRes = expRes;
+    }
+
+    public Resource getLogEndpointRes() {
+        return logEndpointRes;
+    }
+
+    public void setLogEndpointRes(Resource logEndpointRes) {
+        this.logEndpointRes = logEndpointRes;
+    }
+
+    public Long getDatasetSize() {
+        return datasetSize;
+    }
+
+    public void setDatasetSize(Long datasetSize) {
+        this.datasetSize = datasetSize;
+    }
+
+    public int getLogFailCount() {
+        return logFailCount;
+    }
+
+    public void setLogFailCount(int logFailCount) {
+        this.logFailCount = logFailCount;
+    }
+
+    public long getLogEntryIndex() {
+        return logEntryIndex;
+    }
+
+    public void setLogEntryIndex(long logEntryIndex) {
+        this.logEntryIndex = logEntryIndex;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
+
+    public static Logger getLogger() {
+        return logger;
+    }
+
+//    pu LsqProcessor() {
+//        super();
+//    }
 
     @Override
     public Resource apply(Resource r) {
@@ -172,13 +312,12 @@ public class LsqProcessor
 
 
                     if(doRemoteExecution) {
-                        doRemoteExecution(baseRes, r, queryRes);
+                        doRemoteExecution(baseRes, r, queryRes, queryAspectFn);
                     }
 
 
                     if(doLocalExecution) {
-                        doLocalExecution(query, queryRes);
-
+                        doLocalExecution(query, queryRes, queryAspectFn);
                     }
 
                     // Post processing: Craft global IRIs for SPIN variables
@@ -231,7 +370,7 @@ public class LsqProcessor
     }
 
 
-    public void doLocalExecution(Query query, NestedResource queryRes) {
+    public void doLocalExecution(Query query, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
         //boolean hasBeenExecuted = executedQueries.contains(query);
 
         boolean hasBeenExecuted = false;
@@ -257,7 +396,7 @@ public class LsqProcessor
         }
     }
 
-    public void doRemoteExecution(NestedResource baseRes, Resource r, NestedResource queryRes) {
+    public void doRemoteExecution(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 
         // Deal with log entry (remote execution)
         String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
