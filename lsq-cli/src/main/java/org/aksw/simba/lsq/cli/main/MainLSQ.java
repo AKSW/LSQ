@@ -42,7 +42,7 @@ public class MainLSQ
 
         LsqCliParser cliParser = new LsqCliParser(logFmtRegistry);
 
-        cliParser.parse(args);
+        LsqConfig config = cliParser.parse(args);
 
 
         Stream<Resource> logEntryStream;

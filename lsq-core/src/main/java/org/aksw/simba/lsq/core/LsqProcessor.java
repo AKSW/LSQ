@@ -382,9 +382,10 @@ public class LsqProcessor
             String nowStr = dt.format(now.getTime());
             Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
 
-            queryExecRes
-                .addProperty(PROV.wasGeneratedBy, expRes);
-
+            if(expRes != null) {
+                queryExecRes
+                    .addProperty(PROV.wasGeneratedBy, expRes);
+            }
 
             // TODO Switch between local / remote execution
             if(query != null) {

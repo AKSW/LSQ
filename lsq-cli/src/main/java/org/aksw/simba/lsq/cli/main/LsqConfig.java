@@ -18,14 +18,19 @@ public class LsqConfig {
     protected boolean rdfizeQueryExecution;
 
     protected String datasetLabel;
-
+    protected String datasetEndpointIri;
+    protected List<String> datasetDefaultGraphIris;
+    protected boolean fetchDatasetSize;
 
     protected Long queryTimeoutInMs;
-
 
     protected String experimentIri;
 
     protected String endpointUrl;
+
+    protected Long datasetSize;
+
+    protected Long firstItemOffset;
 
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
@@ -94,6 +99,22 @@ public class LsqConfig {
         this.datasetLabel = datasetLabel;
     }
 
+    public String getDatasetEndpointIri() {
+        return datasetEndpointIri;
+    }
+
+    public void setDatasetEndpointIri(String datasetEndpointIri) {
+        this.datasetEndpointIri = datasetEndpointIri;
+    }
+
+    public boolean isFetchDatasetSize() {
+        return fetchDatasetSize;
+    }
+
+    public void setFetchDatasetSize(boolean fetchDatasetSize) {
+        this.fetchDatasetSize = fetchDatasetSize;
+    }
+
     public Long getQueryTimeoutInMs() {
         return queryTimeoutInMs;
     }
@@ -114,6 +135,15 @@ public class LsqConfig {
         return endpointUrl;
     }
 
+
+    public List<String> getDatasetDefaultGraphIris() {
+        return datasetDefaultGraphIris;
+    }
+
+    public void setDatasetDefaultGraphIris(List<String> datasetDefaultGraphIris) {
+        this.datasetDefaultGraphIris = datasetDefaultGraphIris;
+    }
+
     public void setEndpointUrl(String endpointUrl) {
         this.endpointUrl = endpointUrl;
     }
@@ -124,6 +154,15 @@ public class LsqConfig {
 
     public void setFederationEndpoints(List<String> federationEndpoints) {
         this.federationEndpoints = federationEndpoints;
+    }
+
+
+    public Long getFirstItemOffset() {
+        return firstItemOffset;
+    }
+
+    public void setFirstItemOffset(Long firstItemOffset) {
+        this.firstItemOffset = firstItemOffset;
     }
 
     public File getFederationConfigFile() {
@@ -141,6 +180,15 @@ public class LsqConfig {
     public void setOutBaseIri(String outBaseIri) {
         this.outBaseIri = outBaseIri;
     }
+
+    public Long getDatasetSize() {
+        return datasetSize;
+    }
+
+    public void setDatasetSize(Long datasetSize) {
+        this.datasetSize = datasetSize;
+    }
+
 
 
 }

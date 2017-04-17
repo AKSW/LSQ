@@ -21,6 +21,7 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
+import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.QueryFactory;
@@ -180,7 +181,7 @@ public class LsqCliParser {
     }
 
 
-    public void parse(String[] args) throws Exception {
+    public LsqConfig parse(String[] args) throws Exception {
 
         OptionSet options = parser.parse(args);
 
@@ -218,19 +219,17 @@ public class LsqCliParser {
             in = System.in;
         }
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-
 
         String datasetLabel = datasetLabelOs.value(options);
         String endpointUrl = endpointUrlOs.value(options);
         String baseUri = baseUriOs.value(options);
         String logEndpointUri = logEndpointUriOs.value(options) ;
-        List<String> graph = graphUriOs.values(options);
+        List<String> datasetDefaultGraphIris = graphUriOs.values(options);
         Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
         Long timeoutInMs = timeoutInMsOs.value(options);
 
-        boolean queryDatasetSize = !options.has(datasetSizeOs);
+        boolean fetchDatasetSize = !options.has(datasetSizeOs);
 
         Long datasetSize = options.has(datasetSizeOs) ? datasetSizeOs.value(options) : null;
         datasetSize = datasetSize == null ? null : (datasetSize < 0 ? null : datasetSize);
@@ -265,9 +264,48 @@ public class LsqCliParser {
 
         LsqConfig config = new LsqConfig();
         config.setDatasetLabel(datasetLabel);
+        config.setDatasetEndpointIri(logEndpointUri);
+        config.setFetchDatasetSize(fetchDatasetSize);
+
         config.setEndpointUrl(endpointUrl);
+
+        config.setInQueryLogFormat(logFormat);
+        config.setQueryTimeoutInMs(timeoutInMs);
+        config.setFirstItemOffset(head);
+
+        //config.setOutRdfFile();
+        config.setEndpointUrl(endpointUrl);
+        config.setDatasetDefaultGraphIris(datasetDefaultGraphIris);
+
         config.setOutBaseIri(baseUri);
         config.setFederationEndpoints(fedEndpoints);
+
+        config.setDatasetSize(datasetSize);
+
+        config.setRdfizeQuery(isExecutionEnabled);
+
+
+        return config;
+    }
+
+    public void createReader(LsqConfig config) {
+
+    }
+
+    public LsqProcessor createProcessor(LsqConfig config) {
+
+        LsqProcessor result = new LsqProcessor();
+
+        Long datasetSize = config.getDatasetSize();
+        String logEndpointUri = config.getDatasetEndpointIri();
+        String logFormat = config.getInQueryLogFormat();
+        Long firstItemOffset = config.getFirstItemOffset();
+        boolean rdfizeQueryExecution = config.isRdfizeQueryExecution();
+        List<String> fedEndpoints = config.getFederationEndpoints();
+        String endpointUrl = config.getEndpointUrl();
+        List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
+        Long queryTimeoutInMs = config.getQueryTimeoutInMs();
+
         //config.setDa
         //config.setLog
 
@@ -293,8 +331,11 @@ public class LsqCliParser {
         // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
         // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
         //Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         Resource rawLogEndpointRes = logEndpointUri == null ? null : ResourceFactory.createResource(logEndpointUri);
+
+
 
 
         Model specs = ModelFactory.createDefaultModel();
@@ -320,8 +361,8 @@ public class LsqCliParser {
 
         Stream<String> stream = reader.lines();
 
-        if(head != null) {
-            stream = stream.limit(head);
+        if(firstItemOffset != null) {
+            stream = stream.limit(firstItemOffset);
         }
 
         Mapper webLogParser = logFmtRegistry.get(logFormat);
@@ -366,17 +407,17 @@ public class LsqCliParser {
         QueryExecutionFactory baseDataQef;
         QueryExecutionFactory dataQef = null;
 
-        if(isExecutionEnabled) {
+        if(rdfizeQueryExecution) {
             boolean isNormalMode = fedEndpoints.isEmpty();
             //boolean isFederatedMode = !isNormalMode;
 
             if(isNormalMode) {
                 countQef =
                         FluentQueryExecutionFactory
-                        .http(endpointUrl, graph)
+                        .http(endpointUrl, datasetDefaultGraphIris)
                         .create();
 
-                baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, graph).create();
+                baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, datasetDefaultGraphIris).create();
 
             } else {
                 countQef = null;
@@ -391,8 +432,8 @@ public class LsqCliParser {
                     .config()
                         .withParser(SparqlQueryParserImpl.create())
                         .withPostProcessor(qe -> {
-                            if(timeoutInMs != null) {
-                                qe.setTimeout(0, timeoutInMs);
+                            if(queryTimeoutInMs != null) {
+                                qe.setTimeout(0, queryTimeoutInMs);
     //                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
     //                            .setTimeout(timeoutInMs);
                             }
@@ -420,6 +461,10 @@ public class LsqCliParser {
             }
         }
 
+        result.setRawLogEndpointRes(rawLogEndpointRes);
+        result.setDatasetSize(datasetSize);
+
+        return result;
     }
 }
 

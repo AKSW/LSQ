@@ -28,10 +28,10 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.util.ResourceUtils;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.model.Variable;
@@ -71,10 +71,11 @@ public class SpinUtils {
 
         Var c = Var.alloc("_c_");
         // TODO Move to QueryGenerationUtils
-        Var d = Var.alloc("_d_");
+        //Var d = Var.alloc("_d_");
 
         Query query = new Query();
-        query.getProject().add(c, new ExprAggregator(d, new AggCount()));
+        Expr expr = query.allocAggregate(new AggCount());
+        query.getProject().add(c, expr);
         query.setQuerySelectType();
         query.setQueryPattern(ElementUtils.createElement(triple));
 
