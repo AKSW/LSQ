@@ -55,7 +55,7 @@ public class TestSelectivity {
         processor.setStmtParser(SparqlStmtParserImpl.create(Syntax.syntaxARQ, false));
         processor.setBaseUri("http://example.org/");
         processor.setDoRdfizeQuery(true);
-        processor.setDoLocalExecution(true);
+        processor.setQueryExecutionRemote(true);
         processor.setDataQef(dataQef);
         //processor.setQueryAspectFn(queryAspectFn);
 

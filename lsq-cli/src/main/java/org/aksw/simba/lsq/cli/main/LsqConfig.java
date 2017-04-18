@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.simba.lsq.util.Mapper;
 
@@ -24,21 +25,25 @@ public class LsqConfig {
     // base Iri of output resources
     protected String outBaseIri;
 
-    protected boolean rdfizeQuery;
-    protected boolean rdfizeLog;
-    protected boolean rdfizeQueryExecution;
+    protected boolean isRdfizerQueryStructuralFeaturesEnabled;
+    protected boolean isRdfizerQueryExecutionEnabled;
+    protected boolean isQueryExecutionRemote;
+    //protected boolean isRdfizerRemoteExecutionEnabled;
 
     protected String datasetLabel;
-    protected String datasetEndpointIri;
-    protected List<String> datasetDefaultGraphIris;
-    protected boolean fetchDatasetSize;
 
-    protected Long queryTimeoutInMs;
+    protected SparqlServiceReference datasetEndpointDescription;
+    //protected Long datasetEndpointPagination;
+    protected boolean isFetchDatasetSizeEnabled;
+    //protected boolean fetchDatasetEndpointSize;
+
+//    protected SparqlServiceReference remoteEndpoint;
+//    protected Long remoteDatasetEndpointFetchSize;
+//    protected boolean fetchRemoteDatasetEndpointSize;
+
+    protected Long datasetQueryExecutionTimeoutInMs;
 
     protected String experimentIri;
-
-    protected String endpointUrl;
-
     protected Long datasetSize;
 
     protected Long firstItemOffset;
@@ -46,6 +51,14 @@ public class LsqConfig {
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
 
+    public boolean isFetchDatasetSizeEnabled() {
+        return isFetchDatasetSizeEnabled;
+    }
+
+
+    public void setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
+        this.isFetchDatasetSizeEnabled = isFetchDatasetSizeEnabled;
+    }
 
 
     public Function<String, SparqlStmt> getSparqlStmtParser() {
@@ -112,28 +125,61 @@ public class LsqConfig {
     }
 
     public boolean isRdfizeQuery() {
-        return rdfizeQuery;
+        return isRdfizerQueryStructuralFeaturesEnabled;
     }
 
     public void setRdfizeQuery(boolean rdfizeQuery) {
-        this.rdfizeQuery = rdfizeQuery;
+        this.isRdfizerQueryStructuralFeaturesEnabled = rdfizeQuery;
     }
 
-    public boolean isRdfizeLog() {
-        return rdfizeLog;
+    public boolean isRdfizerQueryExecutionEnabled() {
+        return isRdfizerQueryExecutionEnabled;
     }
 
-    public void setRdfizeLog(boolean rdfizeLog) {
-        this.rdfizeLog = rdfizeLog;
+    public void setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
+        this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
     }
 
-    public boolean isRdfizeQueryExecution() {
-        return rdfizeQueryExecution;
+
+
+//    public boolean isRdfizerRemoteExecutionEnabled() {
+//        return isRdfizerRemoteExecutionEnabled;
+//    }
+//
+//    public void setRdfizerRemoteExecutionEnabled(boolean isRdfizerRemoteExecutionEnabled) {
+//        this.isRdfizerRemoteExecutionEnabled = isRdfizerRemoteExecutionEnabled;
+//    }
+
+
+    public boolean isRdfizerQueryStructuralFeaturesEnabled() {
+        return isRdfizerQueryStructuralFeaturesEnabled;
     }
 
-    public void setRdfizeQueryExecution(boolean rdfizeQueryExecution) {
-        this.rdfizeQueryExecution = rdfizeQueryExecution;
+
+    public void setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
+        this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryStructuralFeaturesEnabled;
     }
+
+
+    public boolean isQueryExecutionRemote() {
+        return isQueryExecutionRemote;
+    }
+
+
+    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
+        this.isQueryExecutionRemote = isQueryExecutionRemote;
+    }
+
+
+//    public Long getDatasetEndpointPagination() {
+//        return datasetEndpointPagination;
+//    }
+//
+//
+//    public void setDatasetEndpointPagination(Long datasetEndpointPagination) {
+//        this.datasetEndpointPagination = datasetEndpointPagination;
+//    }
+
 
     public String getDatasetLabel() {
         return datasetLabel;
@@ -143,28 +189,12 @@ public class LsqConfig {
         this.datasetLabel = datasetLabel;
     }
 
-    public String getDatasetEndpointIri() {
-        return datasetEndpointIri;
-    }
-
-    public void setDatasetEndpointIri(String datasetEndpointIri) {
-        this.datasetEndpointIri = datasetEndpointIri;
-    }
-
-    public boolean isFetchDatasetSize() {
-        return fetchDatasetSize;
-    }
-
-    public void setFetchDatasetSize(boolean fetchDatasetSize) {
-        this.fetchDatasetSize = fetchDatasetSize;
-    }
-
     public Long getQueryTimeoutInMs() {
-        return queryTimeoutInMs;
+        return datasetQueryExecutionTimeoutInMs;
     }
 
-    public void setQueryTimeoutInMs(Long queryTimeoutInMs) {
-        this.queryTimeoutInMs = queryTimeoutInMs;
+    public void setDatasetQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
+        this.datasetQueryExecutionTimeoutInMs = datasetQueryExecutionTimeoutInMs;
     }
 
     public String getExperimentIri() {
@@ -175,21 +205,23 @@ public class LsqConfig {
         this.experimentIri = experimentIri;
     }
 
-    public String getEndpointUrl() {
-        return endpointUrl;
+    public boolean isRdfizerQueryEnabled() {
+        return isRdfizerQueryStructuralFeaturesEnabled;
     }
 
 
-    public List<String> getDatasetDefaultGraphIris() {
-        return datasetDefaultGraphIris;
+    public void setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
+        this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryEnabled;
     }
 
-    public void setDatasetDefaultGraphIris(List<String> datasetDefaultGraphIris) {
-        this.datasetDefaultGraphIris = datasetDefaultGraphIris;
+
+    public SparqlServiceReference getDatasetEndpointDescription() {
+        return datasetEndpointDescription;
     }
 
-    public void setEndpointUrl(String endpointUrl) {
-        this.endpointUrl = endpointUrl;
+
+    public void setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
+        this.datasetEndpointDescription = datasetEndpointDescription;
     }
 
     public List<String> getFederationEndpoints() {

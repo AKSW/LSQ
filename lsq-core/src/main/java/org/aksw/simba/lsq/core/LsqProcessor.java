@@ -69,8 +69,8 @@ public class LsqProcessor
     // Config attributes
     protected String baseUri;
     protected boolean doRdfizeQuery;
-    protected boolean doRemoteExecution;
-    protected boolean doLocalExecution;
+    protected boolean doQueryExecution;
+    protected boolean isQueryExecutionRemote;
 
     protected Long workloadSize;
 
@@ -123,19 +123,19 @@ public class LsqProcessor
     }
 
     public boolean isDoRemoteExecution() {
-        return doRemoteExecution;
+        return doQueryExecution;
     }
 
     public void setDoRemoteExecution(boolean doRemoteExecution) {
-        this.doRemoteExecution = doRemoteExecution;
+        this.doQueryExecution = doRemoteExecution;
     }
 
-    public boolean isDoLocalExecution() {
-        return doLocalExecution;
+    public boolean isQueryExecutionRemote() {
+        return isQueryExecutionRemote;
     }
 
-    public void setDoLocalExecution(boolean doLocalExecution) {
-        this.doLocalExecution = doLocalExecution;
+    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
+        this.isQueryExecutionRemote = isQueryExecutionRemote;
     }
 
     public Long getWorkloadSize() {
@@ -317,14 +317,14 @@ public class LsqProcessor
                     }
 
 
-                    if(doRemoteExecution) {
-                        doRemoteExecution(baseRes, r, queryRes, queryAspectFn);
+                    if(doQueryExecution) {
+                        if(isQueryExecutionRemote) {
+                            doRemoteExecution(baseRes, r, queryRes, queryAspectFn);
+                        } else {
+                            doLocalExecution(query, queryRes, queryAspectFn);
+                        }
                     }
 
-
-                    if(doLocalExecution) {
-                        doLocalExecution(query, queryRes, queryAspectFn);
-                    }
 
                     // Post processing: Craft global IRIs for SPIN variables
                     Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();

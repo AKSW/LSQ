@@ -2,16 +2,18 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
+import org.aksw.jena_sparql_api.core.SparqlServiceReference;
+import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -46,8 +48,9 @@ public class MainLSQ
 
     public static void run(LsqConfig config) throws Exception  {
 
-        String datasetEndpointUrl = config.getDatasetEndpointIri();
-        List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
+        SparqlServiceReference ssr = config.getDatasetEndpointDescription();
+        String datasetEndpointUrl = ssr.getServiceURL();
+        DatasetDescription datasetDescription = ssr.getDatasetDescription();
         Long datasetSize = config.getDatasetSize();
 
         String expBaseIri = config.getExperimentIri();
@@ -63,7 +66,7 @@ public class MainLSQ
         Long workloadSize = null;
 
         logger.info("About to process " + workloadSize + " queries");
-        logger.info("Dataset size of " + datasetEndpointUrl + " / " + datasetDefaultGraphIris + " - size: " + datasetSize);
+        logger.info("Dataset size of " + datasetEndpointUrl + " / " + DatasetDescriptionUtils.toString(datasetDescription) + " - size: " + datasetSize);
 
         NestedResource expBaseRes = new NestedResource(ResourceFactory.createResource(expBaseIri));
 

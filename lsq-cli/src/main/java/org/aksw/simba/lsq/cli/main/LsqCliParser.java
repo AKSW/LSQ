@@ -11,6 +11,7 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -22,10 +23,12 @@ import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
+import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.WebLogParser;
@@ -40,6 +43,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,53 +203,18 @@ public class LsqCliParser {
 
         OptionSet options = parser.parse(args);
 
-        // Write to file or sysout depending on arguments
-        PrintStream out;
-        File outFile = null;
-        boolean[] outNeedsClosing = { true };
-        if(options.has(outputOs)) {
-            outFile = outputOs.value(options);
-            out = new PrintStream(outFile);
-        } else {
-            out = System.out;
-            outNeedsClosing[0] = false;
-        }
-
-
-
-
-        File inFile = options.has(inputOs)
-                ? inputOs.value(options)
-                : null;
-
-//        if(options.has(inputOs)) {
-//            File file = inputOs.value(options);
-//
-//            file = file.getAbsoluteFile();
-//            in = new FileInputStream(file);
-//        } else {
-//            in = System.in;
-//        }
-
 
         String datasetLabel = datasetLabelOs.value(options);
-        String endpointUrl = endpointUrlOs.value(options);
         String baseUri = baseUriOs.value(options);
-        String logEndpointUri = logEndpointUriOs.value(options) ;
-        List<String> datasetDefaultGraphIris = graphUriOs.values(options);
         Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
-        Long timeoutInMs = timeoutInMsOs.value(options);
 
         boolean fetchDatasetSize = !options.has(datasetSizeOs);
 
         Long datasetSize = options.has(datasetSizeOs) ? datasetSizeOs.value(options) : null;
         datasetSize = datasetSize == null ? null : (datasetSize < 0 ? null : datasetSize);
 
-        boolean isExecutionEnabled = rdfizer.contains("e");
-
         String expBaseUri = expBaseUriOs.value(options);
-        String logFormat = logFormatOs.value(options);
         String outFormatStr = outFormatOs.value(options);
 
         RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equals(outFormatStr)).findFirst().orElse(null);
@@ -270,33 +239,42 @@ public class LsqCliParser {
         }
 
 
+
+        String datasetEndpointUrl = logEndpointUriOs.value(options);
+        List<String> datasetDefaultGraphIris = graphUriOs.values(options);
+
+        DatasetDescription datasetDescription = DatasetDescription.create(datasetDefaultGraphIris, Collections.emptyList());
+        SparqlServiceReference datasetEndpointDescription = new SparqlServiceReference(datasetEndpointUrl, datasetDescription);
+
         LsqConfig config = new LsqConfig();
 
-        config.setLogFmtRegistry(logFmtRegistry);
 
-        config.setInQueryLogFile(inFile);
-        config.setInQueryLogFormat(logFormat);
+        config.setLogFmtRegistry(logFmtRegistry);
+        config.setOutBaseIri(baseUri);
+        config.setExperimentIri(expBaseUri);
+
+        config.setInQueryLogFile(inputOs.value(options));
+        config.setInQueryLogFormat(logFormatOs.value(options));
+
+        config.setFetchDatasetSizeEnabled(config.isFetchDatasetSizeEnabled());
 
         config.setDatasetLabel(datasetLabel);
-        config.setDatasetEndpointIri(logEndpointUri);
-        config.setFetchDatasetSize(fetchDatasetSize);
-
-        config.setEndpointUrl(endpointUrl);
-
-        config.setQueryTimeoutInMs(timeoutInMs);
-        config.setFirstItemOffset(head);
-
-        //config.setOutRdfFile();
-        config.setEndpointUrl(endpointUrl);
-        config.setDatasetDefaultGraphIris(datasetDefaultGraphIris);
-
-        config.setOutBaseIri(baseUri);
-        config.setFederationEndpoints(fedEndpoints);
+        config.setDatasetEndpointDescription(datasetEndpointDescription);
 
         config.setDatasetSize(datasetSize);
 
-        config.setRdfizeQuery(isExecutionEnabled);
+        config.setDatasetQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
+        config.setFirstItemOffset(head);
 
+        //config.setOutRdfFile();
+        config.setFederationEndpoints(fedEndpoints);
+
+
+        config.setRdfizeQuery(rdfizer.contains("q"));
+        config.setRdfizerQueryExecutionEnabled(rdfizer.contains("l") || rdfizer.contains("e"));
+        config.setQueryExecutionRemote(rdfizer.contains("e"));
+
+        config.setOutFile(outputOs.value(options));
 
         return config;
     }
@@ -399,74 +377,19 @@ public class LsqCliParser {
         sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
+        SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
         Long datasetSize = config.getDatasetSize();
-        String logEndpointUri = config.getDatasetEndpointIri();
-        boolean rdfizeQueryExecution = config.isRdfizeQueryExecution();
+        //String localDatasetEndpointUrl = config.getLocalDatasetEndpointUrl()
+        //List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
+        boolean isFetchDatasetSizeEnabled = config.isFetchDatasetSizeEnabled();
+
+        boolean isRdfizerQueryExecutionEnabled = config.isRdfizerQueryExecutionEnabled();
         List<String> fedEndpoints = config.getFederationEndpoints();
-        String endpointUrl = config.getEndpointUrl();
-        List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
+        String datasetEndpointUrl = datasetEndpointDescription.getServiceURL();
         Long queryTimeoutInMs = config.getQueryTimeoutInMs();
+        String baseIri = config.getOutBaseIri();
 
-        boolean queryDatasetSize = config.isFetchDatasetSize();
-
-        //config.setDa
-        //config.setLog
-
-
-
-//        These lines are just kept for reference in case we need something fancy
-//        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
-//        ApplicationContext ctx = SpringApplication.run(ConfigLSQ.class, args);
-
-//        JenaSystem.init();
-//        InitJenaCore.init();
-//        ARQ.init();
-//        SPINModuleRegistry.get().init();
-
-
-        //DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //Calendar startTime = new GregorianCalendar();
-
-        //Date date = startTime.getTime();
-        //String prts []  = dateFormat.format(date).split(" ");
-
-
-        // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
-        // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
-        //Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
-
-        Resource rawLogEndpointRes = logEndpointUri == null ? null : ResourceFactory.createResource(logEndpointUri);
-
-
-
-
-        Model specs = ModelFactory.createDefaultModel();
-        //Resource generatorRes = baseGeneratorRes.inModel(specs);
-
-
-        // TODO Attempt to determine attributes automatically ; or merge this data from a file or something
-//        Resource engineRes = specs.createResource()
-//                .addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"))
-//                .addProperty(LSQ.version, "Virtuoso v.7.2")
-//                .addProperty(LSQ.processor, "2.5GHz i7")
-//                .addProperty(LSQ.ram,"8GB");
-//        generatorRes
-//            .addProperty(LSQ.engine, engineRes);
-
-//        Resource datasetRes = specs.createResource();
-//        generatorRes
-//            .addLiteral(LSQ.dataset, datasetRes)
-//            .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
-//            .addLiteral(PROV.startedAtTime, startTime);
-
-
-//        List<Resource> workloadResources = stream
-//                .map(line -> {
-//                Resource r = logModel.createResource();
-//                webLogParser.parseEntry(line, r);
-//                return r;
-//            })
-//            .collect(Collectors.toList());
+        Resource rawLogEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
 
 
         Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
@@ -482,17 +405,17 @@ public class LsqCliParser {
         QueryExecutionFactory baseDataQef;
         QueryExecutionFactory dataQef = null;
 
-        if(rdfizeQueryExecution) {
+        if(isRdfizerQueryExecutionEnabled) {
             boolean isNormalMode = fedEndpoints.isEmpty();
             //boolean isFederatedMode = !isNormalMode;
 
             if(isNormalMode) {
                 countQef =
                         FluentQueryExecutionFactory
-                        .http(endpointUrl, datasetDefaultGraphIris)
+                        .http(datasetEndpointDescription)
                         .create();
 
-                baseDataQef = FluentQueryExecutionFactory.http(endpointUrl, datasetDefaultGraphIris).create();
+                baseDataQef = FluentQueryExecutionFactory.http(datasetEndpointDescription).create();
 
             } else {
                 countQef = null;
@@ -530,17 +453,82 @@ public class LsqCliParser {
 //                qe.close();
 //            }
 
-            if(queryDatasetSize) {
+            if(isFetchDatasetSizeEnabled) {
                 logger.info("Counting triples in the endpoint ...");
                 datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
             }
         }
 
+        result.setDoRdfizeQuery(config.isRdfizeQuery());
+        result.setDoRemoteExecution(isRdfizerQueryExecutionEnabled);
+        result.setQueryExecutionRemote(config.isQueryExecutionRemote());
+        //result.setDoLocalExecution(config.isRd);
+
+        result.setBaseUri(baseIri);
+        result.setDataQef(dataQef);
         result.setRawLogEndpointRes(rawLogEndpointRes);
         result.setDatasetSize(datasetSize);
         result.setStmtParser(sparqlStmtParser);
+        result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));
 
         return result;
     }
 }
+
+
+
+
+//config.setDa
+//config.setLog
+
+
+
+//These lines are just kept for reference in case we need something fancy
+//JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
+//ApplicationContext ctx = SpringApplication.run(ConfigLSQ.class, args);
+
+//JenaSystem.init();
+//InitJenaCore.init();
+//ARQ.init();
+//SPINModuleRegistry.get().init();
+
+
+//DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//Calendar startTime = new GregorianCalendar();
+
+//Date date = startTime.getTime();
+//String prts []  = dateFormat.format(date).split(" ");
+
+
+// Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
+// However, with .inModel(model) we can create resources that are bound to a specific model from another resource
+//Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
+
+//Model specs = ModelFactory.createDefaultModel();
+//Resource generatorRes = baseGeneratorRes.inModel(specs);
+
+
+// TODO Attempt to determine attributes automatically ; or merge this data from a file or something
+//Resource engineRes = specs.createResource()
+//        .addProperty(LSQ.vendor, specs.createResource(LSQ.defaultLsqrNs + "Virtuoso"))
+//        .addProperty(LSQ.version, "Virtuoso v.7.2")
+//        .addProperty(LSQ.processor, "2.5GHz i7")
+//        .addProperty(LSQ.ram,"8GB");
+//generatorRes
+//    .addProperty(LSQ.engine, engineRes);
+
+//Resource datasetRes = specs.createResource();
+//generatorRes
+//    .addLiteral(LSQ.dataset, datasetRes)
+//    .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
+//    .addLiteral(PROV.startedAtTime, startTime);
+
+
+//List<Resource> workloadResources = stream
+//        .map(line -> {
+//        Resource r = logModel.createResource();
+//        webLogParser.parseEntry(line, r);
+//        return r;
+//    })
+//    .collect(Collectors.toList());
 
