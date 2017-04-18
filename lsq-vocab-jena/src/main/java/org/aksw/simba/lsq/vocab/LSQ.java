@@ -66,6 +66,10 @@ public class LSQ {
     // Type so that all triple pattern executions in a query can be retrieved
     //public static final Resource TPExec = resource("TPExec");
 
+    // An LSQ Query. It is different from SPIN::Query.
+    // TODO Sort out the exact semantic relation.
+    public static final Resource Query = resource("Query");
+
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");

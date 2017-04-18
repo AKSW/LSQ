@@ -459,6 +459,7 @@ public class LsqCliParser {
             }
         }
 
+        result.setDatasetLabel(config.getDatasetLabel());
         result.setDoRdfizeQuery(config.isRdfizeQuery());
         result.setDoRemoteExecution(isRdfizerQueryExecutionEnabled);
         result.setQueryExecutionRemote(config.isQueryExecutionRemote());

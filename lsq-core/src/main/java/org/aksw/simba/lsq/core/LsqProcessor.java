@@ -5,9 +5,9 @@ import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -35,7 +35,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
@@ -301,7 +300,7 @@ public class LsqProcessor
                     Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
                     result
-                        .addProperty(RDF.type, SP.Query)
+                        .addProperty(RDF.type, LSQ.Query)
                         //.addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
                         .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
 
