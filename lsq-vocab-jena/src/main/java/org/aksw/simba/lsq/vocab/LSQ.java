@@ -211,6 +211,7 @@ public class LSQ {
 
 
     public static final Property hasVar = property("hasVar");
+    public static final Property hasVarExec = property("hasVarExec");
 
     // Temporary id attributes - used to craft final IRIs
     public static final Property queryId = property("queryId");

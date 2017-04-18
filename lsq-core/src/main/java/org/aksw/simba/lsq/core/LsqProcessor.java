@@ -565,6 +565,18 @@ public class LsqProcessor
             BiMap<org.topbraid.spin.model.Triple, Resource> tpToTpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
             Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
 
+            Collection<org.topbraid.spin.model.Triple> tps = bgpToTps.values();
+
+            // Note: We assume that each var only originates from a single resource - which is the case for lsq
+            // In general, we would have to use a multimap
+            Map<Var, Resource> varToQueryVarRes = tps.stream()
+                    .flatMap(tp -> SpinUtils.indexTripleNodes2(tp).entrySet().stream())
+                    .filter(e -> e.getValue().isVariable())
+                    .collect(Collectors.toMap(
+                            e -> (Var)e.getValue(),
+                            e -> e.getKey().asResource(),
+                            (old, now) -> now));
+
             if(datasetSize != null) {
 
                 SpinUtils.enrichModelWithTriplePatternSelectivities(tpToTpExecRess.values(), qef, datasetSize);
@@ -604,7 +616,6 @@ public class LsqProcessor
             for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 
 
-
                 // Map each resource to the corresponding jena element
                 Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
                         .collect(Collectors.toMap(
@@ -628,7 +639,7 @@ public class LsqProcessor
                                 v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
 
                 // Link the var occurrence
-                varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVar, vr));
+                varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVarExec, vr));
 
                 queryExecRes.addProperty(LSQ.hasBGPExec, bgpCtxRes);
 
@@ -639,9 +650,13 @@ public class LsqProcessor
 
                 // Add the BGP var statistics
                 varToCount.forEach((v, c) -> {
+                    Resource queryVarRes = varToQueryVarRes.get(v);
+                    //System.out.println("queryVar: " + queryVar);
+
                     Resource bgpVar = varToBgpVar.get(v);
 
                     bgpVar.addLiteral(LSQ.resultSize, c);
+                    bgpVar.addProperty(LSQ.proxyFor, queryVarRes);
                 });
                     //
 

@@ -67,6 +67,16 @@ public class SpinUtils {
         return result;
     }
 
+    public static Map<RDFNode, Node> indexTripleNodes2(org.topbraid.spin.model.Triple t) {
+        Triple jt = SpinUtils.toJenaTriple(t);
+        Map<RDFNode, Node> result = new HashMap<>();
+        result.put(t.getSubject(), jt.getSubject());
+        result.put(t.getPredicate(), jt.getPredicate());
+        result.put(t.getObject(), jt.getObject());
+
+        return result;
+    }
+
     public static int fetchTriplePatternExtensionSize(QueryExecutionFactory qef, Triple triple) {
 
         Var c = Var.alloc("_c_");
