@@ -223,8 +223,10 @@ public class SpinUtils {
 
     public static long countTriplePattern(QueryExecutionFactory qef, Triple t) {
         Query query = new Query();
+        Expr aggExpr = query.allocAggregate(new AggCount());
+
         query.setQuerySelectType();
-        query.getProject().add(Vars.c, new ExprAggregator(Vars.x, new AggCount()));
+        query.getProject().add(Vars.c, aggExpr);
         query.setQueryPattern(ElementUtils.createElement(t));
 
         QueryExecution qe = qef.createQueryExecution(query);

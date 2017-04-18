@@ -63,12 +63,12 @@ public class LsqProcessor
 
 
     protected Function<String, SparqlStmt> stmtParser;
-    protected SimpleDateFormat dt = new SimpleDateFormat("yyyyy-mm-dd_hh:mm:ss");
+    protected SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd_hh:mm:ss");
 
     // Config attributes
     protected String baseUri;
-    protected boolean doRdfizeQuery;
-    protected boolean doQueryExecution;
+    protected boolean isRdfizerQueryStructuralFeaturesEnabled;
+    protected boolean isRdfizerQueryExecutionEnabled;
     protected boolean isQueryExecutionRemote;
 
     protected Long workloadSize;
@@ -113,20 +113,20 @@ public class LsqProcessor
         this.baseUri = baseUri;
     }
 
-    public boolean isDoRdfizeQuery() {
-        return doRdfizeQuery;
+    public boolean isRdfizerQueryStructuralFeaturesEnabled() {
+        return isRdfizerQueryStructuralFeaturesEnabled;
     }
 
-    public void setDoRdfizeQuery(boolean doRdfizeQuery) {
-        this.doRdfizeQuery = doRdfizeQuery;
+    public void setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
+        this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryStructuralFeaturesEnabled;
     }
 
-    public boolean isDoRemoteExecution() {
-        return doQueryExecution;
+    public boolean isRdfizerQueryExecutionEnabled() {
+        return isRdfizerQueryExecutionEnabled;
     }
 
-    public void setDoRemoteExecution(boolean doRemoteExecution) {
-        this.doQueryExecution = doRemoteExecution;
+    public void setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
+        this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
     }
 
     public boolean isQueryExecutionRemote() {
@@ -310,20 +310,18 @@ public class LsqProcessor
                         result
                             .addLiteral(LSQ.parseError, msg);
                     } else {
-                        if(doRdfizeQuery) { // TODO Replace with function call
+                        if(isRdfizerQueryStructuralFeaturesEnabled) {
                             rdfizeQuery(result, queryAspectFn, query);
                         }
                     }
 
-
-                    if(doQueryExecution) {
+                    if(isRdfizerQueryExecutionEnabled) {
                         if(isQueryExecutionRemote) {
                             doRemoteExecution(baseRes, r, queryRes, queryAspectFn);
                         } else {
                             doLocalExecution(query, queryRes, queryAspectFn);
                         }
                     }
-
 
                     // Post processing: Craft global IRIs for SPIN variables
                     Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
@@ -471,11 +469,7 @@ public class LsqProcessor
           // ... and skolemize the rest
           Skolemize.skolemize(spinRes);
 
-          queryRes
-              .addProperty(LSQ.hasSpin, spinRes);
-
-
-
+          queryRes.addProperty(LSQ.hasSpin, spinRes);
 
 
 //          } catch (Exception ex) {
@@ -568,180 +562,182 @@ public class LsqProcessor
             SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
 
 
+            BiMap<org.topbraid.spin.model.Triple, Resource> tpToTpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
+            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
+
             if(datasetSize != null) {
 
-                BiMap<org.topbraid.spin.model.Triple, Resource> tpToTpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
                 SpinUtils.enrichModelWithTriplePatternSelectivities(tpToTpExecRess.values(), qef, datasetSize);
 
-
-                Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
                 SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
-
-                // For the id part, we can index the structural bgps, tps, joinVars
-                //
-
-                // BGP restricted triple pattern selectivity
-                // These selectivities can be related directly to the TP executions
-                // - [[bgp-vars]] / [[tp-vars]]
-
-                // Join restricted triple pattern selectivity
-                // For these selectivities we need to introduce _observation_ resources for
-                // (1) each (join) var in the bgp
-                // (2) each (join) var in a tp
-                // - [[join-bgp-var]] / [[tp-var]]
-
-                // Note, that there are resources for structural information on (join) bgp-vars
-                // but I suppose there is no structural information for tp-vars
-                // So the latter does not have a correspondence - TODO: how are var-resources allocated by topbraid's spin?
-                //
-                // We also need an API for working with LSQ data, otherwise it seems to me its too
-                // cumbersome - for this we need some use cases, such as
-
-                // - getLatestObservation(bgpRes); but instead of java methods,
-                // we would also benefit from more powerful navigation and filtering of resources:
-                // bgpRes.as(ResourceEnh.class).in(LSQ.onBGP).orderBy(LSQ.date).first()
-                // .startOrder().newItem().in(LSQ.date).endItem().endOrder()
-                // - getBGPStats(bgpRes)
+            }
 
 
-                // For each variable in the BGP create a new resource
-                for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+            // For the id part, we can index the structural bgps, tps, joinVars
+            //
+
+            // BGP restricted triple pattern selectivity
+            // These selectivities can be related directly to the TP executions
+            // - [[bgp-vars]] / [[tp-vars]]
+
+            // Join restricted triple pattern selectivity
+            // For these selectivities we need to introduce _observation_ resources for
+            // (1) each (join) var in the bgp
+            // (2) each (join) var in a tp
+            // - [[join-bgp-var]] / [[tp-var]]
+
+            // Note, that there are resources for structural information on (join) bgp-vars
+            // but I suppose there is no structural information for tp-vars
+            // So the latter does not have a correspondence - TODO: how are var-resources allocated by topbraid's spin?
+            //
+            // We also need an API for working with LSQ data, otherwise it seems to me its too
+            // cumbersome - for this we need some use cases, such as
+
+            // - getLatestObservation(bgpRes); but instead of java methods,
+            // we would also benefit from more powerful navigation and filtering of resources:
+            // bgpRes.as(ResourceEnh.class).in(LSQ.onBGP).orderBy(LSQ.date).first()
+            // .startOrder().newItem().in(LSQ.date).endItem().endOrder()
+            // - getBGPStats(bgpRes)
+
+
+            // For each variable in the BGP create a new resource
+            for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 
 
 
-                    // Map each resource to the corresponding jena element
-                    Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
-                            .collect(Collectors.toMap(
-                                    r -> r,
-                                    r -> ElementUtils.createElement(SpinUtils.toJenaTriple(r))));
+                // Map each resource to the corresponding jena element
+                Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
+                        .collect(Collectors.toMap(
+                                r -> r,
+                                r -> ElementUtils.createElement(SpinUtils.toJenaTriple(r))));
 
 
-                    Set<Var> bgpVars = resToEl.values().stream()
-                            .flatMap(el -> PatternVars.vars(el).stream())
-                            .collect(Collectors.toSet());
+                Set<Var> bgpVars = resToEl.values().stream()
+                        .flatMap(el -> PatternVars.vars(el).stream())
+                        .collect(Collectors.toSet());
 
 
-                    //String queryId = "";
-                    String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
+                //String queryId = "";
+                String bgpId = e.getKey().getProperty(Skolemize.skolemId).getString();
 
-                    Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp" + bgpId);
+                Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp-" + bgpId);
 
-                    Map<Var, Resource> varToBgpVar = bgpVars.stream()
-                            .collect(Collectors.toMap(
-                                    v -> v,
-                                    v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
+                Map<Var, Resource> varToBgpVar = bgpVars.stream()
+                        .collect(Collectors.toMap(
+                                v -> v,
+                                v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
 
-                    // Link the var occurrence
-                    varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVar, vr));
+                // Link the var occurrence
+                varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVar, vr));
 
-                    queryExecRes.addProperty(LSQ.hasBGPExec, bgpCtxRes);
+                queryExecRes.addProperty(LSQ.hasBGPExec, bgpCtxRes);
 
-                    // Obtain the selectivity for the variable in that tp
-                    //for(e.getValue())
-                    Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(qef, resToEl.values());
+                // Obtain the selectivity for the variable in that tp
+                //for(e.getValue())
+                Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(qef, resToEl.values());
 
 
-                    // Add the BGP var statistics
-                    varToCount.forEach((v, c) -> {
-                        Resource bgpVar = varToBgpVar.get(v);
+                // Add the BGP var statistics
+                varToCount.forEach((v, c) -> {
+                    Resource bgpVar = varToBgpVar.get(v);
 
-                        bgpVar.addLiteral(LSQ.resultSize, c);
+                    bgpVar.addLiteral(LSQ.resultSize, c);
+                });
+                    //
+
+                    //vr.addLiteral(LSQ.tpSelectivity, o);
+
+
+                Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
+
+                elToVarToCount.forEach((t, vToC) -> {
+                    Map<Node, RDFNode> varToRes = SpinUtils.indexTripleNodes(t);
+
+                    Resource execTp = tpToTpExecRess.get(t);
+
+                    String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
+
+                    //String tpResBase = queryExecRes.getURI() + "-tp-" + tpId;
+                    String tpResBase = execTp.getURI();
+
+                    vToC.forEach((v, c) -> {
+                        Resource execTpVarRes = queryExecRes.getModel().createResource(tpResBase + "-var-" + v.getName());
+
+                        long bgpJoinVarCount = varToCount.get(v);
+
+                        double tpSelJoinVarRestricted = c == 0 ? 0d : bgpJoinVarCount / (double)c;
+                        execTpVarRes
+                            .addLiteral(LSQ.resultSize, c)
+                            .addLiteral(LSQ.tpSelJoinVarRestricted, tpSelJoinVarRestricted)
+                            .addProperty(LSQ.hasVar, varToRes.get(v))
+                            //.addLiteral(LSQ.hasVar, )
+                            ;
+
+                        execTp.addProperty(LSQ.hasJoinVarExec, execTpVarRes);
                     });
-                        //
 
-                        //vr.addLiteral(LSQ.tpSelectivity, o);
-
-
-                    Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
-
-                    elToVarToCount.forEach((t, vToC) -> {
-                        Map<Node, RDFNode> varToRes = SpinUtils.indexTripleNodes(t);
-
-                        Resource execTp = tpToTpExecRess.get(t);
-
-                        String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
-
-                        //String tpResBase = queryExecRes.getURI() + "-tp-" + tpId;
-                        String tpResBase = execTp.getURI();
-
-                        vToC.forEach((v, c) -> {
-                            Resource execTpVarRes = queryExecRes.getModel().createResource(tpResBase + "-var-" + v.getName());
-
-                            long bgpJoinVarCount = varToCount.get(v);
-
-                            double tpSelJoinVarRestricted = c == 0 ? 0d : bgpJoinVarCount / (double)c;
-                            execTpVarRes
-                                .addLiteral(LSQ.resultSize, c)
-                                .addLiteral(LSQ.tpSelJoinVarRestricted, tpSelJoinVarRestricted)
-                                .addProperty(LSQ.hasVar, varToRes.get(v))
-                                //.addLiteral(LSQ.hasVar, )
-                                ;
-
-                            execTp.addProperty(LSQ.hasJoinVarExec, execTpVarRes);
-                        });
-
-                        //Resource tpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + tpId);
+                    //Resource tpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-" + tpId);
 
 
-                    });
+                });
 
 //                    System.out.println(varToCount);
 //                    System.out.println(elToVarToCount);
 
 
-                    /*
-                    bgp hasTp tp1
-                    tp1 hasJoinVar tp1-jv-x
-                    tp1-jv-x hasEval e1-tp1-jv-x
-                    e1-tp1-jv-x selectivity 0.5
-                    e1 inExperiment/onDataset DBpedia
+                /*
+                bgp hasTp tp1
+                tp1 hasJoinVar tp1-jv-x
+                tp1-jv-x hasEval e1-tp1-jv-x
+                e1-tp1-jv-x selectivity 0.5
+                e1 inExperiment/onDataset DBpedia
 
 
 
 
-                    */
-                }
-
-                // For each triple in the BGP create a new resource
-
-
-                // We need to create observation resources for each variable in each bgp
-                for(Entry<Resource, org.topbraid.spin.model.Triple> e : bgpToTps.entries()) {
-                    org.topbraid.spin.model.Triple t = e.getValue();
-                    org.apache.jena.graph.Triple tr = SpinUtils.toJenaTriple(t);
-
-                    Set<Var> vars;
-
-                    // allocate iris for each variable in the bgp
-                    queryExecRes.getModel().createResource(queryExecRes.getURI() + "");
-
-
-                    //queryExecRes + tp-id + var
-
-
-
-
-                    // create the
-
-
-
-                }
-                //bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
-
-
-
-                // Now create the resources for stats on the join vars
-                //Set<Resource> joinVarRess = SpinUtils.createJoinVarObservations(queryRes, queryExecRes);
-
-                // And now compute selectivities of the join variables
-                //SpinUtils.enrichModelWithJoinRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+                */
             }
 
+            // For each triple in the BGP create a new resource
 
 
-                //SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+            // We need to create observation resources for each variable in each bgp
+            for(Entry<Resource, org.topbraid.spin.model.Triple> e : bgpToTps.entries()) {
+                org.topbraid.spin.model.Triple t = e.getValue();
+                org.apache.jena.graph.Triple tr = SpinUtils.toJenaTriple(t);
 
-                //SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(queryRes, queryExecRes, qef, totalTripleCount);
+                Set<Var> vars;
+
+                // allocate iris for each variable in the bgp
+                queryExecRes.getModel().createResource(queryExecRes.getURI() + "");
+
+
+                //queryExecRes + tp-id + var
+
+
+
+
+                // create the
+
+
+
+            }
+            //bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
+
+
+
+            // Now create the resources for stats on the join vars
+            //Set<Resource> joinVarRess = SpinUtils.createJoinVarObservations(queryRes, queryExecRes);
+
+            // And now compute selectivities of the join variables
+            //SpinUtils.enrichModelWithJoinRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+
+
+
+
+            //SpinUtils.enrichModelWithTriplePatternSelectivities(queryRes, queryExecRes, qef, datasetSize); //subModel, resultSetSize);
+
+            //SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(queryRes, queryExecRes, qef, totalTripleCount);
 
 
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";

@@ -52,19 +52,24 @@ public class TestSelectivity {
 
 
         LsqProcessor processor = new LsqProcessor();
+        processor.setDatasetSize(dataModel.size());
         processor.setStmtParser(SparqlStmtParserImpl.create(Syntax.syntaxARQ, false));
         processor.setBaseUri("http://example.org/");
-        processor.setDoRdfizeQuery(true);
-        processor.setQueryExecutionRemote(true);
+        processor.setDatasetLabel("test");
+        processor.setRdfizerQueryStructuralFeaturesEnabled(true);
+        processor.setRdfizerQueryExecutionEnabled(true);
+        processor.setQueryExecutionRemote(false);
         processor.setDataQef(dataQef);
         //processor.setQueryAspectFn(queryAspectFn);
 
         Resource logRes = ModelFactory.createDefaultModel().createResource();
         mapper.parse(logRes, queryStr);
 
+        //RDFDataMgr.write(System.err, logRes.getModel(), RDFFormat.TURTLE_BLOCKS);
+
         Resource queryRes = processor.apply(logRes);
 
-        RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_PRETTY);
+        RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_BLOCKS);
 
 
 

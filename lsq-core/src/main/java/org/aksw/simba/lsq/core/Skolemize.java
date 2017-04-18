@@ -28,6 +28,7 @@ public class Skolemize {
     // Property for the skolemized id (without uri prefix and such)
     public static final Property skolemId = ResourceFactory.createProperty("http://tmp.aksw.org/skolemId");
 
+
     /**
      * Skolemizes blank nodes using a two phase approach:
      * First, for each individual blank node a signature string is created from its direct neighbors with blank nodes replaced with a constant.
