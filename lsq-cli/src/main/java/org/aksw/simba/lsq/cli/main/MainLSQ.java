@@ -1,26 +1,23 @@
 package org.aksw.simba.lsq.cli.main;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.NestedResource;
-import org.aksw.simba.lsq.util.WebLogParser;
+import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.query.Syntax;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 /**
  * This is the main class used to RDFise query logs
@@ -33,22 +30,17 @@ public class MainLSQ
 
     private static final Logger logger = LoggerFactory.getLogger(MainLSQ.class);
 
-    public static void main(String[] args) throws Exception  {
-        SpringApplication.run(LsqConfig.class, args);
-    }
+//    public static void main(String[] args) throws Exception  {
+//        SpringApplication.run(LsqConfig.class, args);
+//    }
 
-    public static void config(String[] args) {
-        Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
+    public static void main(String[] args) throws IOException {
 
-        LsqCliParser cliParser = new LsqCliParser(logFmtRegistry);
-
+        LsqCliParser cliParser = new LsqCliParser();
         LsqConfig config = cliParser.parse(args);
 
-
-        Stream<Resource> logEntryStream;
-
         try {
-            run(args);
+            run(config);
         } catch(Exception e) {
             logger.error("Error", e);
             cliParser.getOptionParser().printHelpOn(System.err);
@@ -56,18 +48,59 @@ public class MainLSQ
         }
     }
 
-    public static void run(
-            Stream<Resource> itemReader,
-            Function<Resource, Resource> itemProcessor,
-            Consumer<Resource> itemWriter) throws Exception  {
+    public static void run(LsqConfig config) throws Exception  {
+
+        String datasetEndpointUrl = config.getDatasetEndpointIri();
+        List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
+        Long datasetSize = config.getDatasetSize();
+
+        String expBaseIri = config.getExperimentIri();
+
+
+        Stream<Resource> logEntryStream;
+
+
+        Stream<Resource> itemReader = LsqCliParser.createReader(config);
+        Function<Resource, Resource> itemProcessor = LsqCliParser.createProcessor(config);
+        Sink<Resource> itemWriter = LsqCliParser.createWriter(config);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
+
+        Long workloadSize = null;
+
+        logger.info("About to process " + workloadSize + " queries");
+        logger.info("Dataset size of " + datasetEndpointUrl + " / " + datasetDefaultGraphIris + " - size: " + datasetSize);
+
+        Calendar expStart = Calendar.getInstance();
+
+        NestedResource expBaseRes = new NestedResource(ResourceFactory.createResource(expBaseIri));
+
+      //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
+        expRes
+          //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+            .addLiteral(PROV.startedAtTime, expStart);
+
+        //RDFDataMgr.write(out, expModel, outFormat);
+
+        itemWriter.send(expRes);
+
+
         itemReader
             .map(itemProcessor)
             .filter(x -> x != null)
-            .forEach(itemWriter::accept);
-            //.forEach(r -> RDFDataMgr.write(out, queryModel, outFormat));
+            .forEach(itemWriter::send);
+
+        Resource tmp = expRes.inModel(ModelFactory.createDefaultModel())
+            .addLiteral(PROV.endAtTime, Calendar.getInstance());
+
+        itemWriter.send(tmp);
+
+        itemWriter.flush();
+        itemWriter.close();
     }
 
-    public LsqConfig parseLsqConfig(String[] args) {
+    public void parseLsqConfig(String[] args) {
 
 
 
@@ -85,10 +118,6 @@ public class MainLSQ
 
 
         //int workloadSize = workloadResources.size();
-        Long workloadSize = null;
-
-        logger.info("About to process " + workloadSize + " queries");
-        logger.info("Dataset size of " + endpointUrl + " / " + graph + ": " + datasetSize);
 
         //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
 
@@ -99,27 +128,6 @@ public class MainLSQ
         //specs.write(out, "NTRIPLES");
 
         //SparqlQueryParser queryParser = SparqlQueryParserImpl.create(Syntax.syntaxARQ);
-        SparqlStmtParser stmtParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
-
-
-        //Set<Query> executedQueries = new HashSet<>();
-
-        //.addLiteral(PROV.startedAtTime, start)
-        //.addLiteral(PROV.endAtTime, end)
-
-        Calendar expStart = Calendar.getInstance();
-        //String expStartStr = dt.format(expStart.getTime());
-
-        Model expModel = ModelFactory.createDefaultModel();
-        NestedResource expBaseRes = new NestedResource(expModel.createResource(expBaseUri));
-
-      //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
-        expRes
-          //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-            .addLiteral(PROV.startedAtTime, expStart);
-
-        RDFDataMgr.write(out, expModel, outFormat);
 
 
 //        myenv
@@ -143,31 +151,11 @@ public class MainLSQ
         // available in order to consider the workload a query log
         //for(Resource r : workloadResources) {
         //workloadResourceStream.forEach(r -> {
-        Iterator<Resource> it = workloadResourceStream.iterator();
-        while(it.hasNext()) {
-            Resource r = it.next();
-
-        }
-
-
-        Model tmpModel = ModelFactory.createDefaultModel();
-        expRes.inModel(tmpModel)
-            .addLiteral(PROV.endAtTime, Calendar.getInstance());
-
-        RDFDataMgr.write(out, tmpModel, outFormat); //RDFFormat.TURTLE_BLOCKS);
-
-
-        out.flush();
-
-        // If the output stream is based on a file then close it, but
-        // don't close stdout
-        if(outNeedsClosing[0]) {
-            outNeedsClosing[0] = false;
-            out.close();
-            logger.info("Done. Output written to: " + outFile.getAbsolutePath());
-        } else {
-            logger.info("Done.");
-        }
+//        Iterator<Resource> it = workloadResourceStream.iterator();
+//        while(it.hasNext()) {
+//            Resource r = it.next();
+//
+//        }
 
     }
 

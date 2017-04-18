@@ -3,6 +3,8 @@ package org.aksw.simba.lsq.cli.main;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -23,12 +25,15 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.util.Mapper;
+import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.vocabulary.RDFS;
@@ -180,8 +185,13 @@ public class LsqCliParser {
                 .ofType(File.class);
     }
 
+    public LsqCliParser() {
+        logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
+    }
 
-    public LsqConfig parse(String[] args) throws Exception {
+
+
+    public LsqConfig parse(String[] args) throws IOException {
 
         OptionSet options = parser.parse(args);
 
@@ -199,20 +209,11 @@ public class LsqCliParser {
 
 
 
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                if(outNeedsClosing[0]) {
-                    logger.info("Shutdown hook: Flushing output");
-                    out.flush();
-                    out.close();
-                }
-            };
-        });
-
 
         InputStream in;
         if(options.has(inputOs)) {
             File file = inputOs.value(options);
+
             file = file.getAbsoluteFile();
             in = new FileInputStream(file);
         } else {
@@ -263,6 +264,7 @@ public class LsqCliParser {
 
 
         LsqConfig config = new LsqConfig();
+        config.setLogFmtRegistry(logFmtRegistry);
         config.setDatasetLabel(datasetLabel);
         config.setDatasetEndpointIri(logEndpointUri);
         config.setFetchDatasetSize(fetchDatasetSize);
@@ -288,23 +290,106 @@ public class LsqCliParser {
         return config;
     }
 
-    public void createReader(LsqConfig config) {
 
+    public static Sink<Resource> createWriter(LsqConfig config) throws FileNotFoundException {
+        String outRdfFormat = config.getOutRdfFormat();
+        File outFile = config.getOutFile();
+
+        RDFFormat rdfFormat = RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
+
+        PrintStream out;
+        boolean doClose;
+
+        if(outFile == null) {
+            out = System.out;
+            doClose = false;
+        } else {
+            out = new PrintStream(outFile);
+            doClose = true;
+        }
+
+        Sink<Resource> result = new SinkIO<>(out, doClose, (o, r) -> RDFDataMgr.write(out, r.getModel(), rdfFormat));
+        return result;
     }
 
-    public LsqProcessor createProcessor(LsqConfig config) {
+
+    public static Stream<Resource> createReader(LsqConfig config) throws FileNotFoundException {
+
+        File inputFile = config.getInQueryLogFile();
+        InputStream in;
+        if(inputFile != null) {
+            inputFile = inputFile.getAbsoluteFile();
+            in = new FileInputStream(inputFile);
+        } else {
+            in = System.in;
+        }
+
+
+        Long firstItemOffset = config.getFirstItemOffset();
+        String logFormat = config.getInQueryLogFormat();
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+
+        Stream<String> stream = reader.lines();
+
+        if(firstItemOffset != null) {
+            stream = stream.limit(firstItemOffset);
+        }
+
+        //Model logModel = ModelFactory.createDefaultModel();
+
+
+        Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
+        if(webLogParser == null) {
+            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+        }
+        //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
+
+        // TODO Use zipWithIndex in order to make the index part of the resource
+        Stream<Resource> result = stream
+            .map(line -> {
+                Resource r = ModelFactory.createDefaultModel().createResource();
+                r.addLiteral(RDFS.label, line);
+                boolean parsed = webLogParser.parse(r, line) != 0;
+                if(!parsed) {
+                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
+                }
+
+                return r;
+            });
+
+//        result.onClose(() -> {
+//            try {
+//                reader.close();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//        });
+
+//        result.onClose(() ->
+//            if(outNeedsClosing[0]) {
+//                logger.info("Shutdown hook: Flushing output");
+//                out.flush();
+//                out.close();
+//            }
+//        });
+
+        return result;
+    }
+
+    public static LsqProcessor createProcessor(LsqConfig config) {
 
         LsqProcessor result = new LsqProcessor();
 
         Long datasetSize = config.getDatasetSize();
         String logEndpointUri = config.getDatasetEndpointIri();
-        String logFormat = config.getInQueryLogFormat();
-        Long firstItemOffset = config.getFirstItemOffset();
         boolean rdfizeQueryExecution = config.isRdfizeQueryExecution();
         List<String> fedEndpoints = config.getFederationEndpoints();
         String endpointUrl = config.getEndpointUrl();
         List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
         Long queryTimeoutInMs = config.getQueryTimeoutInMs();
+
+        boolean queryDatasetSize = config.isFetchDatasetSize();
 
         //config.setDa
         //config.setLog
@@ -331,7 +416,6 @@ public class LsqCliParser {
         // Note: We re-use the baseGeneratorRes in every query's model, hence its not bound to the specs model directly
         // However, with .inModel(model) we can create resources that are bound to a specific model from another resource
         //Resource baseGeneratorRes = ResourceFactory.createResource(baseUri + datasetLabel + "-" + prts[0]);
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
 
         Resource rawLogEndpointRes = logEndpointUri == null ? null : ResourceFactory.createResource(logEndpointUri);
 
@@ -356,33 +440,6 @@ public class LsqCliParser {
 //            .addLiteral(LSQ.dataset, datasetRes)
 //            .addLiteral(PROV.hadPrimarySource, specs.createResource(endpointUrl))
 //            .addLiteral(PROV.startedAtTime, startTime);
-
-        Model logModel = ModelFactory.createDefaultModel();
-
-        Stream<String> stream = reader.lines();
-
-        if(firstItemOffset != null) {
-            stream = stream.limit(firstItemOffset);
-        }
-
-        Mapper webLogParser = logFmtRegistry.get(logFormat);
-        if(webLogParser == null) {
-            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
-        }
-        //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
-
-        // TODO Use zipWithIndex in order to make the index part of the resource
-        Stream<Resource> workloadResourceStream = stream
-                .map(line -> {
-                Resource r = logModel.createResource();
-                r.addLiteral(RDFS.label, line);
-                boolean parsed = webLogParser.parse(r, line) != 0;
-                if(!parsed) {
-                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
-                }
-
-                return r;
-            });
 
 
 //        List<Resource> workloadResources = stream

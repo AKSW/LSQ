@@ -2,13 +2,22 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.File;
 import java.util.List;
+import java.util.Map;
+
+import org.aksw.simba.lsq.util.Mapper;
 
 public class LsqConfig {
+    protected Map<String, Mapper> logFmtRegistry;
+
     protected File inQueryLogFile;
     protected String inQueryLogFormat;
 
     protected File outRdfFile;
     protected String outRdfFormat;
+
+
+    protected File outFile;
+
 
     // base Iri of output resources
     protected String outBaseIri;
@@ -34,6 +43,28 @@ public class LsqConfig {
 
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
+
+
+    public Map<String, Mapper> getLogFmtRegistry() {
+        return logFmtRegistry;
+    }
+
+
+    public void setLogFmtRegistry(Map<String, Mapper> logFmtRegistry) {
+        this.logFmtRegistry = logFmtRegistry;
+    }
+
+
+
+    public File getOutFile() {
+        return outFile;
+    }
+
+
+    public void setOutFile(File outFile) {
+        this.outFile = outFile;
+    }
+
 
     public File getInQueryLogFile() {
         return inQueryLogFile;
