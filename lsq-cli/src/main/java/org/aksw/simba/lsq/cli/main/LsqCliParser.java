@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.fedx.jsa.FedXFactory;
@@ -23,12 +24,15 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
+import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -39,6 +43,7 @@ import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -76,6 +81,10 @@ public class LsqCliParser {
 
     public OptionParser getOptionParser() {
         return parser;
+    }
+
+    public LsqCliParser() {
+        this(WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
     }
 
     public LsqCliParser(Map<String, Mapper> logFmtRegistry) {
@@ -185,11 +194,6 @@ public class LsqCliParser {
                 .ofType(File.class);
     }
 
-    public LsqCliParser() {
-        logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
-    }
-
-
 
     public LsqConfig parse(String[] args) throws IOException {
 
@@ -210,15 +214,18 @@ public class LsqCliParser {
 
 
 
-        InputStream in;
-        if(options.has(inputOs)) {
-            File file = inputOs.value(options);
+        File inFile = options.has(inputOs)
+                ? inputOs.value(options)
+                : null;
 
-            file = file.getAbsoluteFile();
-            in = new FileInputStream(file);
-        } else {
-            in = System.in;
-        }
+//        if(options.has(inputOs)) {
+//            File file = inputOs.value(options);
+//
+//            file = file.getAbsoluteFile();
+//            in = new FileInputStream(file);
+//        } else {
+//            in = System.in;
+//        }
 
 
         String datasetLabel = datasetLabelOs.value(options);
@@ -264,14 +271,18 @@ public class LsqCliParser {
 
 
         LsqConfig config = new LsqConfig();
+
         config.setLogFmtRegistry(logFmtRegistry);
+
+        config.setInQueryLogFile(inFile);
+        config.setInQueryLogFormat(logFormat);
+
         config.setDatasetLabel(datasetLabel);
         config.setDatasetEndpointIri(logEndpointUri);
         config.setFetchDatasetSize(fetchDatasetSize);
 
         config.setEndpointUrl(endpointUrl);
 
-        config.setInQueryLogFormat(logFormat);
         config.setQueryTimeoutInMs(timeoutInMs);
         config.setFirstItemOffset(head);
 
@@ -295,7 +306,10 @@ public class LsqCliParser {
         String outRdfFormat = config.getOutRdfFormat();
         File outFile = config.getOutFile();
 
-        RDFFormat rdfFormat = RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
+        RDFFormat rdfFormat = StringUtils.isEmpty(outRdfFormat) ? RDFFormat.TURTLE_BLOCKS : RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
+        if(rdfFormat == null) {
+            throw new RuntimeException("No rdf format found for " + outRdfFormat);
+        }
 
         PrintStream out;
         boolean doClose;
@@ -380,6 +394,10 @@ public class LsqCliParser {
     public static LsqProcessor createProcessor(LsqConfig config) {
 
         LsqProcessor result = new LsqProcessor();
+
+        Function<String, SparqlStmt> sparqlStmtParser = config.getSparqlStmtParser();
+        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
+
 
         Long datasetSize = config.getDatasetSize();
         String logEndpointUri = config.getDatasetEndpointIri();
@@ -520,6 +538,7 @@ public class LsqCliParser {
 
         result.setRawLogEndpointRes(rawLogEndpointRes);
         result.setDatasetSize(datasetSize);
+        result.setStmtParser(sparqlStmtParser);
 
         return result;
     }

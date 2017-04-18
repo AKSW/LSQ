@@ -237,6 +237,8 @@ public class LsqProcessor
     @Override
     public Resource apply(Resource r) {
 
+        // logger.debug(RDFDataMgr.write(out, dataset, lang););
+
         // Extract the query and add it with the lsq:query property
         WebLogParser.extractQuery(r);
 
@@ -245,6 +247,8 @@ public class LsqProcessor
 
         boolean fail = false;
         boolean parsed = r.getProperty(LSQ.processingError) == null ? true : false;
+
+        Resource result = null;
 
         try {
             if(parsed) {
@@ -292,9 +296,11 @@ public class LsqProcessor
                     String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
                     NestedResource queryRes = baseRes.nest("q-" + queryHash);
 
+                    result = queryRes.get();
+
                     Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
-                    queryRes.get()
+                    result
                         .addProperty(RDF.type, SP.Query)
                         //.addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
                         .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
@@ -302,11 +308,11 @@ public class LsqProcessor
 
                     if(!queryStmt.isParsed()) {
                         String msg = queryStmt.getParseException().getMessage();
-                        queryRes.get()
+                        result
                             .addLiteral(LSQ.parseError, msg);
                     } else {
                         if(doRdfizeQuery) { // TODO Replace with function call
-                            rdfizeQuery(queryRes.get(), queryAspectFn, query);
+                            rdfizeQuery(result, queryAspectFn, query);
                         }
                     }
 
@@ -366,7 +372,7 @@ public class LsqProcessor
         //.write(System.err, "TURTLE");
         ++logEntryIndex;
 
-        return r;
+        return result;
     }
 
 

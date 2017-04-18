@@ -2,17 +2,13 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.apache.jena.atlas.lib.Sink;
-import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -56,9 +52,7 @@ public class MainLSQ
 
         String expBaseIri = config.getExperimentIri();
 
-
-        Stream<Resource> logEntryStream;
-
+//        Stream<Resource> logEntryStream;
 
         Stream<Resource> itemReader = LsqCliParser.createReader(config);
         Function<Resource, Resource> itemProcessor = LsqCliParser.createProcessor(config);
@@ -71,30 +65,30 @@ public class MainLSQ
         logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + datasetEndpointUrl + " / " + datasetDefaultGraphIris + " - size: " + datasetSize);
 
-        Calendar expStart = Calendar.getInstance();
-
         NestedResource expBaseRes = new NestedResource(ResourceFactory.createResource(expBaseIri));
 
       //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
         Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
-        expRes
-          //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-            .addLiteral(PROV.startedAtTime, expStart);
+
+        itemWriter.send(
+               expRes.inModel(ModelFactory.createDefaultModel())
+                   //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                   .addLiteral(PROV.startedAtTime, Calendar.getInstance())
+        );
 
         //RDFDataMgr.write(out, expModel, outFormat);
-
-        itemWriter.send(expRes);
-
 
         itemReader
             .map(itemProcessor)
             .filter(x -> x != null)
             .forEach(itemWriter::send);
 
-        Resource tmp = expRes.inModel(ModelFactory.createDefaultModel())
-            .addLiteral(PROV.endAtTime, Calendar.getInstance());
+        itemWriter.send(
+                expRes.inModel(ModelFactory.createDefaultModel())
+                    //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                .addLiteral(PROV.endAtTime, Calendar.getInstance())
+        );
 
-        itemWriter.send(tmp);
 
         itemWriter.flush();
         itemWriter.close();

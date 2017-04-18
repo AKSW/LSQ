@@ -3,7 +3,9 @@ package org.aksw.simba.lsq.cli.main;
 import java.io.File;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
+import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.simba.lsq.util.Mapper;
 
 public class LsqConfig {
@@ -14,7 +16,7 @@ public class LsqConfig {
 
     protected File outRdfFile;
     protected String outRdfFormat;
-
+    protected Function<String, SparqlStmt> sparqlStmtParser;
 
     protected File outFile;
 
@@ -43,6 +45,17 @@ public class LsqConfig {
 
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
+
+
+
+    public Function<String, SparqlStmt> getSparqlStmtParser() {
+        return sparqlStmtParser;
+    }
+
+
+    public void setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
+        this.sparqlStmtParser = sparqlStmtParser;
+    }
 
 
     public Map<String, Mapper> getLogFmtRegistry() {
