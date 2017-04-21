@@ -311,7 +311,7 @@ public class LsqProcessor
                             .addLiteral(LSQ.parseError, msg);
                     } else {
                         if(isRdfizerQueryStructuralFeaturesEnabled) {
-                            rdfizeQuery(result, queryAspectFn, query);
+                            rdfizeQueryStructuralFeatures(result, queryAspectFn, query);
                         }
                     }
 
@@ -432,7 +432,7 @@ public class LsqProcessor
         }
     }
 
-    public static void rdfizeQuery(Resource queryRes, Function<String, NestedResource> queryAspectFn, Query query) {
+    public static void rdfizeQueryStructuralFeatures(Resource queryRes, Function<String, NestedResource> queryAspectFn, Query query) {
 
         //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
 
@@ -491,6 +491,9 @@ public class LsqProcessor
             // Add used features
             QueryStatistics2.enrichResourceWithQueryFeatures(featureRes, query);
 
+            if(query.isSelectType()) {
+                featureRes.addLiteral(LSQ.projectVars, query.getProjectVars().size());
+            }
 
 //            Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
 //            features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
@@ -659,7 +662,6 @@ public class LsqProcessor
                     bgpVar.addProperty(LSQ.proxyFor, queryVarRes);
                 });
                     //
-
                     //vr.addLiteral(LSQ.tpSelectivity, o);
 
 

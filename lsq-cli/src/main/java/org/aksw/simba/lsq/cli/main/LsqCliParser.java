@@ -270,7 +270,7 @@ public class LsqCliParser {
         config.setFederationEndpoints(fedEndpoints);
 
 
-        config.setRdfizeQuery(rdfizer.contains("q"));
+        config.setRdfizerQueryStructuralFeaturesEnabled(rdfizer.contains("q"));
         config.setRdfizerQueryExecutionEnabled(rdfizer.contains("l") || rdfizer.contains("e"));
         config.setQueryExecutionRemote(rdfizer.contains("e"));
 
@@ -460,8 +460,8 @@ public class LsqCliParser {
         }
 
         result.setDatasetLabel(config.getDatasetLabel());
-        result.setDoRdfizeQuery(config.isRdfizeQuery());
-        result.setDoRemoteExecution(isRdfizerQueryExecutionEnabled);
+        result.setRdfizerQueryStructuralFeaturesEnabled(config.isRdfizerQueryStructuralFeaturesEnabled());
+        result.setRdfizerQueryExecutionEnabled(isRdfizerQueryExecutionEnabled);
         result.setQueryExecutionRemote(config.isQueryExecutionRemote());
         //result.setDoLocalExecution(config.isRd);
 

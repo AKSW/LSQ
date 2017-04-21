@@ -42,6 +42,7 @@ public class LSQ {
     public static final Property minBGPTriples = property("minBGPTriples");
     public static final Property maxBGPTriles = property("maxBGPTriples");
     public static final Property joinVertices = property("joinVertices");
+    public static final Property projectVars = property("projectVars");
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");

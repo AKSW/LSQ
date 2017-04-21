@@ -124,14 +124,6 @@ public class LsqConfig {
         this.outRdfFormat = outRdfFormat;
     }
 
-    public boolean isRdfizeQuery() {
-        return isRdfizerQueryStructuralFeaturesEnabled;
-    }
-
-    public void setRdfizeQuery(boolean rdfizeQuery) {
-        this.isRdfizerQueryStructuralFeaturesEnabled = rdfizeQuery;
-    }
-
     public boolean isRdfizerQueryExecutionEnabled() {
         return isRdfizerQueryExecutionEnabled;
     }
