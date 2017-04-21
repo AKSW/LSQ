@@ -16,7 +16,7 @@
 :Colin
   a :Person ;
   :age 24 ;
-  :knows :Anne ;
+#  :knows :Anne ;
   .
 
 

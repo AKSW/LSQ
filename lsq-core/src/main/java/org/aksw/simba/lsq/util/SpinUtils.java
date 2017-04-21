@@ -397,21 +397,21 @@ public class SpinUtils {
 
     }
 
-
-    public static void enrichModelWithJoinRestrictedTPSelectivities(
-        QueryExecutionFactory qef,
-        Model observationModel,
-        Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps)
-    {
-
-        for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
-            // For each bgp, we now have a mapping for the vars
-            Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
-            System.out.println("TP/BGP join var counts " + joinVarCounts);
-
-
-        }
-    }
+//
+//    public static void enrichModelWithJoinRestrictedTPSelectivities(
+//        QueryExecutionFactory qef,
+//        Model observationModel,
+//        Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps)
+//    {
+//
+//        for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+//            // For each bgp, we now have a mapping for the vars
+//            Map<Var, Long> joinVarCounts = QueryStatistics2.fetchCountVarJoin(qef, e.getValue());
+//            //System.out.println("TP/BGP join var counts " + joinVarCounts);
+//
+//
+//        }
+//    }
 
 
 

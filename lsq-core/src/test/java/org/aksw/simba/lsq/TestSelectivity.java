@@ -42,7 +42,7 @@ public class TestSelectivity {
         QueryExecutionFactory dataQef = FluentQueryExecutionFactory.from(dataModel).create();
 
         Stream<String> queryStrs = new BufferedReader(new InputStreamReader(new ClassPathResource("lsq-tests/01/query.sparql.log").getInputStream())).lines();//.collect(Collectors.joining("\n"));
-        String queryStr = queryStrs.findFirst().get();
+        //Stream<String> queryStr = queryStrs.findFirst();
 
         // TODO Consider specifying the pattern directly without going over the registry
         Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
@@ -62,14 +62,20 @@ public class TestSelectivity {
         processor.setDataQef(dataQef);
         //processor.setQueryAspectFn(queryAspectFn);
 
-        Resource logRes = ModelFactory.createDefaultModel().createResource();
-        mapper.parse(logRes, queryStr);
+
+        queryStrs.forEach(queryStr -> {
+            Resource logRes = ModelFactory.createDefaultModel().createResource();
+            mapper.parse(logRes, queryStr);
+            Resource queryRes = processor.apply(logRes);
+            if(queryRes != null) {
+                RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_BLOCKS);
+            }
+        });
+
 
         //RDFDataMgr.write(System.err, logRes.getModel(), RDFFormat.TURTLE_BLOCKS);
 
-        Resource queryRes = processor.apply(logRes);
 
-        RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_BLOCKS);
 
 
 
