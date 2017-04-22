@@ -35,13 +35,13 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
@@ -69,12 +69,13 @@ public class LsqProcessor
     protected String baseUri;
     protected boolean isRdfizerQueryStructuralFeaturesEnabled;
     protected boolean isRdfizerQueryExecutionEnabled;
-    protected boolean isQueryExecutionRemote;
+    protected boolean isRdfizerQueryLogRecordEnabled;
+    //protected boolean isQueryExecutionRemote;
 
     protected Long workloadSize;
 
     //protected Function<String, NestedResource> queryAspectFn;
-    protected Resource rawLogEndpointRes; // TODO Rename to remoteEndpointRes?
+    //protected Resource rawLogEndpointRes; // TODO Rename to remoteEndpointRes?
 
 
     protected QueryExecutionFactory dataQef;
@@ -129,13 +130,21 @@ public class LsqProcessor
         this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
     }
 
-    public boolean isQueryExecutionRemote() {
-        return isQueryExecutionRemote;
+    public boolean isRdfizerQueryLogRecordEnabled() {
+        return isRdfizerQueryLogRecordEnabled;
     }
 
-    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
-        this.isQueryExecutionRemote = isQueryExecutionRemote;
+    public void setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
+        this.isRdfizerQueryLogRecordEnabled = isRdfizerQueryLogRecordEnabled;
     }
+
+//    public boolean isQueryExecutionRemote() {
+//        return isQueryExecutionRemote;
+//    }
+//
+//    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
+//        this.isQueryExecutionRemote = isQueryExecutionRemote;
+//    }
 
     public Long getWorkloadSize() {
         return workloadSize;
@@ -153,13 +162,13 @@ public class LsqProcessor
 //        this.queryAspectFn = queryAspectFn;
 //    }
 
-    public Resource getRawLogEndpointRes() {
-        return rawLogEndpointRes;
-    }
-
-    public void setRawLogEndpointRes(Resource rawLogEndpointRes) {
-        this.rawLogEndpointRes = rawLogEndpointRes;
-    }
+//    public Resource getRawLogEndpointRes() {
+//        return rawLogEndpointRes;
+//    }
+//
+//    public void setRawLogEndpointRes(Resource rawLogEndpointRes) {
+//        this.rawLogEndpointRes = rawLogEndpointRes;
+//    }
 
     public QueryExecutionFactory getDataQef() {
         return dataQef;
@@ -287,7 +296,7 @@ public class LsqProcessor
                     Model queryModel = ModelFactory.createDefaultModel();
 
 
-                    Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
+                    //Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
 
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
                     NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
@@ -315,13 +324,19 @@ public class LsqProcessor
                         }
                     }
 
-                    if(isRdfizerQueryExecutionEnabled) {
-                        if(isQueryExecutionRemote) {
-                            doRemoteExecution(baseRes, r, queryRes, queryAspectFn);
-                        } else {
-                            doLocalExecution(query, queryRes, queryAspectFn);
-                        }
+                    if(isRdfizerQueryLogRecordEnabled) {
+                        rdfizeLogRecord(baseRes, r, queryRes, queryAspectFn);
                     }
+
+
+                    if(isRdfizerQueryExecutionEnabled) {
+//                        if(isQueryExecutionRemote) {
+//                            rdfizeLogRecord(baseRes, r, queryRes, queryAspectFn);
+//                        } else {
+                            doLocalExecution(query, queryRes, queryAspectFn);
+//                        }
+                    }
+
 
                     // Post processing: Craft global IRIs for SPIN variables
                     Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
@@ -400,7 +415,7 @@ public class LsqProcessor
         }
     }
 
-    public void doRemoteExecution(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
+    public void rdfizeLogRecord(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 
         // Deal with log entry (remote execution)
         String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
@@ -780,8 +795,10 @@ public class LsqProcessor
      */
     public static String toString(Resource r) {
         Model m = ResourceUtils.reachableClosure(r);
-        m.setNsPrefix("rdfs", RDFS.uri);
+        m.setNsPrefixes(PrefixMapping.Extended);
+        m.setNsPrefix("ex", "http://example.org/");
         m.setNsPrefix("lsq", LSQ.ns);
+        m.setNsPrefix("prov", PROV.ns);
         String result = ModelUtils.toString(m, "TTL");
         return result;
     }

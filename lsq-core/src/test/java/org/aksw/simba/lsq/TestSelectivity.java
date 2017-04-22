@@ -58,7 +58,7 @@ public class TestSelectivity {
         processor.setDatasetLabel("test");
         processor.setRdfizerQueryStructuralFeaturesEnabled(true);
         processor.setRdfizerQueryExecutionEnabled(true);
-        processor.setQueryExecutionRemote(false);
+        processor.setRdfizerQueryLogRecordEnabled(true);
         processor.setDataQef(dataQef);
         //processor.setQueryAspectFn(queryAspectFn);
 

@@ -271,8 +271,8 @@ public class LsqCliParser {
 
 
         config.setRdfizerQueryStructuralFeaturesEnabled(rdfizer.contains("q"));
-        config.setRdfizerQueryExecutionEnabled(rdfizer.contains("l") || rdfizer.contains("e"));
-        config.setQueryExecutionRemote(rdfizer.contains("e"));
+        config.setRdfizerQueryLogRecordEnabled(rdfizer.contains("l"));
+        config.setRdfizerQueryExecutionEnabled(rdfizer.contains("e"));
 
         config.setOutFile(outputOs.value(options));
 
@@ -461,8 +461,9 @@ public class LsqCliParser {
 
         result.setDatasetLabel(config.getDatasetLabel());
         result.setRdfizerQueryStructuralFeaturesEnabled(config.isRdfizerQueryStructuralFeaturesEnabled());
-        result.setRdfizerQueryExecutionEnabled(isRdfizerQueryExecutionEnabled);
-        result.setQueryExecutionRemote(config.isQueryExecutionRemote());
+        result.setRdfizerQueryLogRecordEnabled(config.isRdfizerQueryLogRecordEnabled());
+        result.setRdfizerQueryExecutionEnabled(config.isRdfizerQueryExecutionEnabled());
+        //result.setQueryExecutionRemote(config.isQueryExecutionRemote());
         //result.setDoLocalExecution(config.isRd);
 
         result.setBaseUri(baseIri);

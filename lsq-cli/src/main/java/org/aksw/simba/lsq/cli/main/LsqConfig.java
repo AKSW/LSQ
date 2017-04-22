@@ -27,7 +27,8 @@ public class LsqConfig {
 
     protected boolean isRdfizerQueryStructuralFeaturesEnabled;
     protected boolean isRdfizerQueryExecutionEnabled;
-    protected boolean isQueryExecutionRemote;
+    protected boolean isRdfizerQueryLogRecordEnabled;
+    //protected boolean isQueryExecutionRemote;
     //protected boolean isRdfizerRemoteExecutionEnabled;
 
     protected String datasetLabel;
@@ -132,6 +133,15 @@ public class LsqConfig {
         this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
     }
 
+    public boolean isRdfizerQueryLogRecordEnabled() {
+        return isRdfizerQueryLogRecordEnabled;
+    }
+
+    public void setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
+        this.isRdfizerQueryLogRecordEnabled = isRdfizerQueryLogRecordEnabled;
+    }
+
+
 
 
 //    public boolean isRdfizerRemoteExecutionEnabled() {
@@ -153,14 +163,14 @@ public class LsqConfig {
     }
 
 
-    public boolean isQueryExecutionRemote() {
-        return isQueryExecutionRemote;
-    }
-
-
-    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
-        this.isQueryExecutionRemote = isQueryExecutionRemote;
-    }
+//    public boolean isQueryExecutionRemote() {
+//        return isQueryExecutionRemote;
+//    }
+//
+//
+//    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
+//        this.isQueryExecutionRemote = isQueryExecutionRemote;
+//    }
 
 
 //    public Long getDatasetEndpointPagination() {

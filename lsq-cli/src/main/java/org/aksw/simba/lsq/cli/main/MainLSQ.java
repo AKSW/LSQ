@@ -6,14 +6,20 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
+import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
+import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.apache.jena.atlas.lib.Sink;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.core.Prologue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -33,7 +39,6 @@ public class MainLSQ
 //    }
 
     public static void main(String[] args) throws IOException {
-
         LsqCliParser cliParser = new LsqCliParser();
         LsqConfig config = cliParser.parse(args);
 
