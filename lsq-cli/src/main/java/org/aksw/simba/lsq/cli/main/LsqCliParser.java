@@ -389,7 +389,7 @@ public class LsqCliParser {
         Long queryTimeoutInMs = config.getQueryTimeoutInMs();
         String baseIri = config.getOutBaseIri();
 
-        Resource rawLogEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
+        //Resource datasetEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
 
 
         Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
@@ -468,7 +468,7 @@ public class LsqCliParser {
 
         result.setBaseUri(baseIri);
         result.setDataQef(dataQef);
-        result.setRawLogEndpointRes(rawLogEndpointRes);
+        result.setDatasetEndpointUrl(datasetEndpointUrl);
         result.setDatasetSize(datasetSize);
         result.setStmtParser(sparqlStmtParser);
         result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));

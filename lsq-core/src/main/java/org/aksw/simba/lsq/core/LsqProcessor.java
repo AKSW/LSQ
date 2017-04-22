@@ -81,7 +81,7 @@ public class LsqProcessor
     protected QueryExecutionFactory dataQef;
     protected String datasetLabel;
     protected Resource expRes;
-    protected Resource logEndpointRes;
+    protected String datasetEndpointUrl;
     protected Long datasetSize;
 
 
@@ -194,12 +194,12 @@ public class LsqProcessor
         this.expRes = expRes;
     }
 
-    public Resource getLogEndpointRes() {
-        return logEndpointRes;
+    public String getDatasetEndpointUrl() {
+        return datasetEndpointUrl;
     }
 
-    public void setLogEndpointRes(Resource logEndpointRes) {
-        this.logEndpointRes = logEndpointRes;
+    public void setDatasetEndpointUrl(String datasetEndpointUrl) {
+        this.datasetEndpointUrl = datasetEndpointUrl;
     }
 
     public Long getDatasetSize() {
@@ -442,8 +442,9 @@ public class LsqProcessor
             .addProperty(LSQ.wasAssociatedWith, agentRes)
             ;
 
-        if(logEndpointRes != null) {
-            queryExecRecRes.addProperty(LSQ.endpoint, logEndpointRes); // TODO Make it possible to specify the dataset configuration that was used to execute the query
+        if(datasetEndpointUrl != null) {
+            Resource tmp = queryExecRecRes.getModel().createResource(datasetEndpointUrl);
+            queryExecRecRes.addProperty(LSQ.endpoint, tmp); // TODO Make it possible to specify the dataset configuration that was used to execute the query
         }
     }
 
