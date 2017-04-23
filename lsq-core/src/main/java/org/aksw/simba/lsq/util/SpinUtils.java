@@ -486,31 +486,31 @@ public class SpinUtils {
      * Otherwise returns the given node
      *
      * @param model
-     * @param node
+     * @param rdfNode
      * @return
      */
-    public static Node readNode(RDFNode node, Map<RDFNode, Node> modelToNode) {
-        Model model = node.getModel();
+    public static Node readNode(RDFNode rdfNode, Map<RDFNode, Node> rdfNodeToNode) {
+        Node result = rdfNodeToNode == null
+                ? SpinUtils.readNode(rdfNode)
+                : rdfNodeToNode.computeIfAbsent(rdfNode, SpinUtils::readNode);
 
-        Node result;
+        return result;
+    }
 
-        Node tmp = null;
-        if(node != null & node.isResource()) {
-            Resource r = node.asResource();
+    public static Node readNode(RDFNode rdfNode) {
+        Model model = rdfNode.getModel();
+
+        Node result = null;
+        if(rdfNode != null && rdfNode.isResource()) {
+            Resource r = rdfNode.asResource();
             RDFNode o = model.listObjectsOfProperty(r, SP.varName).toList().stream().findFirst().orElse(null);
             if(o != null) {
                 String varName = o.asLiteral().getString();
-                tmp = Var.alloc(varName);
+                result = Var.alloc(varName);
             }
         }
 
-        result = tmp == null
-                ? node.asNode()
-                : tmp;
-
-        if(modelToNode != null) {
-            modelToNode.putIfAbsent(node, result);
-        }
+        result = result == null ? rdfNode.asNode() : result;
 
         return result;
     }

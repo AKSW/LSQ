@@ -412,7 +412,7 @@ public class QueryStatistics2 {
      * @param triples
      */
     public static void enrichModelWithHyperGraphData(Model result, Map<Node, Resource> nodeToResource,
-            Iterable<Triple> triples) {
+            Iterable<Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
         // result = result == null ? ModelFactory.createDefaultModel() : result;
 
         for (Triple t : triples) {
@@ -441,6 +441,9 @@ public class QueryStatistics2 {
             Resource ss = result.wrapAsResource(t.getSubject());
             Resource pp = result.wrapAsResource(t.getPredicate());
             RDFNode oo = result.asRDFNode(t.getObject());
+
+            //hyperGraphResourceToNode.put(sx, t.getSubject());
+
 
             sx.addProperty(RDF.type, LSQ.Vertex).addProperty(RDF.subject, ss).addProperty(LSQ.proxyFor, ss)
                     .addLiteral(RDFS.label, getLabel(s));
@@ -471,10 +474,11 @@ public class QueryStatistics2 {
      */
     public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Resource targetRes) {
         // Map<RDFNode, Node> modelToNode = new HashMap<>();
-        Map<RDFNode, Node> modelToNode = new HashMap<>();
-        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes, modelToNode);
+        Map<RDFNode, Node> rdfNodeToNode = new HashMap<>();
+        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes, rdfNodeToNode);
+
         Map<Node, RDFNode> nodeToModel = new IdentityHashMap<>();
-        modelToNode.forEach((k, v) -> nodeToModel.put(v, k));
+        rdfNodeToNode.forEach((k, v) -> nodeToModel.put(v, k));
 
         // Make sure the BGP resources exist in the target model
         resToBgp = resToBgp.entrySet().stream()
@@ -584,8 +588,17 @@ public class QueryStatistics2 {
             Resource joinVertexType = getJoinVertexType(v);
             int degree = joinVertexToDegree.get(v);
 
+            //rdfNodeToNode = v.getProperty(LSQ.proxyFor).getObject();
+
+            Node proxyNode = v.getProperty(LSQ.proxyFor).getObject().asNode();
+            RDFNode proxyRdfNode = nodeToModel.get(proxyNode);
+
+            if(proxyRdfNode == null) {
+                throw new NullPointerException("Should not happen");
+            }
+
             joinVertexRes.addLiteral(LSQ.joinVertexDegree, degree).addProperty(LSQ.joinVertexType, joinVertexType)
-                    .addProperty(LSQ.proxyFor, nodeToModel.get(v.getProperty(LSQ.proxyFor).getObject().asNode()))
+                    .addProperty(LSQ.proxyFor, proxyRdfNode)
             // .addProperty(LSQ.proxyFor,
             // v)//v.getPropertyResourceValue(LSQ.proxyFor))
             ;
