@@ -342,7 +342,15 @@ public class LsqCliParser {
             .map(line -> {
                 Resource r = ModelFactory.createDefaultModel().createResource();
                 r.addLiteral(RDFS.label, line);
-                boolean parsed = webLogParser.parse(r, line) != 0;
+
+                boolean parsed;
+                try {
+                    parsed = webLogParser.parse(r, line) != 0;
+                } catch(Exception e) {
+                    parsed = false;
+                    logger.warn("Parser error", e);
+                }
+
                 if(!parsed) {
                     r.addLiteral(LSQ.processingError, "Failed to parse log line");
                 }
