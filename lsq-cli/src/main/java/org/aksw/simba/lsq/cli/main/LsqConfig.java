@@ -34,6 +34,9 @@ public class LsqConfig {
     protected String datasetLabel;
 
     protected SparqlServiceReference datasetEndpointDescription;
+
+    protected SparqlServiceReference benchmarkEndpointDescription;
+
     //protected Long datasetEndpointPagination;
     protected boolean isFetchDatasetSizeEnabled;
     //protected boolean fetchDatasetEndpointSize;
@@ -42,7 +45,7 @@ public class LsqConfig {
 //    protected Long remoteDatasetEndpointFetchSize;
 //    protected boolean fetchRemoteDatasetEndpointSize;
 
-    protected Long datasetQueryExecutionTimeoutInMs;
+    protected Long benchmarkQueryExecutionTimeoutInMs;
 
     protected String experimentIri;
     protected Long datasetSize;
@@ -55,6 +58,19 @@ public class LsqConfig {
     public boolean isFetchDatasetSizeEnabled() {
         return isFetchDatasetSizeEnabled;
     }
+
+
+
+    public SparqlServiceReference getBenchmarkEndpointDescription() {
+        return benchmarkEndpointDescription;
+    }
+
+
+
+    public void setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
+        this.benchmarkEndpointDescription = benchmarkEndpointDescription;
+    }
+
 
 
     public void setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
@@ -191,12 +207,12 @@ public class LsqConfig {
         this.datasetLabel = datasetLabel;
     }
 
-    public Long getQueryTimeoutInMs() {
-        return datasetQueryExecutionTimeoutInMs;
+    public Long getBenchmarkQueryExecutionTimeoutInMs() {
+        return benchmarkQueryExecutionTimeoutInMs;
     }
 
-    public void setDatasetQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
-        this.datasetQueryExecutionTimeoutInMs = datasetQueryExecutionTimeoutInMs;
+    public void setBenchmarkQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
+        this.benchmarkQueryExecutionTimeoutInMs = datasetQueryExecutionTimeoutInMs;
     }
 
     public String getExperimentIri() {
@@ -215,7 +231,6 @@ public class LsqConfig {
     public void setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
         this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryEnabled;
     }
-
 
     public SparqlServiceReference getDatasetEndpointDescription() {
         return datasetEndpointDescription;

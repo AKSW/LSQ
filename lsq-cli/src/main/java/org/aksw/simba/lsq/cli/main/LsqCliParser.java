@@ -28,7 +28,6 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.util.Mapper;
 import org.aksw.simba.lsq.util.WebLogParser;
@@ -36,7 +35,6 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -71,14 +69,14 @@ public class LsqCliParser {
     protected OptionSpec<String> logFormatOs;
     protected OptionSpec<String> outFormatOs;
     protected OptionSpec<String> rdfizerOs;
-    protected OptionSpec<String> endpointUrlOs;
+    protected OptionSpec<String> benchmarkEndpointUrlOs;
     protected OptionSpec<String> graphUriOs;
     protected OptionSpec<String> datasetLabelOs;
     protected OptionSpec<Long> headOs;
     protected OptionSpec<Long> datasetSizeOs;
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
-    protected OptionSpec<String> logEndpointUriOs;
+    protected OptionSpec<String> datasetEndpointUriOs;
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
@@ -131,7 +129,7 @@ public class LsqCliParser {
                 .defaultsTo("elq")
                 ;
 
-        endpointUrlOs = parser
+        benchmarkEndpointUrlOs = parser
                 .acceptsAll(Arrays.asList("e", "endpoint"), "Local SPARQL service (endpoint) URL on which to execute queries")
                 .withRequiredArg()
                 .defaultsTo("http://localhost:8890/sparql")
@@ -139,7 +137,7 @@ public class LsqCliParser {
 
         graphUriOs = parser
                 .acceptsAll(Arrays.asList("g", "graph"), "Local graph(s) from which to retrieve the data")
-                .availableIf(endpointUrlOs)
+                .availableIf(benchmarkEndpointUrlOs)
                 .withRequiredArg()
                 ;
 
@@ -175,7 +173,7 @@ public class LsqCliParser {
                 .defaultsTo(LSQ.defaultLsqrNs)
                 ;
 
-        logEndpointUriOs = parser
+        datasetEndpointUriOs = parser
                 .acceptsAll(Arrays.asList("p", "public"), "Public endpoint URL - e.g. http://example.org/sparql")
                 .withRequiredArg()
                 //.defaultsTo("http://example.org/sparql")
@@ -239,12 +237,21 @@ public class LsqCliParser {
         }
 
 
+        // TODO Messed up endpoint urls of the dataset distribution and that of the local executions... - need to fix
+        String benchmarkEndpointUrl = benchmarkEndpointUrlOs.value(options);
+        List<String> benchmarkDefaultGraphIris = graphUriOs.values(options);
+        DatasetDescription benchmarkDatasetDescription = DatasetDescription.create(benchmarkDefaultGraphIris, Collections.emptyList());
+        SparqlServiceReference benchmarkEndpointDescription = new SparqlServiceReference(benchmarkEndpointUrl, benchmarkDatasetDescription);
 
-        String datasetEndpointUrl = logEndpointUriOs.value(options);
+
+        String datasetEndpointUri = datasetEndpointUriOs.value(options);
         List<String> datasetDefaultGraphIris = graphUriOs.values(options);
 
         DatasetDescription datasetDescription = DatasetDescription.create(datasetDefaultGraphIris, Collections.emptyList());
-        SparqlServiceReference datasetEndpointDescription = new SparqlServiceReference(datasetEndpointUrl, datasetDescription);
+        SparqlServiceReference datasetEndpointDescription = new SparqlServiceReference(datasetEndpointUri, datasetDescription);
+
+
+
 
         LsqConfig config = new LsqConfig();
 
@@ -263,12 +270,11 @@ public class LsqCliParser {
 
         config.setDatasetSize(datasetSize);
 
-        config.setDatasetQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
+        config.setBenchmarkEndpointDescription(benchmarkEndpointDescription);
+        config.setBenchmarkQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
         config.setFirstItemOffset(head);
 
-        //config.setOutRdfFile();
         config.setFederationEndpoints(fedEndpoints);
-
 
         config.setRdfizerQueryStructuralFeaturesEnabled(rdfizer.contains("q"));
         config.setRdfizerQueryLogRecordEnabled(rdfizer.contains("l"));
@@ -385,7 +391,7 @@ public class LsqCliParser {
         sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
 
 
-        SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
+        SparqlServiceReference benchmarkEndpointDescription = config.getDatasetEndpointDescription();
         Long datasetSize = config.getDatasetSize();
         //String localDatasetEndpointUrl = config.getLocalDatasetEndpointUrl()
         //List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
@@ -393,9 +399,13 @@ public class LsqCliParser {
 
         boolean isRdfizerQueryExecutionEnabled = config.isRdfizerQueryExecutionEnabled();
         List<String> fedEndpoints = config.getFederationEndpoints();
-        String datasetEndpointUrl = datasetEndpointDescription.getServiceURL();
-        Long queryTimeoutInMs = config.getQueryTimeoutInMs();
+        //String benchmarkEndpointUrl = benchmarkEndpointDescription.getServiceURL();
+        Long queryTimeoutInMs = config.getBenchmarkQueryExecutionTimeoutInMs();
         String baseIri = config.getOutBaseIri();
+
+
+        SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
+        String datasetEndpointUri = datasetEndpointDescription == null ? null : datasetEndpointDescription.getServiceURL();
 
         //Resource datasetEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
 
@@ -420,10 +430,10 @@ public class LsqCliParser {
             if(isNormalMode) {
                 countQef =
                         FluentQueryExecutionFactory
-                        .http(datasetEndpointDescription)
+                        .http(benchmarkEndpointDescription)
                         .create();
 
-                baseDataQef = FluentQueryExecutionFactory.http(datasetEndpointDescription).create();
+                baseDataQef = FluentQueryExecutionFactory.http(benchmarkEndpointDescription).create();
 
             } else {
                 countQef = null;
@@ -476,7 +486,7 @@ public class LsqCliParser {
 
         result.setBaseUri(baseIri);
         result.setDataQef(dataQef);
-        result.setDatasetEndpointUrl(datasetEndpointUrl);
+        result.setDatasetEndpointUri(datasetEndpointUri);
         result.setDatasetSize(datasetSize);
         result.setStmtParser(sparqlStmtParser);
         result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));
