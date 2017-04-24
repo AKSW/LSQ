@@ -38,14 +38,15 @@ public class LSQ {
     public static final Property joinVertexDegree = property("joinVertexDegree");
 
     public static final Property bgps = property("bgps");
-    public static final Property triplePatterns = property("triplePatterns");
-    public static final Property minBgpTriples = property("minBgpTriples");
-    public static final Property maxBgpTriples = property("maxBgpTriples");
+    public static final Property tps = property("tps");
+    public static final Property minBGPTriples = property("minBGPTriples");
+    public static final Property maxBGPTriles = property("maxBGPTriples");
     public static final Property joinVertices = property("joinVertices");
+    public static final Property projectVars = property("projectVars");
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
-    public static final Property medianJoinVertexsDegree = property("medianJoinVerticesDegree");
+    public static final Property medianJoinVertexsDegree = property("medianJoinVertexDegree");
 
     public static final Property mentionsSubject = property("mentionsSubject");
     public static final Property mentionsPredicate = property("mentionsPredicate");
@@ -63,27 +64,52 @@ public class LSQ {
 //    public static final Resource Describe = resource(org.topbraid.spin.vocabulary.SP));
 
 
+    // Type so that all triple pattern executions in a query can be retrieved
+    //public static final Resource TPExec = resource("TPExec");
+
+    // An LSQ Query. It is different from SPIN::Query.
+    // TODO Sort out the exact semantic relation.
+    public static final Resource Query = resource("Query");
+
 
     public static final Property text = property("text");
     public static final Property resultSize = property("resultSize");
     public static final Property hasStructuralFeatures = property("hasStructuralFeatures");
     public static final Property hasSpin = property("hasSpin");
-    public static final Property hasTriplePattern = property("hasTriplePattern");
-    public static final Property hasTriplePatternExecution = property("hasTriplePatternExecution");
-    public static final Property triplePatternText = property("triplePatternText");
-    public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property executionError = property("executionError");
+    public static final Property hasTP = property("hasTP");
+    public static final Property hasBGP = property("hasBGP");
+    public static final Property tpText = property("tpText");
+    //public static final Property triplePatternResultSize = property("triplePatternResultSize");
+    public static final Property execError = property("execError");
     public static final Property processingError = property("processingError");
     public static final Property parseError = property("parseError");
     public static final Property runTimeMs = property("runTimeMs");
 
-    public static final Property hasExecution = property("hasExecution");
-    public static final Property hasLocalExecution = property("hasLocalExecution");
-    public static final Property hasRemoteExecution = property("hasRemoteExecution");
+    public static final Property hasExec = property("hasExec");
+    public static final Property hasLocalExec = property("hasLocalExec");
+    public static final Property hasRemoteExec = property("hasRemoteExec");
+
+    public static final Property hasBGPExec = property("hasBGPExec");
+    public static final Property hasTPExec = property("hasTPExec");
+    public static final Property hasJoinVarExec = property("hasJoinVarExec");
 
     // Execution
-    public static final Property triplePatternSelectivity = property("triplePatternSelectivity");
-    public static final Property meanTriplePatternSelectivity = property("meanTriplePatternSelectivity");
+    // Selectivity of a triple pattern in regard to the whole data set
+    // TODO Rename to tpSelectivity(GraphRestricted)
+    public static final Property tpSel = property("tpSel");
+
+    // Selectivity of a triple pattern in regard to the BGP in which it occurrs
+    public static final Property tpSelBGPRestricted = property("tpSelBGPRestricted");
+
+    // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
+    public static final Property tpSelJoinVarRestricted = property("tpSelJoinVarRestricted");
+
+    // Similar to tpSelectivity, but considering immediate filters present on it
+    // (maybe only those filters for which indexes can be used)
+    //public static final Property fTpSelectivityBgpRestricted = property("fTpSelectivityBgpRestricted");
+
+
+    public static final Property meanTPSelectivity = property("meanTPSelectivity");
 
     // TODO This is PROV vocab
     public static final Property wasAssociatedWith = property("wasAssociatedWith");
@@ -106,12 +132,17 @@ public class LSQ {
 
 
     // TODO This is actually the vocab for apache log parsing - move it elsewhere
+    public static final Resource WebAccessLogFormat = resource("WebAccessLogFormat");
+    public static final Property pattern = property("pattern");
+
     public static final Property host = property("host");
     public static final Property user = property("user");
     public static final Property request = property("request");
     public static final Property query = property("query");
     public static final Property path = property("uri");
+    public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
+    public static final Property headers = property("headers");
     public static final Property verb = property("verb");
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
@@ -178,6 +209,18 @@ public class LSQ {
 
 
     public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
+
+
+    public static final Property hasVar = property("hasVar");
+    public static final Property hasVarExec = property("hasVarExec");
+
+    // Temporary id attributes - used to craft final IRIs
+    public static final Property queryId = property("queryId");
+    public static final Property bgpId = property("bgpId");
+    public static final Property bgpVarId = property("bgpVarId");
+
+    public static final Property tpId = property("tpId");
+    public static final Property tpVarId = property("tpVarId");
 
     //public static final Property
 

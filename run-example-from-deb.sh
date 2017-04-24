@@ -8,7 +8,7 @@ if ! command_exists "lsq"; then
 fi
 
 lsq \
-  -f lsq-core/src/test/resources/swdf.apache.log \
+  -f lsq-core/src/test/resources/logs/combined.swdf.log \
   -e http://localhost:8890/sparql \
   -l swdf \
   -b http://lsq.aksw.org/res/ \

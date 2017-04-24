@@ -1,0 +1,371 @@
+
+
+--------------------------------------------------------------
+1: B1 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/>  SELECT  ?expValue  WHERE {   {    ?s	tcga:bcr_patient_barcode	<http://tcga.deri.ie/TCGA-37-3789>.      <http://tcga.deri.ie/TCGA-37-3789>	tcga:result	?results.     ?results  tcga:RPKM ?expValue.   } UNION   {    ?uri	tcga:bcr_patient_barcode	<http://tcga.deri.ie/TCGA-37-3789>.      <http://tcga.deri.ie/TCGA-37-3789>	tcga:result	?geneResults.     ?geneResults  tcga:scaled_estimate ?expValue.   } }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 6
+Total Vertices:14 ==> [http://tcga.deri.ie/schema/bcr_patient_barcode, uri, http://tcga.deri.ie/TCGA-37-3789, expValue, http://tcga.deri.ie/schema/RPKM, geneResults, http://tcga.deri.ie/TCGA-37-3789, results, s, http://tcga.deri.ie/schema/result, expValue, http://tcga.deri.ie/schema/result, http://tcga.deri.ie/schema/scaled_estimate, http://tcga.deri.ie/schema/bcr_patient_barcode]
+Join Vertices: 4 ==> [http://tcga.deri.ie/TCGA-37-3789, http://tcga.deri.ie/TCGA-37-3789, results, geneResults]
+Join Vertices to Total Vertices ratio: 0.2857142857142857
+     http://tcga.deri.ie/TCGA-37-3789 Join Vertex Degree: 2, Join Vertex Type: path
+     http://tcga.deri.ie/TCGA-37-3789 Join Vertex Degree: 2, Join Vertex Type: path
+     results Join Vertex Degree: 2, Join Vertex Type: path
+     geneResults Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+2: B2 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/>  SELECT   DISTINCT ?patient ?tumorType ?exonValue WHERE { ?s tcga:bcr_patient_barcode ?patient. ?patient tcga:disease_acronym <http://tcga.deri.ie/lusc>. ?patient tcga:tumor_weight ?weight. ?patient tcga:tumor_type ?tumorType.  ?patient tcga:result ?results. ?results tcga:RPKM  ?exonValue. FILTER(?weight <= 55) }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 6
+Total Vertices:13 ==> [http://tcga.deri.ie/schema/tumor_type, http://tcga.deri.ie/schema/bcr_patient_barcode, http://tcga.deri.ie/schema/RPKM, s, tumorType, patient, http://tcga.deri.ie/schema/tumor_weight, results, http://tcga.deri.ie/schema/result, exonValue, http://tcga.deri.ie/schema/disease_acronym, http://tcga.deri.ie/lusc, weight]
+Join Vertices: 2 ==> [results, patient]
+Join Vertices to Total Vertices ratio: 0.15384615384615385
+     results Join Vertex Degree: 2, Join Vertex Type: path
+     patient Join Vertex Degree: 5, Join Vertex Type: Hybrid
+Mean Join Vertices Degree: 3.5
+--------------------------------------------------------------
+3: B3 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/>  PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> SELECT  ?patient ?methylationValue WHERE { ?s tcga:bcr_patient_barcode ?patient. ?patient <http://tcga.deri.ie/schema/vital_status> "Dead". ?patient tcga:bcr_drug_barcode ?drug. ?drug tcga:drug_name "Tarceva". ?patient <http://tcga.deri.ie/schema/age_at_initial_pathologic_diagnosis> ?age. ?patient tcga:result ?results. ?results  tcga:beta_value ?methylationValue. FILTER(?age <= 51) } ORDER BY (?patient)
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 7
+Total Vertices:15 ==> [http://tcga.deri.ie/schema/bcr_patient_barcode, http://tcga.deri.ie/schema/vital_status, http://tcga.deri.ie/schema/result, s, http://tcga.deri.ie/schema/age_at_initial_pathologic_diagnosis, patient, http://tcga.deri.ie/schema/drug_name, results, drug, Tarceva, http://tcga.deri.ie/schema/bcr_drug_barcode, Dead, http://tcga.deri.ie/schema/beta_value, methylationValue, age]
+Join Vertices: 3 ==> [patient, results, drug]
+Join Vertices to Total Vertices ratio: 0.2
+     patient Join Vertex Degree: 5, Join Vertex Type: Hybrid
+     results Join Vertex Degree: 2, Join Vertex Type: path
+     drug Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 3.0
+--------------------------------------------------------------
+4: B4 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/>  PREFIX dbpedia: <http://dbpedia.org/ontology/> SELECT    ?expressionValues WHERE {  {   ?uri tcga:bcr_patient_barcode ?patient.   ?patient dbpedia:country ?country.   ?patient tcga:result ?results.   ?results  tcga:reads_per_million_miRNA_mapped ?expressionValues.  } UNION  {   ?s tcga:bcr_patient_barcode ?patient.   ?patient dbpedia:country ?country.   ?patient tcga:result ?exonResults.   ?exonResults tcga:RPKM ?expressionValues.  } FILTER REGEX(?country,"Brazil|Argentina", "i") }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 8
+Total Vertices:18 ==> [country, http://tcga.deri.ie/schema/bcr_patient_barcode, uri, http://tcga.deri.ie/schema/RPKM, http://dbpedia.org/ontology/country, expressionValues, http://tcga.deri.ie/schema/reads_per_million_miRNA_mapped, expressionValues, results, exonResults, http://tcga.deri.ie/schema/bcr_patient_barcode, http://tcga.deri.ie/schema/result, patient, country, patient, s, http://dbpedia.org/ontology/country, http://tcga.deri.ie/schema/result]
+Join Vertices: 4 ==> [results, exonResults, patient, patient]
+Join Vertices to Total Vertices ratio: 0.2222222222222222
+     results Join Vertex Degree: 2, Join Vertex Type: path
+     exonResults Join Vertex Degree: 2, Join Vertex Type: path
+     patient Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     patient Join Vertex Degree: 3, Join Vertex Type: Hybrid
+Mean Join Vertices Degree: 2.5
+--------------------------------------------------------------
+5: B5 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX affymetrix: <http://bio2rdf.org/affymetrix_vocabulary:> SELECT  ?methylationCNTNAP2    WHERE  {  ?s affymetrix:x-symbol <http://bio2rdf.org/symbol:CNTNAP2>.  ?s affymetrix:x-geneid ?geneId.  ?geneId rdf:type tcga:expression_gene_lookup.  ?geneId tcga:chromosome ?lookupChromosome.   ?geneId tcga:start ?start.  ?geneId tcga:stop  ?stop.   ?uri tcga:bcr_patient_barcode ?patient .  ?patient tcga:result ?recordNo .  ?recordNo tcga:chromosome   ?chromosome.  ?recordNo tcga:position     ?position.  ?recordNo tcga:beta_value  ?methylationCNTNAP2.  FILTER (?position >= ?start && ?position <= ?stop && str(?chromosome) = str(?lookupChromosome) ) }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 11
+Total Vertices:23 ==> [chromosome, start, http://tcga.deri.ie/schema/expression_gene_lookup, http://tcga.deri.ie/schema/result, uri, recordNo, http://tcga.deri.ie/schema/stop, patient, http://tcga.deri.ie/schema/start, s, position, http://bio2rdf.org/symbol:CNTNAP2, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://tcga.deri.ie/schema/chromosome, methylationCNTNAP2, http://tcga.deri.ie/schema/position, geneId, http://tcga.deri.ie/schema/beta_value, http://bio2rdf.org/affymetrix_vocabulary:x-geneid, http://bio2rdf.org/affymetrix_vocabulary:x-symbol, http://tcga.deri.ie/schema/bcr_patient_barcode, stop, lookupChromosome]
+Join Vertices: 5 ==> [recordNo, geneId, patient, s, http://tcga.deri.ie/schema/chromosome]
+Join Vertices to Total Vertices ratio: 0.21739130434782608
+     recordNo Join Vertex Degree: 4, Join Vertex Type: Hybrid
+     geneId Join Vertex Degree: 5, Join Vertex Type: Hybrid
+     patient Join Vertex Degree: 2, Join Vertex Type: path
+     s Join Vertex Degree: 2, Join Vertex Type: Star
+     http://tcga.deri.ie/schema/chromosome Join Vertex Degree: 2, Join Vertex Type: Sink
+Mean Join Vertices Degree: 3.0
+--------------------------------------------------------------
+6: B6 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> PREFIX affymetrix: <http://bio2rdf.org/affymetrix_vocabulary:> SELECT  DISTINCT ?patient ?start ?stop ?geneExpVal  WHERE  { 	?s affymetrix:x-symbol <http://bio2rdf.org/symbol:KRAS>. 	?s affymetrix:x-geneid ?geneId. 	?geneId rdf:type tcga:expression_gene_lookup. 	?geneId tcga:chromosome ?lookupChromosome. 	?uri tcga:bcr_patient_barcode ?patient . 	?patient tcga:result ?recordNo . 	?recordNo tcga:chromosome   ?chromosome. 	?recordNo tcga:start ?start. 	?recordNo tcga:stop ?stop. 	?recordNo tcga:scaled_estimate ?geneExpVal 	FILTER (str(?lookupChromosome)= str(?chromosome)) }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 10
+Total Vertices:21 ==> [lookupChromosome, http://tcga.deri.ie/schema/expression_gene_lookup, start, s, http://tcga.deri.ie/schema/chromosome, geneId, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, patient, http://bio2rdf.org/symbol:KRAS, http://tcga.deri.ie/schema/start, geneExpVal, stop, http://bio2rdf.org/affymetrix_vocabulary:x-symbol, http://tcga.deri.ie/schema/bcr_patient_barcode, http://bio2rdf.org/affymetrix_vocabulary:x-geneid, uri, http://tcga.deri.ie/schema/result, chromosome, http://tcga.deri.ie/schema/stop, http://tcga.deri.ie/schema/scaled_estimate, recordNo]
+Join Vertices: 5 ==> [s, http://tcga.deri.ie/schema/chromosome, recordNo, geneId, patient]
+Join Vertices to Total Vertices ratio: 0.23809523809523808
+     s Join Vertex Degree: 2, Join Vertex Type: Star
+     http://tcga.deri.ie/schema/chromosome Join Vertex Degree: 2, Join Vertex Type: Sink
+     recordNo Join Vertex Degree: 5, Join Vertex Type: Hybrid
+     geneId Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     patient Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.8
+--------------------------------------------------------------
+7: B7 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/> PREFIX dbpedia: <http://dbpedia.org/ontology/> SELECT DISTINCT ?patient ?p ?o WHERE { ?uri tcga:bcr_patient_barcode ?patient . ?patient dbpedia:country ?country. ?country dbpedia:populationDensity ?popDensity. ?patient tcga:bcr_aliquot_barcode ?aliquot. ?aliquot ?p ?o. FILTER(?popDensity >= 32) }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 5
+Total Vertices:11 ==> [uri, patient, popDensity, http://tcga.deri.ie/schema/bcr_patient_barcode, aliquot, o, http://dbpedia.org/ontology/populationDensity, http://dbpedia.org/ontology/country, http://tcga.deri.ie/schema/bcr_aliquot_barcode, p, country]
+Join Vertices: 3 ==> [patient, aliquot, country]
+Join Vertices to Total Vertices ratio: 0.2727272727272727
+     patient Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     aliquot Join Vertex Degree: 2, Join Vertex Type: path
+     country Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.3333333333333335
+--------------------------------------------------------------
+8: B8 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/> PREFIX dbpedia: <http://dbpedia.org/ontology/> SELECT  ?chromosome ?expressionValue WHERE { { ?uri tcga:bcr_patient_barcode <http://tcga.deri.ie/TCGA-D9-A1X3> . <http://tcga.deri.ie/TCGA-D9-A1X3> tcga:result ?recordNo . ?recordNo tcga:chromosome   ?chromosome. ?recordNo tcga:protein_expression_value ?expressionValue. } UNION { ?s tcga:bcr_patient_barcode <http://tcga.deri.ie/TCGA-D9-A1X3> . <http://tcga.deri.ie/TCGA-D9-A1X3> tcga:result ?results . ?results tcga:chromosome   ?chromosome. ?results tcga:beta_value ?expressionValue. } FILTER (?expressionValue > 0.05) }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 8
+Total Vertices:18 ==> [http://tcga.deri.ie/schema/bcr_patient_barcode, s, http://tcga.deri.ie/TCGA-D9-A1X3, http://tcga.deri.ie/schema/beta_value, http://tcga.deri.ie/schema/result, http://tcga.deri.ie/schema/bcr_patient_barcode, chromosome, http://tcga.deri.ie/schema/protein_expression_value, expressionValue, http://tcga.deri.ie/schema/chromosome, http://tcga.deri.ie/schema/result, results, uri, chromosome, recordNo, http://tcga.deri.ie/TCGA-D9-A1X3, expressionValue, http://tcga.deri.ie/schema/chromosome]
+Join Vertices: 4 ==> [results, http://tcga.deri.ie/TCGA-D9-A1X3, recordNo, http://tcga.deri.ie/TCGA-D9-A1X3]
+Join Vertices to Total Vertices ratio: 0.2222222222222222
+     results Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     http://tcga.deri.ie/TCGA-D9-A1X3 Join Vertex Degree: 2, Join Vertex Type: path
+     recordNo Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     http://tcga.deri.ie/TCGA-D9-A1X3 Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.5
+--------------------------------------------------------------
+9: C1 Query:  PREFIX drugbank: <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/>  PREFIX drugtype: <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugtype/> PREFIX kegg: <http://bio2rdf.org/ns/kegg#> PREFIX chebi: <http://bio2rdf.org/ns/bio2rdf#> PREFIX purl: <http://purl.org/dc/elements/1.1/> SELECT distinct ?drug	?drugDesc ?molecularWeightAverage 	?compound   ?ReactionTitle    ?ChemicalEquation  WHERE { ?drug 			drugbank:description 	 ?drugDesc . ?drug 			drugbank:drugType 	 drugtype:smallMolecule . ?drug 	     drugbank:keggCompoundId ?compound.  ?enzyme 		kegg:xSubstrate 	?compound . ?Chemicalreaction 	kegg:xEnzyme 		?enzyme . ?Chemicalreaction	kegg:equation 		?ChemicalEquation . ?Chemicalreaction 	purl:title 		?ReactionTitle OPTIONAL  {  ?drug drugbank:molecularWeightAverage ?molecularWeightAverage. FILTER (?molecularWeightAverage > 114)  } } Limit 1000
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 8
+Total Vertices:18 ==> [http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugType, http://bio2rdf.org/ns/kegg#equation, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugtype/smallMolecule, http://bio2rdf.org/ns/kegg#xSubstrate, ChemicalEquation, ReactionTitle, enzyme, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/description, molecularWeightAverage, http://purl.org/dc/elements/1.1/title, drug, drugDesc, drug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId, Chemicalreaction, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/molecularWeightAverage, http://bio2rdf.org/ns/kegg#xEnzyme, compound]
+Join Vertices: 4 ==> [Chemicalreaction, enzyme, compound, drug]
+Join Vertices to Total Vertices ratio: 0.2222222222222222
+     Chemicalreaction Join Vertex Degree: 3, Join Vertex Type: Star
+     enzyme Join Vertex Degree: 2, Join Vertex Type: path
+     compound Join Vertex Degree: 2, Join Vertex Type: Sink
+     drug Join Vertex Degree: 3, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.5
+--------------------------------------------------------------
+10: C10 Query:  PREFIX tcga: <http://tcga.deri.ie/schema/> PREFIX kegg: <http://bio2rdf.org/ns/kegg#> PREFIX dbpedia: <http://dbpedia.org/ontology/> PREFIX drugbank: <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/> PREFIX purl: <http://purl.org/dc/terms/> SELECT  DISTINCT ?patient  ?gender ?country ?popDensity ?drugName ?indication ?formula ?compound  WHERE { ?uri tcga:bcr_patient_barcode 			?patient . ?patient tcga:gender 					?gender. ?patient dbpedia:country 				?country. ?country dbpedia:populationDensity 		?popDensity. ?patient tcga:bcr_drug_barcode 			?drugbcr. ?drugbcr tcga:drug_name 				?drugName.  ?drgBnkDrg  drugbank:genericName 		?drugName. ?drgBnkDrg  drugbank:indication 		?indication. ?drgBnkDrg  drugbank:chemicalFormula 	?formula. ?drgBnkDrg 	drugbank:keggCompoundId 	?compound . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 10
+Total Vertices:21 ==> [indication, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/indication, popDensity, formula, http://dbpedia.org/ontology/country, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/genericName, http://tcga.deri.ie/schema/bcr_patient_barcode, http://tcga.deri.ie/schema/gender, drugbcr, gender, drgBnkDrg, http://tcga.deri.ie/schema/bcr_drug_barcode, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/chemicalFormula, uri, http://tcga.deri.ie/schema/drug_name, patient, compound, country, http://dbpedia.org/ontology/populationDensity, drugName, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId]
+Join Vertices: 5 ==> [drugbcr, patient, country, drgBnkDrg, drugName]
+Join Vertices to Total Vertices ratio: 0.23809523809523808
+     drugbcr Join Vertex Degree: 2, Join Vertex Type: path
+     patient Join Vertex Degree: 4, Join Vertex Type: Hybrid
+     country Join Vertex Degree: 2, Join Vertex Type: path
+     drgBnkDrg Join Vertex Degree: 4, Join Vertex Type: Star
+     drugName Join Vertex Degree: 2, Join Vertex Type: Sink
+Mean Join Vertices Degree: 2.8
+--------------------------------------------------------------
+11: C2 Query:  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX owl: <http://www.w3.org/2002/07/owl#> PREFIX drugbank: <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/> PREFIX kegg: <http://bio2rdf.org/ns/kegg#> PREFIX chebi: <http://bio2rdf.org/ns/chebi#> PREFIX purl: <http://purl.org/dc/elements/1.1/> PREFIX bio2RDF: <http://bio2rdf.org/ns/bio2rdf#> SELECT ?drug ?keggmass ?chebiIupacName  WHERE  { ?drug rdf:type drugbank:drugs . ?drug drugbank:keggCompoundId ?keggDrug . ?keggDrug bio2RDF:mass ?keggmass . ?drug drugbank:genericName ?drugBankName . ?chebiDrug purl:title ?drugBankName . ?chebiDrug chebi:iupacName ?chebiIupacName . OPTIONAL {              ?drug drugbank:inchiIdentifier ?drugbankInchi . 			?chebiDrug bio2RDF:inchi ?chebiInchi . 			FILTER (?drugbankInchi = ?chebiInchi)  		} }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 8
+Total Vertices:19 ==> [drug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugs, http://bio2rdf.org/ns/chebi#iupacName, drugbankInchi, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, keggmass, chebiDrug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/inchiIdentifier, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId, chebiIupacName, keggDrug, http://purl.org/dc/elements/1.1/title, chebiDrug, http://bio2rdf.org/ns/bio2rdf#mass, chebiInchi, drug, drugBankName, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/genericName, http://bio2rdf.org/ns/bio2rdf#inchi]
+Join Vertices: 4 ==> [chebiDrug, drug, drugBankName, keggDrug]
+Join Vertices to Total Vertices ratio: 0.21052631578947367
+     chebiDrug Join Vertex Degree: 2, Join Vertex Type: Star
+     drug Join Vertex Degree: 3, Join Vertex Type: Star
+     drugBankName Join Vertex Degree: 2, Join Vertex Type: Sink
+     keggDrug Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.25
+--------------------------------------------------------------
+12: C3 Query:  PREFIX foaf: 		<http://xmlns.com/foaf/0.1/> PREFIX geonames: 	<http://www.geonames.org/ontology#> PREFIX mo:   		<http://purl.org/ontology/mo/> PREFIX nytimes:         <http://data.nytimes.com/elements/> PREFIX owl: <http://www.w3.org/2002/07/owl#> SELECT DISTINCT ?artist ?name ?location ?anylocation WHERE { 	     ?artist a mo:MusicArtist ;          foaf:name ?name ; 		 foaf:based_near ?location .          ?location geonames:parentFeature ?locationName .          ?locationName geonames:name ?anylocation .          ?nytLocation owl:sameAs ?location.          ?nytLocation nytimes:topicPage ?news  OPTIONAL  {          ?locationName geonames:name 'Islamic Republic of Afghanistan' . } }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 8
+Total Vertices:18 ==> [http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://data.nytimes.com/elements/topicPage, http://xmlns.com/foaf/0.1/name, http://www.geonames.org/ontology#parentFeature, http://xmlns.com/foaf/0.1/based_near, http://www.geonames.org/ontology#name, artist, locationName, news, nytLocation, locationName, location, http://www.geonames.org/ontology#name, name, http://purl.org/ontology/mo/MusicArtist, http://www.w3.org/2002/07/owl#sameAs, Islamic Republic of Afghanistan, anylocation]
+Join Vertices: 4 ==> [nytLocation, location, artist, locationName]
+Join Vertices to Total Vertices ratio: 0.2222222222222222
+     nytLocation Join Vertex Degree: 2, Join Vertex Type: Star
+     location Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     artist Join Vertex Degree: 3, Join Vertex Type: Star
+     locationName Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.5
+--------------------------------------------------------------
+13: C4 Query:  prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> prefix geonames: <http://www.geonames.org/ontology#> prefix owl: <http://www.w3.org/2002/07/owl#> Prefix dbpedia: <http://dbpedia.org/ontology/> SELECT DISTINCT ?countryName ?countryCode ?locationMap ?population ?longitude ?latitude ?nationalAnthem ?foundingDate ?largestCity ?ethnicGroup ?motto { ?NYTplace geonames:name ?countryName; geonames:countryCode ?countryCode; geonames:population  ?population; geo:long   ?longitude; geo:lat     ?latitude; owl:sameAs   ?geonameplace. OPTIONAL { ?geonameplace dbpedia:capital ?capital; dbpedia:anthem ?nationalAnthem; dbpedia:foundingDate ?foundingDate; dbpedia:largestCity ?largestCity; dbpedia:ethnicGroup ?ethnicGroup; dbpedia:motto ?motto. } } LIMIT 50
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 12
+Total Vertices:26 ==> [http://dbpedia.org/ontology/anthem, longitude, population, ethnicGroup, http://www.w3.org/2003/01/geo/wgs84_pos#lat, http://dbpedia.org/ontology/capital, nationalAnthem, largestCity, geonameplace, countryCode, http://dbpedia.org/ontology/foundingDate, http://www.w3.org/2003/01/geo/wgs84_pos#long, http://dbpedia.org/ontology/ethnicGroup, http://www.geonames.org/ontology#population, http://www.w3.org/2002/07/owl#sameAs, capital, countryName, NYTplace, http://www.geonames.org/ontology#countryCode, http://www.geonames.org/ontology#name, foundingDate, http://dbpedia.org/ontology/largestCity, geonameplace, motto, latitude, http://dbpedia.org/ontology/motto]
+Join Vertices: 2 ==> [NYTplace, geonameplace]
+Join Vertices to Total Vertices ratio: 0.07692307692307693
+     NYTplace Join Vertex Degree: 6, Join Vertex Type: Star
+     geonameplace Join Vertex Degree: 6, Join Vertex Type: Star
+Mean Join Vertices Degree: 6.0
+--------------------------------------------------------------
+14: C5 Query:  PREFIX linkedmdb: <http://data.linkedmdb.org/resource/movie/> PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX dbpedia: <http://dbpedia.org/ontology/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT ?actor ?movie ?movieTitle ?movieDate ?birthDate ?spouseName {         ?actor rdfs:label ?actor_name_en;                dbpedia:birthDate ?birthDate ;                dbpedia:spouse ?spouseURI .         ?spouseURI rdfs:label ?spouseName .   	?imdbactor linkedmdb:actor_name ?actor_name.       ?movie linkedmdb:actor ?imdbactor ;              dcterms:title ?movieTitle ;              dcterms:date ?movieDate       FILTER(STR(?actor_name_en )= STR(?actor_name))  } LIMIT 500
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 8
+Total Vertices:17 ==> [http://dbpedia.org/ontology/spouse, birthDate, spouseName, http://data.linkedmdb.org/resource/movie/actor, http://purl.org/dc/terms/date, imdbactor, actor, actor_name, http://www.w3.org/2000/01/rdf-schema#label, actor_name_en, http://dbpedia.org/ontology/birthDate, movieTitle, movie, http://purl.org/dc/terms/title, movieDate, spouseURI, http://data.linkedmdb.org/resource/movie/actor_name]
+Join Vertices: 5 ==> [http://www.w3.org/2000/01/rdf-schema#label, imdbactor, movie, actor, spouseURI]
+Join Vertices to Total Vertices ratio: 0.29411764705882354
+     http://www.w3.org/2000/01/rdf-schema#label Join Vertex Degree: 2, Join Vertex Type: Sink
+     imdbactor Join Vertex Degree: 2, Join Vertex Type: path
+     movie Join Vertex Degree: 3, Join Vertex Type: Star
+     actor Join Vertex Degree: 3, Join Vertex Type: Star
+     spouseURI Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.4
+--------------------------------------------------------------
+15: C6 Query:  PREFIX linkedmdb: <http://data.linkedmdb.org/resource/movie/> prefix owl: <http://www.w3.org/2002/07/owl#> PREFIX dcterms: <http://purl.org/dc/terms/> PREFIX purl: <http://purl.org/dc/terms/> PREFIX nytimes: <http://data.nytimes.com/elements/> SELECT ?actor ?filmTitle ?news ?variants ?articleCount ?first_use ?latest_use WHERE  { ?film purl:title 			?filmTitle . ?film linkedmdb:actor 			?actor . ?actor owl:sameAs 			?dbpediaURI. ?nytURI owl:sameAs 			?dbpediaURI . ?nytURI nytimes:topicPage 		?news ; 	nytimes:number_of_variants 	?variants; 	nytimes:associated_article_count ?articleCount; 	nytimes:first_use 		?first_use; 	nytimes:latest_use 		?latest_use } ORDER BY (?actor)
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 9
+Total Vertices:18 ==> [http://data.nytimes.com/elements/associated_article_count, variants, articleCount, latest_use, nytURI, filmTitle, first_use, http://www.w3.org/2002/07/owl#sameAs, http://data.linkedmdb.org/resource/movie/actor, news, actor, dbpediaURI, http://data.nytimes.com/elements/topicPage, http://data.nytimes.com/elements/first_use, film, http://data.nytimes.com/elements/number_of_variants, http://data.nytimes.com/elements/latest_use, http://purl.org/dc/terms/title]
+Join Vertices: 5 ==> [http://www.w3.org/2002/07/owl#sameAs, actor, dbpediaURI, film, nytURI]
+Join Vertices to Total Vertices ratio: 0.2777777777777778
+     http://www.w3.org/2002/07/owl#sameAs Join Vertex Degree: 2, Join Vertex Type: Sink
+     actor Join Vertex Degree: 2, Join Vertex Type: path
+     dbpediaURI Join Vertex Degree: 2, Join Vertex Type: Sink
+     film Join Vertex Degree: 2, Join Vertex Type: Star
+     nytURI Join Vertex Degree: 6, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.8
+--------------------------------------------------------------
+16: C7 Query:  prefix swc: <http://data.semanticweb.org/ns/swc/ontology#> prefix swrc: <http://swrc.ontoware.org/ontology#> prefix eswc: <http://data.semanticweb.org/conference/eswc/> prefix foaf: <http://xmlns.com/foaf/0.1/> prefix dbpedia: <http://dbpedia.org/ontology/> prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> SELECT DISTINCT ?author ?role ?paper ?place ?capital ?latitude ?longitude  ?proceedings WHERE  { ?role swc:isRoleAt  eswc:2010. ?role swc:heldBy ?author . ?proceedings swc:relatedToEvent eswc:2010. ?paper swrc:author ?author . ?author foaf:based_near ?place. ?paper swc:isPartOf ?proceedings .  OPTIONAL { ?place dbpedia:capital ?capital; 	geo:lat ?latitude;	 	geo:long ?longitude. } }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 9
+Total Vertices:19 ==> [place, capital, http://data.semanticweb.org/conference/eswc/2010, latitude, http://data.semanticweb.org/ns/swc/ontology#isRoleAt, place, longitude, paper, http://data.semanticweb.org/ns/swc/ontology#isPartOf, http://www.w3.org/2003/01/geo/wgs84_pos#lat, http://swrc.ontoware.org/ontology#author, author, http://data.semanticweb.org/ns/swc/ontology#heldBy, proceedings, http://data.semanticweb.org/ns/swc/ontology#relatedToEvent, http://www.w3.org/2003/01/geo/wgs84_pos#long, role, http://xmlns.com/foaf/0.1/based_near, http://dbpedia.org/ontology/capital]
+Join Vertices: 6 ==> [paper, http://data.semanticweb.org/conference/eswc/2010, author, place, proceedings, role]
+Join Vertices to Total Vertices ratio: 0.3157894736842105
+     paper Join Vertex Degree: 2, Join Vertex Type: Star
+     http://data.semanticweb.org/conference/eswc/2010 Join Vertex Degree: 2, Join Vertex Type: Sink
+     author Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     place Join Vertex Degree: 3, Join Vertex Type: Star
+     proceedings Join Vertex Degree: 2, Join Vertex Type: path
+     role Join Vertex Degree: 2, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.3333333333333335
+--------------------------------------------------------------
+17: C8 Query:  prefix swc: <http://data.semanticweb.org/ns/swc/ontology#> prefix swrc: <http://swrc.ontoware.org/ontology#> prefix eswc: <http://data.semanticweb.org/conference/eswc/> prefix iswc:  <http://data.semanticweb.org/conference/iswc/2009/> prefix foaf: <http://xmlns.com/foaf/0.1/> prefix purl: <http://purl.org/ontology/bibo/> PREFIX dbpedia: <http://dbpedia.org/ontology/> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT DISTINCT * WHERE  { ?paper swc:isPartOf iswc:proceedings . iswc:proceedings swrc:address ?proceedingAddress. ?paper swrc:author ?author . ?author swrc:affiliation ?affiliation ;  rdfs:label ?fullnames ;  foaf:based_near ?place. OPTIONAL { ?place dbpedia:capital ?capital;        dbpedia:populationDensity  ?populationDensity;        dbpedia:governmentType   ?governmentType;        dbpedia:language  ?language ;        dbpedia:leaderTitle ?leaderTitle. } }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 11
+Total Vertices:24 ==> [http://dbpedia.org/ontology/populationDensity, http://swrc.ontoware.org/ontology#author, leaderTitle, http://www.w3.org/2000/01/rdf-schema#label, http://dbpedia.org/ontology/language, http://dbpedia.org/ontology/governmentType, http://dbpedia.org/ontology/capital, paper, http://swrc.ontoware.org/ontology#address, place, http://swrc.ontoware.org/ontology#affiliation, fullnames, http://dbpedia.org/ontology/leaderTitle, proceedingAddress, affiliation, capital, http://xmlns.com/foaf/0.1/based_near, http://data.semanticweb.org/conference/iswc/2009/proceedings, place, populationDensity, http://data.semanticweb.org/ns/swc/ontology#isPartOf, author, governmentType, language]
+Join Vertices: 4 ==> [http://data.semanticweb.org/conference/iswc/2009/proceedings, paper, place, author]
+Join Vertices to Total Vertices ratio: 0.16666666666666666
+     http://data.semanticweb.org/conference/iswc/2009/proceedings Join Vertex Degree: 2, Join Vertex Type: path
+     paper Join Vertex Degree: 2, Join Vertex Type: Star
+     place Join Vertex Degree: 5, Join Vertex Type: Star
+     author Join Vertex Degree: 4, Join Vertex Type: Hybrid
+Mean Join Vertices Degree: 3.25
+--------------------------------------------------------------
+18: C9 Query:  Prefix dbpedia: <http://dbpedia.org/ontology/> Prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> Prefix owl: <http://www.w3.org/2002/07/owl#> Prefix drugbank: <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/> SELECT * WHERE  { ?Drug rdf:type dbpedia:Drug . ?drugbankDrug owl:sameAs ?Drug . ?InteractionName drugbank:interactionDrug1 ?drugbankDrug . ?InteractionName drugbank:interactionDrug2 ?drugbankDrug2 . ?InteractionName drugbank:text ?IntEffect  OPTIONAL { ?drugbankDrug  drugbank:affectedOrganism 'Humans and other mammals'; drugbank:description ?description ; drugbank:structure ?structure ; drugbank:casRegistryNumber ?casRegistryNumber } } ORDER BY (?drugbankDrug) LIMIT 100
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 9
+Total Vertices:20 ==> [http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/affectedOrganism, structure, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug1, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug2, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/text, casRegistryNumber, drugbankDrug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/casRegistryNumber, drugbankDrug, Humans and other mammals, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/structure, description, InteractionName, Drug, http://dbpedia.org/ontology/Drug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/description, drugbankDrug2, http://www.w3.org/2002/07/owl#sameAs, IntEffect]
+Join Vertices: 4 ==> [InteractionName, Drug, drugbankDrug, drugbankDrug]
+Join Vertices to Total Vertices ratio: 0.2
+     InteractionName Join Vertex Degree: 3, Join Vertex Type: Star
+     Drug Join Vertex Degree: 2, Join Vertex Type: path
+     drugbankDrug Join Vertex Degree: 2, Join Vertex Type: path
+     drugbankDrug Join Vertex Degree: 4, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.75
+--------------------------------------------------------------
+19: S1 Query:  SELECT ?predicate ?object WHERE {    { <http://dbpedia.org/resource/Barack_Obama> ?predicate ?object }    UNION        { ?subject <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Barack_Obama> .      ?subject ?predicate ?object }  }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 3
+Total Vertices:8 ==> [subject, http://dbpedia.org/resource/Barack_Obama, predicate, http://www.w3.org/2002/07/owl#sameAs, http://dbpedia.org/resource/Barack_Obama, object, predicate, object]
+Join Vertices: 1 ==> [subject]
+Join Vertices to Total Vertices ratio: 0.125
+     subject Join Vertex Degree: 2, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+20: S10 Query:  SELECT ?Drug ?IntDrug ?IntEffect WHERE {     ?Drug <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Drug> .     ?y <http://www.w3.org/2002/07/owl#sameAs> ?Drug .     ?Int <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug1> ?y .     ?Int <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug2> ?IntDrug .     ?Int <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/text> ?IntEffect .  }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 5
+Total Vertices:11 ==> [y, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug1, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/interactionDrug2, IntDrug, IntEffect, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/text, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://dbpedia.org/ontology/Drug, Drug, http://www.w3.org/2002/07/owl#sameAs, Int]
+Join Vertices: 3 ==> [y, Drug, Int]
+Join Vertices to Total Vertices ratio: 0.2727272727272727
+     y Join Vertex Degree: 2, Join Vertex Type: path
+     Drug Join Vertex Degree: 2, Join Vertex Type: path
+     Int Join Vertex Degree: 3, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.3333333333333335
+--------------------------------------------------------------
+21: S11 Query:  SELECT ?drugDesc ?cpd ?equation WHERE {    ?drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugCategory> <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugcategory/cathartics> .    ?drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId> ?cpd .    ?drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/description> ?drugDesc .    ?enzyme <http://bio2rdf.org/ns/kegg#xSubstrate> ?cpd .    ?enzyme <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bio2rdf.org/ns/kegg#Enzyme> .    ?reaction <http://bio2rdf.org/ns/kegg#xEnzyme> ?enzyme .    ?reaction <http://bio2rdf.org/ns/kegg#equation> ?equation .  }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 7
+Total Vertices:15 ==> [drug, http://bio2rdf.org/ns/kegg#xSubstrate, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugCategory, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId, equation, cpd, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, drugDesc, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugcategory/cathartics, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/description, reaction, http://bio2rdf.org/ns/kegg#xEnzyme, enzyme, http://bio2rdf.org/ns/kegg#equation, http://bio2rdf.org/ns/kegg#Enzyme]
+Join Vertices: 4 ==> [drug, reaction, enzyme, cpd]
+Join Vertices to Total Vertices ratio: 0.26666666666666666
+     drug Join Vertex Degree: 3, Join Vertex Type: Star
+     reaction Join Vertex Degree: 2, Join Vertex Type: Star
+     enzyme Join Vertex Degree: 3, Join Vertex Type: Hybrid
+     cpd Join Vertex Degree: 2, Join Vertex Type: Sink
+Mean Join Vertices Degree: 2.5
+--------------------------------------------------------------
+22: S12 Query:  SELECT $drug $keggUrl $chebiImage WHERE {    $drug <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugs> .    $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId> $keggDrug .    $keggDrug <http://bio2rdf.org/ns/bio2rdf#url> $keggUrl .    $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/genericName> $drugBankName .    $chebiDrug <http://purl.org/dc/elements/1.1/title> $drugBankName .    $chebiDrug <http://bio2rdf.org/ns/bio2rdf#image> $chebiImage . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 6
+Total Vertices:13 ==> [http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/keggCompoundId, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/genericName, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://bio2rdf.org/ns/bio2rdf#image, chebiImage, drug, http://purl.org/dc/elements/1.1/title, drugBankName, keggDrug, http://bio2rdf.org/ns/bio2rdf#url, keggUrl, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugs, chebiDrug]
+Join Vertices: 4 ==> [drugBankName, keggDrug, chebiDrug, drug]
+Join Vertices to Total Vertices ratio: 0.3076923076923077
+     drugBankName Join Vertex Degree: 2, Join Vertex Type: Sink
+     keggDrug Join Vertex Degree: 2, Join Vertex Type: path
+     chebiDrug Join Vertex Degree: 2, Join Vertex Type: Star
+     drug Join Vertex Degree: 3, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.25
+--------------------------------------------------------------
+23: S13 Query:  SELECT ?drug ?title WHERE {     ?drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugCategory> <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugcategory/micronutrient> .    ?drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/casRegistryNumber> ?id .    ?keggDrug <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bio2rdf.org/ns/kegg#Drug> .    ?keggDrug <http://bio2rdf.org/ns/bio2rdf#xRef> ?id .    ?keggDrug <http://purl.org/dc/elements/1.1/title> ?title . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 5
+Total Vertices:11 ==> [http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/drugCategory, http://purl.org/dc/elements/1.1/title, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugcategory/micronutrient, title, http://bio2rdf.org/ns/kegg#Drug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/casRegistryNumber, drug, http://bio2rdf.org/ns/bio2rdf#xRef, id, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, keggDrug]
+Join Vertices: 3 ==> [drug, id, keggDrug]
+Join Vertices to Total Vertices ratio: 0.2727272727272727
+     drug Join Vertex Degree: 2, Join Vertex Type: Star
+     id Join Vertex Degree: 2, Join Vertex Type: Sink
+     keggDrug Join Vertex Degree: 3, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.3333333333333335
+--------------------------------------------------------------
+24: S14 Query:  SELECT $drug $transform $mass WHERE {    	{ $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/affectedOrganism>  'Humans and other mammals'.  	  $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/casRegistryNumber> $cas .  	  $keggDrug <http://bio2rdf.org/ns/bio2rdf#xRef> $cas .  	  $keggDrug <http://bio2rdf.org/ns/bio2rdf#mass> $mass .  	     	} .  	  OPTIONAL { $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/biotransformation> $transform . }  }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 5
+Total Vertices:12 ==> [transform, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/casRegistryNumber, cas, http://bio2rdf.org/ns/bio2rdf#xRef, drug, Humans and other mammals, mass, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/affectedOrganism, drug, http://bio2rdf.org/ns/bio2rdf#mass, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/biotransformation, keggDrug]
+Join Vertices: 3 ==> [cas, drug, keggDrug]
+Join Vertices to Total Vertices ratio: 0.25
+     cas Join Vertex Degree: 2, Join Vertex Type: Sink
+     drug Join Vertex Degree: 2, Join Vertex Type: Star
+     keggDrug Join Vertex Degree: 2, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+25: S2 Query:  SELECT ?party ?page  WHERE {    <http://dbpedia.org/resource/Barack_Obama> <http://dbpedia.org/ontology/party> ?party .    ?x <http://data.nytimes.com/elements/topicPage> ?page .    ?x <http://www.w3.org/2002/07/owl#sameAs> <http://dbpedia.org/resource/Barack_Obama> . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 3
+Total Vertices:7 ==> [x, page, http://www.w3.org/2002/07/owl#sameAs, http://dbpedia.org/ontology/party, http://data.nytimes.com/elements/topicPage, http://dbpedia.org/resource/Barack_Obama, party]
+Join Vertices: 2 ==> [x, http://dbpedia.org/resource/Barack_Obama]
+Join Vertices to Total Vertices ratio: 0.2857142857142857
+     x Join Vertex Degree: 2, Join Vertex Type: Star
+     http://dbpedia.org/resource/Barack_Obama Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+26: S3 Query:  SELECT ?president ?party ?page WHERE {    ?president <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/President> .    ?president <http://dbpedia.org/ontology/nationality> <http://dbpedia.org/resource/United_States> .    ?president <http://dbpedia.org/ontology/party> ?party .    ?x <http://data.nytimes.com/elements/topicPage> ?page .    ?x <http://www.w3.org/2002/07/owl#sameAs> ?president . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 5
+Total Vertices:11 ==> [http://www.w3.org/2002/07/owl#sameAs, http://dbpedia.org/ontology/nationality, page, http://www.w3.org/1999/02/22-rdf-syntax-ns#type, http://data.nytimes.com/elements/topicPage, x, party, http://dbpedia.org/ontology/party, president, http://dbpedia.org/resource/United_States, http://dbpedia.org/ontology/President]
+Join Vertices: 2 ==> [x, president]
+Join Vertices to Total Vertices ratio: 0.18181818181818182
+     x Join Vertex Degree: 2, Join Vertex Type: Star
+     president Join Vertex Degree: 4, Join Vertex Type: Hybrid
+Mean Join Vertices Degree: 3.0
+--------------------------------------------------------------
+27: S4 Query:  SELECT ?actor ?news WHERE {    ?film <http://purl.org/dc/terms/title> 'Tarzan' .    ?film <http://data.linkedmdb.org/resource/movie/actor> ?actor .    ?actor <http://www.w3.org/2002/07/owl#sameAs> ?x.    ?y <http://www.w3.org/2002/07/owl#sameAs> ?x .    ?y <http://data.nytimes.com/elements/topicPage> ?news }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 5
+Total Vertices:10 ==> [y, http://data.linkedmdb.org/resource/movie/actor, x, actor, http://data.nytimes.com/elements/topicPage, news, http://purl.org/dc/terms/title, Tarzan, film, http://www.w3.org/2002/07/owl#sameAs]
+Join Vertices: 5 ==> [y, x, actor, film, http://www.w3.org/2002/07/owl#sameAs]
+Join Vertices to Total Vertices ratio: 0.5
+     y Join Vertex Degree: 2, Join Vertex Type: Star
+     x Join Vertex Degree: 2, Join Vertex Type: Sink
+     actor Join Vertex Degree: 2, Join Vertex Type: path
+     film Join Vertex Degree: 2, Join Vertex Type: Star
+     http://www.w3.org/2002/07/owl#sameAs Join Vertex Degree: 2, Join Vertex Type: Sink
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+28: S5 Query:  SELECT ?film ?director ?genre WHERE {    ?film <http://dbpedia.org/ontology/director>  ?director .    ?director <http://dbpedia.org/ontology/nationality> <http://dbpedia.org/resource/Italy> .    ?x <http://www.w3.org/2002/07/owl#sameAs> ?film .    ?x <http://data.linkedmdb.org/resource/movie/genre> ?genre . }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 4
+Total Vertices:9 ==> [http://www.w3.org/2002/07/owl#sameAs, http://data.linkedmdb.org/resource/movie/genre, http://dbpedia.org/ontology/director, director, x, http://dbpedia.org/ontology/nationality, genre, http://dbpedia.org/resource/Italy, film]
+Join Vertices: 3 ==> [director, x, film]
+Join Vertices to Total Vertices ratio: 0.3333333333333333
+     director Join Vertex Degree: 2, Join Vertex Type: path
+     x Join Vertex Degree: 2, Join Vertex Type: Star
+     film Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+29: S6 Query:  SELECT ?name ?location ?news WHERE {    ?artist <http://xmlns.com/foaf/0.1/name> ?name .    ?artist <http://xmlns.com/foaf/0.1/based_near> ?location .    ?location <http://www.geonames.org/ontology#parentFeature> ?germany .     ?germany <http://www.geonames.org/ontology#name> 'Federal Republic of Germany' }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 4
+Total Vertices:9 ==> [http://www.geonames.org/ontology#parentFeature, name, location, http://www.geonames.org/ontology#name, http://xmlns.com/foaf/0.1/based_near, Federal Republic of Germany, germany, artist, http://xmlns.com/foaf/0.1/name]
+Join Vertices: 3 ==> [location, germany, artist]
+Join Vertices to Total Vertices ratio: 0.3333333333333333
+     location Join Vertex Degree: 2, Join Vertex Type: path
+     germany Join Vertex Degree: 2, Join Vertex Type: path
+     artist Join Vertex Degree: 2, Join Vertex Type: Star
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+30: S7 Query:  SELECT ?location ?news WHERE {    ?location <http://www.geonames.org/ontology#parentFeature> ?parent .     ?parent <http://www.geonames.org/ontology#name> 'California' .    ?y <http://www.w3.org/2002/07/owl#sameAs> ?location .    ?y <http://data.nytimes.com/elements/topicPage> ?news  }
+Basic Graph Patterns (BGPs): 1
+Triple Patterns: 4
+Total Vertices:9 ==> [http://www.w3.org/2002/07/owl#sameAs, http://data.nytimes.com/elements/topicPage, http://www.geonames.org/ontology#name, California, news, http://www.geonames.org/ontology#parentFeature, parent, y, location]
+Join Vertices: 3 ==> [parent, y, location]
+Join Vertices to Total Vertices ratio: 0.3333333333333333
+     parent Join Vertex Degree: 2, Join Vertex Type: path
+     y Join Vertex Degree: 2, Join Vertex Type: Star
+     location Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.0
+--------------------------------------------------------------
+31: S8 Query:  SELECT $drug $melt WHERE {     { $drug <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/meltingPoint> $melt. }     UNION     { $drug <http://dbpedia.org/ontology/Drug/meltingPoint> $melt . } }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 2
+Total Vertices:6 ==> [http://dbpedia.org/ontology/Drug/meltingPoint, melt, melt, drug, drug, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugbank/meltingPoint]
+Join Vertices: 0 ==> []
+Join Vertices to Total Vertices ratio: 0.0
+Mean Join Vertices Degree: NaN
+--------------------------------------------------------------
+32: S9 Query:  SELECT ?predicate ?object WHERE {     { <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00201> ?predicate ?object . }     UNION         { <http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00201> <http://www.w3.org/2002/07/owl#sameAs> ?caff .       ?caff ?predicate ?object . }  }
+Basic Graph Patterns (BGPs): 2
+Triple Patterns: 3
+Total Vertices:8 ==> [http://www.w3.org/2002/07/owl#sameAs, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00201, object, caff, object, predicate, http://www4.wiwiss.fu-berlin.de/drugbank/resource/drugs/DB00201, predicate]
+Join Vertices: 1 ==> [caff]
+Join Vertices to Total Vertices ratio: 0.125
+     caff Join Vertex Degree: 2, Join Vertex Type: path
+Mean Join Vertices Degree: 2.0
+
+BigRDFBench-Queries_Features.txt
+Displaying BigRDFBench-Queries_Features.txt.

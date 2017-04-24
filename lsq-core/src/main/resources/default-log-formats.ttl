@@ -1,0 +1,48 @@
+@prefix lsq: <http://lsq.aksw.org/vocab#> .
+@prefix fmt: <http://example.org/format/> .
+
+# TODO Transition to a proper vocabulary
+
+fmt:common
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:commonVirtuoso
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %{dd/MMM/yyyy HH:mm:ss Z}t \"%r\" %>s %b" ;
+  .
+
+
+fmt:commonVHost
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%v %h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:combined
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-agent}i\"" ;
+  .
+
+fmt:virtuoso
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %{dd/MMM/yyyy HH:mm:ss Z}t %u \"%U%q\"" ;
+  .
+
+fmt:distributed
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %l %u %t \"%r\" %>s %b" ;
+  .
+
+fmt:bio2rdf
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%h %t \"%r\" %>s" ;
+  .
+
+# Format for one sparql query per line
+fmt:sparql
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%sparql" ;
+  .
+
+
