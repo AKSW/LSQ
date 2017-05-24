@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 
 import org.aksw.beast.vocabs.PROV;
-import org.aksw.simba.lsq.util.Mapper;
-import org.aksw.simba.lsq.util.StringMapper;
-import org.aksw.simba.lsq.util.WebLogParser;
+import org.aksw.simba.lsq.parser.Mapper;
+import org.aksw.simba.lsq.parser.StringMapper;
+import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;

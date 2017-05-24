@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.util;
+package org.aksw.simba.lsq.parser;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -13,13 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aksw.beast.vocabs.PROV;
-import org.aksw.jena_sparql_api.utils.model.ResourceUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -299,8 +299,8 @@ public class WebLogParser {
         if(m != null) {
             result = true;
 
-            ResourceUtils.addLiteral(inout, LSQ.host, m.get("host"));
-            ResourceUtils.addLiteral(inout, LSQ.user, m.get("user"));
+            Optional.ofNullable(m.get("host")).ifPresent(o -> inout.addLiteral(LSQ.host, o));
+            Optional.ofNullable(m.get("user")).ifPresent(o -> inout.addLiteral(LSQ.user, o));
 
 //            String request = m.get("request");
 //            ResourceUtils.addLiteral(inout, LSQ.request, request);
@@ -311,9 +311,9 @@ public class WebLogParser {
 //                if(n.find()) {
             String pathStr = Objects.toString(m.get("path"));
 
-            ResourceUtils.addLiteral(inout, LSQ.protocol, m.get("protocol"));
-            ResourceUtils.addLiteral(inout, LSQ.path, pathStr);
-            ResourceUtils.addLiteral(inout, LSQ.verb, m.get("verb"));
+            Optional.ofNullable(m.get("protocol")).ifPresent(o -> inout.addLiteral(LSQ.protocol, o));
+            Optional.ofNullable(m.get(pathStr)).ifPresent(o -> inout.addLiteral(LSQ.path, o));
+            Optional.ofNullable(m.get("verb")).ifPresent(o -> inout.addLiteral(LSQ.verb, o));
 
             if(pathStr != null) {
 

@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.util;
+package org.aksw.simba.lsq.parser;
 
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.datatypes.TypeMapper;

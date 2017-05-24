@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.util;
+package org.aksw.simba.lsq.parser;
 
 import java.text.DateFormat;
 import java.util.Calendar;

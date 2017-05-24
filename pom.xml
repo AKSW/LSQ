@@ -50,6 +50,7 @@
 
 
     <modules>
+        <module>lsq-parser</module>
         <module>lsq-vocab-jena</module>
         <module>lsq-core</module>
         <module>lsq-cli</module>
@@ -79,6 +80,12 @@
 
             <dependency>
                 <groupId>org.aksw.simba.lsq</groupId>
+                <artifactId>lsq-parser</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.aksw.simba.lsq</groupId>
                 <artifactId>lsq-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -96,6 +103,13 @@
                 <classifier>jar-with-dependencies</classifier>
             </dependency>
 
+
+<!-- 			<dependency> -->
+<!-- 				<groupId>org.apache.jena</groupId> -->
+<!-- 				<artifactId>jena-arq</artifactId> -->
+<!-- 				<version>${jena.version}</version> -->
+<!-- 			</dependency> -->
+
             <dependency>
                 <groupId>org.aksw.beast</groupId>
                 <artifactId>beast-vocabs-jena</artifactId>
@@ -112,6 +126,12 @@
                         <artifactId>quartz</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-sparql-ext</artifactId>
+                <version>${jsa.version}</version>
             </dependency>
 
             <dependency>

@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.util;
+package org.aksw.simba.lsq.parser;
 
 import java.util.Map;
 import java.util.function.Function;

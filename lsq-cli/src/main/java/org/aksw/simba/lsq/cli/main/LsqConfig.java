@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.simba.lsq.util.Mapper;
+import org.aksw.simba.lsq.parser.Mapper;
 
 public class LsqConfig {
     protected Map<String, Mapper> logFmtRegistry;
