@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeDelegate;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
 
 public class RDFDatatypeDateFormat
@@ -26,11 +27,14 @@ public class RDFDatatypeDateFormat
     }
 
     public String unparse(Object value) {
-    	Calendar cal = (Calendar)value;
+        XSDDateTime dt = (XSDDateTime)value;
+        Calendar cal = dt.asCalendar();
+
+        //Calendar cal = (Calendar)value;
 //      Calendar cal = new GregorianCalendar();
 //      cal.setTime(date);
-    	//Date date = (Date) value;
-    	Date date = cal.getTime();
+        //Date date = (Date) value;
+        Date date = cal.getTime();
       String result = dateFormat.format(date);
 //        XSDDateTime tmp = new XSDDateTime(cal);
 //        String result = super.unparse(tmp);
@@ -40,7 +44,7 @@ public class RDFDatatypeDateFormat
     @Override
     public Object parse(String lexicalForm) {
         try {
-        	Date date = dateFormat.parse(lexicalForm);
+            Date date = dateFormat.parse(lexicalForm);
             //Object tmp = super.parse(lexicalForm);
             //XSDDateTime xsd = (XSDDateTime) tmp;
             //Calendar cal = xsd.asCalendar();
