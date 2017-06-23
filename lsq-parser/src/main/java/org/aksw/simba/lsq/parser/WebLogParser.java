@@ -7,6 +7,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -31,6 +32,11 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Converter;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
+import com.google.common.primitives.Ints;
 
 public class WebLogParser {
 
@@ -91,7 +97,7 @@ public class WebLogParser {
         Map<String, BiConsumer<StringMapper, String>> result = new HashMap<>();
 
         result.put("h", (m, x) -> m.addField(LSQ.host, "[^\\s]+", String.class));
-        result.put("l", (m, x) -> m.ignoreField("\\S+"));
+        result.put("l", (m, x) -> m.ignoreField("\\S+", "-"));
         result.put("u", (m, x) -> m.addField(LSQ.user, "\\S+", String.class));
         result.put("t", (m, x) -> {
             DateFormat dateFormat = x == null
@@ -108,14 +114,22 @@ public class WebLogParser {
 
         result.put("r", (m, x) -> {
             m.addField(LSQ.verb, "[^\\s\"]*", String.class);
-            m.skipPattern("\\s*");
+            m.skipPattern("\\s*", " ");
             m.addField(LSQ.path, "[^\\s\"]*", String.class);
-            m.skipPattern("\\s*");
+            m.skipPattern("\\s*", " ");
             m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
 
-        result.put(">s", (m, x) -> m.ignoreField("-|\\d{3}"));
-        result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
+
+        Converter<String, String> dashToZeroConverter = ConverterChain.create(
+                Maps.asConverter(HashBiMap.create(Collections.singletonMap("-", "0"))),
+                Converter.identity());
+
+
+        result.put(">s", (m, x) -> m.addField(LSQ.statusCode, "-|\\d{3}", Integer.class, dashToZeroConverter));
+        result.put("b", (m, x) -> m.addField(LSQ.numResponseBytes, "-|\\d+", Integer.class, dashToZeroConverter));
+        //result.put(">s", (m, x) -> m.ignoreField("-|\\d{3}"));
+        //result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
 
         result.put("U", (m, x) -> {
             m.addField(LSQ.path, "[^\\s\"?]*", String.class);
@@ -144,9 +158,9 @@ public class WebLogParser {
 
 
         result.put("sparql", (m, x) -> {
-        	m.addField(LSQ.query, ".*", String.class);
+            m.addField(LSQ.query, ".*", String.class);
         });
-        
+
 //      result.put("b", (x) -> "(?<bytecount>\\d+)");
 
 

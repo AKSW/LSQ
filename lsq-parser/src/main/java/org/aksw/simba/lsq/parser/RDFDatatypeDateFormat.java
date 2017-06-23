@@ -1,9 +1,12 @@
 package org.aksw.simba.lsq.parser;
 
 import java.text.DateFormat;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 
 import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeDelegate;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
@@ -44,6 +47,10 @@ public class RDFDatatypeDateFormat
     @Override
     public Object parse(String lexicalForm) {
         try {
+
+            //DateTimeFormatter f = DateTimeFormatter.ofPattern("dd MM uuuu HH:mm:ss.SSS X");
+            //OffsetDateTime odt = OffsetDateTime.parse ( input , f );
+
             Date date = dateFormat.parse(lexicalForm);
             //Object tmp = super.parse(lexicalForm);
             //XSDDateTime xsd = (XSDDateTime) tmp;

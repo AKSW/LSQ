@@ -30,9 +30,9 @@ public class FixMapper
 
         boolean isAccepted = isPrefixMatch && isSuffixMatch;
 
-        int result = isAccepted
-        		? delegate.parse(r, lexicalForm.substring(prefix.length(), lexicalForm.length() - suffix.length()))
-        		: 0;
+        int result = isAccepted && delegate != null
+                ? delegate.parse(r, lexicalForm.substring(prefix.length(), lexicalForm.length() - suffix.length()))
+                : 0;
 
         return result;
     }
@@ -44,7 +44,7 @@ public class FixMapper
             sb.append(prefix);
         }
 
-        String s = delegate.unparse(r);
+        String s = delegate == null ? "" : delegate.unparse(r);
         sb.append(s);
 
         if(suffix != null) {

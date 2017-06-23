@@ -146,6 +146,11 @@ public class LSQ {
     public static final Property verb = property("verb");
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
+    public static final Property statusCode = property("statusCode");
+    public static final Property numResponseBytes = property("numResponseBytes");
+
+
+
     // Query / Graph Pattern Features
     // None indicates the absence of features; must not appear with any other features
     public static final Resource None = resource("None");
