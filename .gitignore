@@ -4,6 +4,8 @@
 .settings
 target
 
+pom.xml.versionBackup
+
 deptree.txt
 LSQ-SWDF-test.ttl
 
