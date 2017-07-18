@@ -88,6 +88,7 @@ public class LsqCliParser {
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
+    protected OptionSpec<Boolean> reuseLogIri;
 
     public OptionParser getOptionParser() {
         return parser;
@@ -215,6 +216,13 @@ public class LsqCliParser {
                 .acceptsAll(Arrays.asList("fedf"), "URIs of federated endpoints")
                 .withRequiredArg()
                 .ofType(File.class);
+
+//        reuseLogIri = parser
+//                .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
+//                .withRequiredArg()
+//                .defaultsTo(LSQ.defaultLsqrNs)
+//                ;
+
     }
 
 
@@ -280,12 +288,15 @@ public class LsqCliParser {
         LsqConfig config = new LsqConfig();
 
 
+
         config.setLogFmtRegistry(logFmtRegistry);
         config.setOutBaseIri(baseUri);
         config.setExperimentIri(expBaseUri);
 
         config.setInQueryLogFile(inputOs.value(options));
         config.setInQueryLogFormat(logFormatOs.value(options));
+
+        config.setReuseLogIri(logFormatOs.value(options).equals("rdf"));
 
         config.setFetchDatasetSizeEnabled(config.isFetchDatasetSizeEnabled());
 
@@ -584,6 +595,8 @@ public class LsqCliParser {
         result.setDatasetSize(datasetSize);
         result.setStmtParser(sparqlStmtParser);
         result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));
+
+        result.setReuseLogIri(config.isReuseLogIri());
 
         return result;
     }

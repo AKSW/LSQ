@@ -60,6 +60,8 @@ public class LsqConfig {
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
 
+    protected boolean reuseLogIri;
+
     public boolean isFetchDatasetSizeEnabled() {
         return isFetchDatasetSizeEnabled;
     }
@@ -300,6 +302,12 @@ public class LsqConfig {
         this.datasetSize = datasetSize;
     }
 
+    public boolean isReuseLogIri() {
+        return reuseLogIri;
+    }
 
+    public void setReuseLogIri(boolean reuseLogIri) {
+        this.reuseLogIri = reuseLogIri;
+    }
 
 }

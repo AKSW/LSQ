@@ -65,6 +65,9 @@ public class LsqProcessor
     protected Function<String, SparqlStmt> stmtParser;
     protected SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd_hh:mm:ss");
 
+
+    protected boolean reuseLogIri;
+
     // Config attributes
     protected String baseUri;
     protected boolean isRdfizerQueryStructuralFeaturesEnabled;
@@ -112,6 +115,14 @@ public class LsqProcessor
 
     public void setBaseUri(String baseUri) {
         this.baseUri = baseUri;
+    }
+
+    public boolean isReuseLogIri() {
+        return reuseLogIri;
+    }
+
+    public void setReuseLogIri(boolean reuseLogIri) {
+        this.reuseLogIri = reuseLogIri;
     }
 
     public boolean isRdfizerQueryStructuralFeaturesEnabled() {
@@ -299,14 +310,24 @@ public class LsqProcessor
                     //Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
 
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
+
                     NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
 
-                    String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
-                    NestedResource queryRes = baseRes.nest("q-" + queryHash);
+                    Function<String, NestedResource> queryAspectFn;
+                    NestedResource queryRes;
+                    if(reuseLogIri && r.isURIResource()) {
+                        queryRes = new NestedResource(r);
+
+                        queryAspectFn = (aspect) -> queryRes.nest("-" + aspect); //.nest("q-" + queryHash);
+                    } else {
+
+                        String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
+                        queryRes = baseRes.nest("q-" + queryHash);
+                        queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
+                    }
 
                     result = queryRes.get();
 
-                    Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 
                     result
                         .addProperty(RDF.type, LSQ.Query)
@@ -398,7 +419,7 @@ public class LsqProcessor
 
             Calendar now = Calendar.getInstance();
             String nowStr = dt.format(now.getTime());
-            Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel + "-").nest("-" + nowStr).get();
+            Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).nest("-" + nowStr).get();
 
             if(expRes != null) {
                 queryExecRes
@@ -428,7 +449,7 @@ public class LsqProcessor
         String timestampStr = dt.format(timestamp.getTime());
         //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
-        Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel + "-").nest("-" + hashedIp + "-" + timestampStr).get();
+        Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel).nest("-" + hashedIp + "-" + timestampStr).get();
 
         // Express that the query execution was recorded
         // at some point in time by some user at some service
@@ -457,7 +478,7 @@ public class LsqProcessor
             query = query.cloneQuery();
             query.getGraphURIs().clear();
 
-            Resource spinRes = queryAspectFn.apply("spin-").get();
+            Resource spinRes = queryAspectFn.apply("spin").get();
 //          queryNo++;
 
         // .. generate the spin model ...
@@ -499,7 +520,7 @@ public class LsqProcessor
 //          }
 
             //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-            Resource featureRes = queryAspectFn.apply("sf-").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
+            Resource featureRes = queryAspectFn.apply("sf").get(); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
 
             queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
 
