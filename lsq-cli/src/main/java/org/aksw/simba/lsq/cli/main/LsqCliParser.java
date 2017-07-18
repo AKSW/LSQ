@@ -386,7 +386,7 @@ public class LsqCliParser {
     public static Map<String, Function<InputStream, Stream<Resource>>> wrap(Map<String, Function<InputStream, Stream<Resource>>> result, Map<String, Mapper> webLogParserRegistry) {
         Map<String, Function<InputStream, Stream<Resource>>> tmp = result == null
                 ? new HashMap<>()
-                : null;
+                : result;
 
         webLogParserRegistry.forEach((name, mapper) -> {
             Function<InputStream, Stream<Resource>> fn = (in) -> createResourceStreamFromMapperRegistry(in, webLogParserRegistry::get, name);
