@@ -24,7 +24,8 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <project.description>A framework for RDFizing and annotating SPARQL queries based on SPIN</project.description>
+                <project.description>A framework for RDFizing and annotating SPARQL
+                    queries based on SPIN</project.description>
             </properties>
         </profile>
     </profiles>
@@ -33,19 +34,19 @@
 
     <build>
         <plugins>
- <plugin>
-    <groupId>org.apache.maven.plugins</groupId>
-    <artifactId>maven-deploy-plugin</artifactId>
-    <configuration>
-        <skip>true</skip>
-    </configuration>
-  </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
 
 
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-			</plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <artifactId>jdeb</artifactId>
@@ -74,14 +75,14 @@
 
                             <dataSet>
 
-<!--                                 <data> -->
-<!--                                     <type>directory</type> -->
-<!--                                     <src>${basedir}/src/deb/resources/etc</src> -->
-<!--                                     <mapper> -->
-<!--                                         <type>perm</type> -->
-<!--                                         <prefix>/etc</prefix> -->
-<!--                                     </mapper> -->
-<!--                                 </data> -->
+                                <!-- <data> -->
+                                <!-- <type>directory</type> -->
+                                <!-- <src>${basedir}/src/deb/resources/etc</src> -->
+                                <!-- <mapper> -->
+                                <!-- <type>perm</type> -->
+                                <!-- <prefix>/etc</prefix> -->
+                                <!-- </mapper> -->
+                                <!-- </data> -->
 
                                 <data>
                                     <type>directory</type>
@@ -126,11 +127,11 @@
             <groupId>org.aksw.simba.lsq</groupId>
             <artifactId>lsq-cli</artifactId>
         </dependency>
-<!--     	<dependency> -->
-<!-- 			<groupId>org.slf4j</groupId> -->
-<!-- 			<artifactId>slf4j-log4j12</artifactId> -->
-<!-- 			<scope>compile</scope> -->
-<!-- 		</dependency> -->
+        <!-- <dependency> -->
+        <!-- <groupId>org.slf4j</groupId> -->
+        <!-- <artifactId>slf4j-log4j12</artifactId> -->
+        <!-- <scope>compile</scope> -->
+        <!-- </dependency> -->
     </dependencies>
 </project>
 

@@ -12,11 +12,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import org.aksw.commons.collections.utils.StreamUtils;
 import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
@@ -33,15 +36,18 @@ import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.atlas.lib.Sink;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
+import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +68,9 @@ public class LsqCliParser {
 
     protected OptionParser parser = new OptionParser();
 
-    protected Map<String, Mapper> logFmtRegistry;
+    //protected Map<String, Mapper> logFmtRegistry;
+    protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
+
 
     protected OptionSpec<File> inputOs;
     protected OptionSpec<File> outputOs;
@@ -86,10 +94,23 @@ public class LsqCliParser {
     }
 
     public LsqCliParser() {
-        this(WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
+        this(createDefaultLogFmtRegistry());
     }
 
-    public LsqCliParser(Map<String, Mapper> logFmtRegistry) {
+
+    public static Map<String, Function<InputStream, Stream<Resource>>> createDefaultLogFmtRegistry() {
+        Map<String, Function<InputStream, Stream<Resource>>> result = new HashMap<>();
+
+        // Load line based log formats
+        wrap(result, WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
+
+        // Add custom RDF based log format(s)
+        result.put("rdf", (in) -> LsqCliParser.createResourceStreamFromRdf(in, Lang.NTRIPLES, "http://example.org/"));
+
+        return result;
+    }
+
+    public LsqCliParser(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
         this.parser = new OptionParser();
 
         this.logFmtRegistry = logFmtRegistry;
@@ -252,6 +273,9 @@ public class LsqCliParser {
 
 
 
+//        Map<String, Function<InputStream, Stream<Resource>>> inputFormatRegistry = new HashMap();
+//        wrap(inputFormatRegistry, )
+
 
         LsqConfig config = new LsqConfig();
 
@@ -311,6 +335,68 @@ public class LsqCliParser {
     }
 
 
+    public static Stream<Resource> createResourceStreamFromMapperRegistry(InputStream in, Function<String, Mapper> fmtSupplier, String fmtName) {
+        Mapper mapper = fmtSupplier.apply(fmtName);
+        if(mapper == null) {
+            throw new RuntimeException("No mapper found for '" + fmtName + "'");
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        Stream<String> stream = reader.lines();
+
+        Stream<Resource> result = stream
+                .map(line -> {
+                    Resource r = ModelFactory.createDefaultModel().createResource();
+                    r.addLiteral(RDFS.label, line);
+
+                    boolean parsed;
+                    try {
+                        parsed = mapper.parse(r, line) != 0;
+                    } catch(Exception e) {
+                        parsed = false;
+                        logger.warn("Parser error", e);
+                    }
+
+                    if(!parsed) {
+                        r.addLiteral(LSQ.processingError, "Failed to parse log line");
+                    }
+
+                    return r;
+                })
+                ;
+
+        return result;
+    }
+
+
+    public static Stream<Resource> createResourceStreamFromRdf(InputStream in, Lang lang, String baseIRI) {
+        Iterator<Triple> it = RDFDataMgr.createIteratorTriples(in, lang, baseIRI);
+
+        // Filter out triples that do not have the right predicateS
+        Stream<Triple> s = StreamUtils.stream(it)
+                .filter(t -> t.getPredicate().equals(LSQ.text.asNode()));
+
+        Stream<Resource> result = s.map(t -> ModelUtils.convertGraphNodeToRDFNode(t.getSubject(), ModelFactory.createDefaultModel()).asResource()
+                    .addLiteral(LSQ.query, t.getObject().getLiteralValue()));
+
+        return result;
+    }
+
+
+    public static Map<String, Function<InputStream, Stream<Resource>>> wrap(Map<String, Function<InputStream, Stream<Resource>>> result, Map<String, Mapper> webLogParserRegistry) {
+        Map<String, Function<InputStream, Stream<Resource>>> tmp = result == null
+                ? new HashMap<>()
+                : null;
+
+        webLogParserRegistry.forEach((name, mapper) -> {
+            Function<InputStream, Stream<Resource>> fn = (in) -> createResourceStreamFromMapperRegistry(in, webLogParserRegistry::get, name);
+            tmp.put(name, fn);
+        });
+
+        return tmp;
+    }
+
+
     public static Stream<Resource> createReader(LsqConfig config) throws FileNotFoundException {
 
         File inputFile = config.getInQueryLogFile();
@@ -326,43 +412,51 @@ public class LsqCliParser {
         Long firstItemOffset = config.getFirstItemOffset();
         String logFormat = config.getInQueryLogFormat();
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        Function<InputStream, Stream<Resource>> webLogParser = config.getLogFmtRegistry().get(logFormat);
 
-        Stream<String> stream = reader.lines();
+        //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
+        if(webLogParser == null) {
+            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+        }
 
+//        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+
+//        Stream<String> stream = reader.lines();
+
+        Stream<Resource> result = webLogParser.apply(in);
         if(firstItemOffset != null) {
-            stream = stream.limit(firstItemOffset);
+            result = result.limit(firstItemOffset);
         }
 
         //Model logModel = ModelFactory.createDefaultModel();
 
 
-        Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
-        if(webLogParser == null) {
-            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
-        }
         //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
 
         // TODO Use zipWithIndex in order to make the index part of the resource
-        Stream<Resource> result = stream
-            .map(line -> {
-                Resource r = ModelFactory.createDefaultModel().createResource();
-                r.addLiteral(RDFS.label, line);
-
-                boolean parsed;
-                try {
-                    parsed = webLogParser.parse(r, line) != 0;
-                } catch(Exception e) {
-                    parsed = false;
-                    logger.warn("Parser error", e);
-                }
-
-                if(!parsed) {
-                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
-                }
-
-                return r;
-            });
+//        Stream<Resource> result = stream
+//            .map(line -> {
+//                Resource r = ModelFactory.createDefaultModel().createResource();
+//                r.addLiteral(RDFS.label, line);
+//
+//                boolean parsed;
+//                try {
+//                    parsed = webLogParser.parse(r, line) != 0;
+//                } catch(Exception e) {
+//                    parsed = false;
+//                    logger.warn("Parser error", e);
+//                }
+//
+//                if(!parsed) {
+//                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
+//                }
+//
+//                return r;
+//            })
+//            ;
+//            .onClose(() -> {
+//                try { reader.close(); } catch (IOException e) { throw new RuntimeException(e); }
+//            });
 
 //        result.onClose(() -> {
 //            try {

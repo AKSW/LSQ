@@ -20,6 +20,8 @@ Executions can be marked as local and remote: a remote execution of a query take
 
 
 ### Supported log formats
+
+#### Web log formats
 Default log formats are configured in the [default-log-formats.ttl](lsq-core/src/main/resources/default-log-formats.ttl) file, which contains entries such as:
 ```rdf
 fmt:combined
@@ -31,6 +33,19 @@ At present, LSQ performs lookup of patterns by their local name, such as _combin
 
 The pattern definitions follow the specification of Apache's [mod_log_config](http://httpd.apache.org/docs/current/mod/mod_log_config.html).
 Custom log formats can thus be easily added by simply extending the underlying RDF model.
+
+#### RDF-based formats
+The LSQ tool can also RDFize queries from RDF datasets
+
+*TODO* Finish this section
+```bash
+curl -GLH 'Accept: text/plain' http://lsq.aksw.org/sparql --data-urlencode query='PREFIX lsq: <http://lsq.aksw.org/vocab#> CONSTRUCT WHERE { ?s lsq:text ?o } LIMIT 10' | lsq -m rdf ...
+```
+
+Notes:
+
+* `-u`: Do not reuse the subject of the input triple for the output; i.e. given an input triple <s> <p> <o>, the output will *not* be attached to <s>, rather a new resource will be allocated.
+* `-m rdf`: rdf is a currently hard-coded pseudo-log format (i.e. not configurable via the default log formats mentioned above).
 
 
 ## Vocabulary

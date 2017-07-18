@@ -1,16 +1,21 @@
 package org.aksw.simba.lsq.cli.main;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.simba.lsq.parser.Mapper;
+import org.apache.jena.rdf.model.Resource;
 
 public class LsqConfig {
-    protected Map<String, Mapper> logFmtRegistry;
+    protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
+
+    //protected Map<String, Mapper> logFmtRegistry;
 
     protected File inQueryLogFile;
     protected String inQueryLogFormat;
@@ -88,21 +93,34 @@ public class LsqConfig {
     }
 
 
-    public Map<String, Mapper> getLogFmtRegistry() {
+    public Map<String, Function<InputStream, Stream<Resource>>> getLogFmtRegistry() {
         return logFmtRegistry;
     }
 
 
-    public void setLogFmtRegistry(Map<String, Mapper> logFmtRegistry) {
+
+    public LsqConfig setLogFmtRegistry(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
         this.logFmtRegistry = logFmtRegistry;
+        return this;
     }
+
+
+//    public Map<String, Mapper> getLogFmtRegistry() {
+//        return logFmtRegistry;
+//    }
+//
+//
+//    public void setLogFmtRegistry(Map<String, Mapper> logFmtRegistry) {
+//        this.logFmtRegistry = logFmtRegistry;
+//    }
+
+
 
 
 
     public File getOutFile() {
         return outFile;
     }
-
 
     public void setOutFile(File outFile) {
         this.outFile = outFile;
