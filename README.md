@@ -42,6 +42,10 @@ The LSQ tool can also RDFize queries from RDF datasets
 curl -GLH 'Accept: text/plain' http://lsq.aksw.org/sparql --data-urlencode query='PREFIX lsq: <http://lsq.aksw.org/vocab#> CONSTRUCT WHERE { ?s lsq:text ?o } LIMIT 10' | lsq -m rdf ...
 ```
 
+```bash
+cat unsorted-files/sparqlqc-all.nt | lsq -e http://localhost:8890/sparql -m rdf -l sparqlqc -p http://localhost/sparqlqc/sparql -r q > unsorted-files/sparqlqc-all-lsq.ttl
+```
+
 Notes:
 
 * `-u`: Do not reuse the subject of the input triple for the output; i.e. given an input triple <s> <p> <o>, the output will *not* be attached to <s>, rather a new resource will be allocated.
