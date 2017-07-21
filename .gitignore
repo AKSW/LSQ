@@ -26,3 +26,6 @@ d.ttl
 outfile.ttl
 deptree.txt
 
+trash
+*.swp
+
