@@ -460,7 +460,7 @@ public class LsqProcessor
         queryExecRecRes
             //.addProperty(RDF.type, LSQ.)
             .addLiteral(PROV.atTime, timestampLiteral) //.inModel(queryModel))
-            .addProperty(LSQ.wasAssociatedWith, agentRes)
+            .addProperty(PROV.wasAssociatedWith, agentRes)
             ;
 
         if(datasetEndpointUri != null) {

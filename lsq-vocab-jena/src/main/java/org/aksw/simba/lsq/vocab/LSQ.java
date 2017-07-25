@@ -78,7 +78,7 @@ public class LSQ {
     public static final Property hasSpin = property("hasSpin");
     public static final Property hasTP = property("hasTP");
     public static final Property hasBGP = property("hasBGP");
-    public static final Property tpText = property("tpText");
+    //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
     public static final Property execError = property("execError");
     public static final Property processingError = property("processingError");
@@ -112,7 +112,7 @@ public class LSQ {
     public static final Property meanTPSelectivity = property("meanTPSelectivity");
 
     // TODO This is PROV vocab
-    public static final Property wasAssociatedWith = property("wasAssociatedWith");
+    //public static final Property wasAssociatedWith = property("wasAssociatedWith");
 
     public static final Property usesFeature = property("usesFeature");
 

@@ -172,6 +172,10 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>log4j-over-slf4j</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-core</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -380,7 +384,7 @@
             <build>
                 <plugins>
 
- 
+
                 </plugins>
             </build>
         </profile>
