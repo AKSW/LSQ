@@ -1,6 +1,8 @@
 package org.aksw.simba.lsq.upgrade.v0_0_1_to_1_0_0;
 
 import java.io.FileOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
@@ -20,17 +22,47 @@ import org.slf4j.LoggerFactory;
 public class MainLsqUpgrade {
 
     private static final Logger logger = LoggerFactory.getLogger(MainLsqUpgrade.class);
+//
+//    public static String extractDatasetLabel(String filename) {
+//        Pattern pattern = Pattern.compile("lsq.(\\w*)");
+//
+//        Matcher m = pattern.matcher(filename);
+//        String result = null;
+//        if(m.find()) {
+//            result = m.group(1);
+//        }
+//
+//        return result;
+//    }
+//
+//    public static void main(String[] args) throws Exception {
+//        File folder = new File("/home/raven/Projects/Eclipse/lsq-parent/unsorted-files/trash/upgrade-test/");
+//
+//        System.out.println(extractDatasetLabel("lsq-affymetrix-sorted.zip"));
+//
+//    }
 
+//
+//    public static void main(String[] args) throws Exception {
+//
+//    }
 
     public static void main(String[] args) throws Exception {
         //Model model = ModelFactory.createDefaultModel();
 
-        Model model = RDFDataMgr.loadModel(args[0]);
+        String datasetUrl = args[0];
+        if(datasetUrl == null) {
+            throw new RuntimeException("URL / Filename of LSQ dataset to upgrade expected as only argument");
+        }
+
+
+        Model model = RDFDataMgr.loadModel(datasetUrl);
+        //String datasetLabel = args[1];
 
         logger.info("Loaded data");
 
 
-        String datasetLabel;
+        //String datasetLabel;
 
         SparqlService ss = FluentSparqlService.from(model).create();
 
@@ -94,18 +126,18 @@ public class MainLsqUpgrade {
 
 
         //System.out.println(ServiceUtils.fetchInteger(ss.getQueryExecutionFactory().createQueryExecution("PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT (COUNT(*) AS ?x) { ?s lsq:hasRemoteExecution ?o  }"), Vars.x));
-        System.out.println(ServiceUtils.fetchInteger(ss.getQueryExecutionFactory().createQueryExecution("PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT (COUNT(*) AS ?x) { ?s ?p ?o }"), Vars.x));
+//        System.out.println(ServiceUtils.fetchInteger(ss.getQueryExecutionFactory().createQueryExecution("PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT (COUNT(*) AS ?x) { ?s ?p ?o }"), Vars.x));
 
+//new FileOutputStream("/tmp/output.ttl")
+        RDFDataMgr.write(System.out, model, RDFFormat.NTRIPLES);
 
-        RDFDataMgr.write(new FileOutputStream("/tmp/output.ttl"), model, RDFFormat.TURTLE_PRETTY);
-
-        Server server = FactoryBeanSparqlServer.newInstance()
-            .setSparqlServiceFactory(ss.getQueryExecutionFactory())
-            .create();
-
-        logger.info("Starting server");
-        server.start();
-        server.join();
+//        Server server = FactoryBeanSparqlServer.newInstance()
+//            .setSparqlServiceFactory(ss.getQueryExecutionFactory())
+//            .create();
+//
+//        logger.info("Starting server");
+//        server.start();
+//        server.join();
     }
 
 
