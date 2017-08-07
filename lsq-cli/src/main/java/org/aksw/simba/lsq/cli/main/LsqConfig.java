@@ -61,6 +61,8 @@ public class LsqConfig {
 
     protected boolean reuseLogIri;
 
+    protected boolean emitProcessMetadata;
+
     public boolean isFetchDatasetSizeEnabled() {
         return isFetchDatasetSizeEnabled;
     }
@@ -309,4 +311,12 @@ public class LsqConfig {
         this.reuseLogIri = reuseLogIri;
     }
 
+    public boolean isEmitProcessMetadata() {
+        return emitProcessMetadata;
+    }
+
+    public void setEmitProcessMetadata(boolean emitProcessMetadata) {
+        this.emitProcessMetadata = emitProcessMetadata;
+    }
 }
+

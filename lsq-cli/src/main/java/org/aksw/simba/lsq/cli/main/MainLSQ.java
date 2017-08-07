@@ -6,20 +6,14 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.beast.vocabs.PROV;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.apache.jena.atlas.lib.Sink;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.core.Prologue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -78,11 +72,13 @@ public class MainLSQ
       //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
         Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
 
-        itemWriter.send(
-               expRes.inModel(ModelFactory.createDefaultModel())
-                   //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-                   .addLiteral(PROV.startedAtTime, Calendar.getInstance())
-        );
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                   expRes.inModel(ModelFactory.createDefaultModel())
+                       //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                       .addLiteral(PROV.startedAtTime, Calendar.getInstance())
+            );
+        }
 
         //RDFDataMgr.write(out, expModel, outFormat);
 
@@ -91,12 +87,13 @@ public class MainLSQ
             .filter(x -> x != null)
             .forEach(itemWriter::send);
 
-        itemWriter.send(
-                expRes.inModel(ModelFactory.createDefaultModel())
-                    //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-                .addLiteral(PROV.endAtTime, Calendar.getInstance())
-        );
-
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                    expRes.inModel(ModelFactory.createDefaultModel())
+                        //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                    .addLiteral(PROV.endAtTime, Calendar.getInstance())
+            );
+        }
 
         itemWriter.flush();
         itemWriter.close();

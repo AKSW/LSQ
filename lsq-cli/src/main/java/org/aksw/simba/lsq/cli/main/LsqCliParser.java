@@ -146,7 +146,7 @@ public class LsqCliParser {
                 ;
 
         rdfizerOs = parser
-                .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og and (q)uery")
+                .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og, (q)uery and (p)rocess metadata")
                 .withOptionalArg()
                 .defaultsTo("elq")
                 ;
@@ -328,6 +328,7 @@ public class LsqCliParser {
         config.setRdfizerQueryStructuralFeaturesEnabled(rdfizer.contains("q"));
         config.setRdfizerQueryLogRecordEnabled(rdfizer.contains("l"));
         config.setRdfizerQueryExecutionEnabled(rdfizer.contains("e"));
+        config.setEmitProcessMetadata(rdfizer.contains("p"));
 
         config.setOutFile(outputOs.value(options));
 
