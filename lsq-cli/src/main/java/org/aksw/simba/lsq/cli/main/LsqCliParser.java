@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.commons.collections.utils.StreamUtils;
 import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
@@ -55,6 +54,7 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.collect.Streams;
 import com.google.common.io.Files;
 
 import joptsimple.OptionParser;
@@ -84,11 +84,11 @@ public class LsqCliParser {
     protected OptionSpec<Long> datasetSizeOs;
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
+    protected OptionSpec<Boolean> logIriAsBaseIriOs;
     protected OptionSpec<String> datasetEndpointUriOs;
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
-    protected OptionSpec<Boolean> reuseLogIri;
 
     public OptionParser getOptionParser() {
         return parser;
@@ -195,6 +195,13 @@ public class LsqCliParser {
                 .defaultsTo(LSQ.defaultLsqrNs)
                 ;
 
+        logIriAsBaseIriOs = parser
+                .acceptsAll(Arrays.asList("i", "logirisasbase"), "Use IRIs in RDF query logs as the base IRIs")
+                .withRequiredArg()
+                .ofType(Boolean.class)
+                .defaultsTo(false)
+                ;
+
         datasetEndpointUriOs = parser
                 .acceptsAll(Arrays.asList("p", "public"), "Public endpoint URL - e.g. http://example.org/sparql")
                 .withRequiredArg()
@@ -296,7 +303,14 @@ public class LsqCliParser {
         config.setInQueryLogFile(inputOs.value(options));
         config.setInQueryLogFormat(logFormatOs.value(options));
 
-        config.setReuseLogIri(logFormatOs.value(options).equals("rdf"));
+        // By default, reuse log iris if the format is rdf; unless it is explicitly overridden ...
+        boolean reuseLogIris = !options.has(logIriAsBaseIriOs)
+                ? logFormatOs.value(options).equals("rdf")
+                : logIriAsBaseIriOs.value(options);
+
+        config.setReuseLogIri(reuseLogIris);
+
+
 
         config.setFetchDatasetSizeEnabled(config.isFetchDatasetSizeEnabled());
 
@@ -384,7 +398,7 @@ public class LsqCliParser {
         Iterator<Triple> it = RDFDataMgr.createIteratorTriples(in, lang, baseIRI);
 
         // Filter out triples that do not have the right predicateS
-        Stream<Triple> s = StreamUtils.stream(it)
+        Stream<Triple> s = Streams.stream(it)
                 .filter(t -> t.getPredicate().equals(LSQ.text.asNode()));
 
         Stream<Resource> result = s.map(t -> ModelUtils.convertGraphNodeToRDFNode(t.getSubject(), ModelFactory.createDefaultModel()).asResource()

@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.simba.lsq.parser.Mapper;
 import org.apache.jena.rdf.model.Resource;
 
 public class LsqConfig {
