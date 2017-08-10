@@ -1,16 +1,11 @@
 package org.aksw.simba.lsq.upgrade.v0_0_1_to_1_0_0;
 
-import java.io.FileOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
+import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlService;
-import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.server.utils.FactoryBeanSparqlServer;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
-import org.aksw.jena_sparql_api.utils.Vars;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.eclipse.jetty.server.Server;
@@ -48,6 +43,24 @@ public class MainLsqUpgrade {
 //    }
 
     public static void main(String[] args) throws Exception {
+        //runUpgrade(args);
+        runServer();
+    }
+
+    public static void runServer() throws Exception {
+        QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://localhost:8950/sparql").create();
+
+        Server server = FactoryBeanSparqlServer.newInstance().setSparqlServiceFactory(qef)
+                .create();
+
+        logger.info("Starting server");
+        server.start();
+        server.join();
+
+    }
+
+
+    public static void runUpgrade(String[] args) {
         //Model model = ModelFactory.createDefaultModel();
 
         String datasetUrl = args[0];

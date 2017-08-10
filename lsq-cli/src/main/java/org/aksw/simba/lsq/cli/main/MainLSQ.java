@@ -13,16 +13,16 @@ import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.SpringApplicationConfiguration;
 /**
  * This is the main class used to RDFise query logs
  * @author Saleem
  *
  */
-@SpringApplicationConfiguration
+//@SpringApplicationConfiguration
 public class MainLSQ
 {
 
@@ -33,6 +33,7 @@ public class MainLSQ
 //    }
 
     public static void main(String[] args) throws IOException {
+
         LsqCliParser cliParser = new LsqCliParser();
         LsqConfig config = cliParser.parse(args);
 

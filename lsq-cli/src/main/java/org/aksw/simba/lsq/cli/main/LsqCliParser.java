@@ -251,7 +251,8 @@ public class LsqCliParser {
         String expBaseUri = expBaseUriOs.value(options);
         String outFormatStr = outFormatOs.value(options);
 
-        RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equals(outFormatStr)).findFirst().orElse(null);
+        RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equalsIgnoreCase(outFormatStr)).findFirst().orElse(null);
+        //RDFFormat outFormat = RDFWriterRegistry.get
         if(outFormat == null) {
             throw new RuntimeException("No Jena writer found for name: " + outFormatStr);
         }
@@ -331,6 +332,7 @@ public class LsqCliParser {
         config.setEmitProcessMetadata(rdfizer.contains("p"));
 
         config.setOutFile(outputOs.value(options));
+        config.setOutRdfFormat(outFormatStr);
 
         return config;
     }
@@ -340,7 +342,10 @@ public class LsqCliParser {
         String outRdfFormat = config.getOutRdfFormat();
         File outFile = config.getOutFile();
 
-        RDFFormat rdfFormat = StringUtils.isEmpty(outRdfFormat) ? RDFFormat.TURTLE_BLOCKS : RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
+        RDFFormat rdfFormat = StringUtils.isEmpty(outRdfFormat)
+                ? RDFFormat.TURTLE_BLOCKS
+                :RDFWriterRegistry.registered().stream().filter(f -> f.toString().equalsIgnoreCase(outRdfFormat)).findFirst().orElse(null);
+                        // : RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
         if(rdfFormat == null) {
             throw new RuntimeException("No rdf format found for " + outRdfFormat);
         }
