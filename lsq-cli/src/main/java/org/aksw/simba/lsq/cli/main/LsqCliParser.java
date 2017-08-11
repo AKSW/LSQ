@@ -86,7 +86,7 @@ public class LsqCliParser {
     protected OptionSpec<Long> datasetSizeOs;
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
-    protected OptionSpec<Boolean> logIriAsBaseIriOs;
+    protected OptionSpec<Void> logIriAsBaseIriOs;
     protected OptionSpec<String> queryIdPatternOs;
     protected OptionSpec<String> datasetEndpointUriOs;
     protected OptionSpec<String> expBaseUriOs;
@@ -200,9 +200,9 @@ public class LsqCliParser {
 
         logIriAsBaseIriOs = parser
                 .acceptsAll(Arrays.asList("i", "logirisasbase"), "Use IRIs in RDF query logs as the base IRIs")
-                .withRequiredArg()
-                .ofType(Boolean.class)
-                .defaultsTo(false)
+                //.withOptionalArg()
+                //.ofType(Boolean.class)
+                //.defaultsTo(false)
                 ;
 
         datasetEndpointUriOs = parser
@@ -230,8 +230,9 @@ public class LsqCliParser {
         queryIdPatternOs = parser
                 .acceptsAll(Arrays.asList("q", "querypattern"), "Patter to parse out query ids; use empty string to use whole IRI")
                 .availableIf(logIriAsBaseIriOs)
-                .withRequiredArg()
-                .defaultsTo("q-([^->])")
+                .withOptionalArg()
+                //.withRequiredArg()
+                .defaultsTo("q-([^->]+)")
                 .ofType(String.class);
 
 //        reuseLogIri = parser
@@ -317,9 +318,10 @@ public class LsqCliParser {
         // By default, reuse log iris if the format is rdf; unless it is explicitly overridden ...
         boolean reuseLogIris = !options.has(logIriAsBaseIriOs)
                 ? logFormatOs.value(options).equals("rdf")
-                : logIriAsBaseIriOs.value(options);
+                : true;//logIriAsBaseIriOs.value(options);
 
         String queryIdPatternStr = queryIdPatternOs.value(options);
+        queryIdPatternStr = queryIdPatternStr == null ? null : queryIdPatternStr.trim();
         Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
 
         config.setReuseLogIri(reuseLogIris);
@@ -631,6 +633,7 @@ public class LsqCliParser {
         result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));
 
         result.setReuseLogIri(config.isReuseLogIri());
+        result.setQueryIdPattern(config.getQueryIdPattern());
 
         return result;
     }

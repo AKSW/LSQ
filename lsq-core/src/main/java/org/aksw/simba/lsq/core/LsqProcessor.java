@@ -79,6 +79,14 @@ public class LsqProcessor
 
     protected Pattern queryIdPattern;
 
+    public Pattern getQueryIdPattern() {
+        return queryIdPattern;
+    }
+
+    public void setQueryIdPattern(Pattern queryIdPattern) {
+        this.queryIdPattern = queryIdPattern;
+    }
+
     protected Long workloadSize;
 
     //protected Function<String, NestedResource> queryAspectFn;
@@ -327,6 +335,8 @@ public class LsqProcessor
                             if(m.find()) {
                                 // TODO This is the same code as below, maybe we can reduce redundancy
                                 String queryHash = m.group(1);
+                                //System.out.println("Matched query id: " + queryHash);
+                                logger.debug("Matched query id: " + queryHash + " with pattern " + queryIdPattern + " in " + uriStr);
                                 queryRes = baseRes.nest("q-" + queryHash);
                                 queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
                             } else {
