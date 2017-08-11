@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
@@ -62,6 +63,12 @@ public class LsqConfig {
     protected boolean reuseLogIri;
 
     protected boolean emitProcessMetadata;
+
+    /**
+     * Regex for matching a query ID from a prior IRI;
+     * only applicable when processing queries from RDF input
+     */
+    protected Pattern queryIdPattern;
 
     public boolean isFetchDatasetSizeEnabled() {
         return isFetchDatasetSizeEnabled;
@@ -317,6 +324,14 @@ public class LsqConfig {
 
     public void setEmitProcessMetadata(boolean emitProcessMetadata) {
         this.emitProcessMetadata = emitProcessMetadata;
+    }
+
+    public Pattern getQueryIdPattern() {
+        return queryIdPattern;
+    }
+
+    public void setQueryIdPattern(Pattern queryIdPattern) {
+        this.queryIdPattern = queryIdPattern;
     }
 }
 

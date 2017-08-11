@@ -9,6 +9,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aksw.beast.vocabs.PROV;
@@ -74,6 +76,8 @@ public class LsqProcessor
     protected boolean isRdfizerQueryExecutionEnabled;
     protected boolean isRdfizerQueryLogRecordEnabled;
     //protected boolean isQueryExecutionRemote;
+
+    protected Pattern queryIdPattern;
 
     protected Long workloadSize;
 
@@ -316,9 +320,24 @@ public class LsqProcessor
                     Function<String, NestedResource> queryAspectFn;
                     NestedResource queryRes;
                     if(reuseLogIri && r.isURIResource()) {
-                        queryRes = new NestedResource(r);
+                        // Check whether to parse out a specific part of the logIri to use as the queryHash
+                        if(queryIdPattern != null) {
+                            String uriStr = r.getURI();
+                            Matcher m = queryIdPattern.matcher(uriStr);
+                            if(m.find()) {
+                                // TODO This is the same code as below, maybe we can reduce redundancy
+                                String queryHash = m.group(1);
+                                queryRes = baseRes.nest("q-" + queryHash);
+                                queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
+                            } else {
+                                throw new RuntimeException("No match for a query id with pattern " + queryIdPattern + " in '" + uriStr + "'" );
+                            }
+                        } else {
 
-                        queryAspectFn = (aspect) -> queryRes.nest("-" + aspect); //.nest("q-" + queryHash);
+                            queryRes = new NestedResource(r);
+
+                            queryAspectFn = (aspect) -> queryRes.nest("-" + aspect); //.nest("q-" + queryHash);
+                        }
                     } else {
 
                         String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);

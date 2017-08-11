@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.aksw.fedx.jsa.FedXFactory;
@@ -52,6 +53,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Streams;
@@ -85,6 +87,7 @@ public class LsqCliParser {
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
     protected OptionSpec<Boolean> logIriAsBaseIriOs;
+    protected OptionSpec<String> queryIdPatternOs;
     protected OptionSpec<String> datasetEndpointUriOs;
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
@@ -224,6 +227,13 @@ public class LsqCliParser {
                 .withRequiredArg()
                 .ofType(File.class);
 
+        queryIdPatternOs = parser
+                .acceptsAll(Arrays.asList("q", "querypattern"), "Patter to parse out query ids; use empty string to use whole IRI")
+                .availableIf(logIriAsBaseIriOs)
+                .withRequiredArg()
+                .defaultsTo("q-([^->])")
+                .ofType(String.class);
+
 //        reuseLogIri = parser
 //                .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
 //                .withRequiredArg()
@@ -309,7 +319,11 @@ public class LsqCliParser {
                 ? logFormatOs.value(options).equals("rdf")
                 : logIriAsBaseIriOs.value(options);
 
+        String queryIdPatternStr = queryIdPatternOs.value(options);
+        Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
+
         config.setReuseLogIri(reuseLogIris);
+        config.setQueryIdPattern(queryIdPattern);
 
 
 
