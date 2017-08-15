@@ -308,8 +308,9 @@ public class LsqProcessor
                         query = queryStmt.getQuery();
 
                         PrefixMapping pm = org.aksw.jena_sparql_api.utils.QueryUtils.usedPrefixes(query);
-                        Query prefixCleanedQuery = QueryTransformOps.shallowCopy(query);
-                        prefixCleanedQuery.setPrefixMapping(pm);
+                        //Query prefixCleanedQuery = QueryTransformOps.shallowCopy(query);
+                        //prefixCleanedQuery.setPrefixMapping(pm);
+                        query.setPrefixMapping(pm);
 
                         //org.aksw.jena_sparql_api.utils.QueryUtils
 
