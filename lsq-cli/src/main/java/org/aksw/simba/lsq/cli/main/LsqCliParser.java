@@ -28,6 +28,7 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
+import org.aksw.jena_sparql_api.stmt.SparqlParserConfig;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
@@ -48,6 +49,7 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.sparql.util.ModelUtils;
+import org.apache.jena.sparql.util.PrefixMapping2;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -529,7 +531,8 @@ public class LsqCliParser {
         LsqProcessor result = new LsqProcessor();
 
         Function<String, SparqlStmt> sparqlStmtParser = config.getSparqlStmtParser();
-        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
+        //SparqlParserConfig sparqlParserConfig = SparqlParserConfig.create().create(S, prologue)
+        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, PrefixMapping2.Extended, true);
 
 
         SparqlServiceReference benchmarkEndpointDescription = config.getDatasetEndpointDescription();

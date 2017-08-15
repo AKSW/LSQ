@@ -16,12 +16,14 @@ import java.util.stream.Collectors;
 import org.aksw.beast.vocabs.PROV;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.jena_sparql_api.backports.syntaxtransform.QueryTransformOps;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
+import org.aksw.jena_sparql_api.utils.QuerySolutionUtils;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -42,6 +44,8 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.PatternVars;
+import org.apache.jena.sparql.util.QueryExecUtils;
+import org.apache.jena.sparql.util.QueryUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
@@ -302,6 +306,13 @@ public class LsqProcessor
                         queryStr = queryStmt.getOriginalString();
                     } else {
                         query = queryStmt.getQuery();
+
+                        PrefixMapping pm = org.aksw.jena_sparql_api.utils.QueryUtils.usedPrefixes(query);
+                        Query prefixCleanedQuery = QueryTransformOps.shallowCopy(query);
+                        prefixCleanedQuery.setPrefixMapping(pm);
+
+                        //org.aksw.jena_sparql_api.utils.QueryUtils
+
                         queryStr = "" + queryStmt.getQuery();
                     }
 
@@ -464,6 +475,7 @@ public class LsqProcessor
             }
         }
     }
+
 
     public void rdfizeLogRecord(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 
