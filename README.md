@@ -1,6 +1,6 @@
 # The Linked SPARQL Queries (LSQ) Framework
 LSQ is a framework for RDFizing arbitrary SPARQL query logs with support for several types of analysis.
-This project page describes the framework; information about the Linked Dataset, a SPARQL endpoint, and complete dumps are all available on the LSQ [homepage](http://aksw.github.io/LSQ/) along with pointers a VoID description, example LSQ queries, and various other dataset assets.
+This project page describes the framework; information about the Linked Dataset, a SPARQL endpoint, and complete dumps are all available on the LSQ [homepage](http://dice-group.github.io/LSQ/) along with pointers a VoID description, example LSQ queries, and various other dataset assets.
 
 
 ## Architecture
