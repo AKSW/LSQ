@@ -92,7 +92,7 @@ Option                Description
 -l, --label           Label of the dataset, such as 'dbpedia' or 'lgd'. Will be
                         used in URI generation (default: mydata)               
 -m, --format          Format of the input data. Available options: [virtuoso,  
-                        apache, distributed] (default: apache)                              
+                        apache, distributed, sparql] (default: apache)                              
 -o, --output <File>   File where to store the output data.                     
 -p, --public          Public endpoint URL - e.g. http://example.org/sparql     
 -r, --rdfizer         RDFizer selection: Any combination of the letters (e)    
