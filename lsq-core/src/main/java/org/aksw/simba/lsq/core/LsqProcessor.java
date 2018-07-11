@@ -4,32 +4,33 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.aksw.beast.vocabs.PROV;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.strings.StringUtils;
-import org.aksw.jena_sparql_api.backports.syntaxtransform.QueryTransformOps;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
-import org.aksw.jena_sparql_api.utils.QuerySolutionUtils;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -39,19 +40,20 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.PatternVars;
-import org.apache.jena.sparql.util.QueryExecUtils;
-import org.apache.jena.sparql.util.QueryUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
 
+import com.google.common.cache.Cache;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.Multimap;
 
@@ -81,9 +83,21 @@ public class LsqProcessor
     protected boolean isRdfizerQueryLogRecordEnabled;
     //protected boolean isQueryExecutionRemote;
 
+    protected boolean useDeterministicPseudoTimestamps;
+    
     protected Pattern queryIdPattern;
 
-    public Pattern getQueryIdPattern() {
+    protected Cache<String, Object> seenQueryCache;
+    
+    public boolean isUseDeterministicPseudoTimestamps() {
+		return useDeterministicPseudoTimestamps;
+	}
+
+	public void setUseDeterministicPseudoTimestamps(boolean useDeterministicPseudoTimestamps) {
+		this.useDeterministicPseudoTimestamps = useDeterministicPseudoTimestamps;
+	}
+
+	public Pattern getQueryIdPattern() {
         return queryIdPattern;
     }
 
@@ -98,6 +112,8 @@ public class LsqProcessor
 
 
     protected QueryExecutionFactory dataQef;
+    protected QueryExecutionFactory benchmarkQef;
+    
     protected String datasetLabel;
     protected Resource expRes;
     protected String datasetEndpointUri;
@@ -181,6 +197,7 @@ public class LsqProcessor
         this.workloadSize = workloadSize;
     }
 
+    
 //    public Function<String, NestedResource> getQueryAspectFn() {
 //        return queryAspectFn;
 //    }
@@ -197,15 +214,32 @@ public class LsqProcessor
 //        this.rawLogEndpointRes = rawLogEndpointRes;
 //    }
 
-    public QueryExecutionFactory getDataQef() {
+    public Cache<String, ? extends Object> getSeenQueryCache() {
+		return seenQueryCache;
+	}
+
+	public LsqProcessor setSeenQueryCache(Cache<String, Object> seenQueryCache) {
+		this.seenQueryCache = seenQueryCache;
+		return this;
+	}
+
+	public QueryExecutionFactory getDataQef() {
         return dataQef;
     }
-
+	
     public void setDataQef(QueryExecutionFactory dataQef) {
         this.dataQef = dataQef;
     }
+    
+    public QueryExecutionFactory getBenchmarkQef() {
+		return benchmarkQef;
+	}
 
-    public String getDatasetLabel() {
+	public void setBenchmarkQef(QueryExecutionFactory benchmarkQef) {
+		this.benchmarkQef = benchmarkQef;
+	}
+
+	public String getDatasetLabel() {
         return datasetLabel;
     }
 
@@ -453,13 +487,21 @@ public class LsqProcessor
     public void doLocalExecution(Query query, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
         //boolean hasBeenExecuted = executedQueries.contains(query);
 
-        boolean hasBeenExecuted = false;
+        boolean hasBeenExecuted = seenQueryCache.getIfPresent("" + query) != null;
+        seenQueryCache.put("" + query, true);
+
         if(!hasBeenExecuted) {
             //executedQueries.add(query);
 
-
-            Calendar now = Calendar.getInstance();
-            String nowStr = dt.format(now.getTime());
+        	String nowStr;
+        	if(useDeterministicPseudoTimestamps) {
+        		//nowStr = queryRes.get().getProperty(p)
+        		nowStr = "now";
+        	} else {
+                Calendar now = Calendar.getInstance();
+                nowStr = dt.format(now.getTime());
+        	}
+        	
             Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).nest("-" + nowStr).get();
 
             if(expRes != null) {
@@ -472,11 +514,24 @@ public class LsqProcessor
                 queryRes.get()
                     .addProperty(LSQ.hasLocalExec, queryExecRes);
 
-                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, dataQef, datasetSize);
+                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, benchmarkQef, dataQef, datasetSize);
             }
         }
     }
 
+    public String getTimestampStr(Resource r) {
+    	String result;
+        if(r.hasProperty(PROV.atTime)) {
+            Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
+            Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
+            result = dt.format(timestamp.getTime());        
+        } else if(r.hasProperty(LSQ.sequenceId)) {
+        	result = "" + r.getProperty(LSQ.sequenceId).getObject().asLiteral().getLong();
+        } else {
+        	result = dt.format(new GregorianCalendar());
+        }
+        return result;
+    }
 
     public void rdfizeLogRecord(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 
@@ -485,10 +540,8 @@ public class LsqProcessor
 
         Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
 
+        String timestampStr = getTimestampStr(r);
 
-        Literal timestampLiteral = r.getProperty(PROV.atTime).getObject().asLiteral();
-        Calendar timestamp = ((XSDDateTime)timestampLiteral.getValue()).asCalendar();
-        String timestampStr = dt.format(timestamp.getTime());
         //String timestampStr = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
 
         Resource queryExecRecRes = queryAspectFn.apply("re-" + datasetLabel).nest("-" + hashedIp + "-" + timestampStr).get();
@@ -499,9 +552,14 @@ public class LsqProcessor
         queryRes.get()
             .addProperty(LSQ.hasRemoteExec, queryExecRecRes);
 
+        if(r.hasProperty(PROV.atTime)) {
+            queryExecRecRes
+            	//.addProperty(RDF.type, LSQ.)
+            	.addLiteral(PROV.atTime, r.getProperty(PROV.atTime).getObject()); //.inModel(queryModel))        	
+        }
+
         queryExecRecRes
             //.addProperty(RDF.type, LSQ.)
-            .addLiteral(PROV.atTime, timestampLiteral) //.inModel(queryModel))
             .addProperty(PROV.wasAssociatedWith, agentRes)
             ;
 
@@ -550,6 +608,8 @@ public class LsqProcessor
 
           queryRes.addProperty(LSQ.hasSpin, spinRes);
 
+          //RDFDataMgr.write(System.out, spinRes.getModel(), RDFFormat.TURTLE);
+
 
 //          } catch (Exception ex) {
 //              String msg = ex.getMessage();// ExceptionUtils.getFullStackTrace(ex);
@@ -557,7 +617,7 @@ public class LsqProcessor
 //
 //              // TODO Port the getRDFUserExceptions function
 //              // String queryStats =
-//              // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),separator);
+//              // this.getRDFUserExecutions(queryToSubmissions.get(queryStr),sSeparator);
 //              parseErrorCount++;
 //          }
 
@@ -615,33 +675,72 @@ public class LsqProcessor
     }
 
 
+    /**
+     * Perform all rdfizations
+     * 
+     * @param queryRes
+     * @param query
+     * @param queryExecRes
+     * @param qef
+     * @param cachedQef
+     * @param datasetSize
+     */
+    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, QueryExecutionFactory cachedQef, Long datasetSize) {
+    	try {
+    		rdfizeQueryExecutionBenchmark(query, queryExecRes, qef);
+    		rdfizeQueryExecutionStats(queryRes, query, queryExecRes, cachedQef, datasetSize);
+    	}
+        catch(Exception e) {
+            Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
+            String msg = f.getMessage();
+            msg = msg == null ? "" + ExceptionUtils.getStackTrace(f) : msg;
+            queryExecRes.addLiteral(LSQ.execError, msg);
+            String queryStr = ("" + query).replace("\n", " ");
+            logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);
+        }
+    }
 
-    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, Long datasetSize) {
+    /**
+     * Benchmark the combined execution and retrieval time of a given query
+     * 
+     * @param query
+     * @param queryExecRes
+     * @param qef
+     */
+    public static void rdfizeQueryExecutionBenchmark(Query query, Resource queryExecRes, QueryExecutionFactory qef) {
+    	Stopwatch sw = Stopwatch.createStarted();
+        QueryExecution qe = qef.createQueryExecution(query);
+        long resultSetSize = QueryExecutionUtils.consume(qe);
+        double durationInMillis = sw.stop().elapsed(TimeUnit.NANOSECONDS) / 1000000.0;
+        //Calendar end = Calendar.getInstance();
+        //Duration duration = Duration.between(start.toInstant(), end.toInstant());
 
-        try {
+
+        //double durationInSeconds = duration.toNanos() / 1000000.0;
+        queryExecRes
+            .addLiteral(LSQ.resultSize, resultSetSize)
+            .addLiteral(LSQ.runTimeMs, durationInMillis)
+            //.addLiteral(PROV.startedAtTime, start)
+            //.addLiteral(PROV.endAtTime, end)
+            ;
+    }
+
+
+    public static void rdfizeQueryExecutionStats(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory cachedQef, Long datasetSize) {
+
+//        try {
     //        Stopwatch sw = Stopwatch.createStarted();
     //      long runtimeInMs = sw.stop().elapsed(TimeUnit.MILLISECONDS);
 
 
+        	// Benchmark the query execution
 
-            Calendar start = Calendar.getInstance();
+            //Calendar start = Calendar.getInstance();
             //long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
 //System.out.println(query);
-            QueryExecution qe = qef.createQueryExecution(query);
-            long resultSetSize = QueryExecutionUtils.consume(qe);
+        	
 
-            Calendar end = Calendar.getInstance();
-            Duration duration = Duration.between(start.toInstant(), end.toInstant());
-
-
-            queryExecRes
-                .addLiteral(LSQ.resultSize, resultSetSize)
-                .addLiteral(LSQ.runTimeMs, duration.getNano() / 1000000l)
-                //.addLiteral(PROV.startedAtTime, start)
-                //.addLiteral(PROV.endAtTime, end)
-                ;
-
-            SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, qef);
+            SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
 
 
             BiMap<org.topbraid.spin.model.Triple, Resource> tpToTpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
@@ -661,9 +760,9 @@ public class LsqProcessor
 
             if(datasetSize != null) {
 
-                SpinUtils.enrichModelWithTriplePatternSelectivities(tpToTpExecRess.values(), qef, datasetSize);
+                SpinUtils.enrichModelWithTriplePatternSelectivities(tpToTpExecRess.values(), cachedQef, datasetSize);
 
-                SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(qef, queryExecRes.getModel(), bgpToTps);
+                SpinUtils.enrichModelWithBGPRestrictedTPSelectivities(cachedQef, queryExecRes.getModel(), bgpToTps);
             }
 
 
@@ -727,7 +826,7 @@ public class LsqProcessor
 
                 // Obtain the selectivity for the variable in that tp
                 //for(e.getValue())
-                Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(qef, resToEl.values());
+                Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(cachedQef, resToEl.values());
 
 
                 // Add the BGP var statistics
@@ -744,7 +843,7 @@ public class LsqProcessor
                     //vr.addLiteral(LSQ.tpSelectivity, o);
 
 
-                Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(qef, resToEl);
+                Map<org.topbraid.spin.model.Triple, Map<Var, Long>> elToVarToCount = QueryStatistics2.fetchCountJoinVarElement(cachedQef, resToEl);
 
                 elToVarToCount.forEach((t, vToC) -> {
                     Map<Node, RDFNode> varToRes = SpinUtils.indexTripleNodes(t);
@@ -839,15 +938,15 @@ public class LsqProcessor
             //  queryStats = queryStats + " lsqv:meanTriplePatternSelectivity "+Selectivity.getMeanTriplePatternSelectivity(query.toString(),localEndpoint,graph,endpointSize)  +" ; \n ";
             //long resultSize = QueryExecutionUtils.countQuery(query, dataQef);
             //long resultSize = this.getQueryResultSize(queryNew.toString(), localEndpoint,"select");
-        }
-        catch(Exception e) {
-            Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
-            String msg = f.getMessage();
-            msg = msg == null ? "" + ExceptionUtils.getStackTrace(f) : msg;
-            queryExecRes.addLiteral(LSQ.execError, msg);
-            String queryStr = ("" + query).replace("\n", " ");
-            logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);
-        }
+//        }
+//        catch(Exception e) {
+//            Throwable f = ExceptionUtilsAksw.unwrap(e, QueryExceptionHTTP.class).orElse(e);
+//            String msg = f.getMessage();
+//            msg = msg == null ? "" + ExceptionUtils.getStackTrace(f) : msg;
+//            queryExecRes.addLiteral(LSQ.execError, msg);
+//            String queryStr = ("" + query).replace("\n", " ");
+//            logger.warn("Query execution exception [" + msg + "] for query " + queryStr, e);
+//        }
     }
 
     /**

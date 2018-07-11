@@ -1,0 +1,14 @@
+SELECT DISTINCT  ?x0 ?x1
+WHERE {
+  ?x0
+    <http://dbpedia.org/ontology/director>  ?x1 ;
+    <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .
+
+  <http://dbpedia.org/resource/Party_of_Five>
+    <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .
+    
+  <http://dbpedia.org/resource/Matthew_Fox>
+    <http://dbpedia.org/ontology/birthPlace>  <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania>
+}
+OFFSET  0
+LIMIT   2

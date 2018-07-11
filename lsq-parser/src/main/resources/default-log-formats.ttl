@@ -40,7 +40,8 @@ fmt:bio2rdf
   .
 
 # Format for one sparql query per line
-fmt:sparql
+# Note: 'sparql' is a multiline format and should supersede sparql2; however the former may not yet scale to large log files due to the way the parser works
+fmt:sparql2
   a lsq:WebAccessLogFormat ;
   lsq:pattern "%sparql" ;
   .

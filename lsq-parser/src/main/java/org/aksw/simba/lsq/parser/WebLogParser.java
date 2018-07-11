@@ -20,8 +20,8 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.aksw.beast.vocabs.PROV;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.datatypes.RDFDatatype;
@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Converter;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
-import com.google.common.primitives.Ints;
 
 public class WebLogParser {
 

@@ -6,11 +6,11 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
-import org.aksw.beast.vocabs.PROV;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.StringMapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
-public class WebServerAccessLogParserTests {
+public class TestLsqWebServerAccessLogParser {
 
-	private static final Logger logger = LoggerFactory.getLogger(WebServerAccessLogParserTests.class);
+	private static final Logger logger = LoggerFactory.getLogger(TestLsqWebServerAccessLogParser.class);
 
 	private static final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 

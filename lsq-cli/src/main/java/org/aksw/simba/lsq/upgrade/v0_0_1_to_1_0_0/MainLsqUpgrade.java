@@ -43,8 +43,8 @@ public class MainLsqUpgrade {
 //    }
 
     public static void main(String[] args) throws Exception {
-        //runUpgrade(args);
-        runServer();
+        runUpgrade(args);
+        //runServer();
     }
 
     public static void runServer() throws Exception {

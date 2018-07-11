@@ -1,1 +1,0 @@
-PREFIX ex: <http://example.org> SELECT * { { ?s a ex:Person ; ex:firstName ?n } UNION { ?s a ex:Organization ; ex:label ?l } }

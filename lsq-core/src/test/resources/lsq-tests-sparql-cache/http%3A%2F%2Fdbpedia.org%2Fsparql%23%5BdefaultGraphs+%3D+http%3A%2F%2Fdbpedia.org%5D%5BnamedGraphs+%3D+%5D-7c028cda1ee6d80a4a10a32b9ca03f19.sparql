@@ -1,0 +1,3 @@
+SELECT  (count(*) AS ?c)
+WHERE
+  { ?s  ?p  ?o }

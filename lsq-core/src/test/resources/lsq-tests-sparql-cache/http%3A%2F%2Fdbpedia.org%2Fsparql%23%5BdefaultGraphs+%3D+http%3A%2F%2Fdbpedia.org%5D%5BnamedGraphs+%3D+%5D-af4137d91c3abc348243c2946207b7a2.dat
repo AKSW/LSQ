@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+  <head>
+    <variable name="x0"/>
+    <variable name="x1"/>
+  </head>
+  <results>
+    <result>
+      <binding name="x0">
+        <uri>http://dbpedia.org/resource/Alex_Cross_(film)</uri>
+      </binding>
+      <binding name="x1">
+        <uri>http://dbpedia.org/resource/Rob_Cohen</uri>
+      </binding>
+    </result>
+    <result>
+      <binding name="x0">
+        <uri>http://dbpedia.org/resource/Bone_Tomahawk</uri>
+      </binding>
+      <binding name="x1">
+        <uri>http://dbpedia.org/resource/S._Craig_Zahler</uri>
+      </binding>
+    </result>
+  </results>
+</sparql>

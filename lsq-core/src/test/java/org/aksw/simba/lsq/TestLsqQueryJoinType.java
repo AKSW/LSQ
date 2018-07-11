@@ -11,7 +11,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 
-public class TestQueryJoinType {
+public class TestLsqQueryJoinType {
     //@Test
     public void test() {
         String queryStr = "PREFIX tcga: <http://tcga.deri.ie/schema/>  SELECT  ?expValue  WHERE {   {    ?s	tcga:bcr_patient_barcode	<http://tcga.deri.ie/TCGA-37-3789>.      <http://tcga.deri.ie/TCGA-37-3789>	tcga:result	?results.     ?results  tcga:RPKM ?expValue.   } UNION   {    ?uri	tcga:bcr_patient_barcode	<http://tcga.deri.ie/TCGA-37-3789>.      <http://tcga.deri.ie/TCGA-37-3789>	tcga:result	?geneResults.     ?geneResults  tcga:scaled_estimate ?expValue.   } }";

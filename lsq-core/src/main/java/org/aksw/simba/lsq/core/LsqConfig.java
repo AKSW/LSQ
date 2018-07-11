@@ -1,7 +1,8 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.core;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -11,13 +12,20 @@ import java.util.stream.Stream;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdfconnection.RDFConnection;
 
 public class LsqConfig {
     protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
 
+    // Use LsqUtils.applyDefaults for default values
+    public LsqConfig() {
+    	//this.logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
+    	this.federationEndpoints = new ArrayList<>();
+    }
+    
     //protected Map<String, Mapper> logFmtRegistry;
 
-    protected File inQueryLogFile;
+    protected String inQueryLogFile;
     protected String inQueryLogFormat;
 
     protected File outRdfFile;
@@ -39,9 +47,16 @@ public class LsqConfig {
     protected String datasetLabel;
 
     protected SparqlServiceReference datasetEndpointDescription;
-
+    
+    
     protected SparqlServiceReference benchmarkEndpointDescription;
-
+    
+    // If no benchmark connection is set, the endpoint description will be used to create one
+    // Conversely, if the connection is set, it will be used regardless of the benchmarkEndpointDescripton
+    protected RDFConnection benchmarkConnection;
+    
+    protected RDFConnection dataConnection;
+    
     //protected Long datasetEndpointPagination;
     protected boolean isFetchDatasetSizeEnabled;
     //protected boolean fetchDatasetEndpointSize;
@@ -64,7 +79,21 @@ public class LsqConfig {
 
     protected boolean emitProcessMetadata;
 
-    /**
+    protected Long seenQueryCacheSize;
+    
+    
+    protected boolean deterministicPseudoTimestamps;
+    
+    
+    public Long getSeenQueryCacheSize() {
+		return seenQueryCacheSize;
+	}
+
+	public void setSeenQueryCacheSize(Long seenQueryCacheSize) {
+		this.seenQueryCacheSize = seenQueryCacheSize;
+	}
+
+	/**
      * Regex for matching a query ID from a prior IRI;
      * only applicable when processing queries from RDF input
      */
@@ -82,14 +111,16 @@ public class LsqConfig {
 
 
 
-    public void setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
+    public LsqConfig setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
         this.benchmarkEndpointDescription = benchmarkEndpointDescription;
+        return this;
     }
 
 
 
-    public void setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
+    public LsqConfig setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
         this.isFetchDatasetSizeEnabled = isFetchDatasetSizeEnabled;
+        return this;
     }
 
 
@@ -98,12 +129,22 @@ public class LsqConfig {
     }
 
 
-    public void setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
+    public LsqConfig setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
         this.sparqlStmtParser = sparqlStmtParser;
+        return this;
     }
+    
+    // Use sequence ids for local executions
+    public boolean isDeterministicPseudoTimestamps() {
+		return deterministicPseudoTimestamps;
+	}
 
+	public LsqConfig setDeterministicPseudoTimestamps(boolean deterministicPseudoTimestamps) {
+		this.deterministicPseudoTimestamps = deterministicPseudoTimestamps;
+		return this;
+	}
 
-    public Map<String, Function<InputStream, Stream<Resource>>> getLogFmtRegistry() {
+	public Map<String, Function<InputStream, Stream<Resource>>> getLogFmtRegistry() {
         return logFmtRegistry;
     }
 
@@ -120,69 +161,92 @@ public class LsqConfig {
 //    }
 //
 //
-//    public void setLogFmtRegistry(Map<String, Mapper> logFmtRegistry) {
+//    public LsqConfig setLogFmtRegistry(Map<String, Mapper> logFmtRegistry) {
 //        this.logFmtRegistry = logFmtRegistry;
 //    }
 
 
+    public RDFConnection getBenchmarkConnection() {
+		return benchmarkConnection;
+	}
 
+	public LsqConfig setBenchmarkConnection(RDFConnection benchmarkConnection) {
+		this.benchmarkConnection = benchmarkConnection;
+		return this;
+	}
 
+    public RDFConnection getDataConnection() {
+		return dataConnection;
+	}
 
-    public File getOutFile() {
+	public LsqConfig setDataConnection(RDFConnection dataConnection) {
+		this.dataConnection = dataConnection;
+		return this;
+	}
+
+	public File getOutFile() {
         return outFile;
     }
 
-    public void setOutFile(File outFile) {
+
+	public LsqConfig setOutFile(File outFile) {
         this.outFile = outFile;
+        return this;
     }
 
 
-    public File getInQueryLogFile() {
+    public String getInQueryLogFile() {
         return inQueryLogFile;
     }
 
-    public void setInQueryLogFile(File inQueryLogFile) {
+    public LsqConfig setInQueryLogFile(String inQueryLogFile) {
         this.inQueryLogFile = inQueryLogFile;
+        return this;
     }
 
     public String getInQueryLogFormat() {
         return inQueryLogFormat;
     }
 
-    public void setInQueryLogFormat(String inQueryLogFormat) {
+    public LsqConfig setInQueryLogFormat(String inQueryLogFormat) {
         this.inQueryLogFormat = inQueryLogFormat;
+        return this;
     }
 
     public File getOutRdfFile() {
         return outRdfFile;
     }
 
-    public void setOutRdfFile(File outRdfFile) {
+    public LsqConfig setOutRdfFile(File outRdfFile) {
         this.outRdfFile = outRdfFile;
+        return this;
     }
 
     public String getOutRdfFormat() {
         return outRdfFormat;
     }
 
-    public void setOutRdfFormat(String outRdfFormat) {
+    public LsqConfig setOutRdfFormat(String outRdfFormat) {
         this.outRdfFormat = outRdfFormat;
+        return this;
     }
 
     public boolean isRdfizerQueryExecutionEnabled() {
         return isRdfizerQueryExecutionEnabled;
     }
 
-    public void setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
+    public LsqConfig setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
         this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
+        return this;
     }
 
     public boolean isRdfizerQueryLogRecordEnabled() {
         return isRdfizerQueryLogRecordEnabled;
     }
 
-    public void setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
+    public LsqConfig setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
         this.isRdfizerQueryLogRecordEnabled = isRdfizerQueryLogRecordEnabled;
+        return this;
     }
 
 
@@ -192,7 +256,7 @@ public class LsqConfig {
 //        return isRdfizerRemoteExecutionEnabled;
 //    }
 //
-//    public void setRdfizerRemoteExecutionEnabled(boolean isRdfizerRemoteExecutionEnabled) {
+//    public LsqConfig setRdfizerRemoteExecutionEnabled(boolean isRdfizerRemoteExecutionEnabled) {
 //        this.isRdfizerRemoteExecutionEnabled = isRdfizerRemoteExecutionEnabled;
 //    }
 
@@ -202,8 +266,9 @@ public class LsqConfig {
     }
 
 
-    public void setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
+    public LsqConfig setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
         this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryStructuralFeaturesEnabled;
+        return this;
     }
 
 
@@ -212,7 +277,7 @@ public class LsqConfig {
 //    }
 //
 //
-//    public void setQueryExecutionRemote(boolean isQueryExecutionRemote) {
+//    public LsqConfig setQueryExecutionRemote(boolean isQueryExecutionRemote) {
 //        this.isQueryExecutionRemote = isQueryExecutionRemote;
 //    }
 
@@ -222,7 +287,7 @@ public class LsqConfig {
 //    }
 //
 //
-//    public void setDatasetEndpointPagination(Long datasetEndpointPagination) {
+//    public LsqConfig setDatasetEndpointPagination(Long datasetEndpointPagination) {
 //        this.datasetEndpointPagination = datasetEndpointPagination;
 //    }
 
@@ -231,24 +296,27 @@ public class LsqConfig {
         return datasetLabel;
     }
 
-    public void setDatasetLabel(String datasetLabel) {
+    public LsqConfig setDatasetLabel(String datasetLabel) {
         this.datasetLabel = datasetLabel;
+        return this;
     }
 
     public Long getBenchmarkQueryExecutionTimeoutInMs() {
         return benchmarkQueryExecutionTimeoutInMs;
     }
 
-    public void setBenchmarkQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
+    public LsqConfig setBenchmarkQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
         this.benchmarkQueryExecutionTimeoutInMs = datasetQueryExecutionTimeoutInMs;
+        return this;
     }
 
     public String getExperimentIri() {
         return experimentIri;
     }
 
-    public void setExperimentIri(String experimentIri) {
+    public LsqConfig setExperimentIri(String experimentIri) {
         this.experimentIri = experimentIri;
+        return this;
     }
 
     public boolean isRdfizerQueryEnabled() {
@@ -256,8 +324,9 @@ public class LsqConfig {
     }
 
 
-    public void setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
+    public LsqConfig setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
         this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryEnabled;
+        return this;
     }
 
     public SparqlServiceReference getDatasetEndpointDescription() {
@@ -265,73 +334,81 @@ public class LsqConfig {
     }
 
 
-    public void setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
+    public LsqConfig setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
         this.datasetEndpointDescription = datasetEndpointDescription;
+        return this;
     }
 
     public List<String> getFederationEndpoints() {
         return federationEndpoints;
     }
 
-    public void setFederationEndpoints(List<String> federationEndpoints) {
+    public LsqConfig setFederationEndpoints(List<String> federationEndpoints) {
         this.federationEndpoints = federationEndpoints;
+        return this;
     }
-
 
     public Long getFirstItemOffset() {
         return firstItemOffset;
     }
 
-    public void setFirstItemOffset(Long firstItemOffset) {
+    public LsqConfig setFirstItemOffset(Long firstItemOffset) {
         this.firstItemOffset = firstItemOffset;
+        return this;
     }
 
     public File getFederationConfigFile() {
         return federationConfigFile;
     }
 
-    public void setFederationConfigFile(File federationConfigFile) {
+    public LsqConfig setFederationConfigFile(File federationConfigFile) {
         this.federationConfigFile = federationConfigFile;
+        return this;
     }
 
     public String getOutBaseIri() {
         return outBaseIri;
     }
 
-    public void setOutBaseIri(String outBaseIri) {
+    public LsqConfig setOutBaseIri(String outBaseIri) {
         this.outBaseIri = outBaseIri;
+        return this;
     }
 
     public Long getDatasetSize() {
         return datasetSize;
     }
 
-    public void setDatasetSize(Long datasetSize) {
+    public LsqConfig setDatasetSize(Long datasetSize) {
         this.datasetSize = datasetSize;
+        return this;
     }
 
     public boolean isReuseLogIri() {
         return reuseLogIri;
     }
 
-    public void setReuseLogIri(boolean reuseLogIri) {
+    public LsqConfig setReuseLogIri(boolean reuseLogIri) {
         this.reuseLogIri = reuseLogIri;
+        return this;
     }
 
     public boolean isEmitProcessMetadata() {
         return emitProcessMetadata;
     }
 
-    public void setEmitProcessMetadata(boolean emitProcessMetadata) {
+    public LsqConfig setEmitProcessMetadata(boolean emitProcessMetadata) {
         this.emitProcessMetadata = emitProcessMetadata;
+        return this;
     }
 
     public Pattern getQueryIdPattern() {
         return queryIdPattern;
     }
 
-    public void setQueryIdPattern(Pattern queryIdPattern) {
+    public LsqConfig setQueryIdPattern(Pattern queryIdPattern) {
         this.queryIdPattern = queryIdPattern;
+        return this;
     }
 }
 

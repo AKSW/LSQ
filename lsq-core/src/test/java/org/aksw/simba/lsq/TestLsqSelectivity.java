@@ -34,7 +34,7 @@ import org.topbraid.spin.model.Triple;
 
 import com.google.common.collect.Multimap;
 
-public class TestSelectivity {
+public class TestLsqSelectivity {
 
     @Test
     public void testSelectivityRdfOutput() throws IOException {
@@ -46,7 +46,7 @@ public class TestSelectivity {
 
         // TODO Consider specifying the pattern directly without going over the registry
         Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
-        Mapper mapper = logFmtRegistry.get("sparql");
+        Mapper mapper = logFmtRegistry.get("sparql2");
 
         //Function<String, NestedResource> queryAspectFn = (aspect) -> baseRes.nest(aspect).nest("q-" + queryHash);
 

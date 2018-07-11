@@ -2,13 +2,15 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.beast.vocabs.PROV;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
+import org.aksw.simba.lsq.core.LsqConfig;
+import org.aksw.simba.lsq.core.LsqProcessor;
+import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.util.NestedResource;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -47,7 +49,7 @@ public class MainLSQ
 
     public static void run(LsqConfig config) throws Exception  {
 
-        SparqlServiceReference ssr = config.getDatasetEndpointDescription();
+        SparqlServiceReference ssr = config.getBenchmarkEndpointDescription();
         String datasetEndpointUrl = ssr.getServiceURL();
         DatasetDescription datasetDescription = ssr.getDatasetDescription();
         Long datasetSize = config.getDatasetSize();
@@ -56,13 +58,14 @@ public class MainLSQ
 
 //        Stream<Resource> logEntryStream;
 
-        Stream<Resource> itemReader = LsqCliParser.createReader(config);
-        Function<Resource, Resource> itemProcessor = LsqCliParser.createProcessor(config);
-        Sink<Resource> itemWriter = LsqCliParser.createWriter(config);
+        Stream<Resource> itemReader = LsqUtils.createReader(config);
+        LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
+        Sink<Resource> itemWriter = LsqUtils.createWriter(config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
 
-        Long workloadSize = null;
+        datasetSize = itemProcessor.getDatasetSize();
+        Long workloadSize = null; //itemProcessor.getDatasetSize();
 
         logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + datasetEndpointUrl + " / " + DatasetDescriptionUtils.toString(datasetDescription) + " - size: " + datasetSize);

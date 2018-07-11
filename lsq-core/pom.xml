@@ -28,10 +28,10 @@
 			<artifactId>jena-sparql-api-core</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.aksw.beast</groupId>
-			<artifactId>beast-vocabs-jena</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>org.aksw.fedx</groupId>
+            <artifactId>fedx-jsa</artifactId>
+        </dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<scope>test</scope>
+<!-- 			<scope>test</scope> -->
 		</dependency>
 
 		<dependency>

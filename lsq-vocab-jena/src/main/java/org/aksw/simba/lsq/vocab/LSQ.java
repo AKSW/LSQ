@@ -135,6 +135,8 @@ public class LSQ {
     public static final Resource WebAccessLogFormat = resource("WebAccessLogFormat");
     public static final Property pattern = property("pattern");
 
+    public static final Property sequenceId = property("sequenceId");
+
     public static final Property host = property("host");
     public static final Property user = property("user");
     public static final Property request = property("request");
