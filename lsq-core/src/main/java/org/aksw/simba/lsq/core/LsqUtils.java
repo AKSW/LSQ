@@ -208,6 +208,12 @@ public class LsqUtils {
         	// TODO We could make the resource loader part of the config
     		ResourceLoader loader = new DefaultResourceLoader();
     		org.springframework.core.io.Resource resource = loader.getResource(inputResource);
+    		
+    		// Retry with prepending file:
+    		if(!resource.exists()) {
+    			resource = loader.getResource("file:" + inputResource);
+    		}
+    		
 //            File inputFile = new File(inputResource);
 //            inputFile = inputFile.getAbsoluteFile();
             in = resource.getInputStream();
