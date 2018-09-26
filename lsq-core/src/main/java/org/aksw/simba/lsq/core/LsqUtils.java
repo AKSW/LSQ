@@ -51,6 +51,7 @@ import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
@@ -211,7 +212,8 @@ public class LsqUtils {
     		
     		// Retry with prepending file:
     		if(!resource.exists()) {
-    			resource = loader.getResource("file:" + inputResource);
+    			resource = new FileSystemResource(inputResource);
+    			//resource = loader.getResource("file:" + inputResource);
     		}
     		
 //            File inputFile = new File(inputResource);

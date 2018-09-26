@@ -68,7 +68,9 @@ public class LSQ {
     //public static final Resource TPExec = resource("TPExec");
 
     // An LSQ Query. It is different from SPIN::Query.
-    // TODO Sort out the exact semantic relation.
+    // TODO Sort out the exact semantic relation - but its roughly:
+    // A SPIN query represents a query itself, whereas a LSQ query represents a record about it
+    // More concretely, an LSQ record holds information about at which time a certain query was fired based on which log file, etc.
     public static final Resource Query = resource("Query");
 
 
