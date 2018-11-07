@@ -48,7 +48,7 @@ public class TestLsqTimeout {
 				.from(ModelFactory.createDefaultModel())
 				//.http("http://dbpedia.org/sparql", "http://dbpedia.org")
 				.config()
-					.withPostProcessor((Function<QueryExecution, QueryExecutionDecoratorBase<QueryExecution>>)qe -> new QueryExecutionDecoratorBase<QueryExecution>(qe) {
+					.withPostTransformer((Function<QueryExecution, QueryExecutionDecoratorBase<QueryExecution>>)qe -> new QueryExecutionDecoratorBase<QueryExecution>(qe) {
 						Thread t;
 						@Override public void beforeExec() {
 							t = Thread.currentThread();
