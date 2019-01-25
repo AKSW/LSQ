@@ -5,6 +5,11 @@ import org.apache.jena.rdf.model.Resource;
 /**
  * Helper class to conveniently create nested resources
  *
+ * Resources in the given model are only created upon calling .get().
+ *
+ * For that reason, 'current' merely acts as a cache
+ * current.getModel() should always equal 'model'.
+ *
  * @author raven
  *
  */
@@ -18,10 +23,12 @@ public class NestedResource {
         this(null, model, str, null);
     }
 
+    // Use NestedResource.from(..) instead
     public NestedResource(Resource current) {
         this(null, current.getModel(), current.getURI(), current);
     }
 
+    // Avoid calling this ctor directly
     public NestedResource(NestedResource parent, Model model, String str, Resource current) {
         this.parent = parent;
         this.model = model;
@@ -36,8 +43,7 @@ public class NestedResource {
      */
     public Resource get() {
         if(current == null) {
-            Resource result = model.createResource(str);
-            return result;
+            current = model.createResource(str);
         }
         return current;
     }
@@ -58,4 +64,9 @@ public class NestedResource {
     public static NestedResource from(Resource r) {
         return new NestedResource(r);
     }
+    
+    public static NestedResource from(Model model, String baseUri) {
+        return new NestedResource(model, baseUri);
+    }
+
 }

@@ -1,164 +1,109 @@
-<http://example.org/spin-q-af4137d9-bn4dfa08c7>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/spin-q-af4137d9-bn885ea0bc> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://example.org/spin-q-af4137d9-bn4c97e783> .
+<http://example.org/spin-q-af4137d9-bn4dfa08c7> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/spin-q-af4137d9-bn885ea0bc> .
+<http://example.org/spin-q-af4137d9-bn4dfa08c7> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://example.org/spin-q-af4137d9-bn4c97e783> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTPExec> <http://example.org/le-mydata-q-af4137d9-now-tp-4> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTPExec> <http://example.org/le-mydata-q-af4137d9-now-tp-3> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTPExec> <http://example.org/le-mydata-q-af4137d9-now-tp-2> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTPExec> <http://example.org/le-mydata-q-af4137d9-now-tp-1> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasBGPExec> <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now> <http://www.w3.org/ns/prov#wasGeneratedBy> <http://example.org/unnamed-experiment> .
+<http://example.org/q-af4137d9> <http://lsq.aksw.org/vocab#hasLocalExec> <http://example.org/le-mydata-q-af4137d9-now> .
+<http://example.org/q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasRemoteExec> <http://example.org/re-mydata-q-af4137d9-d9b539a2fb2139d2-0> .
+<http://example.org/q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasStructuralFeatures> <http://example.org/sf-q-af4137d9> .
+<http://example.org/q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasSpin> <http://example.org/spin-q-af4137d9> .
+<http://example.org/q-af4137d9> <http://lsq.aksw.org/vocab#text> "SELECT DISTINCT  ?x0 ?x1 WHERE   { ?x0       <http://dbpedia.org/ontology/director>  ?x1 ;               <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .     <http://dbpedia.org/resource/Party_of_Five>               <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .     <http://dbpedia.org/resource/Matthew_Fox>               <http://dbpedia.org/ontology/birthPlace>  <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania>   } OFFSET  0 LIMIT   2 " .
+<http://example.org/q-af4137d9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#Query> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0> <http://lsq.aksw.org/vocab#hasVar> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0> <http://lsq.aksw.org/vocab#tpSelJoinVarRestricted> "0.5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "8"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-2> <http://lsq.aksw.org/vocab#tpSelBGPRestricted> "4.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-2> <http://lsq.aksw.org/vocab#tpSel> "2.2813522515624677E-9"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-2> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-2> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bnd1799e75> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox> <http://lsq.aksw.org/vocab#proxyFor> <http://dbpedia.org/resource/Matthew_Fox> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexType> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#Hybrid> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexDegree> "3"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0> <http://lsq.aksw.org/vocab#proxyFor> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexType> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#Star> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexDegree> "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/spin-q-af4137d9-bnd1799e75> <http://spinrdf.org/sp#object> <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania> .
+<http://example.org/spin-q-af4137d9-bnd1799e75> <http://spinrdf.org/sp#predicate> <http://dbpedia.org/ontology/birthPlace> .
+<http://example.org/spin-q-af4137d9-bnd1799e75> <http://spinrdf.org/sp#subject> <http://dbpedia.org/resource/Matthew_Fox> .
+<http://example.org/spin-q-af4137d9-bnd1799e75> <http://www.w3.org/2000/01/rdf-schema#label> "<http://dbpedia.org/resource/Matthew_Fox> <http://dbpedia.org/ontology/birthPlace> <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania> ." .
+<http://example.org/le-mydata-q-af4137d9-now-tp-1> <http://lsq.aksw.org/vocab#tpSelBGPRestricted> "4.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-1> <http://lsq.aksw.org/vocab#tpSel> "2.2813522515624677E-9"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-1> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-1> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn4e3c89a4> .
+<http://example.org/spin-q-af4137d9-bn885ea0bc> <http://spinrdf.org/sp#object> <http://dbpedia.org/resource/Matthew_Fox> .
+<http://example.org/spin-q-af4137d9-bn885ea0bc> <http://spinrdf.org/sp#predicate> <http://dbpedia.org/ontology/starring> .
+<http://example.org/spin-q-af4137d9-bn885ea0bc> <http://spinrdf.org/sp#subject> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/spin-q-af4137d9-bn885ea0bc> <http://www.w3.org/2000/01/rdf-schema#label> "?x0 <http://dbpedia.org/ontology/starring> <http://dbpedia.org/resource/Matthew_Fox> ." .
+<http://example.org/spin-q-af4137d9> <http://spinrdf.org/sp#where> <http://example.org/spin-q-af4137d9-bn0db80fd0> .
+<http://example.org/spin-q-af4137d9> <http://spinrdf.org/sp#limit> "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/spin-q-af4137d9> <http://spinrdf.org/sp#offset> "0"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/spin-q-af4137d9> <http://spinrdf.org/sp#distinct> "true"^^<http://www.w3.org/2001/XMLSchema#boolean> .
+<http://example.org/spin-q-af4137d9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://example.org/spin-q-af4137d9> <http://spinrdf.org/sp#resultVariables> <http://example.org/spin-q-af4137d9-bne39e1b2d> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertex> <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertex> <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/spin-q-af4137d9-bn1d1daf34> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertex> <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://example.org/spin-q-af4137d9-bn4dfa08c7> .
+<http://example.org/spin-q-af4137d9-bn4e3c89a4> <http://spinrdf.org/sp#object> <http://dbpedia.org/resource/Matthew_Fox> .
+<http://example.org/spin-q-af4137d9-bn4e3c89a4> <http://spinrdf.org/sp#predicate> <http://dbpedia.org/ontology/starring> .
+<http://example.org/spin-q-af4137d9-bn4e3c89a4> <http://spinrdf.org/sp#subject> <http://dbpedia.org/resource/Party_of_Five> .
+<http://example.org/spin-q-af4137d9-bn4e3c89a4> <http://www.w3.org/2000/01/rdf-schema#label> "<http://dbpedia.org/resource/Party_of_Five> <http://dbpedia.org/ontology/starring> <http://dbpedia.org/resource/Matthew_Fox> ." .
+<http://example.org/spin-q-af4137d9-bne39e1b2d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://example.org/spin-q-af4137d9-bn5acb516e> .
+<http://example.org/spin-q-af4137d9-bne39e1b2d> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/spin-q-af4137d9-bn1d1daf34> <http://spinrdf.org/sp#subject> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/spin-q-af4137d9-bn1d1daf34> <http://spinrdf.org/sp#predicate> <http://dbpedia.org/ontology/director> .
+<http://example.org/spin-q-af4137d9-bn1d1daf34> <http://spinrdf.org/sp#object> <http://example.org/q-af4137d9-var-x1> .
+<http://example.org/spin-q-af4137d9-bn1d1daf34> <http://www.w3.org/2000/01/rdf-schema#label> "?x0 <http://dbpedia.org/ontology/director> ?x1 ." .
+<http://example.org/re-mydata-q-af4137d9-d9b539a2fb2139d2-0> <http://www.w3.org/ns/prov#wasAssociatedWith> <http://example.org/agent-d9b539a2fb2139d2> .
+<http://example.org/spin-q-af4137d9-bn03a2c543> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://example.org/spin-q-af4137d9-bn03a2c543> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/spin-q-af4137d9-bnd1799e75> .
+<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x0> <http://lsq.aksw.org/vocab#proxyFor> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "4"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasJoinVarExec> <http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4> <http://lsq.aksw.org/vocab#tpSelBGPRestricted> "3.210736703536626E-5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4> <http://lsq.aksw.org/vocab#tpSel> "2.842154262041554E-4"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "124582"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn1d1daf34> .
+<http://example.org/q-af4137d9-var-x1> <http://spinrdf.org/sp#varName> "x1" .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0> <http://lsq.aksw.org/vocab#hasVar> <http://example.org/q-af4137d9-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0> <http://lsq.aksw.org/vocab#tpSelJoinVarRestricted> "3.524632777322513E-5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "113487"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#bgps> "1"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Limit> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#projectVars> "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#medianJoinVertexDegree> "2.0"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bnd1799e75> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Group> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#tps> "4"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn1d1daf34> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn885ea0bc> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#meanJoinVertexDegree> "2.3333333333333335"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasBGP> <http://example.org/spin-q-af4137d9-bn0db80fd0> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Distinct> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#maxBGPTriples> "4"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#TriplePattern> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Select> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertices> "3"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#minBGPTriples> "4"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/sf-q-af4137d9> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn4e3c89a4> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasJoinVarExec> <http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3> <http://lsq.aksw.org/vocab#tpSelBGPRestricted> "0.5"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3> <http://lsq.aksw.org/vocab#tpSel> "1.8250818012499742E-8"^^<http://www.w3.org/2001/XMLSchema#double> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#resultSize> "8"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/le-mydata-q-af4137d9-now-tp-3> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#hasTP> <http://example.org/spin-q-af4137d9-bn885ea0bc> .
+<http://example.org/spin-q-af4137d9-bn4c97e783> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/spin-q-af4137d9-bn4e3c89a4> .
+<http://example.org/spin-q-af4137d9-bn4c97e783> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://example.org/spin-q-af4137d9-bn03a2c543> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring> <http://lsq.aksw.org/vocab#proxyFor> <http://dbpedia.org/ontology/starring> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexType> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#Sink> .
+<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring> <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#joinVertexDegree> "2"^^<http://www.w3.org/2001/XMLSchema#long> .
+<http://example.org/q-af4137d9-var-x0> <http://spinrdf.org/sp#varName> "x0" .
+<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0> <http://lsq.aksw.org/vocab#hasVarExec> <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x0> .
+<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0> <http://lsq.aksw.org/vocab#hasVarExec> <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x1> .
+<http://example.org/spin-q-af4137d9-bn5acb516e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://example.org/q-af4137d9-var-x1> .
+<http://example.org/spin-q-af4137d9-bn5acb516e> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
 
-<http://example.org/le-mydata-q-af4137d9-now>
-        <http://lsq.aksw.org/vocab#hasBGPExec>  <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0> ;
-        <http://lsq.aksw.org/vocab#hasTPExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-4> ;
-        <http://lsq.aksw.org/vocab#hasTPExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-3> ;
-        <http://lsq.aksw.org/vocab#hasTPExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-2> ;
-        <http://lsq.aksw.org/vocab#hasTPExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-1> ;
-        <http://lsq.aksw.org/vocab#runTimeMs>  "4.983593"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#resultSize>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://www.w3.org/ns/prov#wasGeneratedBy>  <http://example.org/unnamed-experiment> .
-
-<http://example.org/q-af4137d9>
-        <http://lsq.aksw.org/vocab#hasLocalExec>  <http://example.org/le-mydata-q-af4137d9-now> ;
-        <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://example.org/re-mydata-q-af4137d9-d9b539a2fb2139d2-0> ;
-        <http://lsq.aksw.org/vocab#hasStructuralFeatures>  <http://example.org/sf-q-af4137d9> ;
-        <http://lsq.aksw.org/vocab#hasSpin>  <http://example.org/spin-q-af4137d9> ;
-        <http://lsq.aksw.org/vocab#text>  "SELECT DISTINCT  ?x0 ?x1 WHERE   { ?x0       <http://dbpedia.org/ontology/director>  ?x1 ;               <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .     <http://dbpedia.org/resource/Party_of_Five>               <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox> .     <http://dbpedia.org/resource/Matthew_Fox>               <http://dbpedia.org/ontology/birthPlace>  <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania>   } OFFSET  0 LIMIT   2 " ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://lsq.aksw.org/vocab#Query> .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0>
-        <http://lsq.aksw.org/vocab#hasVar>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://lsq.aksw.org/vocab#tpSelJoinVarRestricted>  "0.5"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#resultSize>  "8"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-2>
-        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  "4.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#tpSel>  2.2813522515624677E-9 ;
-        <http://lsq.aksw.org/vocab#resultSize>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bnd1799e75> .
-
-<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox>
-        <http://lsq.aksw.org/vocab#proxyFor>  <http://dbpedia.org/resource/Matthew_Fox> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>  <http://lsq.aksw.org/vocab#Hybrid> ;
-        <http://lsq.aksw.org/vocab#joinVertexDegree>  "3"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0>
-        <http://lsq.aksw.org/vocab#proxyFor>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>  <http://lsq.aksw.org/vocab#Star> ;
-        <http://lsq.aksw.org/vocab#joinVertexDegree>  "2"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/spin-q-af4137d9-bnd1799e75>
-        <http://spinrdf.org/sp#object>  <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania> ;
-        <http://spinrdf.org/sp#predicate>  <http://dbpedia.org/ontology/birthPlace> ;
-        <http://spinrdf.org/sp#subject>  <http://dbpedia.org/resource/Matthew_Fox> ;
-        <http://www.w3.org/2000/01/rdf-schema#label>  "<http://dbpedia.org/resource/Matthew_Fox> <http://dbpedia.org/ontology/birthPlace> <http://dbpedia.org/resource/Abington_Township,_Montgomery_County,_Pennsylvania> ." .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-1>
-        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  "4.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#tpSel>  2.2813522515624677E-9 ;
-        <http://lsq.aksw.org/vocab#resultSize>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn4e3c89a4> .
-
-<http://example.org/spin-q-af4137d9-bn885ea0bc>
-        <http://spinrdf.org/sp#object>  <http://dbpedia.org/resource/Matthew_Fox> ;
-        <http://spinrdf.org/sp#predicate>  <http://dbpedia.org/ontology/starring> ;
-        <http://spinrdf.org/sp#subject>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://www.w3.org/2000/01/rdf-schema#label>  "?x0 <http://dbpedia.org/ontology/starring> <http://dbpedia.org/resource/Matthew_Fox> ." .
-
-<http://example.org/spin-q-af4137d9>
-        <http://spinrdf.org/sp#resultVariables>  <http://example.org/spin-q-af4137d9-bne39e1b2d> ;
-        <http://spinrdf.org/sp#limit>   "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://spinrdf.org/sp#where>   <http://example.org/spin-q-af4137d9-bn0db80fd0> ;
-        <http://spinrdf.org/sp#distinct>  true ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Select> ;
-        <http://spinrdf.org/sp#offset>  "0"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/spin-q-af4137d9-bn0db80fd0>
-        <http://lsq.aksw.org/vocab#joinVertex>  <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-resource-Matthew_Fox> ;
-        <http://lsq.aksw.org/vocab#joinVertex>  <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-x0> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://example.org/spin-q-af4137d9-bn4dfa08c7> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/spin-q-af4137d9-bn1d1daf34> ;
-        <http://lsq.aksw.org/vocab#joinVertex>  <http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring> .
-
-<http://example.org/spin-q-af4137d9-bn4e3c89a4>
-        <http://spinrdf.org/sp#object>  <http://dbpedia.org/resource/Matthew_Fox> ;
-        <http://spinrdf.org/sp#predicate>  <http://dbpedia.org/ontology/starring> ;
-        <http://spinrdf.org/sp#subject>  <http://dbpedia.org/resource/Party_of_Five> ;
-        <http://www.w3.org/2000/01/rdf-schema#label>  "<http://dbpedia.org/resource/Party_of_Five> <http://dbpedia.org/ontology/starring> <http://dbpedia.org/resource/Matthew_Fox> ." .
-
-<http://example.org/spin-q-af4137d9-bne39e1b2d>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://example.org/spin-q-af4137d9-bn5acb516e> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/q-af4137d9-var-x0> .
-
-<http://example.org/spin-q-af4137d9-bn1d1daf34>
-        <http://spinrdf.org/sp#subject>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://spinrdf.org/sp#predicate>  <http://dbpedia.org/ontology/director> ;
-        <http://spinrdf.org/sp#object>  <http://example.org/q-af4137d9-var-x1> ;
-        <http://www.w3.org/2000/01/rdf-schema#label>  "?x0 <http://dbpedia.org/ontology/director> ?x1 ." .
-
-<http://example.org/re-mydata-q-af4137d9-d9b539a2fb2139d2-0>
-        <http://www.w3.org/ns/prov#wasAssociatedWith>  <http://example.org/agent-d9b539a2fb2139d2> .
-
-<http://example.org/spin-q-af4137d9-bn03a2c543>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/spin-q-af4137d9-bnd1799e75> .
-
-<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x0>
-        <http://lsq.aksw.org/vocab#proxyFor>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://lsq.aksw.org/vocab#resultSize>  "4"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-4>
-        <http://lsq.aksw.org/vocab#hasJoinVarExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0> ;
-        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  3.210736703536626E-5 ;
-        <http://lsq.aksw.org/vocab#tpSel>  2.842154262041554E-4 ;
-        <http://lsq.aksw.org/vocab#resultSize>  "124582"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn1d1daf34> .
-
-<http://example.org/q-af4137d9-var-x1>
-        <http://spinrdf.org/sp#varName>  "x1" .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-4-var-x0>
-        <http://lsq.aksw.org/vocab#hasVar>  <http://example.org/q-af4137d9-var-x0> ;
-        <http://lsq.aksw.org/vocab#tpSelJoinVarRestricted>  3.524632777322513E-5 ;
-        <http://lsq.aksw.org/vocab#resultSize>  "113487"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/sf-q-af4137d9>
-        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Limit> ;
-        <http://lsq.aksw.org/vocab#hasBGP>  <http://example.org/spin-q-af4137d9-bn0db80fd0> ;
-        <http://lsq.aksw.org/vocab#medianJoinVertexDegree>  "2.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bnd1799e75> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn1d1daf34> ;
-        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Group> ;
-        <http://lsq.aksw.org/vocab#joinVertices>  "3"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#maxBGPTriples>  "4"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#meanJoinVertexDegree>  "2.3333333333333335"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Distinct> ;
-        <http://lsq.aksw.org/vocab#projectVars>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#TriplePattern> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn4e3c89a4> ;
-        <http://lsq.aksw.org/vocab#bgps>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Select> ;
-        <http://lsq.aksw.org/vocab#tps>  "4"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn885ea0bc> ;
-        <http://lsq.aksw.org/vocab#minBGPTriples>  "4"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/le-mydata-q-af4137d9-now-tp-3>
-        <http://lsq.aksw.org/vocab#hasJoinVarExec>  <http://example.org/le-mydata-q-af4137d9-now-tp-3-var-x0> ;
-        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  "0.5"^^<http://www.w3.org/2001/XMLSchema#double> ;
-        <http://lsq.aksw.org/vocab#tpSel>  1.8250818012499742E-8 ;
-        <http://lsq.aksw.org/vocab#resultSize>  "8"^^<http://www.w3.org/2001/XMLSchema#long> ;
-        <http://lsq.aksw.org/vocab#hasTP>  <http://example.org/spin-q-af4137d9-bn885ea0bc> .
-
-<http://example.org/spin-q-af4137d9-bn4c97e783>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://example.org/spin-q-af4137d9-bn03a2c543> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/spin-q-af4137d9-bn4e3c89a4> .
-
-<http://example.org/spin-q-af4137d9-bn0db80fd0-jv-http-dbpedia.org-ontology-starring>
-        <http://lsq.aksw.org/vocab#proxyFor>  <http://dbpedia.org/ontology/starring> ;
-        <http://lsq.aksw.org/vocab#joinVertexType>  <http://lsq.aksw.org/vocab#Sink> ;
-        <http://lsq.aksw.org/vocab#joinVertexDegree>  "2"^^<http://www.w3.org/2001/XMLSchema#long> .
-
-<http://example.org/q-af4137d9-var-x0>
-        <http://spinrdf.org/sp#varName>  "x0" .
-
-<http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0>
-        <http://lsq.aksw.org/vocab#hasVarExec>  <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x0> ;
-        <http://lsq.aksw.org/vocab#hasVarExec>  <http://example.org/le-mydata-q-af4137d9-now-bgp-0db80fd0-var-x1> .
-
-<http://example.org/spin-q-af4137d9-bn5acb516e>
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
-        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://example.org/q-af4137d9-var-x1> .

@@ -13,36 +13,102 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public class LSQ {
     public static final String ns = "http://lsq.aksw.org/vocab#";
 
+    
+	public static class Strs {
+	    public static final String Query = ns + "Query";
+
+	    public static final String text = ns + "text";
+	    public static final String resultSize = ns + "resultSize";
+	    public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
+	    public static final String hasSpin = ns + "hasSpin";
+	    public static final String hasTP = ns + "hasTP";
+	    public static final String hasBGP = ns + "hasBGP";
+	    //public static final String tpText = ns + "tpText";
+	    //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
+	    public static final String execError = ns + "execError";
+	    public static final String processingError = ns + "processingError";
+	    public static final String parseError = ns + "parseError";
+	    public static final String runTimeMs = ns + "runTimeMs";
+
+	    public static final String hasExec = ns + "hasExec";
+	    public static final String hasLocalExec =  ns + "hasLocalExec";
+	    public static final String hasRemoteExec = ns + "hasRemoteExec";
+
+	    public static final String hasBGPExec = ns + "hasBGPExec";
+	    public static final String hasTPExec = ns + "hasTPExec";
+	    public static final String hasJoinVarExec = ns + "hasJoinVarExec";
+	    
+	    
+	    public static final String Vertex = ns + ns + "Vertex";
+	    public static final String Edge = ns + ns + "Edge";
+
+	    public static final String in = ns + "in";
+	    public static final String out = ns + "out";
+	    // Internal use. Indicates that one resource represents another one
+	    public static final String proxyFor = ns + "proxyFor";
+
+
+
+	    public static final String Star = ns + "Star";
+	    public static final String Sink = ns + "Sink";
+	    public static final String Path = ns + "Path";
+	    public static final String Hybrid = ns + "Hybrid";
+
+
+	    public static final String joinVertex = ns + "joinVertex";
+	    public static final String joinVertexType = ns + "joinVertexType";
+	    public static final String joinVertexDegree = ns + "joinVertexDegree";
+
+	    public static final String bgps = ns + "bgps";
+	    public static final String tps = ns + "tps";
+	    public static final String minBGPTriples = ns + "minBGPTriples";
+	    public static final String maxBGPTriples = ns + "maxBGPTriples";
+	    public static final String joinVertices = ns + "joinVertices";
+	    public static final String projectVars = ns + "projectVars";
+
+	    //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
+	    public static final String meanJoinVertexDegree = ns + "meanJoinVertexDegree";
+	    public static final String medianJoinVertexsDegree = ns + "medianJoinVertexDegree";
+
+	    public static final String mentionsSubject = ns + "mentionsSubject";
+	    public static final String mentionsPredicate = ns + "mentionsPredicate";
+	    public static final String mentionsObject = ns + "mentionsObject";
+
+	    public static final String mentionsTuple = ns + "mentionsTuple";
+	}
+	
+	
+
     public static Resource resource(String local) { return ResourceFactory.createResource(ns + local); }
     public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
 
     // Used internally for the hypergraph representation - not part of the public vocab
-    public static final Resource Vertex = resource(ns + "Vertex");
-    public static final Resource Edge = resource(ns + "Edge");
+    public static final Resource Vertex = resource(Strs.Vertex);
+    public static final Resource Edge = resource(Strs.Edge);
 
-    public static final Property in = property("in");
-    public static final Property out = property("out");
+    public static final Property in = property(Strs.in);
+    public static final Property out = property(Strs.out);
     // Internal use. Indicates that one resource represents another one
     public static final Property proxyFor = property("proxyFor");
 
 
 
-    public static final Resource Star = resource("Star");
-    public static final Resource Sink = resource("Sink");
-    public static final Resource Path = resource("Path");
-    public static final Resource Hybrid = resource("Hybrid");
+    public static final Resource Star = resource(Strs.Star);
+    public static final Resource Sink = resource(Strs.Sink);
+    public static final Resource Path = resource(Strs.Path);
+    public static final Resource Hybrid = resource(Strs.Hybrid);
 
 
-    public static final Property joinVertex = property("joinVertex");
-    public static final Property joinVertexType = property("joinVertexType");
-    public static final Property joinVertexDegree = property("joinVertexDegree");
+    public static final Property joinVertex = property(Strs.joinVertex);
+    public static final Property joinVertexType = property(Strs.joinVertexType);
+    public static final Property joinVertexDegree = property(Strs.joinVertexDegree);
 
-    public static final Property bgps = property("bgps");
-    public static final Property tps = property("tps");
-    public static final Property minBGPTriples = property("minBGPTriples");
-    public static final Property maxBGPTriles = property("maxBGPTriples");
-    public static final Property joinVertices = property("joinVertices");
-    public static final Property projectVars = property("projectVars");
+    public static final Property bgps = property(Strs.bgps);
+    public static final Property tps = property(Strs.tps);
+    public static final Property minBGPTriples = property(Strs.minBGPTriples);
+    public static final Property maxBGPTriples = property(Strs.maxBGPTriples);
+    public static final Property joinVertices = property(Strs.joinVertices);
+    public static final Property projectVars = property(Strs.projectVars);
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
@@ -71,29 +137,29 @@ public class LSQ {
     // TODO Sort out the exact semantic relation - but its roughly:
     // A SPIN query represents a query itself, whereas a LSQ query represents a record about it
     // More concretely, an LSQ record holds information about at which time a certain query was fired based on which log file, etc.
-    public static final Resource Query = resource("Query");
+    public static final Resource Query = resource(Strs.Query);
 
 
-    public static final Property text = property("text");
-    public static final Property resultSize = property("resultSize");
-    public static final Property hasStructuralFeatures = property("hasStructuralFeatures");
-    public static final Property hasSpin = property("hasSpin");
-    public static final Property hasTP = property("hasTP");
-    public static final Property hasBGP = property("hasBGP");
+    public static final Property text = property(Strs.text);
+    public static final Property resultSize = property(Strs.resultSize);
+    public static final Property hasStructuralFeatures = property(Strs.hasStructuralFeatures);
+    public static final Property hasSpin = property(Strs.hasSpin);
+    public static final Property hasTP = property(Strs.hasTP);
+    public static final Property hasBGP = property(Strs.hasBGP);
     //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property execError = property("execError");
-    public static final Property processingError = property("processingError");
-    public static final Property parseError = property("parseError");
-    public static final Property runTimeMs = property("runTimeMs");
+    public static final Property execError = property(Strs.execError);
+    public static final Property processingError = property(Strs.processingError);
+    public static final Property parseError = property(Strs.parseError);
+    public static final Property runTimeMs = property(Strs.runTimeMs);
 
-    public static final Property hasExec = property("hasExec");
-    public static final Property hasLocalExec = property("hasLocalExec");
-    public static final Property hasRemoteExec = property("hasRemoteExec");
+    public static final Property hasExec = property(Strs.hasExec);
+    public static final Property hasLocalExec = property(Strs.hasLocalExec);
+    public static final Property hasRemoteExec = property(Strs.hasRemoteExec);
 
-    public static final Property hasBGPExec = property("hasBGPExec");
-    public static final Property hasTPExec = property("hasTPExec");
-    public static final Property hasJoinVarExec = property("hasJoinVarExec");
+    public static final Property hasBGPExec = property(Strs.hasBGPExec);
+    public static final Property hasTPExec = property(Strs.hasTPExec);
+    public static final Property hasJoinVarExec = property(Strs.hasJoinVarExec);
 
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set

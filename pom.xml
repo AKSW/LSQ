@@ -57,8 +57,8 @@
     </modules>
 
     <properties>
-        <jena.version>3.8.0</jena.version>
-        <jsa.subversion>1-SNAPSHOT</jsa.subversion>
+        <jena.version>3.9.0</jena.version>
+        <jsa.subversion>2-SNAPSHOT</jsa.subversion>
         <jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -120,6 +120,13 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-mapper-proxy</artifactId>
+                <version>${jsa.version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>

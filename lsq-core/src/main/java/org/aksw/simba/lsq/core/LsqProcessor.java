@@ -1,7 +1,6 @@
 package org.aksw.simba.lsq.core;
 
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.GregorianCalendar;
@@ -23,6 +22,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
+import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -40,8 +40,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
@@ -304,7 +302,7 @@ public class LsqProcessor
 //    }
 
     @Override
-    public Resource apply(Resource r) {
+    public LsqQuery apply(Resource r) {
 
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
@@ -317,7 +315,7 @@ public class LsqProcessor
         boolean fail = false;
         boolean parsed = r.getProperty(LSQ.processingError) == null ? true : false;
 
-        Resource result = null;
+        LsqQuery result = null;
 
         try {
             if(parsed) {
@@ -369,7 +367,7 @@ public class LsqProcessor
 
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
 
-                    NestedResource baseRes = new NestedResource(queryModel.createResource(baseUri));
+                    NestedResource baseRes = NestedResource.from(queryModel, baseUri);
 
                     Function<String, NestedResource> queryAspectFn;
                     NestedResource queryRes;
@@ -390,7 +388,7 @@ public class LsqProcessor
                             }
                         } else {
 
-                            queryRes = new NestedResource(r);
+                            queryRes = NestedResource.from(r);
 
                             queryAspectFn = (aspect) -> queryRes.nest("-" + aspect); //.nest("q-" + queryHash);
                         }
@@ -401,14 +399,10 @@ public class LsqProcessor
                         queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
                     }
 
-                    result = queryRes.get();
-
-
-                    result
-                        .addProperty(RDF.type, LSQ.Query)
-                        //.addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
-                        .addLiteral(LSQ.text, ("" + queryStr).replace("\n", " "));
-
+                    result = queryRes.get()
+                            .addProperty(RDF.type, LSQ.Query)
+                            .as(LsqQuery.class)
+                            .setText(("" + queryStr).replace("\n", " "));
 
                     if(!queryStmt.isParsed()) {
                         String msg = queryStmt.getParseException().getMessage();
@@ -511,8 +505,8 @@ public class LsqProcessor
 
             // TODO Switch between local / remote execution
             if(query != null) {
-                queryRes.get()
-                    .addProperty(LSQ.hasLocalExec, queryExecRes);
+                queryRes.get().as(LsqQuery.class)
+                	.getLocalExecutions(Resource.class).add(queryExecRes);
 
                 rdfizeQueryExecution(queryRes.get(), query, queryExecRes, benchmarkQef, dataQef, datasetSize);
             }

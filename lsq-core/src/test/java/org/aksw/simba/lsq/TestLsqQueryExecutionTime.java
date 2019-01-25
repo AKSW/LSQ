@@ -25,6 +25,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionModular;
 import org.apache.jena.riot.RDFDataMgr;
@@ -131,6 +132,13 @@ public class TestLsqQueryExecutionTime {
 		Model expected = RDFDataMgr.loadModel("lsq-tests/triple-pattern-selectivity/tpsel01.ttl");
 
 
+//      Test to check whether equals method works through potential proxy resource for LsqQuery
+//		Statement stmt = expected.listStatements().next();
+//		System.out.println("REF: " + stmt);
+//		for(Statement cand : actual.listStatements().toSet()) {
+//			System.out.println("  match? " + cand  + " - " + cand.equals(stmt));
+//		}
+		
 		// Remove ignored properties; should only be used where property values are non-deterministic
 		List<Property> ignoreProperties = Arrays.asList(LSQ.runTimeMs);
 
@@ -140,13 +148,17 @@ public class TestLsqQueryExecutionTime {
 		}
 		
 		
+//		System.out.println("BEGIN OF ACTUAL");
+//		RDFDataMgr.write(System.out, actual, RDFFormat.NTRIPLES);
+//		System.out.println("END OF ACTUAL");
+		
 		ModelDiff diff = ModelDiff.create(actual, expected);
 
 		if(!diff.isEmpty()) {
 			System.err.println("Excessive: ---------------------");
-			RDFDataMgr.write(System.out, diff.getAdded(), RDFFormat.TURTLE_BLOCKS);
+			RDFDataMgr.write(System.out, diff.getAdded(), RDFFormat.NTRIPLES);
 			System.err.println("Missing: ---------------------");
-			RDFDataMgr.write(System.out, diff.getRemoved(), RDFFormat.TURTLE_BLOCKS);
+			RDFDataMgr.write(System.out, diff.getRemoved(), RDFFormat.NTRIPLES);
 		}
 		
 		Assert.assertTrue(diff.isEmpty());

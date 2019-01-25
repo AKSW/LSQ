@@ -532,7 +532,7 @@ public class QueryStatistics2 {
         int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
         targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
-                .addLiteral(LSQ.maxBGPTriles, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
+                .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
     }
 
     public static List<Integer> getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp,

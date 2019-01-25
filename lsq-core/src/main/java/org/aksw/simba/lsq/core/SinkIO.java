@@ -29,7 +29,8 @@ public class SinkIO<T>
     }
 
     public SinkIO(PrintStream out, BiConsumer<PrintStream, T> consumer) {
-        this(out, isStdStream(out), consumer);
+        // By default, close streams unless we are dealing with stdout or stderr
+    	this(out, !isStdStream(out), consumer);
     }
 
     public SinkIO(PrintStream out, boolean doClose, BiConsumer<PrintStream, T> consumer) {

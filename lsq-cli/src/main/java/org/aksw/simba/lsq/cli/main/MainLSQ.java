@@ -18,9 +18,13 @@ import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 /**
- * This is the main class used to RDFise query logs
+ * This is the main class of LSQ's command line interface (CLI)
+ * used to RDFise query logs
+ * 
  * @author Saleem
+ * @author Claus Stadler
  *
  */
 //@SpringApplicationConfiguration
@@ -58,6 +62,9 @@ public class MainLSQ
 
 //        Stream<Resource> logEntryStream;
 
+        // The main setup work is done in LsqUtils following.
+        // It follows a classic batch processing approach:
+        // Create a reader, a processor and a writer
         Stream<Resource> itemReader = LsqUtils.createReader(config);
         LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
         Sink<Resource> itemWriter = LsqUtils.createWriter(config);
@@ -65,7 +72,9 @@ public class MainLSQ
         Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
 
         datasetSize = itemProcessor.getDatasetSize();
-        Long workloadSize = null; //itemProcessor.getDatasetSize();
+        // Precounting the workload size is quite expensive
+        // TODO Add a parameter + implementation do the counting anyway
+        Long workloadSize = null;
 
         logger.info("About to process " + workloadSize + " queries");
         logger.info("Dataset size of " + datasetEndpointUrl + " / " + DatasetDescriptionUtils.toString(datasetDescription) + " - size: " + datasetSize);
@@ -75,6 +84,7 @@ public class MainLSQ
       //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
         Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
 
+        // Report start / end times of the RDFization if requested
         if(config.isEmitProcessMetadata()) {
             itemWriter.send(
                    expRes.inModel(ModelFactory.createDefaultModel())
@@ -101,65 +111,4 @@ public class MainLSQ
         itemWriter.flush();
         itemWriter.close();
     }
-
-    public void parseLsqConfig(String[] args) {
-
-
-
-//        System.out.println(queryToSubmissions.keySet().size());
-
-//        logger.info("Number of distinct queries in log: "
-
-        // This is an abstraction that can execute SPARQL queries
-
-
-//            RiotLib.writeBase(out, base) ;
-//            RiotLib.writePrefixes(out, prefixMap) ;
-//            ShellGraph x = new ShellGraph(graph, null, null) ;
-//            x.writeGraph() ;
-
-
-        //int workloadSize = workloadResources.size();
-
-        //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
-
-
-        //Calendar endTime = new GregorianCalendar();
-        //specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
-
-        //specs.write(out, "NTRIPLES");
-
-        //SparqlQueryParser queryParser = SparqlQueryParserImpl.create(Syntax.syntaxARQ);
-
-
-//        myenv
-//            engine aeouaoeu
-//            dataset aeuaoeueoa
-//
-//
-//       myevn-1-1-2016
-//            basedOn myenv
-//            startedAtTime
-//            endAtTime
-
-        // Small array hack in order to change the values while streaming
-        //int logFailCount[] = new int[] {0};
-        //long logEntryIndex[] = new long[] {0l};
-        int logFailCount = 0;
-        long logEntryIndex = 0l;
-        int batchSize = 10;
-
-        // TODO We should check beforehand whether there is a sufficient number of processable log entries
-        // available in order to consider the workload a query log
-        //for(Resource r : workloadResources) {
-        //workloadResourceStream.forEach(r -> {
-//        Iterator<Resource> it = workloadResourceStream.iterator();
-//        while(it.hasNext()) {
-//            Resource r = it.next();
-//
-//        }
-
-    }
-
-
 }
