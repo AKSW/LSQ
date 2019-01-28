@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.simba.lsq.core.LsqConfig;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.util.NestedResource;
@@ -40,7 +40,7 @@ public class MainLSQ
     public static void main(String[] args) throws IOException {
 
         LsqCliParser cliParser = new LsqCliParser();
-        LsqConfig config = cliParser.parse(args);
+        LsqConfigImpl config = cliParser.parse(args);
 
         try {
             run(config);
@@ -51,7 +51,7 @@ public class MainLSQ
         }
     }
 
-    public static void run(LsqConfig config) throws Exception  {
+    public static void run(LsqConfigImpl config) throws Exception  {
 
         SparqlServiceReference ssr = config.getBenchmarkEndpointDescription();
         String datasetEndpointUrl = ssr.getServiceURL();

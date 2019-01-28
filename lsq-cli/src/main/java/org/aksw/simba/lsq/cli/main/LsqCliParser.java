@@ -34,7 +34,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
-import org.aksw.simba.lsq.core.LsqConfig;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.parser.Mapper;
@@ -238,7 +238,7 @@ public class LsqCliParser {
     }
 
 
-    public LsqConfig parse(String[] args) throws IOException {
+    public LsqConfigImpl parse(String[] args) throws IOException {
 
         OptionSet options = parser.parse(args);
 
@@ -298,7 +298,7 @@ public class LsqCliParser {
 //        wrap(inputFormatRegistry, )
 
 
-        LsqConfig config = new LsqConfig();
+        LsqConfigImpl config = new LsqConfigImpl();
 
 
 

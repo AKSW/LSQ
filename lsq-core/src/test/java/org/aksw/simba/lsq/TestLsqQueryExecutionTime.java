@@ -13,7 +13,7 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionJsa;
 import org.aksw.jena_sparql_api.utils.ModelDiff;
-import org.aksw.simba.lsq.core.LsqConfig;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.Skolemize;
@@ -98,7 +98,7 @@ public class TestLsqQueryExecutionTime {
 		
 		//FluentRDFConnectionFn.
 		
-		LsqConfig config = new LsqConfig()
+		LsqConfigImpl config = new LsqConfigImpl()
 			.setInQueryLogFile("classpath:/lsq-tests/triple-pattern-selectivity/tpsel01.sparql")
 			.setInQueryLogFormat("sparql")
 			

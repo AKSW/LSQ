@@ -89,16 +89,18 @@ public class TestLsqTimeout {
 	
 	@Test(expected=QueryCancelledException.class)
 	public void testLsqBenchmarkTimeout() {
-		QueryExecution dqe = benchmarkQef.createQueryExecution("SELECT * { ?s ?p ?o }");
-		dqe.setTimeout(100);
-		ResultSetFormatter.consume(dqe.execSelect());
+		try(QueryExecution dqe = benchmarkQef.createQueryExecution("SELECT * { ?s ?p ?o }")) {
+			dqe.setTimeout(100);
+			ResultSetFormatter.consume(dqe.execSelect());
+		}
 	}
 
 	@Test(expected=QueryCancelledException.class)
 	public void testLsqDataTimeout() {
-		QueryExecution dqe = dataQef.createQueryExecution("SELECT * { ?s ?p ?o }");
-		dqe.setTimeout(100);
-		ResultSetFormatter.consume(dqe.execSelect());
+		try(QueryExecution dqe = dataQef.createQueryExecution("SELECT * { ?s ?p ?o }")) {
+			dqe.setTimeout(100);
+			ResultSetFormatter.consume(dqe.execSelect());
+		}
 	}
 
 }

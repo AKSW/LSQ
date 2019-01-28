@@ -18,6 +18,11 @@
         <!-- <artifactId>spring-boot</artifactId> -->
         <!-- </dependency> -->
 
+		<dependency>
+			<groupId>com.beust</groupId>
+			<artifactId>jcommander</artifactId>
+		</dependency>
+
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>

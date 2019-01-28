@@ -8,10 +8,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -63,7 +67,7 @@ public class LsqUtils {
 	private static final Logger logger = LoggerFactory.getLogger(LsqUtils.class);
 
 
-	public static void applyDefaults(LsqConfig config) {
+	public static void applyDefaults(LsqConfigImpl config) {
 		// Set the default log format registry if no other has been set
 		PropertyUtils.applyIfAbsent(config::setLogFmtRegistry, config::getLogFmtRegistry, LsqUtils::createDefaultLogFmtRegistry);
 
@@ -110,7 +114,7 @@ public class LsqUtils {
     }
 
 	
-    public static Sink<Resource> createWriter(LsqConfig config) throws FileNotFoundException {
+    public static Sink<Resource> createWriter(LsqConfigImpl config) throws FileNotFoundException {
         String outRdfFormat = config.getOutRdfFormat();
         File outFile = config.getOutFile();
 
@@ -200,7 +204,7 @@ public class LsqUtils {
     }
 
 
-    public static Stream<Resource> createReader(LsqConfig config) throws IOException {
+    public static Stream<Resource> createReader(LsqConfigImpl config) throws IOException {
 
     	String inputResource = config.getInQueryLogFile();
 
@@ -212,8 +216,11 @@ public class LsqUtils {
     		
     		// Retry with prepending file:
     		if(!resource.exists()) {
-    			resource = new FileSystemResource(inputResource);
-    			//resource = loader.getResource("file:" + inputResource);
+    			Path path = Paths.get(inputResource);
+    			path = path.toAbsolutePath();
+    			path = path.normalize();
+    			logger.info("Attempting to open: [" + path + "]");
+    			resource = new FileSystemResource(path.toFile());
     		}
     		
 //            File inputFile = new File(inputResource);
@@ -321,7 +328,7 @@ public class LsqUtils {
         return result;
     }
 
-    public static LsqProcessor createProcessor(LsqConfig config) {
+    public static LsqProcessor createProcessor(LsqConfigImpl config) {
 
         LsqProcessor result = new LsqProcessor();
 

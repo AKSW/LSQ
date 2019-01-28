@@ -14,11 +14,18 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 
-public class LsqConfig {
+/**
+ * Bean implementation of the LSQ config.
+ * The code base should use the interface
+ * 
+ * @author Claus Stadler, Jan 28, 2019
+ *
+ */
+public class LsqConfigImpl {
     protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
 
     // Use LsqUtils.applyDefaults for default values
-    public LsqConfig() {
+    public LsqConfigImpl() {
     	//this.logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
     	this.federationEndpoints = new ArrayList<>();
     }
@@ -111,14 +118,14 @@ public class LsqConfig {
 
 
 
-    public LsqConfig setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
+    public LsqConfigImpl setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
         this.benchmarkEndpointDescription = benchmarkEndpointDescription;
         return this;
     }
 
 
 
-    public LsqConfig setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
+    public LsqConfigImpl setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
         this.isFetchDatasetSizeEnabled = isFetchDatasetSizeEnabled;
         return this;
     }
@@ -129,7 +136,7 @@ public class LsqConfig {
     }
 
 
-    public LsqConfig setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
+    public LsqConfigImpl setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
         this.sparqlStmtParser = sparqlStmtParser;
         return this;
     }
@@ -139,7 +146,7 @@ public class LsqConfig {
 		return deterministicPseudoTimestamps;
 	}
 
-	public LsqConfig setDeterministicPseudoTimestamps(boolean deterministicPseudoTimestamps) {
+	public LsqConfigImpl setDeterministicPseudoTimestamps(boolean deterministicPseudoTimestamps) {
 		this.deterministicPseudoTimestamps = deterministicPseudoTimestamps;
 		return this;
 	}
@@ -150,7 +157,7 @@ public class LsqConfig {
 
 
 
-    public LsqConfig setLogFmtRegistry(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
+    public LsqConfigImpl setLogFmtRegistry(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
         this.logFmtRegistry = logFmtRegistry;
         return this;
     }
@@ -170,7 +177,7 @@ public class LsqConfig {
 		return benchmarkConnection;
 	}
 
-	public LsqConfig setBenchmarkConnection(RDFConnection benchmarkConnection) {
+	public LsqConfigImpl setBenchmarkConnection(RDFConnection benchmarkConnection) {
 		this.benchmarkConnection = benchmarkConnection;
 		return this;
 	}
@@ -179,7 +186,7 @@ public class LsqConfig {
 		return dataConnection;
 	}
 
-	public LsqConfig setDataConnection(RDFConnection dataConnection) {
+	public LsqConfigImpl setDataConnection(RDFConnection dataConnection) {
 		this.dataConnection = dataConnection;
 		return this;
 	}
@@ -189,7 +196,7 @@ public class LsqConfig {
     }
 
 
-	public LsqConfig setOutFile(File outFile) {
+	public LsqConfigImpl setOutFile(File outFile) {
         this.outFile = outFile;
         return this;
     }
@@ -199,7 +206,7 @@ public class LsqConfig {
         return inQueryLogFile;
     }
 
-    public LsqConfig setInQueryLogFile(String inQueryLogFile) {
+    public LsqConfigImpl setInQueryLogFile(String inQueryLogFile) {
         this.inQueryLogFile = inQueryLogFile;
         return this;
     }
@@ -208,7 +215,7 @@ public class LsqConfig {
         return inQueryLogFormat;
     }
 
-    public LsqConfig setInQueryLogFormat(String inQueryLogFormat) {
+    public LsqConfigImpl setInQueryLogFormat(String inQueryLogFormat) {
         this.inQueryLogFormat = inQueryLogFormat;
         return this;
     }
@@ -217,7 +224,7 @@ public class LsqConfig {
         return outRdfFile;
     }
 
-    public LsqConfig setOutRdfFile(File outRdfFile) {
+    public LsqConfigImpl setOutRdfFile(File outRdfFile) {
         this.outRdfFile = outRdfFile;
         return this;
     }
@@ -226,7 +233,7 @@ public class LsqConfig {
         return outRdfFormat;
     }
 
-    public LsqConfig setOutRdfFormat(String outRdfFormat) {
+    public LsqConfigImpl setOutRdfFormat(String outRdfFormat) {
         this.outRdfFormat = outRdfFormat;
         return this;
     }
@@ -235,7 +242,7 @@ public class LsqConfig {
         return isRdfizerQueryExecutionEnabled;
     }
 
-    public LsqConfig setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
+    public LsqConfigImpl setRdfizerQueryExecutionEnabled(boolean isRdfizerQueryExecutionEnabled) {
         this.isRdfizerQueryExecutionEnabled = isRdfizerQueryExecutionEnabled;
         return this;
     }
@@ -244,7 +251,7 @@ public class LsqConfig {
         return isRdfizerQueryLogRecordEnabled;
     }
 
-    public LsqConfig setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
+    public LsqConfigImpl setRdfizerQueryLogRecordEnabled(boolean isRdfizerQueryLogRecordEnabled) {
         this.isRdfizerQueryLogRecordEnabled = isRdfizerQueryLogRecordEnabled;
         return this;
     }
@@ -266,7 +273,7 @@ public class LsqConfig {
     }
 
 
-    public LsqConfig setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
+    public LsqConfigImpl setRdfizerQueryStructuralFeaturesEnabled(boolean isRdfizerQueryStructuralFeaturesEnabled) {
         this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryStructuralFeaturesEnabled;
         return this;
     }
@@ -296,7 +303,7 @@ public class LsqConfig {
         return datasetLabel;
     }
 
-    public LsqConfig setDatasetLabel(String datasetLabel) {
+    public LsqConfigImpl setDatasetLabel(String datasetLabel) {
         this.datasetLabel = datasetLabel;
         return this;
     }
@@ -305,7 +312,7 @@ public class LsqConfig {
         return benchmarkQueryExecutionTimeoutInMs;
     }
 
-    public LsqConfig setBenchmarkQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
+    public LsqConfigImpl setBenchmarkQueryExecutionTimeoutInMs(Long datasetQueryExecutionTimeoutInMs) {
         this.benchmarkQueryExecutionTimeoutInMs = datasetQueryExecutionTimeoutInMs;
         return this;
     }
@@ -314,7 +321,7 @@ public class LsqConfig {
         return experimentIri;
     }
 
-    public LsqConfig setExperimentIri(String experimentIri) {
+    public LsqConfigImpl setExperimentIri(String experimentIri) {
         this.experimentIri = experimentIri;
         return this;
     }
@@ -324,7 +331,7 @@ public class LsqConfig {
     }
 
 
-    public LsqConfig setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
+    public LsqConfigImpl setRdfizerQueryEnabled(boolean isRdfizerQueryEnabled) {
         this.isRdfizerQueryStructuralFeaturesEnabled = isRdfizerQueryEnabled;
         return this;
     }
@@ -334,7 +341,7 @@ public class LsqConfig {
     }
 
 
-    public LsqConfig setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
+    public LsqConfigImpl setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
         this.datasetEndpointDescription = datasetEndpointDescription;
         return this;
     }
@@ -343,7 +350,7 @@ public class LsqConfig {
         return federationEndpoints;
     }
 
-    public LsqConfig setFederationEndpoints(List<String> federationEndpoints) {
+    public LsqConfigImpl setFederationEndpoints(List<String> federationEndpoints) {
         this.federationEndpoints = federationEndpoints;
         return this;
     }
@@ -352,7 +359,7 @@ public class LsqConfig {
         return firstItemOffset;
     }
 
-    public LsqConfig setFirstItemOffset(Long firstItemOffset) {
+    public LsqConfigImpl setFirstItemOffset(Long firstItemOffset) {
         this.firstItemOffset = firstItemOffset;
         return this;
     }
@@ -361,7 +368,7 @@ public class LsqConfig {
         return federationConfigFile;
     }
 
-    public LsqConfig setFederationConfigFile(File federationConfigFile) {
+    public LsqConfigImpl setFederationConfigFile(File federationConfigFile) {
         this.federationConfigFile = federationConfigFile;
         return this;
     }
@@ -370,7 +377,7 @@ public class LsqConfig {
         return outBaseIri;
     }
 
-    public LsqConfig setOutBaseIri(String outBaseIri) {
+    public LsqConfigImpl setOutBaseIri(String outBaseIri) {
         this.outBaseIri = outBaseIri;
         return this;
     }
@@ -379,7 +386,7 @@ public class LsqConfig {
         return datasetSize;
     }
 
-    public LsqConfig setDatasetSize(Long datasetSize) {
+    public LsqConfigImpl setDatasetSize(Long datasetSize) {
         this.datasetSize = datasetSize;
         return this;
     }
@@ -388,7 +395,7 @@ public class LsqConfig {
         return reuseLogIri;
     }
 
-    public LsqConfig setReuseLogIri(boolean reuseLogIri) {
+    public LsqConfigImpl setReuseLogIri(boolean reuseLogIri) {
         this.reuseLogIri = reuseLogIri;
         return this;
     }
@@ -397,7 +404,7 @@ public class LsqConfig {
         return emitProcessMetadata;
     }
 
-    public LsqConfig setEmitProcessMetadata(boolean emitProcessMetadata) {
+    public LsqConfigImpl setEmitProcessMetadata(boolean emitProcessMetadata) {
         this.emitProcessMetadata = emitProcessMetadata;
         return this;
     }
@@ -406,7 +413,7 @@ public class LsqConfig {
         return queryIdPattern;
     }
 
-    public LsqConfig setQueryIdPattern(Pattern queryIdPattern) {
+    public LsqConfigImpl setQueryIdPattern(Pattern queryIdPattern) {
         this.queryIdPattern = queryIdPattern;
         return this;
     }

@@ -239,8 +239,10 @@ public class SpinUtils {
         query.getProject().add(Vars.c, aggExpr);
         query.setQueryPattern(ElementUtils.createElement(t));
 
-        QueryExecution qe = qef.createQueryExecution(query);
-        long result = ServiceUtils.fetchInteger(qe, Vars.c);
+        long result;
+        try(QueryExecution qe = qef.createQueryExecution(query)) {
+        	result = ServiceUtils.fetchInteger(qe, Vars.c);
+        }
         return result;
     }
 

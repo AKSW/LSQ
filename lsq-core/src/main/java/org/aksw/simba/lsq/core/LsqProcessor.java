@@ -703,20 +703,22 @@ public class LsqProcessor
      */
     public static void rdfizeQueryExecutionBenchmark(Query query, Resource queryExecRes, QueryExecutionFactory qef) {
     	Stopwatch sw = Stopwatch.createStarted();
-        QueryExecution qe = qef.createQueryExecution(query);
-        long resultSetSize = QueryExecutionUtils.consume(qe);
-        double durationInMillis = sw.stop().elapsed(TimeUnit.NANOSECONDS) / 1000000.0;
+        try(QueryExecution qe = qef.createQueryExecution(query)) {
+	        long resultSetSize = QueryExecutionUtils.consume(qe);
+	        double durationInMillis = sw.stop().elapsed(TimeUnit.NANOSECONDS) / 1000000.0;
+	        
+	        
+	        //double durationInSeconds = duration.toNanos() / 1000000.0;
+	        queryExecRes
+	            .addLiteral(LSQ.resultSize, resultSetSize)
+	            .addLiteral(LSQ.runTimeMs, durationInMillis)
+	            //.addLiteral(PROV.startedAtTime, start)
+	            //.addLiteral(PROV.endAtTime, end)
+	            ;
+
+        }
         //Calendar end = Calendar.getInstance();
         //Duration duration = Duration.between(start.toInstant(), end.toInstant());
-
-
-        //double durationInSeconds = duration.toNanos() / 1000000.0;
-        queryExecRes
-            .addLiteral(LSQ.resultSize, resultSetSize)
-            .addLiteral(LSQ.runTimeMs, durationInMillis)
-            //.addLiteral(PROV.startedAtTime, start)
-            //.addLiteral(PROV.endAtTime, end)
-            ;
     }
 
 
