@@ -32,7 +32,7 @@ public class LsqConfigImpl {
     
     //protected Map<String, Mapper> logFmtRegistry;
 
-    protected String inQueryLogFile;
+    protected List<String> inQueryLogFiles;
     protected String inQueryLogFormat;
 
     protected File outRdfFile;
@@ -202,12 +202,12 @@ public class LsqConfigImpl {
     }
 
 
-    public String getInQueryLogFile() {
-        return inQueryLogFile;
+    public List<String> getInQueryLogFiles() {
+        return inQueryLogFiles;
     }
 
-    public LsqConfigImpl setInQueryLogFile(String inQueryLogFile) {
-        this.inQueryLogFile = inQueryLogFile;
+    public LsqConfigImpl setInQueryLogFiles(List<String> inQueryLogFiles) {
+        this.inQueryLogFiles = inQueryLogFiles;
         return this;
     }
 

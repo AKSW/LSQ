@@ -306,7 +306,7 @@ public class LsqCliParser {
         config.setOutBaseIri(baseUri);
         config.setExperimentIri(expBaseUri);
 
-        config.setInQueryLogFile(inputOs.value(options));
+        config.setInQueryLogFiles(inputOs.values(options));
         config.setInQueryLogFormat(logFormatOs.value(options));
 
         // By default, reuse log iris if the format is rdf; unless it is explicitly overridden ...

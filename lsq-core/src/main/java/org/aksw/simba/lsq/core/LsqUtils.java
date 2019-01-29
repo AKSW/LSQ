@@ -8,8 +8,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -206,8 +208,38 @@ public class LsqUtils {
 
     public static Stream<Resource> createReader(LsqConfigImpl config) throws IOException {
 
-    	String inputResource = config.getInQueryLogFile();
+    	List<String> inputResources = config.getInQueryLogFiles();
+		logger.info("Input resources: " + inputResources);
 
+//		for(String str : inputResources) {
+//			PathMatcher pathMatcher = FileSystems.getDefault().getPathMatcher(str);
+//			//pathMatcher.
+//			Files.walkFileTree(start, visitor)
+//			
+//		}
+//		
+    	Stream<Resource> result = inputResources.stream()
+    			.flatMap(inputResource -> {
+					try {
+						return createReader(config, inputResource);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+    	
+    	return result;
+    }
+    
+    /**
+     * Method that creates a reader for a specific inputResource under the give config.
+     * The config's inputResources are ignored.
+     * 
+     * @param config
+     * @param inputResource
+     * @return
+     * @throws IOException
+     */
+    public static Stream<Resource> createReader(LsqConfigImpl config, String inputResource) throws IOException {
         InputStream in;
         if(inputResource != null) {
         	// TODO We could make the resource loader part of the config

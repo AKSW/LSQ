@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -99,7 +100,7 @@ public class TestLsqQueryExecutionTime {
 		//FluentRDFConnectionFn.
 		
 		LsqConfigImpl config = new LsqConfigImpl()
-			.setInQueryLogFile("classpath:/lsq-tests/triple-pattern-selectivity/tpsel01.sparql")
+			.setInQueryLogFiles(Collections.singletonList("classpath:/lsq-tests/triple-pattern-selectivity/tpsel01.sparql"))
 			.setInQueryLogFormat("sparql")
 			
 			.setOutBaseIri("http://example.org/")
