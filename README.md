@@ -101,11 +101,11 @@ The following options exist:
 ```bash
 Option                Description                                              
 ------                -----------                                              
+non-option(s)         File(s) containing input data
 -b, --base            Base URI for URI generation (default: http://lsq.aksw.   
                         org/res/)                                              
 -e, --endpoint        Local SPARQL service (endpoint) URL on which to execute  
                         queries (default: http://localhost:8890/sparql)        
--f, --file <File>     File containing input data                               
 -g, --graph           Local graph(s) from which to retrieve the data           
 -h, --head <Long>     Only process n entries starting from the top             
 -l, --label           Label of the dataset, such as 'dbpedia' or 'lgd'. Will be
@@ -124,7 +124,7 @@ From the repository root folder, run:
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/swdf.apache.log \
+  lsq-core/src/test/resources/swdf.apache.log \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf \
@@ -138,7 +138,7 @@ lsq \
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/dbpedia.virtuoso.log \
+  lsq-core/src/test/resources/dbpedia.virtuoso.log \
   -m virtuoso \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
