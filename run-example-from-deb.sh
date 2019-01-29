@@ -7,8 +7,9 @@ if ! command_exists "lsq"; then
   ( mvn clean install && ./reinstall-deb.sh )
 fi
 
+#  -f lsq-core/src/test/resources/logs/combined.swdf.log \
 lsq \
-  -f lsq-core/src/test/resources/logs/combined.swdf.log \
+  lsq-core/src/test/resources/logs/combined.swdf.log \
   -e http://localhost:8890/sparql \
   -l swdf \
   -b http://lsq.aksw.org/res/ \

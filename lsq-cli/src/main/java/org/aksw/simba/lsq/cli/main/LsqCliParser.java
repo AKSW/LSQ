@@ -119,8 +119,9 @@ public class LsqCliParser {
     public void initOptionSpecs() {
 
         inputOs = parser
-                .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
-                .withRequiredArg()
+        		.nonOptions("File(s) containing input data")
+                //.acceptsAll(Arrays.asList("f", "file"), "File containing input data")
+                //.withRequiredArg()
                 //.ofType(File.class)
                 ;
 
