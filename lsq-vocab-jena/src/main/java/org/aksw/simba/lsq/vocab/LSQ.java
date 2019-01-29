@@ -83,32 +83,32 @@ public class LSQ {
     public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
 
     // Used internally for the hypergraph representation - not part of the public vocab
-    public static final Resource Vertex = resource(Strs.Vertex);
-    public static final Resource Edge = resource(Strs.Edge);
+    public static final Resource Vertex = ResourceFactory.createResource(Strs.Vertex);
+    public static final Resource Edge = ResourceFactory.createResource(Strs.Edge);
 
-    public static final Property in = property(Strs.in);
-    public static final Property out = property(Strs.out);
+    public static final Property in = ResourceFactory.createProperty(Strs.in);
+    public static final Property out = ResourceFactory.createProperty(Strs.out);
     // Internal use. Indicates that one resource represents another one
     public static final Property proxyFor = property("proxyFor");
 
 
 
-    public static final Resource Star = resource(Strs.Star);
-    public static final Resource Sink = resource(Strs.Sink);
-    public static final Resource Path = resource(Strs.Path);
-    public static final Resource Hybrid = resource(Strs.Hybrid);
+    public static final Resource Star = ResourceFactory.createResource(Strs.Star);
+    public static final Resource Sink = ResourceFactory.createResource(Strs.Sink);
+    public static final Resource Path = ResourceFactory.createResource(Strs.Path);
+    public static final Resource Hybrid = ResourceFactory.createResource(Strs.Hybrid);
 
 
-    public static final Property joinVertex = property(Strs.joinVertex);
-    public static final Property joinVertexType = property(Strs.joinVertexType);
-    public static final Property joinVertexDegree = property(Strs.joinVertexDegree);
+    public static final Property joinVertex = ResourceFactory.createProperty(Strs.joinVertex);
+    public static final Property joinVertexType = ResourceFactory.createProperty(Strs.joinVertexType);
+    public static final Property joinVertexDegree = ResourceFactory.createProperty(Strs.joinVertexDegree);
 
-    public static final Property bgps = property(Strs.bgps);
-    public static final Property tps = property(Strs.tps);
-    public static final Property minBGPTriples = property(Strs.minBGPTriples);
-    public static final Property maxBGPTriples = property(Strs.maxBGPTriples);
-    public static final Property joinVertices = property(Strs.joinVertices);
-    public static final Property projectVars = property(Strs.projectVars);
+    public static final Property bgps = ResourceFactory.createProperty(Strs.bgps);
+    public static final Property tps = ResourceFactory.createProperty(Strs.tps);
+    public static final Property minBGPTriples = ResourceFactory.createProperty(Strs.minBGPTriples);
+    public static final Property maxBGPTriples = ResourceFactory.createProperty(Strs.maxBGPTriples);
+    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertices);
+    public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVars);
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
@@ -137,29 +137,29 @@ public class LSQ {
     // TODO Sort out the exact semantic relation - but its roughly:
     // A SPIN query represents a query itself, whereas a LSQ query represents a record about it
     // More concretely, an LSQ record holds information about at which time a certain query was fired based on which log file, etc.
-    public static final Resource Query = resource(Strs.Query);
+    public static final Resource Query = ResourceFactory.createResource(Strs.Query);
 
 
-    public static final Property text = property(Strs.text);
-    public static final Property resultSize = property(Strs.resultSize);
-    public static final Property hasStructuralFeatures = property(Strs.hasStructuralFeatures);
-    public static final Property hasSpin = property(Strs.hasSpin);
-    public static final Property hasTP = property(Strs.hasTP);
-    public static final Property hasBGP = property(Strs.hasBGP);
+    public static final Property text = ResourceFactory.createProperty(Strs.text);
+    public static final Property resultSize = ResourceFactory.createProperty(Strs.resultSize);
+    public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
+    public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
+    public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
+    public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBGP);
     //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property execError = property(Strs.execError);
-    public static final Property processingError = property(Strs.processingError);
-    public static final Property parseError = property(Strs.parseError);
-    public static final Property runTimeMs = property(Strs.runTimeMs);
+    public static final Property execError = ResourceFactory.createProperty(Strs.execError);
+    public static final Property processingError = ResourceFactory.createProperty(Strs.processingError);
+    public static final Property parseError = ResourceFactory.createProperty(Strs.parseError);
+    public static final Property runTimeMs = ResourceFactory.createProperty(Strs.runTimeMs);
 
-    public static final Property hasExec = property(Strs.hasExec);
-    public static final Property hasLocalExec = property(Strs.hasLocalExec);
-    public static final Property hasRemoteExec = property(Strs.hasRemoteExec);
+    public static final Property hasExec = ResourceFactory.createProperty(Strs.hasExec);
+    public static final Property hasLocalExec = ResourceFactory.createProperty(Strs.hasLocalExec);
+    public static final Property hasRemoteExec = ResourceFactory.createProperty(Strs.hasRemoteExec);
 
-    public static final Property hasBGPExec = property(Strs.hasBGPExec);
-    public static final Property hasTPExec = property(Strs.hasTPExec);
-    public static final Property hasJoinVarExec = property(Strs.hasJoinVarExec);
+    public static final Property hasBGPExec = ResourceFactory.createProperty(Strs.hasBGPExec);
+    public static final Property hasTPExec = ResourceFactory.createProperty(Strs.hasTPExec);
+    public static final Property hasJoinVarExec = ResourceFactory.createProperty(Strs.hasJoinVarExec);
 
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
