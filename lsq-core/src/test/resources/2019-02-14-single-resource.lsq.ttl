@@ -118,7 +118,8 @@
 <http://lsq.aksw.org/res/re-dbpedia-q-f51d1c61-eabffe195bbe89ad-2015-00-24_03:00:00>
         <http://lsq.aksw.org/vocab#endpoint>  <http://dbpedia.org/sparql> ;
         <http://www.w3.org/ns/prov#wasAssociatedWith>  <http://lsq.aksw.org/res/agent-eabffe195bbe89ad> ;
-        <http://www.w3.org/ns/prov#atTime>  "2015-10-24T01:00:00Z^^http://www.w3.org/2001/XMLSchema#dateTime"^^<java:org.apache.jena.rdf.model.impl.LiteralImpl> .
+#        <http://www.w3.org/ns/prov#atTime>  "2015-10-24T01:00:00Z^^http://www.w3.org/2001/XMLSchema#dateTime"^^<java:org.apache.jena.rdf.model.impl.LiteralImpl> .
+        <http://www.w3.org/ns/prov#atTime>  "2015-10-24T01:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 
 <http://lsq.aksw.org/res/spin-q-f51d1c61-bnffd6c92d>
         <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnb3b8333d> ;

@@ -14,7 +14,7 @@ public class TestLsqValidationWithShacl {
 	public void testLsqValidationWithShacl() {
 		Model shaclModel = RDFDataMgr.loadModel("lsq.shacl.ttl");
 
-		Model dataModel = RDFDataMgr.loadModel("lsq-tests/triple-pattern-selectivity/tpsel01.ttl");
+		Model dataModel = RDFDataMgr.loadModel("2019-02-14-single-resource.lsq.ttl");
 
 		// Perform the validation of everything, using the data model
 		// also as the shapes model - you may have them separated
