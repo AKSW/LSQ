@@ -1,0 +1,198 @@
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn372f612b>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn3213bda8> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnfb8cdb7c>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnd88ee9e1> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn625b6183> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bncd4b8fc5>
+        <http://spinrdf.org/sp#arg2>  "’" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/q-f51d1c61-var-rel>
+        <http://spinrdf.org/sp#varName>  "rel" .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn5b5c2750>
+        <http://spinrdf.org/sp#arg2>  "°" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn888eeb92>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn5b5c2750> .
+
+<http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34>
+        <http://lsq.aksw.org/vocab#hasBGPExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-7beaf11c> ;
+        <http://lsq.aksw.org/vocab#hasBGPExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-0f4fa2d8> ;
+        <http://lsq.aksw.org/vocab#hasTPExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-tp-2> ;
+        <http://lsq.aksw.org/vocab#hasTPExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-tp-1> ;
+        <http://lsq.aksw.org/vocab#runTimeMs>  "20.784064"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#resultSize>  "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://www.w3.org/ns/prov#wasGeneratedBy>  <http://lsq.aksw.org/res/dbpedia> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnb8d93b20>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnd864f901> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn3213bda8>
+        <http://spinrdf.org/sp#arg2>  "×" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn73e0c4c7>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn37611602> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn0f4fa2d8>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnf2273e6f> .
+
+<http://lsq.aksw.org/res/sf-q-f51d1c61>
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Construct> ;
+        <http://lsq.aksw.org/vocab#hasBGP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn7beaf11c> ;
+        <http://lsq.aksw.org/vocab#hasTP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn93e6f6c5> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#fn-not> ;
+        <http://lsq.aksw.org/vocab#maxBGPTriples>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#bgps>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#medianJoinVertexDegree>  "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#hasTP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnf2273e6f> ;
+        <http://lsq.aksw.org/vocab#tps>  "2"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#minBGPTriples>  "1"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#joinVertices>  "0"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Filter> ;
+        <http://lsq.aksw.org/vocab#meanJoinVertexDegree>  "0.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Functions> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#fn-regex> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Group> ;
+        <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#TriplePattern> ;
+        <http://lsq.aksw.org/vocab#hasBGP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn0f4fa2d8> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn7a3a534d>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bncd4b8fc5> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bndfc89dac>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn3694630e> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn7beaf11c>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn93e6f6c5> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn6c4d12bd>
+        <http://spinrdf.org/sp#arg2>  "(/|#)(parent|occupation|owners|parentOrganization|divisions|division|institution|companies|keyFigures|owningOrganisation|workplaces|locationCountry|engines|employer|governingBody_of|tenant_of|brand|sector|keyPerson|regionServed|workInstitutions|author|constructor|currentowner|owningOrganisation_of|subsidiary|institutions|parentCompany|constructors|license|headquarters|workInstitution|knownFor|designfirm|engineName|locationCity|successor|keyPeople|currentTenants_of|laterwork|affiliations|boards|industry|foundation|predecessor|title|manufacturer|products|websiteType|Relation|subsid|engine|headquarter|leadership|builder|company|parentOrganisation|foundedBy|owner|creator|product|foundationPlace|manufacturers|areaServed|founder|wikiPageRevisionID|owningCompany|chairman|designer|services|ownership|partners|service|wikiPageID|developer|location|locations|previousowners|board|homepage)$" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-rel> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnb3b8333d>
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn7a3a534d> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnb8d93b20> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn73e0c4c7> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnd204fbfc> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn372f612b> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Filter> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn888eeb92> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn5694aa35>
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg2>  "–" .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnd864f901>
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg2>  "¿" .
+
+<http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-tp-2>
+        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  "1.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#tpSel>  3.2764514313130193E-8 ;
+        <http://lsq.aksw.org/vocab#resultSize>  "13"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnf2273e6f> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn3694630e>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Filter> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn3716c436> .
+
+<http://lsq.aksw.org/res/re-dbpedia-q-f51d1c61-eabffe195bbe89ad-2015-00-24_03:00:00>
+        <http://lsq.aksw.org/vocab#endpoint>  <http://dbpedia.org/sparql> ;
+        <http://www.w3.org/ns/prov#wasAssociatedWith>  <http://lsq.aksw.org/res/agent-eabffe195bbe89ad> ;
+        <http://www.w3.org/ns/prov#atTime>  "2015-10-24T01:00:00Z^^http://www.w3.org/2001/XMLSchema#dateTime"^^<java:org.apache.jena.rdf.model.impl.LiteralImpl> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnffd6c92d>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnb3b8333d> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bndfc89dac> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnc8ad11a2>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn7beaf11c> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnfb8cdb7c> .
+
+<http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-0f4fa2d8>
+        <http://lsq.aksw.org/vocab#hasVarExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-0f4fa2d8-var-obj> ;
+        <http://lsq.aksw.org/vocab#hasVarExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-0f4fa2d8-var-rel> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61>
+        <http://spinrdf.org/sp#where>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnc8ad11a2> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Construct> ;
+        <http://spinrdf.org/sp#templates>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn0f4fa2d8> .
+
+<http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-tp-1>
+        <http://lsq.aksw.org/vocab#tpSelBGPRestricted>  "1.0"^^<http://www.w3.org/2001/XMLSchema#double> ;
+        <http://lsq.aksw.org/vocab#tpSel>  3.2764514313130193E-8 ;
+        <http://lsq.aksw.org/vocab#resultSize>  "13"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        <http://lsq.aksw.org/vocab#hasTP>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn93e6f6c5> .
+
+<http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-7beaf11c>
+        <http://lsq.aksw.org/vocab#hasVarExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-7beaf11c-var-obj> ;
+        <http://lsq.aksw.org/vocab#hasVarExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34-bgp-7beaf11c-var-rel> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnf2273e6f>
+        <http://spinrdf.org/sp#predicate>  <http://lsq.aksw.org/res/q-f51d1c61-var-rel> ;
+        <http://spinrdf.org/sp#object>  <http://dbpedia.org/resource/Montreal_Carsteel> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>  "?obj ?rel <http://dbpedia.org/resource/Montreal_Carsteel> ." ;
+        <http://spinrdf.org/sp#subject>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn74ad6bc4>
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg2>  "¡" .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn3716c436>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn74ad6bc4> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn625b6183>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnffd6c92d> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn625b6183> ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#first>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bnb3b8333d> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnd88ee9e1>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#Filter> ;
+        <http://spinrdf.org/sp#expression>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn6c4d12bd> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn93e6f6c5>
+        <http://www.w3.org/2000/01/rdf-schema#label>  "?obj ?rel <http://dbpedia.org/resource/Montreal_Carsteel> ." ;
+        <http://spinrdf.org/sp#predicate>  <http://lsq.aksw.org/res/q-f51d1c61-var-rel> ;
+        <http://spinrdf.org/sp#object>  <http://dbpedia.org/resource/Montreal_Carsteel> ;
+        <http://spinrdf.org/sp#subject>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bn37611602>
+        <http://spinrdf.org/sp#arg2>  "—" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#regex> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/q-f51d1c61-var-obj> .
+
+<http://lsq.aksw.org/res/spin-q-f51d1c61-bnd204fbfc>
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://spinrdf.org/sp#not> ;
+        <http://spinrdf.org/sp#arg1>  <http://lsq.aksw.org/res/spin-q-f51d1c61-bn5694aa35> .
+
+<http://lsq.aksw.org/res/q-f51d1c61>
+        <http://lsq.aksw.org/vocab#hasLocalExec>  <http://lsq.aksw.org/res/le-dbpedia-q-f51d1c61-2019-13-14_04:13:34> ;
+        <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/res/re-dbpedia-q-f51d1c61-eabffe195bbe89ad-2015-00-24_03:00:00> ;
+        <http://lsq.aksw.org/vocab#hasStructuralFeatures>  <http://lsq.aksw.org/res/sf-q-f51d1c61> ;
+        <http://lsq.aksw.org/vocab#hasSpin>  <http://lsq.aksw.org/res/spin-q-f51d1c61> ;
+        <http://lsq.aksw.org/vocab#text>  "PREFIX  dbpedia: <http://dbpedia.org/resource/>  CONSTRUCT    {      ?obj ?rel dbpedia:Montreal_Carsteel .   } WHERE   { { ?obj  ?rel  dbpedia:Montreal_Carsteel }     FILTER regex(?rel, \"(/|#)(parent|occupation|owners|parentOrganization|divisions|division|institution|companies|keyFigures|owningOrganisation|workplaces|locationCountry|engines|employer|governingBody_of|tenant_of|brand|sector|keyPerson|regionServed|workInstitutions|author|constructor|currentowner|owningOrganisation_of|subsidiary|institutions|parentCompany|constructors|license|headquarters|workInstitution|knownFor|designfirm|engineName|locationCity|successor|keyPeople|currentTenants_of|laterwork|affiliations|boards|industry|foundation|predecessor|title|manufacturer|products|websiteType|Relation|subsid|engine|headquarter|leadership|builder|company|parentOrganisation|foundedBy|owner|creator|product|foundationPlace|manufacturers|areaServed|founder|wikiPageRevisionID|owningCompany|chairman|designer|services|ownership|partners|service|wikiPageID|developer|location|locations|previousowners|board|homepage)$\")     FILTER ( ! regex(?obj, \"–\") )     FILTER ( ! regex(?obj, \"×\") )     FILTER ( ! regex(?obj, \"’\") )     FILTER ( ! regex(?obj, \"°\") )     FILTER ( ! regex(?obj, \"—\") )     FILTER ( ! regex(?obj, \"¿\") )     FILTER ( ! regex(?obj, \"¡\") )   } " ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://lsq.aksw.org/vocab#Query> .
+
+<http://lsq.aksw.org/res/q-f51d1c61-var-obj>
+        <http://spinrdf.org/sp#varName>  "obj" .
