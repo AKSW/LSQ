@@ -547,9 +547,10 @@ public class LsqProcessor
             .addProperty(LSQ.hasRemoteExec, queryExecRecRes);
 
         if(r.hasProperty(PROV.atTime)) {
+        	RDFNode tmp = r.getProperty(PROV.atTime).getObject();
             queryExecRecRes
             	//.addProperty(RDF.type, LSQ.)
-            	.addLiteral(PROV.atTime, r.getProperty(PROV.atTime).getObject()); //.inModel(queryModel))        	
+            	.addProperty(PROV.atTime, tmp); //.inModel(queryModel))        	
         }
 
         queryExecRecRes
