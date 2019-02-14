@@ -13,10 +13,10 @@
 	</parent>
 
 	<dependencies>
-        <dependency>
-            <groupId>org.aksw.simba.lsq</groupId>
-            <artifactId>lsq-parser</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-parser</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.topbraid</groupId>
@@ -24,19 +24,24 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.topbraid</groupId>
+			<artifactId>shacl</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>
 		</dependency>
 
-                <dependency>
-                        <groupId>org.aksw.jena-sparql-api</groupId>
-                        <artifactId>jena-sparql-api-mapper-proxy</artifactId>
-                </dependency>
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.aksw.fedx</groupId>
-            <artifactId>fedx-jsa</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.fedx</groupId>
+			<artifactId>fedx-jsa</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -47,7 +52,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-<!-- 			<scope>test</scope> -->
+			<!-- <scope>test</scope> -->
 		</dependency>
 
 		<dependency>

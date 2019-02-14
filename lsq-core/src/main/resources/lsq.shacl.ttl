@@ -1,0 +1,56 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+@prefix lsq: <http://lsq.aksw.org/vocab#>
+
+lsq:LsqQueryShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "LSQ Query shape" ;
+  sh:targetClass lsq:Query ;
+  sh:property [
+    sh:path lsq:text ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasSpin ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasStructuralFeatures ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:localExecution ;
+#   lsq:LsqLocalExecutionShape ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:remoteExecution ;
+#    lsq:RemoteExecutionShape ;
+    sh:minCount 1 ;
+  ] ;
+  .
+
+lsq:LsqStructuralFeaturesShape
+  rdf:type sh:NodeShape ;
+
+
+  .
+
+
+lsq:LsqLocalExecutionShape
+  rdf:type sh:NodeShape
+  
+  .
+
+
+lsq:LsqRemoteExecutionShape
+  rdf:type sh:NodeShape
+  .
+
+
+
