@@ -6,7 +6,6 @@ import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
@@ -16,13 +15,11 @@ import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
-import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Var;
@@ -32,6 +29,7 @@ import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.Query;
 import org.topbraid.spin.model.Triple;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;
 
 public class TestLsqSelectivity {
@@ -41,7 +39,9 @@ public class TestLsqSelectivity {
         Model dataModel = RDFDataMgr.loadModel("lsq-tests/01/data.ttl");
         QueryExecutionFactory dataQef = FluentQueryExecutionFactory.from(dataModel).create();
 
-        Stream<String> queryStrs = new BufferedReader(new InputStreamReader(new ClassPathResource("lsq-tests/01/query.sparql.log").getInputStream())).lines();//.collect(Collectors.joining("\n"));
+        Stream<String> queryStrs = new BufferedReader(new InputStreamReader(new ClassPathResource("lsq-tests/01/query.sparql.log").getInputStream())).lines()
+        		.map(String::trim)
+        		.filter(str -> !Strings.isNullOrEmpty(str));//.collect(Collectors.joining("\n"));
         //Stream<String> queryStr = queryStrs.findFirst();
 
         // TODO Consider specifying the pattern directly without going over the registry
@@ -64,6 +64,7 @@ public class TestLsqSelectivity {
 
 
         queryStrs.forEach(queryStr -> {
+        	
             Resource logRes = ModelFactory.createDefaultModel().createResource();
             mapper.parse(logRes, queryStr);
             Resource queryRes = processor.apply(logRes);

@@ -2,6 +2,7 @@ package org.aksw.simba.lsq;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -112,7 +113,7 @@ public class TestLsqWebServerAccessLogParser {
             .removeAll(PROV.atTime)
             .removeAll(LSQ.verb)
             .removeAll(LSQ.host)
-            .addLiteral(PROV.atTime, new Date())
+            .addLiteral(PROV.atTime, Calendar.getInstance())
             .addLiteral(LSQ.verb, "GET")
             .addLiteral(LSQ.host, "0.0.0.0");
 
