@@ -8,16 +8,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -30,6 +26,8 @@ import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQueryConnection;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
+import org.aksw.jena_sparql_api.delay.extra.Delayer;
+import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
@@ -418,6 +416,9 @@ public class LsqUtils {
 
         Function<String, Query> sparqlParser = SparqlQueryParserImpl.create();
         
+        Long delayInMs = config.getDelayInMs();
+        Delayer delayer = delayInMs == null || delayInMs.equals(0) ? null : new DelayerDefault(delayInMs);
+
         // Function used mainly to skip benchmark execution of queries that have already been seen 
 //        Function<String, Boolean> isQueryCached = (queryStr) ->
 //        	queryCache.getIfPresent(queryStr) != null || exceptionCache.getIfPresent(queryStr) != null;
@@ -480,6 +481,7 @@ public class LsqUtils {
 //        //                            .setTimeout(timeoutInMs);
 //                                }
 //                            })
+                            .withDelay(delayer)
                             .withCache(new CacheBackendMem(queryCache))
                             .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
                         .end()
@@ -515,6 +517,9 @@ public class LsqUtils {
                 datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
             }
         }
+        
+        
+        result.setDelayer(delayer);
 
         result.setDatasetLabel(config.getDatasetLabel());
         result.setRdfizerQueryStructuralFeaturesEnabled(config.isRdfizerQueryStructuralFeaturesEnabled());

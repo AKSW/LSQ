@@ -16,8 +16,10 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
+import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
@@ -87,6 +89,11 @@ public class LsqProcessor
 
     protected Cache<String, Object> seenQueryCache;
     
+    
+    // Delayer for benchmarking requests
+    protected Delayer delayer;
+    
+    
     public boolean isUseDeterministicPseudoTimestamps() {
 		return useDeterministicPseudoTimestamps;
 	}
@@ -102,8 +109,17 @@ public class LsqProcessor
     public void setQueryIdPattern(Pattern queryIdPattern) {
         this.queryIdPattern = queryIdPattern;
     }
+    
+    public Delayer getDelayer() {
+		return delayer;
+	}
 
-    protected Long workloadSize;
+	public void setDelayer(Delayer delayer) {
+		this.delayer = delayer;
+	}
+
+
+	protected Long workloadSize;
 
     //protected Function<String, NestedResource> queryAspectFn;
     //protected Resource rawLogEndpointRes; // TODO Rename to remoteEndpointRes?
@@ -508,7 +524,7 @@ public class LsqProcessor
                 queryRes.get().as(LsqQuery.class)
                 	.getLocalExecutions(Resource.class).add(queryExecRes);
 
-                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, benchmarkQef, dataQef, datasetSize);
+                rdfizeQueryExecution(queryRes.get(), query, queryExecRes, delayer, benchmarkQef, dataQef, datasetSize);
             }
         }
     }
@@ -680,8 +696,14 @@ public class LsqProcessor
      * @param cachedQef
      * @param datasetSize
      */
-    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, QueryExecutionFactory qef, QueryExecutionFactory cachedQef, Long datasetSize) {
+    public static void rdfizeQueryExecution(Resource queryRes, Query query, Resource queryExecRes, Delayer delayer, QueryExecutionFactory qef, QueryExecutionFactory cachedQef, Long datasetSize) {
     	try {
+    		if(delayer != null) {
+        		cachedQef = FluentQueryExecutionFactory.from(cachedQef).config().withDelay(delayer).end().create();
+
+        		delayer.doDelay();
+    		}
+
     		rdfizeQueryExecutionBenchmark(query, queryExecRes, qef);
     		rdfizeQueryExecutionStats(queryRes, query, queryExecRes, cachedQef, datasetSize);
     	}
@@ -703,6 +725,7 @@ public class LsqProcessor
      * @param qef
      */
     public static void rdfizeQueryExecutionBenchmark(Query query, Resource queryExecRes, QueryExecutionFactory qef) {
+    	
     	Stopwatch sw = Stopwatch.createStarted();
         try(QueryExecution qe = qef.createQueryExecution(query)) {
 	        long resultSetSize = QueryExecutionUtils.consume(qe);

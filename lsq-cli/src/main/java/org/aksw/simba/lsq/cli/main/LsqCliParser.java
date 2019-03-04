@@ -1,70 +1,30 @@
 package org.aksw.simba.lsq.cli.main;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.aksw.fedx.jsa.FedXFactory;
-import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
-import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
-import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
-import org.aksw.simba.lsq.parser.Mapper;
-import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.aksw.simba.lsq.vocab.PROV;
-import org.apache.commons.io.IOUtils;
-import org.apache.jena.atlas.lib.Sink;
-import org.apache.jena.graph.Triple;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.Syntax;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.util.ModelUtils;
-import org.apache.jena.sparql.util.PrefixMapping2;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Streams;
 import com.google.common.io.Files;
 
 import joptsimple.OptionParser;
@@ -99,7 +59,13 @@ public class LsqCliParser {
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
+    
+    protected OptionSpec<Long> queryDelayInMsOs;
+    protected OptionSpec<String> httpUserAgentOs;
+    
 
+    
+    
     public OptionParser getOptionParser() {
         return parser;
     }
@@ -223,12 +189,28 @@ public class LsqCliParser {
                 .ofType(File.class);
 
         queryIdPatternOs = parser
-                .acceptsAll(Arrays.asList("q", "querypattern"), "Patter to parse out query ids; use empty string to use whole IRI")
+                .acceptsAll(Arrays.asList("q", "querypattern"), "Pattern to parse out query ids; use empty string to use whole IRI")
                 .availableIf(logIriAsBaseIriOs)
                 .withOptionalArg()
                 //.withRequiredArg()
-                .defaultsTo("q-([^->]+)")
-                .ofType(String.class);
+                .defaultsTo("q-([^->]+)");
+
+        
+        queryDelayInMsOs = parser
+                .acceptsAll(Arrays.asList("y", "delay"), "Delay in milliseconds")
+                .withRequiredArg()
+                .ofType(Long.class)
+                .defaultsTo(0l)
+                //.defaultsTo(60000l)
+                //.defaultsTo(null)
+                ;
+
+        httpUserAgentOs = parser
+                .acceptsAll(Arrays.asList("a", "agent"), "Http user agent field")
+                .withRequiredArg()
+                .defaultsTo("Linked Sparql Queries (LSQ) client. User agent not set.")
+                ;
+
 
 //        reuseLogIri = parser
 //                .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
@@ -348,6 +330,12 @@ public class LsqCliParser {
         config.setOutFile(outputOs.value(options));
         config.setOutRdfFormat(outFormatStr);
 
+        
+        Long delayInMs = queryDelayInMsOs.value(options);
+        config.setDelayInMs(delayInMs);
+        String userAgent = httpUserAgentOs.value(options);
+        config.setHttpUserAgent(userAgent);
+        
         return config;
     }
 

@@ -92,6 +92,10 @@ public class LsqConfigImpl {
     protected boolean deterministicPseudoTimestamps;
     
     
+    protected String httpUserAgent;
+    protected Long delayInMs;
+    
+    
     public Long getSeenQueryCacheSize() {
 		return seenQueryCacheSize;
 	}
@@ -417,5 +421,21 @@ public class LsqConfigImpl {
         this.queryIdPattern = queryIdPattern;
         return this;
     }
+
+	public String getHttpUserAgent() {
+		return httpUserAgent;
+	}
+
+	public void setHttpUserAgent(String httpUserAgent) {
+		this.httpUserAgent = httpUserAgent;
+	}
+
+	public Long getDelayInMs() {
+		return delayInMs;
+	}
+
+	public void setDelayInMs(Long delayInMs) {
+		this.delayInMs = delayInMs;
+	}
 }
 

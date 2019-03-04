@@ -15,6 +15,7 @@ import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,12 @@ public class MainLSQ
 
         String expBaseIri = config.getExperimentIri();
 
+        
+        String httpUserAgent = config.getHttpUserAgent();
+        if(httpUserAgent != null) {
+        	HttpOp.setUserAgent(httpUserAgent);
+        }
+        
 //        Stream<Resource> logEntryStream;
 
         // The main setup work is done in LsqUtils following.
