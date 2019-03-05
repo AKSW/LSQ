@@ -34,6 +34,13 @@ At present, LSQ performs lookup of patterns by their local name, such as _combin
 The pattern definitions follow the specification of Apache's [mod_log_config](http://httpd.apache.org/docs/current/mod/mod_log_config.html).
 Custom log formats can thus be easily added by simply extending the underlying RDF model.
 
+
+##### Notes
+
+* The timestamp pattern `%{...}t` only matches timestamps that are enclosed in `[brackets]`
+  * `%{yyyy-MM-dd HH:mm:ss}C` can be used to parse timestamps from e.g. tab-separated files, such as `<TAB>2017-06-12 00:00:00<TAB>`.
+    Note, that %C is so far not otherwise defined in the apache mod_log formats.
+
 #### RDF-based formats
 The LSQ tool can also RDFize queries from RDF datasets
 

@@ -46,4 +46,7 @@ fmt:sparql2
   lsq:pattern "%sparql" ;
   .
 
-
+fmt:wikidata
+  a lsq:WebAccessLogFormat ;
+  lsq:pattern "%encsparql\t%{yyyy-MM-dd HH:mm:ss}C\t%l\t%{User-agent}i" ;
+  .

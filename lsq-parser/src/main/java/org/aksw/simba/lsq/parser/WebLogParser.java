@@ -20,6 +20,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.http.NameValuePair;
@@ -110,6 +111,21 @@ public class WebLogParser {
             m.addString("]");
         });
 
+        // custom extension for dates without '[]'
+        result.put("C", (m, x) -> {
+            DateFormat dateFormat = x == null
+                    ? apacheDateFormat
+                    : new SimpleDateFormat(x);
+
+            RDFDatatype rdfDatatype = new RDFDatatypeDateFormat(dateFormat);
+
+            // Hacky approach to convert datetime pattern to regex - based on
+            // https://stackoverflow.com/questions/6928267/converting-simpledateformat-date-format-to-regular-expression
+            String regexFormat = x.replaceAll("[mHsSdMy]", "\\\\d");
+            
+            m.addField(PROV.atTime, regexFormat, rdfDatatype);
+        });
+
 
         result.put("r", (m, x) -> {
             m.addField(LSQ.verb, "[^\\s\"]*", String.class);
@@ -158,6 +174,10 @@ public class WebLogParser {
 
         result.put("sparql", (m, x) -> {
             m.addField(LSQ.query, ".*", String.class);
+        });
+
+        result.put("encsparql", (m, x) -> {        	
+            m.addField(LSQ.query, "[^\\s]*", String.class, Converter.from(StringUtils::urlDecode, StringUtils::urlEncode));
         });
 
 //      result.put("b", (x) -> "(?<bytecount>\\d+)");

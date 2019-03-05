@@ -82,7 +82,7 @@ public class LsqUtils {
 		
 		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
 			.filter(e -> e.getKey() != 0)
-			.limit(1)
+//			.limit(2)
 			.map(Entry::getValue)
 			.flatMap(Collection::stream)
 			.collect(Collectors.toList());
@@ -98,6 +98,11 @@ public class LsqUtils {
 		
 		for(Entry<String, Function<InputStream, Stream<Resource>>> entry : registry.entrySet()) {
 			String formatName = entry.getKey();
+			
+			if(formatName.equals("wikidata")) {
+				System.out.println("here");
+			}
+			
 			Function<InputStream, Stream<Resource>> fn = entry.getValue();
 			
 			try(InputStream in = resource.getInputStream()) {
@@ -246,7 +251,7 @@ public class LsqUtils {
                 : result;
 
         webLogParserRegistry.forEach((name, mapper) -> {
-            Function<InputStream, Stream<Resource>> fn = (in) -> createResourceStreamFromMapperRegistry(in, webLogParserRegistry::get, name);
+            Function<InputStream, Stream<Resource>> fn = in -> createResourceStreamFromMapperRegistry(in, webLogParserRegistry::get, name);
             tmp.put(name, fn);
         });
 
