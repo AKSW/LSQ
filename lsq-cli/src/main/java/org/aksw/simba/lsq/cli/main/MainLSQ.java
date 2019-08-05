@@ -2,33 +2,33 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.aksw.beast.vocabs.PROV;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
+import org.aksw.simba.lsq.core.LsqProcessor;
+import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.util.NestedResource;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.jena.atlas.lib.Sink;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.riot.web.HttpOp;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.sparql.core.Prologue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+
 /**
- * This is the main class used to RDFise query logs
+ * This is the main class of LSQ's command line interface (CLI)
+ * used to RDFise query logs
+ * 
  * @author Saleem
+ * @author Claus Stadler
  *
  */
-@SpringApplicationConfiguration
+//@SpringApplicationConfiguration
 public class MainLSQ
 {
 
@@ -39,8 +39,9 @@ public class MainLSQ
 //    }
 
     public static void main(String[] args) throws IOException {
+
         LsqCliParser cliParser = new LsqCliParser();
-        LsqConfig config = cliParser.parse(args);
+        LsqConfigImpl config = cliParser.parse(args);
 
         try {
             run(config);
@@ -51,23 +52,35 @@ public class MainLSQ
         }
     }
 
-    public static void run(LsqConfig config) throws Exception  {
+    public static void run(LsqConfigImpl config) throws Exception  {
 
-        SparqlServiceReference ssr = config.getDatasetEndpointDescription();
+        SparqlServiceReference ssr = config.getBenchmarkEndpointDescription();
         String datasetEndpointUrl = ssr.getServiceURL();
         DatasetDescription datasetDescription = ssr.getDatasetDescription();
         Long datasetSize = config.getDatasetSize();
 
         String expBaseIri = config.getExperimentIri();
 
+        
+        String httpUserAgent = config.getHttpUserAgent();
+        if(httpUserAgent != null) {
+        	HttpOp.setUserAgent(httpUserAgent);
+        }
+        
 //        Stream<Resource> logEntryStream;
 
-        Stream<Resource> itemReader = LsqCliParser.createReader(config);
-        Function<Resource, Resource> itemProcessor = LsqCliParser.createProcessor(config);
-        Sink<Resource> itemWriter = LsqCliParser.createWriter(config);
+        // The main setup work is done in LsqUtils following.
+        // It follows a classic batch processing approach:
+        // Create a reader, a processor and a writer
+        Stream<Resource> itemReader = LsqUtils.createReader(config);
+        LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
+        Sink<Resource> itemWriter = LsqUtils.createWriter(config);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
 
+        datasetSize = itemProcessor.getDatasetSize();
+        // Precounting the workload size is quite expensive
+        // TODO Add a parameter + implementation do the counting anyway
         Long workloadSize = null;
 
         logger.info("About to process " + workloadSize + " queries");
@@ -78,11 +91,14 @@ public class MainLSQ
       //  Resource expRes = expBaseRes.nest("-" + expStartStr).get();
         Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
 
-        itemWriter.send(
-               expRes.inModel(ModelFactory.createDefaultModel())
-                   //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-                   .addLiteral(PROV.startedAtTime, Calendar.getInstance())
-        );
+        // Report start / end times of the RDFization if requested
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                   expRes.inModel(ModelFactory.createDefaultModel())
+                       //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                       .addLiteral(PROV.startedAtTime, Calendar.getInstance())
+            );
+        }
 
         //RDFDataMgr.write(out, expModel, outFormat);
 
@@ -91,75 +107,15 @@ public class MainLSQ
             .filter(x -> x != null)
             .forEach(itemWriter::send);
 
-        itemWriter.send(
-                expRes.inModel(ModelFactory.createDefaultModel())
-                    //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-                .addLiteral(PROV.endAtTime, Calendar.getInstance())
-        );
-
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                    expRes.inModel(ModelFactory.createDefaultModel())
+                        //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                    .addLiteral(PROV.endAtTime, Calendar.getInstance())
+            );
+        }
 
         itemWriter.flush();
         itemWriter.close();
     }
-
-    public void parseLsqConfig(String[] args) {
-
-
-
-//        System.out.println(queryToSubmissions.keySet().size());
-
-//        logger.info("Number of distinct queries in log: "
-
-        // This is an abstraction that can execute SPARQL queries
-
-
-//            RiotLib.writeBase(out, base) ;
-//            RiotLib.writePrefixes(out, prefixMap) ;
-//            ShellGraph x = new ShellGraph(graph, null, null) ;
-//            x.writeGraph() ;
-
-
-        //int workloadSize = workloadResources.size();
-
-        //rdfizer.rdfizeLog(out, generatorRes, queryToSubmissions, dataQef, separator, localEndpoint, graph, acronym);
-
-
-        //Calendar endTime = new GregorianCalendar();
-        //specs.add(datasetRes, PROV.startedAtTime, specs.createTypedLiteral(endTime));
-
-        //specs.write(out, "NTRIPLES");
-
-        //SparqlQueryParser queryParser = SparqlQueryParserImpl.create(Syntax.syntaxARQ);
-
-
-//        myenv
-//            engine aeouaoeu
-//            dataset aeuaoeueoa
-//
-//
-//       myevn-1-1-2016
-//            basedOn myenv
-//            startedAtTime
-//            endAtTime
-
-        // Small array hack in order to change the values while streaming
-        //int logFailCount[] = new int[] {0};
-        //long logEntryIndex[] = new long[] {0l};
-        int logFailCount = 0;
-        long logEntryIndex = 0l;
-        int batchSize = 10;
-
-        // TODO We should check beforehand whether there is a sufficient number of processable log entries
-        // available in order to consider the workload a query log
-        //for(Resource r : workloadResources) {
-        //workloadResourceStream.forEach(r -> {
-//        Iterator<Resource> it = workloadResourceStream.iterator();
-//        while(it.hasNext()) {
-//            Resource r = it.next();
-//
-//        }
-
-    }
-
-
 }

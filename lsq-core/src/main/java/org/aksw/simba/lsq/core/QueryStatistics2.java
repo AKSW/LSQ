@@ -100,28 +100,35 @@ public class QueryStatistics2 {
 //        System.out.println(ResultSetFormatter.asText(qef.createQueryExecution(q).execSelect()));
 
         //ServiceUtils.fetchCountConcept(sparqlService, concept, itemLimit, rowLimit)L
-        Integer tmp = ServiceUtils.fetchInteger(qef, ConceptUtils.createQueryList(c), c.getVar());
+        Query query = ConceptUtils.createQueryList(c);
+        Integer tmp = ServiceUtils.fetchInteger(qef, query, c.getVar());
         Long result = tmp.longValue();
 
         return result;
     }
 
     public static Concept createConceptCountDistinctBindings(Element lhs, Set<Var> lhsVars) {
-        Query sub = new Query();
+        Element sub;
         lhsVars = lhsVars == null ? new HashSet<>(PatternVars.vars(lhs)) : lhsVars;
-        sub.setQuerySelectType();
-        sub.setDistinct(true);
-        sub.addProjectVars(lhsVars);
-        //ElementGroup pattern = new ElementGroup();
-        //pattern.addElement(lhs);
-        //pattern.addElement(rhs);
-        sub.setQueryPattern(lhs);
+        if(!lhsVars.isEmpty()) {
+            Query subQuery = new Query();
+            subQuery.setQuerySelectType();
+            subQuery.setDistinct(true);
+            subQuery.addProjectVars(lhsVars);
+            //ElementGroup pattern = new ElementGroup();
+            //pattern.addElement(lhs);
+            //pattern.addElement(rhs);
+            subQuery.setQueryPattern(lhs);
+            sub = new ElementSubQuery(subQuery);
+        } else {
+        	sub = lhs;
+        }
 
         Query query = new Query();
         Expr agg = query.allocAggregate(new AggCount());
         query.getProject().add(Vars.c, agg);
         query.setQuerySelectType();
-        query.setQueryPattern(new ElementSubQuery(sub));
+        query.setQueryPattern(sub);
 
         Concept result = new Concept(new ElementSubQuery(query), Vars.c);
         //System.out.println(result);
@@ -525,7 +532,7 @@ public class QueryStatistics2 {
         int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
         targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
-                .addLiteral(LSQ.maxBGPTriles, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
+                .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
     }
 
     public static List<Integer> getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp,

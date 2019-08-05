@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>lsq-parser</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.simba.lsq</groupId>
+		<artifactId>lsq-parent</artifactId>
+		<version>1.1.0</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-vocab-jena</artifactId>
+		</dependency>
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.apache.jena</groupId> -->
+<!-- 			<artifactId>jena-arq</artifactId> -->
+<!-- 		</dependency> -->
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.topbraid</groupId> -->
+<!-- 			<artifactId>spin</artifactId> -->
+<!-- 		</dependency> -->
+
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-sparql-ext</artifactId>
+		</dependency>
+<!--
+		<dependency>
+			<groupId>org.aksw.beast</groupId>
+			<artifactId>beast-vocabs-jena</artifactId>
+		</dependency>
+-->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>

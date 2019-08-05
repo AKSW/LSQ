@@ -1,0 +1,42 @@
+PREFIX qc: <http://sparql-qc-bench.inrialpes.fr/testsuite#>
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+
+SELECT DISTINCT ?sup ?sups {
+  ?s
+    qc:result "true" ; # TODO Fix dataset to boolean
+    qc:sourceQuery ?sub ;
+    qc:targetQuery ?sup .
+
+  ?sup lsq:text ?sups .
+}
+
+
+
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX qc: <http://sparql-qc-bench.inrialpes.fr/testsuite#>
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+
+SELECT DISTINCT ?sss ?sf ?p ?o {
+
+  ?s
+    qc:result "true" ; # TODO Fix dataset to boolean
+    qc:sourceQuery/lsq:text ?sub ;
+    qc:targetQuery/lsq:text ?sup ;
+    ^rdf:first/(^rdf:rest)*/^qc:hasTest/qc:sourceDir ?sd1 .
+  FILTER(?sd1 IN ("noprojection", "projection"))
+
+  OPTIONAL {
+    ?x
+      qc:result "true" ;
+      qc:sourceQuery/lsq:text ?sup ;
+      qc:targetQuery/lsq:text ?supsup ;
+      ^rdf:first/(^rdf:rest)*/^qc:hasTest/qc:sourceDir ?sd2 .
+    FILTER(?sd2 IN ("noprojection", "projection"))
+  }
+  FILTER(!BOUND(?supsup))
+
+  ?sup ^lsq:text ?sss .
+  ?sss lsq:hasStructuralFeatures ?sf .
+  ?sf ?p ?o .
+}

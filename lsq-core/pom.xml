@@ -9,14 +9,23 @@
 	<parent>
 		<groupId>org.aksw.simba.lsq</groupId>
 		<artifactId>lsq-parent</artifactId>
-		<version>1.0.0</version>
+		<version>1.1.0</version>
 	</parent>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-parser</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>org.topbraid</groupId>
 			<artifactId>spin</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.topbraid</groupId>
+			<artifactId>shacl</artifactId>
 		</dependency>
 
 		<dependency>
@@ -25,8 +34,13 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.beast</groupId>
-			<artifactId>beast-vocabs-jena</artifactId>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.fedx</groupId>
+			<artifactId>fedx-jsa</artifactId>
 		</dependency>
 
 		<dependency>
@@ -38,7 +52,7 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
-			<scope>test</scope>
+			<!-- <scope>test</scope> -->
 		</dependency>
 
 		<dependency>

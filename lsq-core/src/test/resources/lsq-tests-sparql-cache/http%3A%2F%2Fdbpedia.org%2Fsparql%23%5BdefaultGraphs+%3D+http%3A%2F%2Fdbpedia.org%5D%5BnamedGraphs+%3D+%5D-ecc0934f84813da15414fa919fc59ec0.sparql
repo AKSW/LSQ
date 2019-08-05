@@ -1,0 +1,4 @@
+SELECT  (count(*) AS ?c)
+WHERE
+  { <http://dbpedia.org/resource/Party_of_Five>
+              <http://dbpedia.org/ontology/starring>  <http://dbpedia.org/resource/Matthew_Fox>}

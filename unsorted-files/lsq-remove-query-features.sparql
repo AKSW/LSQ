@@ -1,0 +1,73 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sp: <http://spinrdf.org/sp#>
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+
+SELECT ?s ?p ?o {
+
+  { SELECT ?s ?p ?o {
+    ?x (lsq:hasStructuralFeatures|lsq:hasSpin)/(lsq:x|!lsq:x)* ?s .
+    ?s ?p ?o
+
+    BIND('http://lsq.aksw.org/res/' AS ?resourcePrefix)
+    BIND(str(?s) AS ?ss)
+    FILTER(STRSTARTS(?ss, ?resourcePrefix))
+
+  } }
+} LIMIT 100
+
+
+sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sp: <http://spinrdf.org/sp#>
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+
+WITH <http://lsq.aksw.org/>
+DELETE { ?s ?p ?o }
+WHERE {
+  ?x (lsq:hasStructuralFeatures|lsq:hasSpin)/(lsq:x|!lsq:x)* ?s .
+  ?s ?p ?o
+
+  BIND('http://lsq.aksw.org/res/' AS ?resourcePrefix)
+  BIND(str(?s) AS ?ss)
+  FILTER(STRSTARTS(?ss, ?resourcePrefix))
+}
+LIMIT 100000
+
+;
+
+
+
+
+
+while true; do ../opt/virtuoso/vos/7.2.4.2/bin/isql 1251 dba dba 'EXEC=sparql
+
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX sp: <http://spinrdf.org/sp#>
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+
+WITH <http://lsq.aksw.org/>
+DELETE { ?s ?p ?o }
+WHERE {
+  ?x (lsq:hasStructuralFeatures|lsq:hasSpin)/(lsq:x|!lsq:x)* ?s .
+  ?s ?p ?o
+
+  BIND("http://lsq.aksw.org/res/" AS ?resourcePrefix)
+  BIND(str(?s) AS ?ss)
+  FILTER(STRSTARTS(?ss, ?resourcePrefix))
+}
+LIMIT 100000
+
+;
+'; done
+
+
+
+
+
+
+#    FILTER(
+#      STRSTARTS(?ps, 'http://lsq.aksw.org/vocab#') ||
+#      STRSTARTS(?ps, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#') ||
+#      STRSTARTS(?ps, 'http://www.w3.org/2000/01/rdf-schema#') || 
+#      STRSTARTS(?ps, 'http://www.w3.org/2002/07/owl#'))

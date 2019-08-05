@@ -20,6 +20,8 @@ Executions can be marked as local and remote: a remote execution of a query take
 
 
 ### Supported log formats
+
+#### Web log formats
 Default log formats are configured in the [default-log-formats.ttl](lsq-core/src/main/resources/default-log-formats.ttl) file, which contains entries such as:
 ```rdf
 fmt:combined
@@ -31,6 +33,30 @@ At present, LSQ performs lookup of patterns by their local name, such as _combin
 
 The pattern definitions follow the specification of Apache's [mod_log_config](http://httpd.apache.org/docs/current/mod/mod_log_config.html).
 Custom log formats can thus be easily added by simply extending the underlying RDF model.
+
+
+##### Notes
+
+* The timestamp pattern `%{...}t` only matches timestamps that are enclosed in `[brackets]`
+  * `%{yyyy-MM-dd HH:mm:ss}C` can be used to parse timestamps from e.g. tab-separated files, such as `<TAB>2017-06-12 00:00:00<TAB>`.
+    Note, that %C is so far not otherwise defined in the apache mod_log formats.
+
+#### RDF-based formats
+The LSQ tool can also RDFize queries from RDF datasets
+
+*TODO* Finish this section
+```bash
+curl -GLH 'Accept: text/plain' http://lsq.aksw.org/sparql --data-urlencode query='PREFIX lsq: <http://lsq.aksw.org/vocab#> CONSTRUCT WHERE { ?s lsq:text ?o } LIMIT 10' | lsq -m rdf ...
+```
+
+```bash
+cat unsorted-files/sparqlqc-all.nt | lsq -e http://localhost:8890/sparql -m rdf -l sparqlqc -p http://localhost/sparqlqc/sparql -r q > unsorted-files/sparqlqc-all-lsq.ttl
+```
+
+Notes:
+
+* `-u`: Do not reuse the subject of the input triple for the output; i.e. given an input triple <s> <p> <o>, the output will *not* be attached to <s>, rather a new resource will be allocated.
+* `-m rdf`: rdf is a currently hard-coded pseudo-log format (i.e. not configurable via the default log formats mentioned above).
 
 
 ## Vocabulary
@@ -80,32 +106,62 @@ sudo dpkg -i `find . -name '*.deb'`
 
 The following options exist:
 ```bash
-Option                Description                                              
-------                -----------                                              
--b, --base            Base URI for URI generation (default: http://lsq.aksw.   
-                        org/res/)                                              
--e, --endpoint        Local SPARQL service (endpoint) URL on which to execute  
-                        queries (default: http://localhost:8890/sparql)        
--f, --file <File>     File containing input data                               
--g, --graph           Local graph(s) from which to retrieve the data           
--h, --head <Long>     Only process n entries starting from the top             
--l, --label           Label of the dataset, such as 'dbpedia' or 'lgd'. Will be
-                        used in URI generation (default: mydata)               
--m, --format          Format of the input data. Available options: [virtuoso,  
-                        apache, distributed, sparql] (default: apache)                              
--o, --output <File>   File where to store the output data.                     
--p, --public          Public endpoint URL - e.g. http://example.org/sparql     
--r, --rdfizer         RDFizer selection: Any combination of the letters (e)    
-                        xecution, (l)og and (q)uery (default: elq)             
--t, --timeout <Long>  Timeout in milliseconds  
--w --outformat            output format, e.g., "N-Triples/ascii" default is "Turtle/blocks"
--x, --experiment      URI of the experiment environment ```
+
+Non-option arguments:                    
+[String] -- File(s) containing input data
+
+Option                       Description                                        
+------                       -----------                                        
+-a, --agent <String>         Http user agent field (default: Linked Sparql      
+                               Queries (LSQ) client. User agent not set.)       
+-b, --base <String>          Base URI for URI generation (default: http://lsq.  
+                               aksw.org/res/)                                   
+-d, --dsize <Long>           Dataset size. Used in some computations. If not    
+                               given, it will be queried (which might fail).    
+                               Negative values disable dependent computations.  
+-e, --endpoint <String>      Local SPARQL service (endpoint) URL on which to    
+                               execute queries (default: http://localhost:      
+                               8890/sparql)                                     
+--fed <String>               URIs of federated endpoints                        
+--fedf <File>                URIs of federated endpoints                        
+-g, --graph <String>         Local graph(s) from which to retrieve the data     
+-h, --head <Long>            Only process n entries starting from the top       
+-i, --logirisasbase          Use IRIs in RDF query logs as the base IRIs        
+-l, --label <String>         Label of the dataset, such as 'dbpedia' or 'lgd'.  
+                               Will be used in URI generation (default: mydata) 
+-m, --format [String]        Format of the input data. Available options:       
+                               [commonVHost, virtuoso, common, rdf,             
+                               distributed, commonVirtuoso, combined, sparql,   
+                               wikidata, sparql2, bio2rdf] (default: combined)  
+-o, --output <File>          File where to store the output data.               
+-p, --public <String>        Public endpoint URL for record purposes - e.g.     
+                               http://dbpedia.org/sparql                        
+-q, --querypattern [String]  Pattern to parse out query ids; use empty string   
+                               to use whole IRI (default: q-([^->]+))           
+-r, --rdfizer [String]       RDFizer selection: Any combination of the letters  
+                               (e)xecution, (l)og, (q)uery and (p)rocess        
+                               metadata (default: elq)                          
+-t, --timeout <Long>         Timeout in milliseconds                            
+-w, --outformat <String>     Format for (w)riting out data. Available options:  
+                               [JSON-LD/expand pretty, JSON-LD/frame flat,      
+                               RDF/JSON, TriG/pretty, JSON-LD/flatten flat, N-  
+                               Quads/ascii, RDF/XML/pretty, JSON-LD/expand      
+                               flat, RDF-THRIFT/Value, Turtle/blocks, N-        
+                               Triples/ascii, rdf/null, TriX, Turtle/flat, JSON-
+                               LD/compact flat, JSON-LD/flatten pretty, RDF-    
+                               THRIFT, N-Quads/utf-8, JSON-LD/compact pretty,   
+                               TriG/flat, JSON-LD/frame pretty, RDF/XML/plain,  
+                               N-Triples/utf-8, Turtle/pretty, TriG/blocks]     
+                               (default: Turtle/blocks)                         
+-x, --experiment <String>    URI of the experiment environment                  
+-y, --delay <Long>           Delay in milliseconds (default: 0)                 
+```
 
 From the repository root folder, run:
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/swdf.apache.log \
+  lsq-core/src/test/resources/swdf.apache.log \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \
   -l swdf \
@@ -119,7 +175,7 @@ lsq \
 
 ```bash
 lsq \
-  -f lsq-core/src/test/resources/dbpedia.virtuoso.log \
+  lsq-core/src/test/resources/dbpedia.virtuoso.log \
   -m virtuoso \
   -e http://localhost:8890/sparql \
   -g http://aksw.org/benchmark \

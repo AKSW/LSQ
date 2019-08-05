@@ -1,0 +1,1 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX swdf: <http://data.semanticweb.org/ns/swc/ontology#> SELECT DISTINCT ?prop WHERE { ?obj rdf:type swdf:SessionEvent . ?obj ?prop ?targetObj . FILTER (isLiteral(?targetObj)) } ORDER BY ?prop LIMIT 150

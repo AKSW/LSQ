@@ -1,0 +1,3 @@
+SELECT  (count(*) AS ?c)
+WHERE
+  { ?x0  <http://dbpedia.org/ontology/director>  ?x1}

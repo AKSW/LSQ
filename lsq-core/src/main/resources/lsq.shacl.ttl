@@ -1,0 +1,130 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+@prefix prov: <http://www.w3.org/ns/prov#>
+@prefix lsq: <http://lsq.aksw.org/vocab#>
+
+lsq:LsqQueryShape
+  rdf:type sh:NodeShape ;
+  rdfs:label "LSQ Query shape" ;
+  sh:targetClass lsq:Query ;
+  sh:property [
+    sh:path lsq:text ;
+    sh:datatype xsd:string ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasSpin ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasStructuralFeatures ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasLocalExec ;
+#   lsq:LsqLocalExecutionShape ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasRemoteExec ;
+#    lsq:RemoteExecutionShape ;
+    sh:minCount 1 ;
+  ] ;
+  .
+
+lsq:LsqStructuralFeaturesShape
+  rdf:type sh:NodeShape ;
+  sh:targetObjectsOf lsq:hasStructuralFeatures ;
+  sh:property [
+    sh:path lsq:usesFeature ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasBGP ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasTP ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:minBGPTriples ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:maxBGPTriples ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:bgps ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:tps ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:joinVertices ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:meanJoinVertexDegree ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:medianJoinVertexDegree ;
+    sh:minCount 1 ;
+  ] ;
+  .
+
+
+lsq:LsqLocalExecutionShape
+  rdf:type sh:NodeShape ;
+  sh:targetObjectsOf lsq:hasLocalExec ;
+  sh:property [
+    sh:path lsq:hasBGPExec ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:hasTPExec ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:runTimeMs ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path lsq:resultSize ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path prov:wasGeneratedBy ;
+    sh:minCount 1 ;
+  ] ;
+  .
+
+
+lsq:LsqRemoteExecutionShape
+  rdf:type sh:NodeShape ;
+  sh:targetObjectsOf lsq:hasRemoteExec ;
+  sh:property [
+    sh:path lsq:endpoint ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path prov:wasAssociatedWith ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path prov:atTime ;
+    sh:datatype xsd:dateTime ;
+    sh:minCount 1 ;
+  ] ;
+  .
+
+
+

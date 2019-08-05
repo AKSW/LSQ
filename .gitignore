@@ -4,6 +4,9 @@
 .settings
 target
 
+pom.xml.versionBackup
+pom.xml.versionsBackup
+
 deptree.txt
 LSQ-SWDF-test.ttl
 
@@ -23,4 +26,7 @@ d.nt
 d.ttl
 outfile.ttl
 deptree.txt
+
+trash
+*.swp
 

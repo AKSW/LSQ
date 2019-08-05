@@ -1,13 +1,8 @@
 package org.aksw.simba.lsq.cli.main;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,40 +10,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.aksw.fedx.jsa.FedXFactory;
-import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
-import org.aksw.jena_sparql_api.cache.extra.CacheFrontendImpl;
-import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.simba.lsq.core.LsqProcessor;
-import org.aksw.simba.lsq.util.Mapper;
-import org.aksw.simba.lsq.util.WebLogParser;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
+import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.atlas.lib.Sink;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.Syntax;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.google.common.base.Strings;
 import com.google.common.io.Files;
 
 import joptsimple.OptionParser;
@@ -62,9 +38,10 @@ public class LsqCliParser {
 
     protected OptionParser parser = new OptionParser();
 
-    protected Map<String, Mapper> logFmtRegistry;
+    //protected Map<String, Mapper> logFmtRegistry;
+    protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
 
-    protected OptionSpec<File> inputOs;
+    protected OptionSpec<String> inputOs;
     protected OptionSpec<File> outputOs;
     protected OptionSpec<String> logFormatOs;
     protected OptionSpec<String> outFormatOs;
@@ -76,20 +53,28 @@ public class LsqCliParser {
     protected OptionSpec<Long> datasetSizeOs;
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
+    protected OptionSpec<Void> logIriAsBaseIriOs;
+    protected OptionSpec<String> queryIdPatternOs;
     protected OptionSpec<String> datasetEndpointUriOs;
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
+    
+    protected OptionSpec<Long> queryDelayInMsOs;
+    protected OptionSpec<String> httpUserAgentOs;
+    
 
+    
+    
     public OptionParser getOptionParser() {
         return parser;
     }
 
     public LsqCliParser() {
-        this(WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
+        this(LsqUtils.createDefaultLogFmtRegistry());
     }
 
-    public LsqCliParser(Map<String, Mapper> logFmtRegistry) {
+    public LsqCliParser(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
         this.parser = new OptionParser();
 
         this.logFmtRegistry = logFmtRegistry;
@@ -100,9 +85,10 @@ public class LsqCliParser {
     public void initOptionSpecs() {
 
         inputOs = parser
-                .acceptsAll(Arrays.asList("f", "file"), "File containing input data")
-                .withRequiredArg()
-                .ofType(File.class)
+        		.nonOptions("File(s) containing input data")
+                //.acceptsAll(Arrays.asList("f", "file"), "File containing input data")
+                //.withRequiredArg()
+                //.ofType(File.class)
                 ;
 
         outputOs = parser
@@ -124,7 +110,7 @@ public class LsqCliParser {
                 ;
 
         rdfizerOs = parser
-                .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og and (q)uery")
+                .acceptsAll(Arrays.asList("r", "rdfizer"), "RDFizer selection: Any combination of the letters (e)xecution, (l)og, (q)uery and (p)rocess metadata")
                 .withOptionalArg()
                 .defaultsTo("elq")
                 ;
@@ -173,8 +159,15 @@ public class LsqCliParser {
                 .defaultsTo(LSQ.defaultLsqrNs)
                 ;
 
+        logIriAsBaseIriOs = parser
+                .acceptsAll(Arrays.asList("i", "logirisasbase"), "Use IRIs in RDF query logs as the base IRIs")
+                //.withOptionalArg()
+                //.ofType(Boolean.class)
+                //.defaultsTo(false)
+                ;
+
         datasetEndpointUriOs = parser
-                .acceptsAll(Arrays.asList("p", "public"), "Public endpoint URL - e.g. http://example.org/sparql")
+                .acceptsAll(Arrays.asList("p", "public"), "Public endpoint URL for record purposes - e.g. http://dbpedia.org/sparql")
                 .withRequiredArg()
                 //.defaultsTo("http://example.org/sparql")
                 //.defaultsTo(LSQ.defaultLsqrNs + "default-environment");
@@ -194,10 +187,41 @@ public class LsqCliParser {
                 .acceptsAll(Arrays.asList("fedf"), "URIs of federated endpoints")
                 .withRequiredArg()
                 .ofType(File.class);
+
+        queryIdPatternOs = parser
+                .acceptsAll(Arrays.asList("q", "querypattern"), "Pattern to parse out query ids; use empty string to use whole IRI")
+                .availableIf(logIriAsBaseIriOs)
+                .withOptionalArg()
+                //.withRequiredArg()
+                .defaultsTo("q-([^->]+)");
+
+        
+        queryDelayInMsOs = parser
+                .acceptsAll(Arrays.asList("y", "delay"), "Delay in milliseconds")
+                .withRequiredArg()
+                .ofType(Long.class)
+                .defaultsTo(0l)
+                //.defaultsTo(60000l)
+                //.defaultsTo(null)
+                ;
+
+        httpUserAgentOs = parser
+                .acceptsAll(Arrays.asList("a", "agent"), "Http user agent field")
+                .withRequiredArg()
+                .defaultsTo("Linked Sparql Queries (LSQ) client. User agent not set.")
+                ;
+
+
+//        reuseLogIri = parser
+//                .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
+//                .withRequiredArg()
+//                .defaultsTo(LSQ.defaultLsqrNs)
+//                ;
+
     }
 
 
-    public LsqConfig parse(String[] args) throws IOException {
+    public LsqConfigImpl parse(String[] args) throws IOException {
 
         OptionSet options = parser.parse(args);
 
@@ -215,7 +239,8 @@ public class LsqCliParser {
         String expBaseUri = expBaseUriOs.value(options);
         String outFormatStr = outFormatOs.value(options);
 
-        RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equals(outFormatStr)).findFirst().orElse(null);
+        RDFFormat outFormat = RDFWriterRegistry.registered().stream().filter(f -> f.toString().equalsIgnoreCase(outFormatStr)).findFirst().orElse(null);
+        //RDFFormat outFormat = RDFWriterRegistry.get
         if(outFormat == null) {
             throw new RuntimeException("No Jena writer found for name: " + outFormatStr);
         }
@@ -252,18 +277,39 @@ public class LsqCliParser {
 
 
 
+//        Map<String, Function<InputStream, Stream<Resource>>> inputFormatRegistry = new HashMap();
+//        wrap(inputFormatRegistry, )
 
-        LsqConfig config = new LsqConfig();
+
+        LsqConfigImpl config = new LsqConfigImpl();
+
 
 
         config.setLogFmtRegistry(logFmtRegistry);
         config.setOutBaseIri(baseUri);
         config.setExperimentIri(expBaseUri);
 
-        config.setInQueryLogFile(inputOs.value(options));
-        config.setInQueryLogFormat(logFormatOs.value(options));
+        List<String> inputs = inputOs.values(options);
+        config.setInQueryLogFiles(inputs);
+        
+        String inLogFormat = logFormatOs.value(options);
+        config.setInQueryLogFormat(inLogFormat);
 
-        config.setFetchDatasetSizeEnabled(config.isFetchDatasetSizeEnabled());
+        // By default, reuse log iris if the format is rdf; unless it is explicitly overridden ...
+        boolean reuseLogIris = !options.has(logIriAsBaseIriOs)
+                ? logFormatOs.value(options).equals("rdf")
+                : true;//logIriAsBaseIriOs.value(options);
+
+        String queryIdPatternStr = queryIdPatternOs.value(options);
+        queryIdPatternStr = queryIdPatternStr == null ? null : queryIdPatternStr.trim();
+        Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
+
+        config.setReuseLogIri(reuseLogIris);
+        config.setQueryIdPattern(queryIdPattern);
+
+
+
+        config.setFetchDatasetSizeEnabled(fetchDatasetSize);
 
         config.setDatasetLabel(datasetLabel);
         config.setDatasetEndpointDescription(datasetEndpointDescription);
@@ -279,220 +325,20 @@ public class LsqCliParser {
         config.setRdfizerQueryStructuralFeaturesEnabled(rdfizer.contains("q"));
         config.setRdfizerQueryLogRecordEnabled(rdfizer.contains("l"));
         config.setRdfizerQueryExecutionEnabled(rdfizer.contains("e"));
+        config.setEmitProcessMetadata(rdfizer.contains("p"));
 
         config.setOutFile(outputOs.value(options));
+        config.setOutRdfFormat(outFormatStr);
 
+        
+        Long delayInMs = queryDelayInMsOs.value(options);
+        config.setDelayInMs(delayInMs);
+        String userAgent = httpUserAgentOs.value(options);
+        config.setHttpUserAgent(userAgent);
+        
         return config;
     }
 
-
-    public static Sink<Resource> createWriter(LsqConfig config) throws FileNotFoundException {
-        String outRdfFormat = config.getOutRdfFormat();
-        File outFile = config.getOutFile();
-
-        RDFFormat rdfFormat = StringUtils.isEmpty(outRdfFormat) ? RDFFormat.TURTLE_BLOCKS : RDFWriterRegistry.getFormatForJenaWriter(outRdfFormat);
-        if(rdfFormat == null) {
-            throw new RuntimeException("No rdf format found for " + outRdfFormat);
-        }
-
-        PrintStream out;
-        boolean doClose;
-
-        if(outFile == null) {
-            out = System.out;
-            doClose = false;
-        } else {
-            out = new PrintStream(outFile);
-            doClose = true;
-        }
-
-        Sink<Resource> result = new SinkIO<>(out, doClose, (o, r) -> RDFDataMgr.write(out, r.getModel(), rdfFormat));
-        return result;
-    }
-
-
-    public static Stream<Resource> createReader(LsqConfig config) throws FileNotFoundException {
-
-        File inputFile = config.getInQueryLogFile();
-        InputStream in;
-        if(inputFile != null) {
-            inputFile = inputFile.getAbsoluteFile();
-            in = new FileInputStream(inputFile);
-        } else {
-            in = System.in;
-        }
-
-
-        Long firstItemOffset = config.getFirstItemOffset();
-        String logFormat = config.getInQueryLogFormat();
-
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-
-        Stream<String> stream = reader.lines();
-
-        if(firstItemOffset != null) {
-            stream = stream.limit(firstItemOffset);
-        }
-
-        //Model logModel = ModelFactory.createDefaultModel();
-
-
-        Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
-        if(webLogParser == null) {
-            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
-        }
-        //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
-
-        // TODO Use zipWithIndex in order to make the index part of the resource
-        Stream<Resource> result = stream
-            .map(line -> {
-                Resource r = ModelFactory.createDefaultModel().createResource();
-                r.addLiteral(RDFS.label, line);
-
-                boolean parsed;
-                try {
-                    parsed = webLogParser.parse(r, line) != 0;
-                } catch(Exception e) {
-                    parsed = false;
-                    logger.warn("Parser error", e);
-                }
-
-                if(!parsed) {
-                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
-                }
-
-                return r;
-            });
-
-//        result.onClose(() -> {
-//            try {
-//                reader.close();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-
-//        result.onClose(() ->
-//            if(outNeedsClosing[0]) {
-//                logger.info("Shutdown hook: Flushing output");
-//                out.flush();
-//                out.close();
-//            }
-//        });
-
-        return result;
-    }
-
-    public static LsqProcessor createProcessor(LsqConfig config) {
-
-        LsqProcessor result = new LsqProcessor();
-
-        Function<String, SparqlStmt> sparqlStmtParser = config.getSparqlStmtParser();
-        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, true);
-
-
-        SparqlServiceReference benchmarkEndpointDescription = config.getDatasetEndpointDescription();
-        Long datasetSize = config.getDatasetSize();
-        //String localDatasetEndpointUrl = config.getLocalDatasetEndpointUrl()
-        //List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
-        boolean isFetchDatasetSizeEnabled = config.isFetchDatasetSizeEnabled();
-
-        boolean isRdfizerQueryExecutionEnabled = config.isRdfizerQueryExecutionEnabled();
-        List<String> fedEndpoints = config.getFederationEndpoints();
-        //String benchmarkEndpointUrl = benchmarkEndpointDescription.getServiceURL();
-        Long queryTimeoutInMs = config.getBenchmarkQueryExecutionTimeoutInMs();
-        String baseIri = config.getOutBaseIri();
-
-
-        SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
-        String datasetEndpointUri = datasetEndpointDescription == null ? null : datasetEndpointDescription.getServiceURL();
-
-        //Resource datasetEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
-
-
-        Cache<String, byte[]> queryCache = CacheBuilder.newBuilder()
-            .maximumSize(10000)
-            .build();
-
-        Cache<String, Exception> exceptionCache = CacheBuilder.newBuilder()
-                .maximumSize(10000)
-                .build();
-
-
-        QueryExecutionFactory countQef;
-        QueryExecutionFactory baseDataQef;
-        QueryExecutionFactory dataQef = null;
-
-        if(isRdfizerQueryExecutionEnabled) {
-            boolean isNormalMode = fedEndpoints.isEmpty();
-            //boolean isFederatedMode = !isNormalMode;
-
-            if(isNormalMode) {
-                countQef =
-                        FluentQueryExecutionFactory
-                        .http(benchmarkEndpointDescription)
-                        .create();
-
-                baseDataQef = FluentQueryExecutionFactory.http(benchmarkEndpointDescription).create();
-
-            } else {
-                countQef = null;
-
-                baseDataQef = FedXFactory.create(fedEndpoints);
-            }
-
-            dataQef =
-                    FluentQueryExecutionFactory
-                    //.http(endpointUrl, graph)
-                    .from(baseDataQef)
-                    .config()
-                        .withParser(SparqlQueryParserImpl.create())
-                        .withPostProcessor(qe -> {
-                            if(queryTimeoutInMs != null) {
-                                qe.setTimeout(0, queryTimeoutInMs);
-    //                            ((QueryEngineHTTP)((QueryExecutionHttpWrapper)qe).getDecoratee())
-    //                            .setTimeout(timeoutInMs);
-                            }
-                        })
-                        //.onTimeout((qef, queryStmt) -> )
-                        .withCache(new CacheFrontendImpl(new CacheBackendMem(queryCache)))
-                        .compose(qef ->  new QueryExecutionFactoryExceptionCache(qef, exceptionCache))
-                        //)
-    //                    .withRetry(3, 30, TimeUnit.SECONDS)
-    //                    .withPagination(1000)
-                    .end()
-                    .create();
-
-//            for(int i = 0; i < 1000; ++i) {
-//                int x = i % 10;
-//                String qs = "Select count(*) { ?s" + i + " ?p ?o }";
-//                QueryExecution qe = dataQef.createQueryExecution(qs);
-//                System.out.println("loop " + i + ": " + ResultSetFormatter.asText(qe.execSelect()));
-//                qe.close();
-//            }
-
-            if(isFetchDatasetSizeEnabled) {
-                logger.info("Counting triples in the endpoint ...");
-                datasetSize = countQef == null ? null : QueryExecutionUtils.countQuery(QueryFactory.create("SELECT * { ?s ?p ?o }"), countQef);
-            }
-        }
-
-        result.setDatasetLabel(config.getDatasetLabel());
-        result.setRdfizerQueryStructuralFeaturesEnabled(config.isRdfizerQueryStructuralFeaturesEnabled());
-        result.setRdfizerQueryLogRecordEnabled(config.isRdfizerQueryLogRecordEnabled());
-        result.setRdfizerQueryExecutionEnabled(config.isRdfizerQueryExecutionEnabled());
-        //result.setQueryExecutionRemote(config.isQueryExecutionRemote());
-        //result.setDoLocalExecution(config.isRd);
-
-        result.setBaseUri(baseIri);
-        result.setDataQef(dataQef);
-        result.setDatasetEndpointUri(datasetEndpointUri);
-        result.setDatasetSize(datasetSize);
-        result.setStmtParser(sparqlStmtParser);
-        result.setExpRes(ResourceFactory.createResource(config.getExperimentIri()));
-
-        return result;
-    }
 }
 
 

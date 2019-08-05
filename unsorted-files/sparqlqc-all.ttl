@@ -1,0 +1,1074 @@
+@prefix :      <http://sparql-qc-bench.inrialpes.fr/testsuite#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dc:    <http://purl.org/dc/elements/1.1/> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p14>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p14" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop1>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop1" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs>
+        a             :TestSuite ;
+        rdfs:comment  "This test suite, as its name implies, is designed for containment of queries that require RDFS reasoning. Thus, a set of RDF schema axioms are selected in order to be able to test containment in the presence of these constraining schemas. The four schemas cover concept and property hierarchies, and typing (domain and range) restriction axioms. Along with the schemas, the test suite contains 18 queries differing in the: number of operators, number of distinguished variables, and having projection (or no projection)." ;
+        rdfs:label    "Containment of Union of Conjunctive Quries under RDFS schema benchmark testcases"@EN ;
+        :hasTest      ( <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs0> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs1> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs2> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs3> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs4> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs5> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs6> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs7> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs8> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs9> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs10> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs11> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs12> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs13> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs14> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs15> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs16> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs17> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs18> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs19> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs20> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs21> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs22> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs23> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs24> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs25> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs26> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs27> <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs28> ) ;
+        :sourceDir    "rdfs" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop20>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop20" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  ?x a :Student .\n}\n" ;
+        :id       "39"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT  ?z WHERE {\n\t?x ?z ?y .\n}\n" ;
+        :id       "16"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x WHERE {\n\t?x :takesCourse ?c1 .\n\t?c1 :shortName \"Cs200\" .\n\t?x :takesCourse ?c2 .\n\t?c2 :shortName \"Cs301\" .\n}\n" ;
+        :id       "14"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p8>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p8" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y ?z WHERE {\n\t?x a :Student .\n\t?x :registeredAt ?y .\n\t?y a :University .\n\t?x :placeOfBirth ?z .\n\t?z a :City .\n\t?y :locatedAt ?z .\t\n}\n" ;
+        :id       "12"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p22>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p22" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19c> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop9>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop9" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y WHERE \n{\n  {\n    { ?x a :UndergradStudent .  \n      ?x :takesCourse ?y }\n       UNION \n    { ?x a :GraduateStudent .\n      ?x :takesCourse ?y \n    }\n  } \n  ?y a :CsCourse .\n}\n" ;
+        :id       "22"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs4>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs4" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x  ?z WHERE {\n\t?x a :GraduateStudent .\n\t?y a :Department .\n\t?x :memberOf ?y .\n\t?y :subOrganizationOf :University1 .\n\t?x :email ?z .\n}\n" ;
+        :id       "19"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y ?z ?t ?s ?ag ?sx ?email ?dept ?course WHERE \n{ \n  ?x a :Student .\n  ?x :name ?y . \n  ?x :nickName ?z . \n  ?x :telephone ?t . \n  ?x :ssn ?s . \n  ?x :age ?ag . \n  ?x :sex ?sx . \n  ?x :emailAddress ?email . \n  ?x :memberOf ?dept . \n  ?x :takesCourse ?course . \n}\n" ;
+        :id       "17"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs16>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs16" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41d> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> .
+
+<http://ex.org/schema/C3>
+        a           :Schema ;
+        rdfs:label  "C3.rdfs" ;
+        <http://lsq.aksw.org/vocab#text>
+                "{ \n  (maleHeadOf,sp,headOf),\n  (femaleHeadOf,sp,headOf ), \n  (FullProfessor,sc,Professor),\n  (headOf,dom,FullProfessor)\n}\n" ;
+        :id         "3"^^xsd:long .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41e>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x WHERE {\n\t{ ?x :maleHeadOf ?y .}\n\t\tUNION\n\t{ ?x :femaleHeadOf ?y .}\t\n}\n" ;
+        :id       "41"^^xsd:long ;
+        :variant  "e" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop15>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop15" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\n\nSELECT * WHERE { \n   ?x :takesCourse \"Course10\" .\n}\n" ;
+        :id       "1"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs24>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs24" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p3>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p3" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop4>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop4" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p17>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p17" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :Faculty .\n\t?y a :University .\n\t?x ?z ?y .\n}\n" ;
+        :id       "6"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x  WHERE \n{\n  ?x :headOf ?y .\n}\n" ;
+        :id       "40"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39d>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  ?x a :Student .\n  ?x :takesCourse ?y .\n  ?x :telephone ?tel .\n  ?x :sex \"male\" .\n  ?y :courseName \"Course10\" .\n}\n" ;
+        :id       "39"^^xsd:long ;
+        :variant  "d" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs11>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs11" ;
+        :rdfSchema    <http://ex.org/schema/C2> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40e> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p25>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p25" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :GraduateStudent .\n\t?y a :Department .\n\t?x :memberOf ?y .\n\t?y :subOrganizationOf :UniversityO .\n\t?x :email ?z .\n}\n" ;
+        :id       "9"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs7>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs7" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39d> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39e> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y WHERE \n{\n  {\n    { ?x a :UndergradStudent .  \n      ?x :takesCourse ?y }\n       UNION \n    { ?x a :GraduateStudent .\n      ?x :takesCourse ?y \n    }\n  } \n  ?y a :CsCourse .\n}\n" ;
+        :id       "43"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop10>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop10" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y WHERE {\n\t?x a :Professor .\n\t?x :memeberOf ?y \n}\n" ;
+        :id       "13"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs19>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs19" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x WHERE { \n   ?x :takesCourse \"Course10\" . ?x :takesCourse \"Course20\" . \n}\n" ;
+        :id       "11"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p12>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p12" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?name ?email \nWHERE \n{ \n  ?x a :Student . \n  ?x :name ?name . \n  ?x :email ?email .\n  { \n    ?x :takesCourse ?c . \n    ?c :shortName \"Course10\" .\n  }\n  UNION \n  { ?x :takesCourse ?c .\n    ?c :shortName \"Course20\" .\n  }\n  UNION \n  { ?x :takesCourse ?c .\n    ?c :shortName \"Course30\" .\n  }\n}\n" ;
+        :id       "21"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop18>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop18" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y ?z ?r WHERE {\n\t?x :subOrganizationOf ?y .\n\t?y :subOrganizationOf ?z .\n\t?z :subOrganizationOf ?r .\n}\n\n\n" ;
+        :id       "18"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?z WHERE {\n\t?x a :Department .\n\t?y a :University .\n\t?x ?z ?y .\n}\n" ;
+        :id       "16"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs27>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs27" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p6>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p6" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p20>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p20" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop7>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop7" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q0a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  ?x a :Student .\n}\n" ;
+        :id       "0"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs2>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs2" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40e>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x   WHERE \n{\n  ?x :headOf ?y .\n  ?x :worksFor ?y .\n}\n" ;
+        :id       "40"^^xsd:long ;
+        :variant  "e" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q0b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT * WHERE {\n  ?x a :GraduateStudent .\n}\n" ;
+        :id       "0"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs14>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs14" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p28>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p28" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22a> .
+
+<http://ex.org/schema/C1>
+        a           :Schema ;
+        rdfs:label  "C1.rdfs" ;
+        <http://lsq.aksw.org/vocab#text>
+                "{(GraduateStudent,sc,Student), (UndergradStudent,sc,Student)}\n" ;
+        :id         "1"^^xsd:long .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  ?x :femaleHeadOf ?y .\n}\n" ;
+        :id       "41"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop13>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop13" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6c> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :Professor .\n\t?x :graduatedFrom ?y .\n\t?x :memeberOf ?y \n}\n" ;
+        :id       "3"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs22>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs22" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41e> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p1>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p1" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p15>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p15" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop2>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop2" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x :subOrganizationOf ?y .\n\t?y :subOrganizationOf ?z .\n\t?z :subOrganizationOf ?r .\n\t?r :subOrganizationOf :Unibz .\n}\n\n\n" ;
+        :id       "8"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE {\n  ?x a :GraduateStudent .\n}\n" ;
+        :id       "39"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x   WHERE {\n\t?x :takesCourse ?c1 .\n\t?c1 :shortName \"Cs200\" .\n\t?x :takesCourse ?c2 .\n\t?c2 :shortName \"Cs301\" .\n\t?x :takesCourse _:b .\n\t_:b :shortName \"Cs401\" .\n}\n" ;
+        :id       "14"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p9>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p9" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y ?z WHERE {\n\t?x a :Student .\n\t?x :registeredAt ?y .\n\t?x :placeOfBirth ?z .\n\t?y a :University .\n\t?y :locatedAt ?z .\t\n\t?z a :City .\n}\n" ;
+        :id       "12"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p23>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p23" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y WHERE \n{ \n  { ?x a :UndergradStudent .\n    ?x :takesCourse ?y . \n    ?y a :CsCourse \n  }\n    UNION \n  { \n     ?x a :GraduateStudent .\n     ?x :takesCourse ?y \n  }\n}\n" ;
+        :id       "22"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://example.org/>\n\n\n\n\n\n\n\nSELECT * WHERE \n{ \n  ?x a :Student .  \n  {?x :name ?y } \n    UNION \n  {?x :nickName ?z } \n  UNION \n  {?x :telephone ?tel } \n  UNION \n  {?x :ssn ?ssn } \n     UNION \n  {?x :sex ?sex }\n   UNION \n  {?x :memberOf ?dept } \n UNION \n  {?x :emailAddress ?email }\n  UNION \n  {?x :age ?age }  \n ?x :takesCourse ?course .\n}\n" ;
+        :id       "20"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs5>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs5" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x  ?z WHERE {\n\t?x a :GraduateStudent .\n\t?y a :Department .\n\t?x :memberOf ?y .\n\t?y :subOrganizationOf ?u .\n\t?x :email ?z .\n}\n" ;
+        :id       "19"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y ?z ?t ?s ?ag ?sx ?email ?dept ?course  WHERE \n{ \n  ?x a :Student .\n  ?x :name ?y . \n  ?x :nickName ?z . \n  ?x :telephone ?t . \n  ?x :ssn ?s . \n  ?x :age ?ag . \n  ?x :sex ?sx . \n  ?x :emailAddress ?email . \n  ?x :memberOf ?dept . \n  ?x :takesCourse ?course . \n  ?x :masterDegreeFrom ?master .\n}\n" ;
+        :id       "17"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "SELECT ?x ?y  WHERE {\n\t?x ?z ?y \n}\n" ;
+        :id       "15"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs17>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs17" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41d> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p10>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p10" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15a> .
+
+<http://ex.org/schema/C4>
+        a           :Schema ;
+        rdfs:label  "C4.rdfs" ;
+        <http://lsq.aksw.org/vocab#text>
+                "{(CsCourse,sc,Course)}\n" ;
+        :id         "4"^^xsd:long .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop16>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop16" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs25>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs25" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p4>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p4" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q12a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p18>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p18" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop5>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop5" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs0>
+        a             :WarmupContainmentTest ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x ?z ?y .\n}\n" ;
+        :id       "6"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x :takesCourse ?c1 .\n\t?c1 :shortName \"Cs200\" .\n\t?x :takesCourse ?c2 .\n\t?c2 :shortName \"Cs301\" .\n}\n" ;
+        :id       "4"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39e>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  ?x a :GraduateStudent .\n  ?x :takesCourse ?y .\n  ?x :telephone ?tel .\n  ?x :sex \"male\" .\n  ?y :courseName \"Course10\" .\n}\n" ;
+        :id       "39"^^xsd:long ;
+        :variant  "e" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\n\n\nSELECT * WHERE {\n\t?x a :Student .\n\t?x :registeredAt ?y .\n\t?y a :University .\n\t?x :placeOfBirth ?z .\n\t?z a :City .\n\t?y :locatedAt ?z .\t\n}\n" ;
+        :id       "2"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs12>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs12" ;
+        :rdfSchema    <http://ex.org/schema/C2> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40e> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p26>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p26" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :GraduateStudent .\n\t?y a :Department .\n\t?x :memberOf ?y .\n\t?y :subOrganizationOf :University1 .\n\t?x :email ?z .\n}\n" ;
+        :id       "9"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y WHERE \n{ \n  { ?x a :UndergradStudent .\n    ?x :takesCourse ?y . \n    ?y a :CsCourse \n  }\n    UNION \n  { \n     ?x a :GraduateStudent .\n     ?x :takesCourse ?y \n  }\n}\n" ;
+        :id       "43"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs8>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs8" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39e> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39d> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT * WHERE \n{ \n  ?x a :Student .\n  ?x :name ?y . \n  ?x :nickName ?z . \n  ?x :telephone ?tel . \n  ?x :ssn ?ssn . \n  ?x :age ?age . \n  ?x :sex ?sex . \n  ?x :emailAddress ?email . \n  ?x :memberOf ?dept . \n  ?x :takesCourse ?course . \n}\n" ;
+        :id       "7"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop11>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop11" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE {\n  ?x a :Professor .\n}\n" ;
+        :id       "41"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs20>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs20" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\n\nSELECT ?x WHERE { \n   ?x :takesCourse \"Course10\" .\n}\n" ;
+        :id       "11"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p13>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p13" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16c> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop0>
+        a             :WarmupContainmentTest ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q0a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q0b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q21b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?name ?email \nWHERE { \n  ?x a :Student . \n  ?x :name ?name . \n  ?x :email ?email .\n  ?x :takesCourse ?c1 . \n  ?c1 :shortName \"Course10\" . \n  ?x :takesCourse ?c2 . \n  ?c2 :shortName \"Course20\" . \n  ?x :takesCourse ?c . \n  ?c :shortName \"Course30\" .\n}\n" ;
+        :id       "21"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop19>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop19" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q9b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT  ?z WHERE {\n\t?x a :Faculty .\n\t?y a :University .\n\t?x ?z ?y .\n}\n" ;
+        :id       "16"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs28>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs28" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p7>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p7" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q14b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p21>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p21" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop8>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop8" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q0b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE {\n  ?x a :GraduateStudent .\n}\n" ;
+        :id       "0"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs3>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs3" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?z WHERE {\n\t?x a :GraduateStudent .\n\t?y a :Department .\n\t?x :memberOf ?y .\n\t?y :subOrganizationOf :UniversityO .\n\t?x :email ?z .\n}\n" ;
+        :id       "19"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj>
+        a             :TestSuite ;
+        rdfs:comment  "This suite is designed to address the containment of basic graph patterns (conjunctive queries). It contains 20 queries differing in the number of conjunctions and variables they contain. This test suite is developed for containment solvers that do not support projection of variables in queries. " ;
+        rdfs:label    "Containment of Conjunctive Queries with No Projection benchmark testcases"@EN ;
+        :hasTest      ( <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop0> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop1> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop2> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop3> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop4> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop5> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop6> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop7> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop8> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop9> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop10> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop11> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop12> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop13> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop14> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop15> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop16> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop17> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop18> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop19> <http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop20> ) ;
+        :sourceDir    "noprojection" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs15>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs15" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41d> .
+
+<http://ex.org/schema/C2>
+        a           :Schema ;
+        rdfs:label  "C2.rdfs" ;
+        <http://lsq.aksw.org/vocab#text>
+                "{(headOf,dom,Professor), (headOf,range,Department)}\n" ;
+        :id         "2"^^xsd:long .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41d>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE {\n  ?x :headOf ?y.\n}\n" ;
+        :id       "41"^^xsd:long ;
+        :variant  "d" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop14>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop14" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :Professor .\n\t?x :memeberOf ?y \n}\n" ;
+        :id       "3"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q1a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE { \n   ?x :takesCourse \"Course10\" . ?x :takesCourse \"Course20\" . \n}\n" ;
+        :id       "1"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs23>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs23" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p2>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p2" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q11a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop3>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop3" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p16>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p16" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q17a> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x :subOrganizationOf ?y .\n\t?y :subOrganizationOf ?z .\n\t?z :subOrganizationOf ?r .\n}\n\n\n" ;
+        :id       "8"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x a :Department .\n\t?y a :University .\n\t?x ?z ?y .\n}\n" ;
+        :id       "6"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE { \n  {?x a :GraduateStudent . }\n    UNION \n  {?x a :UndergradStudent . }\n}\n" ;
+        :id       "39"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs10>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs10" ;
+        :rdfSchema    <http://ex.org/schema/C2> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40d> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p24>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p24" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q20b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://example.org/>\n\n\n\n\n\n\nSELECT * WHERE { \n  ?x a :Student . \n  {?x :name ?y } \n    UNION \n  {?x :nickName ?z .\n   ?x :telephone ?tel .\n   ?x :ssn ?ssn .\n   ?x :sex ?sex . \n   ?x :memberOf ?dept .\n   ?x :emailAddress ?email .\n   ?x :age ?age  .\n    } \n ?x :takesCourse ?course .\n}\n" ;
+        :id       "20"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs6>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs6" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q15b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y  WHERE {\n\t?x :name ?y .\n}\n" ;
+        :id       "15"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj>
+        a             :TestSuite ;
+        rdfs:comment  "This benchmark testcase comprises 28 queries which have variables in the SELECT clause (aka distinguished variables) hence the name projection. In addition to the projection, the queries are chosen according to selectivity, number of conjunction and unions, and size (in terms of the number of connectives). This test suite assesses containment solvers that support projection and union of conjunctive queries.  " ;
+        rdfs:label    "Containment of Union of Conjunctive Quries with Projection benchmark testcases"@EN ;
+        :hasTest      ( <http://sparql-qc-bench.inrialpes.fr/UCQProj#p0> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p1> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p2> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p3> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p4> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p5> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p6> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p7> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p8> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p9> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p10> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p11> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p12> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p13> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p14> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p15> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p16> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p17> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p18> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p19> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p20> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p21> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p22> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p23> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p24> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p25> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p26> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p27> <http://sparql-qc-bench.inrialpes.fr/UCQProj#p28> ) ;
+        :sourceDir    "projection" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y WHERE {\n\t?x a :Professor .\n\t?x :graduatedFrom ?y .\n\t?x :memeberOf ?y \n}\n" ;
+        :id       "13"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs18>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs18" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41d> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p11>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p11" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q16b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop17>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop17" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q8b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q18a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT ?x ?y ?z ?r  WHERE {\n\t?x :subOrganizationOf ?y .\n\t?y :subOrganizationOf ?z .\n\t?z :subOrganizationOf ?r .\n\t?r :subOrganizationOf :Unibz .\n}\n\n\n" ;
+        :id       "18"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p5>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p5" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q13b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs26>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs26" ;
+        :rdfSchema    <http://ex.org/schema/C4> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p19>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p19" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q19b> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop6>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop6" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q3a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs1>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs1" ;
+        :rdfSchema    <http://ex.org/schema/C1> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q39c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40d>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE \n{ \n  ?x a :Professor .\n}\n" ;
+        :id       "40"^^xsd:long ;
+        :variant  "d" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q4c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\nSELECT * WHERE {\n\t?x :takesCourse ?c1 .\n\t?c1 :shortName \"Cs200\" .\n\t?x :takesCourse ?c2 .\n\t?c2 :shortName \"Cs301\" .\n\t?x :takesCourse _:b .\n\t_:b :shortName \"Cs401\" .\n}\n" ;
+        :id       "4"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q2b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.example.org/>\n\n\n\n\n\nSELECT * WHERE {\n\t?x a :Student .\n\t?x :registeredAt ?y .\n\t?x :placeOfBirth ?z .\n\t?y a :University .\n\t?y :locatedAt ?z .\t\n\t?z a :City .\n}\n" ;
+        :id       "2"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q0a>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT * WHERE { \n  ?x a :Student .\n}\n" ;
+        :id       "0"^^xsd:long ;
+        :variant  "a" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs13>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs13" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41c> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p27>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQProj_p27" ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q22b> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q43c>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x ?y WHERE \n{ \n  {\n    { \n      ?x a :UndergradStudent . \n      ?x :takesCourse ?y \n    }\n     UNION \n    { \n      ?x a :GraduateStudent .\n      ?x :takesCourse ?y \n    } \n   }\n   ?y a :Course .\n}\n" ;
+        :id       "43"^^xsd:long ;
+        :variant  "c" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs9>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs9" ;
+        :rdfSchema    <http://ex.org/schema/C2> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40b> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q40d> .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q7b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT * WHERE \n{ \n  ?x a :Student .\n  ?x :name ?y . \n  ?x :nickName ?z . \n  ?x :telephone ?tel . \n  ?x :ssn ?ssn . \n  ?x :age ?age . \n  ?x :sex ?sex . \n  ?x :emailAddress ?email . \n  ?x :memberOf ?dept . \n  ?x :takesCourse ?course . \n  ?x :masterDegreeFrom :OklahomaUniversity .\n}\n" ;
+        :id       "7"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41b>
+        a         <http://lsq.aksw.org/vocab#Query> ;
+        <http://lsq.aksw.org/vocab#text>
+                "PREFIX : <http://www.lehigh.edu//univ-bench.owl#>\n\nSELECT ?x WHERE \n{\n  ?x :maleHeadOf ?y .\n}\n" ;
+        :id       "41"^^xsd:long ;
+        :variant  "b" .
+
+<http://sparql-qc-bench.inrialpes.fr/CQNoProj#nop12>
+        a             :ContainmentTest ;
+        rdfs:label    "CQNoProj_nop12" ;
+        :result       "false" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6c> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/CQNoProj#CQNoProj-Q6a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQrdfs#rdfs21>
+        a             :ContainmentTest ;
+        rdfs:label    "UCQrdfs_rdfs21" ;
+        :rdfSchema    <http://ex.org/schema/C3> ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41e> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQrdfs#UCQrdfs-Q41a> .
+
+<http://sparql-qc-bench.inrialpes.fr/UCQProj#p0>
+        a             :WarmupContainmentTest ;
+        :result       "true" ;
+        :sourceQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q0a> ;
+        :targetQuery  <http://sparql-qc-bench.inrialpes.fr/UCQProj#UCQProj-Q0b> .
