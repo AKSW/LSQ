@@ -26,7 +26,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionModular;
 import org.apache.jena.riot.RDFDataMgr;
@@ -114,6 +113,8 @@ public class TestLsqQueryExecutionTime {
 			.setRdfizerQueryStructuralFeaturesEnabled(true)
 			.setRdfizerQueryExecutionEnabled(true)
 			.setDeterministicPseudoTimestamps(true)
+			
+			.setPrefixSources(Collections.emptyList())
 			//.setc
 			//.setBenchmarkEndpointDescription(new SparqlServiceReference("http://dbpedia.org/sparql"))
 			;

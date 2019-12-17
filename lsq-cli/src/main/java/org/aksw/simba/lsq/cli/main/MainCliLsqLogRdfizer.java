@@ -13,12 +13,10 @@ import java.util.stream.Stream;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.simba.lsq.core.LsqUtils;
-import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.util.ResourceUtils;
-import org.apache.jena.vocabulary.RDFS;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
@@ -40,7 +38,8 @@ public class MainCliLsqLogRdfizer {
 		String logFormat = cm.inputLogFormat;
 		List<String> sources = cm.nonOptionArgs;
 		
-		List<String> prefixSources = cm.prefixSources;
+		List<String> rawPrefixSources = cm.prefixSources;
+		Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(rawPrefixSources);
 		Function<String, SparqlStmt> sparqlStmtParser = LsqUtils.createSparqlParser(prefixSources);
 		
 		

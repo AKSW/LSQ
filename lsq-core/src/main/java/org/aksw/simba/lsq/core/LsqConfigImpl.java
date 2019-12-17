@@ -96,7 +96,7 @@ public class LsqConfigImpl {
     protected Long delayInMs;
     
     
-    protected List<String> prefixSources;
+    protected Iterable<String> prefixSources;
 
     
     public Long getSeenQueryCacheSize() {
@@ -442,11 +442,11 @@ public class LsqConfigImpl {
 		return this;
 	}
 
-	public List<String> getPrefixSources() {
+	public Iterable<String> getPrefixSources() {
 		return prefixSources;
 	}
 
-	public LsqConfigImpl setPrefixSources(List<String> prefixSources) {
+	public LsqConfigImpl setPrefixSources(Iterable<String> prefixSources) {
 		this.prefixSources = prefixSources;
 		return this;
 	}

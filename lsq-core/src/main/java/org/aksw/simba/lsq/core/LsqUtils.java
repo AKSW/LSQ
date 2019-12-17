@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -439,13 +440,23 @@ public class LsqUtils {
 		return result;
 	}
 	
-	public static SparqlStmtParser createSparqlParser(List<String> prefixSources) {
-        Iterable<String> sources = Iterables.concat(
-        		Collections.singleton("rdf-prefixes/prefix.cc.2019-12-17.jsonld"),
-        		Optional.ofNullable(prefixSources).orElse(Collections.emptyList())); 
 
+	/**
+	 * Extends a list of prefix sources by adding a snapshot of prefix.cc
+	 * 
+	 * @param prefixSources
+	 * @return
+	 */
+	public static Iterable<String> prependDefaultPrefixSources(Iterable<String> prefixSources) {
+	    Iterable<String> sources = Iterables.concat(
+	    		Collections.singleton("rdf-prefixes/prefix.cc.2019-12-17.jsonld"),
+	    		Optional.ofNullable(prefixSources).orElse(Collections.emptyList()));
+	    return sources;
+	}
+
+	public static SparqlStmtParser createSparqlParser(Iterable<String> prefixSources) {
         PrefixMapping prefixMapping = new PrefixMappingImpl();
-        for(String source : sources) {
+        for(String source : prefixSources) {
         	PrefixMapping tmp = RDFDataMgr.loadModel(source);
         	prefixMapping.setNsPrefixes(tmp);
         }
@@ -485,7 +496,7 @@ public class LsqUtils {
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
                 Query query = queryStmt.getQuery();
-                String queryStr = "" + queryStmt.getQuery();
+                String queryStr = Objects.toString(query);
                 r.addLiteral(LSQ.text, queryStr);
             }
         }

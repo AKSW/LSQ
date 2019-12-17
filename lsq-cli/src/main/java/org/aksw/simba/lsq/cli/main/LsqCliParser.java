@@ -311,7 +311,8 @@ public class LsqCliParser {
         Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
 
         
-        List<String> prefixSources = prefixSourcesOs.values(options);
+        Iterable<String> prefixSources = prefixSourcesOs.values(options);
+        prefixSources = LsqUtils.prependDefaultPrefixSources(prefixSources);
         
         config.setReuseLogIri(reuseLogIris);
         config.setQueryIdPattern(queryIdPattern);
