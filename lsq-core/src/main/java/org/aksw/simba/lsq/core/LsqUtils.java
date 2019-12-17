@@ -489,7 +489,7 @@ public class LsqUtils {
                     .map(sparqlStmtParser)
                     .orElse(null);
             
-            if(stmt != null && stmt.isQuery()) {
+            if(stmt != null && stmt.isQuery() && stmt.isParsed()) {
 
                 SparqlStmtUtils.optimizePrefixes(stmt);
 

@@ -17,6 +17,8 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.util.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
@@ -26,6 +28,8 @@ import io.reactivex.Flowable;
 import joptsimple.internal.Strings;
 
 public class MainCliLsqLogRdfizer {
+	private static final Logger logger = LoggerFactory.getLogger(MainCliLsqLogRdfizer.class);
+	
 	public static void main(String[] args) throws Exception {
 		CommandMain cm = new CommandMain();
 
@@ -36,7 +40,7 @@ public class MainCliLsqLogRdfizer {
 		jc.parse(args);
 
 		String logFormat = cm.inputLogFormat;
-		List<String> sources = cm.nonOptionArgs;
+		List<String> logSources = cm.nonOptionArgs;
 		
 		List<String> rawPrefixSources = cm.prefixSources;
 		Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(rawPrefixSources);
@@ -47,13 +51,18 @@ public class MainCliLsqLogRdfizer {
 		Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
 		
 		Flowable<Resource> logRdfEvents = Flowable
-			.fromIterable(sources)
-			.flatMap(source -> {
+			.fromIterable(logSources)
+			.flatMap(logSource -> {
+	        	Path path = Paths.get(logSource);
+	        	String filename = path.getFileName().toString();
+
+	        	logger.info("Processing log source " + logSource);
+	        	
 				String effectiveLogFormat;
 				if(Strings.isNullOrEmpty(logFormat)) {
-					List<String> formats = LsqUtils.probeLogFormat(logFmtRegistry, loader, source);
+					List<String> formats = LsqUtils.probeLogFormat(logFmtRegistry, loader, logSource);
 					if(formats.size() != 1) {
-						throw new RuntimeException("Expected probe to return exactly 1 log format for source " + source + ", got: " + formats);
+						throw new RuntimeException("Expected probe to return exactly 1 log format for source " + logSource + ", got: " + formats);
 					}
 					effectiveLogFormat = formats.get(0);
 				} else {
@@ -67,7 +76,7 @@ public class MainCliLsqLogRdfizer {
 				Flowable<Resource> r = Flowable.fromIterable(() -> {
 					InputStream in;
 					try {
-						in = loader.getResource(source).getInputStream();
+						in = loader.getResource(logSource).getInputStream();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -75,8 +84,6 @@ public class MainCliLsqLogRdfizer {
 			        st = LsqUtils.postProcessStream(st, in, true);
 			        
 			        st = st.map(x -> {
-			        	Path path = Paths.get(source);
-			        	String filename = path.getFileName().toString();
 			        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
 			        	Resource xx = ResourceUtils.renameResource(x, filename + "-" + seqId);
 
