@@ -14,6 +14,9 @@ public class CommandMain {
 	@Parameter(names={"-m", "--format"}, description="Input log format")
 	public String inputLogFormat;
 
+	@Parameter(names={"-n", "--namespaces"}, description="Namespace prefix sources")
+	public List<String> prefixSources = new ArrayList<>();
+
 	@Parameter(description="Non option args")
 	public List<String> nonOptionArgs = new ArrayList<>();
 

@@ -317,6 +317,7 @@ public class LsqProcessor
 //    pu LsqProcessor() {
 //        super();
 //    }
+ 
 
     @Override
     public LsqQuery apply(Resource r) {

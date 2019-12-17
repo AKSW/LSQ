@@ -36,8 +36,10 @@ import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -356,32 +358,7 @@ public class LsqUtils {
             result = result.limit(firstItemOffset);
         }
 
-        // Enrich potentially missing information
-        result = Streams.mapWithIndex(result, (r, i) -> {
-        	if(!r.hasProperty(LSQ.host)) {
-        		// TODO Potentially make host configurable
-        		r.addLiteral(LSQ.host, "localhost");
-        	}
-
-// Note: Avoid instantiating new dates as this breaks determinacy
-//        	if(!r.hasProperty(PROV.atTime)) {
-//        		r.addLiteral(PROV.atTime, new GregorianCalendar());
-//        	}
-        	
-        	if(!r.hasProperty(LSQ.sequenceId)) {
-        		r.addLiteral(LSQ.sequenceId, i);
-        	}
-        	
-        	return r;
-        }).onClose(() -> {
-			try {
-				if(doClose) {
-					in.close();
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
+        result = postProcessStream(result, in, doClose);
         
         //Model logModel = ModelFactory.createDefaultModel();
 
@@ -432,6 +409,88 @@ public class LsqUtils {
         return result;
     }
 
+	public static Stream<Resource> postProcessStream(Stream<Resource> result, InputStream in, boolean doClose) {
+		// Enrich potentially missing information
+        result = Streams.mapWithIndex(result, (r, i) -> {
+        	if(!r.hasProperty(LSQ.host)) {
+        		// TODO Potentially make host configurable
+        		r.addLiteral(LSQ.host, "localhost");
+        	}
+
+// Note: Avoid instantiating new dates as this breaks determinacy
+//        	if(!r.hasProperty(PROV.atTime)) {
+//        		r.addLiteral(PROV.atTime, new GregorianCalendar());
+//        	}
+        	
+        	if(!r.hasProperty(LSQ.sequenceId)) {
+        		r.addLiteral(LSQ.sequenceId, i);
+        	}
+        	
+        	return r;
+        }).onClose(() -> {
+			try {
+				if(doClose) {
+					in.close();
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		});
+		return result;
+	}
+	
+	public static SparqlStmtParser createSparqlParser(List<String> prefixSources) {
+        Iterable<String> sources = Iterables.concat(
+        		Collections.singleton("rdf-prefixes/prefix.cc.2019-12-17.jsonld"),
+        		Optional.ofNullable(prefixSources).orElse(Collections.emptyList())); 
+
+        PrefixMapping prefixMapping = new PrefixMappingImpl();
+        for(String source : sources) {
+        	PrefixMapping tmp = RDFDataMgr.loadModel(source);
+        	prefixMapping.setNsPrefixes(tmp);
+        }
+        
+        SparqlStmtParser result = SparqlStmtParserImpl.create(
+        		Syntax.syntaxARQ, prefixMapping, true);
+
+        return result;
+	}
+
+	
+    public static void postProcessSparqlStmt(Resource r, Function<String, SparqlStmt> sparqlStmtParser) {
+
+        // logger.debug(RDFDataMgr.write(out, dataset, lang););
+
+        // Extract the query and add it with the lsq:query property
+        WebLogParser.extractQuery(r);
+
+        // If the resource is null, we could not parse the log entry
+        // therefore count this as an error
+
+        boolean parsed = r.getProperty(LSQ.processingError) == null ? true : false;
+
+        if(parsed) {
+            Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
+                    .map(queryStmt -> queryStmt.getString());
+
+            //Model m = ResourceUtils.reachableClosure(r);
+            SparqlStmt stmt = str
+                    .map(sparqlStmtParser)
+                    .orElse(null);
+            
+            if(stmt != null && stmt.isQuery()) {
+
+                SparqlStmtUtils.optimizePrefixes(stmt);
+
+                SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+
+                Query query = queryStmt.getQuery();
+                String queryStr = "" + queryStmt.getQuery();
+                r.addLiteral(LSQ.text, queryStr);
+            }
+        }
+    }
+
     public static LsqProcessor createProcessor(LsqConfigImpl config) {
 
         LsqProcessor result = new LsqProcessor();
@@ -442,18 +501,7 @@ public class LsqUtils {
 
         // By default, make a snapshot of prefix.cc prefixes available
         // CollectionUtils.emptyIfNull would be nice to have here
-        Iterable<String> sources = Iterables.concat(
-        		Collections.singleton("rdf-prefixes/prefix.cc.2019-12-17.jsonld"),
-        		Optional.ofNullable(config.getPrefixSources()).orElse(Collections.emptyList())); 
-
-        PrefixMapping prefixMapping = new PrefixMappingImpl();
-        for(String source : sources) {
-        	PrefixMapping tmp = RDFDataMgr.loadModel(source);
-        	prefixMapping.getNsPrefixMap().putAll(tmp.getNsPrefixMap());
-        }
-        
-        Function<String, SparqlStmt> sparqlStmtParser = SparqlStmtParserImpl.create(
-        		Syntax.syntaxARQ, prefixMapping, true);
+        Function<String, SparqlStmt> sparqlStmtParser = createSparqlParser(config.getPrefixSources());
 
 
         SparqlServiceReference benchmarkEndpointDescription = config.getBenchmarkEndpointDescription();
