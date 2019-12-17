@@ -11,10 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,6 +43,7 @@ import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.atlas.lib.Sink;
+import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -52,6 +55,8 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.PrefixMapping2;
 import org.apache.jena.vocabulary.RDFS;
@@ -417,9 +422,24 @@ public class LsqUtils {
 
         LsqProcessor result = new LsqProcessor();
 
-        Function<String, SparqlStmt> sparqlStmtParser = config.getSparqlStmtParser();
+//        Function<String, SparqlStmt> sparqlStmtParser = config.getSparqlStmtParser();
         //SparqlParserConfig sparqlParserConfig = SparqlParserConfig.create().create(S, prologue)
-        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, PrefixMapping2.Extended, true);
+//        sparqlStmtParser = sparqlStmtParser != null ? sparqlStmtParser : SparqlStmtParserImpl.create(Syntax.syntaxARQ, PrefixMapping2.Extended, true);
+
+        // By default, make a snapshot of prefix.cc prefixes available
+        // CollectionUtils.emptyIfNull would be nice to have here
+        Iterable<String> sources = Iterables.concat(
+        		Collections.singleton("rdf-prefixes/prefix.cc.2019-12-17.jsonld"),
+        		Optional.ofNullable(config.getPrefixSources()).orElse(Collections.emptyList())); 
+
+        PrefixMapping prefixMapping = new PrefixMappingImpl();
+        for(String source : sources) {
+        	PrefixMapping tmp = RDFDataMgr.loadModel(source);
+        	prefixMapping.getNsPrefixMap().putAll(tmp.getNsPrefixMap());
+        }
+        
+        Function<String, SparqlStmt> sparqlStmtParser = SparqlStmtParserImpl.create(
+        		Syntax.syntaxARQ, prefixMapping, true);
 
 
         SparqlServiceReference benchmarkEndpointDescription = config.getBenchmarkEndpointDescription();

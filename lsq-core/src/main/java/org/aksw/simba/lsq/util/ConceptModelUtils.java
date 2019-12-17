@@ -5,13 +5,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.apache.jena.graph.Node;
+import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionFactory;
 
 public class ConceptModelUtils {
     public static List<Resource> listResources(Model model, Concept concept) {
@@ -26,15 +27,17 @@ public class ConceptModelUtils {
     }
 
     public static void collectRdfNodes(Model model, Concept concept, Consumer<RDFNode> consumer) {
-        QueryExecutionFactory qef = FluentQueryExecutionFactory
-            .from(model)
-            .create();
-
-        List<Node> nodes = ServiceUtils.fetchList(qef, concept);
-
-        nodes.stream()
-            .map(node -> model.asRDFNode(node))
-            .forEach(consumer);
+//        QueryExecutionFactory qef = FluentQueryExecutionFactory
+//            .from(model)
+//            .create();
+    	try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model))) {
+	    	
+	        List<Node> nodes = ServiceUtils.fetchList(conn, concept);
+	
+	        nodes.stream()
+	            .map(node -> model.asRDFNode(node))
+	            .forEach(consumer);
+    	}
     }
 
 }

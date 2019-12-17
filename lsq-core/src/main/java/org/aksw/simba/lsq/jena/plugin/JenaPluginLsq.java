@@ -17,7 +17,7 @@ public class JenaPluginLsq
 
 	
 	public static void init() {
-		JenaPluginUtils.registerJenaResourceClassesUsingPackageScan(LsqQuery.class.getPackage().getName());
+		JenaPluginUtils.scan(LsqQuery.class.getPackage().getName());
 		// TODO Extend mapper proxy with support for generic collection views
 		// i.e. Collection<T> getFoo(Class<T>)
 		

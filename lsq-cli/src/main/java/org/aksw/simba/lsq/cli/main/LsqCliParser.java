@@ -63,6 +63,7 @@ public class LsqCliParser {
     protected OptionSpec<Long> queryDelayInMsOs;
     protected OptionSpec<String> httpUserAgentOs;
     
+    protected OptionSpec<String> prefixSourcesOs;
 
     
     
@@ -211,6 +212,11 @@ public class LsqCliParser {
                 .defaultsTo("Linked Sparql Queries (LSQ) client. User agent not set.")
                 ;
 
+        prefixSourcesOs = parser
+                .acceptsAll(Arrays.asList("n", "namespaces"), "RDF namespace files")
+                .withRequiredArg()
+                //.defaultsTo("rdf-prefixes/prefix.cc.2019-12-17.jsonld")
+                ;
 
 //        reuseLogIri = parser
 //                .acceptsAll(Arrays.asList("b", "base"), "Base URI for URI generation")
@@ -304,6 +310,9 @@ public class LsqCliParser {
         queryIdPatternStr = queryIdPatternStr == null ? null : queryIdPatternStr.trim();
         Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
 
+        
+        List<String> prefixSources = prefixSourcesOs.values(options);
+        
         config.setReuseLogIri(reuseLogIris);
         config.setQueryIdPattern(queryIdPattern);
 
@@ -335,6 +344,8 @@ public class LsqCliParser {
         config.setDelayInMs(delayInMs);
         String userAgent = httpUserAgentOs.value(options);
         config.setHttpUserAgent(userAgent);
+        
+        config.setPrefixSources(prefixSources);
         
         return config;
     }

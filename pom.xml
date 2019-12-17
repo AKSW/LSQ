@@ -57,8 +57,8 @@
 	</modules>
 
 	<properties>
-		<jena.version>3.11.0</jena.version>
-		<jsa.subversion>1</jsa.subversion>
+		<jena.version>3.13.1</jena.version>
+		<jsa.subversion>1-SNAPSHOT</jsa.subversion>
 		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>

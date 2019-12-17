@@ -37,7 +37,7 @@ public class LsqConfigImpl {
 
     protected File outRdfFile;
     protected String outRdfFormat;
-    protected Function<String, SparqlStmt> sparqlStmtParser;
+//    protected Function<String, SparqlStmt> sparqlStmtParser;
 
     protected File outFile;
 
@@ -96,6 +96,9 @@ public class LsqConfigImpl {
     protected Long delayInMs;
     
     
+    protected List<String> prefixSources;
+
+    
     public Long getSeenQueryCacheSize() {
 		return seenQueryCacheSize;
 	}
@@ -135,15 +138,15 @@ public class LsqConfigImpl {
     }
 
 
-    public Function<String, SparqlStmt> getSparqlStmtParser() {
-        return sparqlStmtParser;
-    }
-
-
-    public LsqConfigImpl setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
-        this.sparqlStmtParser = sparqlStmtParser;
-        return this;
-    }
+//    public Function<String, SparqlStmt> getSparqlStmtParser() {
+//        return sparqlStmtParser;
+//    }
+//
+//
+//    public LsqConfigImpl setSparqlStmtParser(Function<String, SparqlStmt> sparqlStmtParser) {
+//        this.sparqlStmtParser = sparqlStmtParser;
+//        return this;
+//    }
     
     // Use sequence ids for local executions
     public boolean isDeterministicPseudoTimestamps() {
@@ -434,8 +437,20 @@ public class LsqConfigImpl {
 		return delayInMs;
 	}
 
-	public void setDelayInMs(Long delayInMs) {
+	public LsqConfigImpl setDelayInMs(Long delayInMs) {
 		this.delayInMs = delayInMs;
+		return this;
 	}
+
+	public List<String> getPrefixSources() {
+		return prefixSources;
+	}
+
+	public LsqConfigImpl setPrefixSources(List<String> prefixSources) {
+		this.prefixSources = prefixSources;
+		return this;
+	}
+	
+	
 }
 

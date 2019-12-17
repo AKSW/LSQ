@@ -22,6 +22,7 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
@@ -342,8 +343,10 @@ public class LsqProcessor
                 SparqlStmt stmt = str
                         .map(stmtParser)
                         .orElse(null);
-
+                
                 if(stmt != null && stmt.isQuery()) {
+
+                    SparqlStmtUtils.optimizePrefixes(stmt);
 
                     SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
