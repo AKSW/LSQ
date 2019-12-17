@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,7 +58,6 @@ import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.util.ModelUtils;
-import org.apache.jena.sparql.util.PrefixMapping2;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +82,22 @@ public class LsqUtils {
 		ResourceLoader loader = new FileSystemResourceLoader();		
 		Map<String, Function<InputStream, Stream<Resource>>> registry = LsqUtils.createDefaultLogFmtRegistry();
 		
-		Multimap<Long, String> report = probeLogFormat(registry, loader, resource);
+		List<String> result = probeLogFormat(registry, loader, resource);
+//		Multimap<Long, String> report = probeLogFormatCore(registry, loader, resource);
+//		
+//		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
+//			.filter(e -> e.getKey() != 0)
+////			.limit(2)
+//			.map(Entry::getValue)
+//			.flatMap(Collection::stream)
+//			.collect(Collectors.toList());
+
+		return result;
+	}
+
+	public static List<String> probeLogFormat(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String resource) {
+		
+		Multimap<Long, String> report = probeLogFormatCore(registry, loader, resource);
 		
 		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
 			.filter(e -> e.getKey() != 0)
@@ -95,7 +109,7 @@ public class LsqUtils {
 		return result;
 	}
 
-	public static Multimap<Long, String> probeLogFormat(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String filename) {
+	public static Multimap<Long, String> probeLogFormatCore(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String filename) {
 		org.springframework.core.io.Resource resource = loader.getResource(filename);
 		
 		// succcessCountToFormat
@@ -104,9 +118,9 @@ public class LsqUtils {
 		for(Entry<String, Function<InputStream, Stream<Resource>>> entry : registry.entrySet()) {
 			String formatName = entry.getKey();
 			
-			if(formatName.equals("wikidata")) {
-				System.out.println("here");
-			}
+//			if(formatName.equals("wikidata")) {
+//				System.out.println("here");
+//			}
 			
 			Function<InputStream, Stream<Resource>> fn = entry.getValue();
 			

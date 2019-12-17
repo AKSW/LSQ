@@ -1,0 +1,11 @@
+#!/bin/sh
+
+java -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLsqLogRdfizer "$@"
+
+#artifactBase="/usr/share/lib/sparqlify-cli/sparqlify-core"
+
+# Source the dependencies (they become the value of the variable 'artifacts')
+#. "$artifactBase.inc"
+
+#java -cp "$artifacts:$artifactBase.jar" org.aksw.sparqlify.web.Main "$@"
+
