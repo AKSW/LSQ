@@ -87,17 +87,20 @@ public class MainCliLsqLogRdfizer {
 			        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
 			        	Resource xx = ResourceUtils.renameResource(x, filename + "-" + seqId);
 
-			        	LsqUtils.postProcessSparqlStmt(xx, sparqlStmtParser);
+			        	try {
+			        		LsqUtils.postProcessSparqlStmt(xx, sparqlStmtParser);
+			        	} catch(Exception e) {
+			                xx.addLiteral(LSQ.processingError, e.toString());
+			        	}
 
 			        	// Remove text and query properties, as LSQ.text is
 			        	// the polished one
 			        	// xx.removeAll(LSQ.query);
 			        	// xx.removeAll(RDFS.label);
-			        	
+
 			        	return xx;
 			        })
-			        .filter(x -> x.getProperty(LSQ.text) != null);
-			        
+			        .filter(x -> x != null);
 
 			        Iterator<Resource> it = st.iterator();
 			        return it;

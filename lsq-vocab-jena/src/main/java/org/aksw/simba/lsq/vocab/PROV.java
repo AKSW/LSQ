@@ -22,7 +22,7 @@ public class PROV {
     public static final Property hadPrimarySource = property("hadPrimarySource");
     public static final Property atTime = property("atTime");
     public static final Property startedAtTime = property("startedAtTime");
-    public static final Property endAtTime = property("endAtTime");
+    public static final Property endedAtTime = property("endedAtTime");
     public static final Property wasGeneratedBy = property("wasGeneratedBy");
     public static final Property wasAssociatedWith = property("wasAssociatedWith");
 

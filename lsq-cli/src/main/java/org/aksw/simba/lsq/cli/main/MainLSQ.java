@@ -109,7 +109,7 @@ public class MainLSQ
 	            itemWriter.send(
 	                    expRes.inModel(ModelFactory.createDefaultModel())
 	                        //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-	                    .addLiteral(PROV.endAtTime, Calendar.getInstance())
+	                    .addLiteral(PROV.endedAtTime, Calendar.getInstance())
 	            );
 	        }
 	

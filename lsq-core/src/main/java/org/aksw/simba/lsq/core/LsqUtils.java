@@ -236,14 +236,15 @@ public class LsqUtils {
                     boolean parsed;
                     try {
                         parsed = mapper.parse(r, line) != 0;
+                        if(!parsed) {
+                            r.addLiteral(LSQ.processingError, "Failed to parse log line (no detailed information available)");
+                        }
                     } catch(Exception e) {
                         parsed = false;
+                        r.addLiteral(LSQ.processingError, "Failed to parse log line: " + e);
                         logger.warn("Parser error", e);
                     }
 
-                    if(!parsed) {
-                        r.addLiteral(LSQ.processingError, "Failed to parse log line");
-                    }
 
                     return r;
                 })
@@ -478,9 +479,9 @@ public class LsqUtils {
         // If the resource is null, we could not parse the log entry
         // therefore count this as an error
 
-        boolean parsed = r.getProperty(LSQ.processingError) == null ? true : false;
+        boolean logLineSuccessfullyParsed = r.getProperty(LSQ.processingError) == null;
 
-        if(parsed) {
+        if(logLineSuccessfullyParsed) {
             Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
                     .map(queryStmt -> queryStmt.getString());
 
