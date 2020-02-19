@@ -10,7 +10,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 

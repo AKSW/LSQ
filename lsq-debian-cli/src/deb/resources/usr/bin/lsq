@@ -1,6 +1,6 @@
 #!/bin/sh
 
-java -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainLSQ "$@"
+java -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLSQ "$@"
 
 #artifactBase="/usr/share/lib/sparqlify-cli/sparqlify-core"
 

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,6 +35,7 @@ import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQuery
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
+import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
@@ -51,12 +53,14 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
@@ -100,10 +104,10 @@ public class LsqUtils {
 
 	public static List<String> probeLogFormat(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String resource) {
 		
-		Multimap<Long, String> report = probeLogFormatCore(registry, loader, resource);
+		Multimap<? extends Number, String> report = probeLogFormatCore(registry, loader, resource);
 		
 		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
-			.filter(e -> e.getKey() != 0)
+			.filter(e -> e.getKey().doubleValue() != 0)
 //			.limit(2)
 			.map(Entry::getValue)
 			.flatMap(Collection::stream)
@@ -112,11 +116,20 @@ public class LsqUtils {
 		return result;
 	}
 
-	public static Multimap<Long, String> probeLogFormatCore(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String filename) {
+	/**
+	 * Return formats sorted by weight
+	 * Higher weight = better format; more properties could be parsed with that format
+	 * 
+	 * @param registry
+	 * @param loader
+	 * @param filename
+	 * @return
+	 */
+	public static Multimap<Double, String> probeLogFormatCore(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String filename) {
 		org.springframework.core.io.Resource resource = loader.getResource(filename);
 		
 		// succcessCountToFormat
-		Multimap<Long, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+		Multimap<Double, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		
 		for(Entry<String, Function<InputStream, Stream<Resource>>> entry : registry.entrySet()) {
 			String formatName = entry.getKey();
@@ -128,14 +141,30 @@ public class LsqUtils {
 			Function<InputStream, Stream<Resource>> fn = entry.getValue();
 			
 			try(InputStream in = resource.getInputStream()) {
-				//List<Resource> items =
-				long count = fn.apply(in)
+				List<Resource> baseItems = fn.apply(in)
 						.limit(1000)
+						.collect(Collectors.toList());
+				
+				int availableItems = baseItems.size();
+				
+				//List<Resource> items =
+				List<Resource> parsedItems = baseItems.stream()
 						.filter(r -> !r.hasProperty(LSQ.processingError))
-						.count();
+						.collect(Collectors.toList());
 						//.collect(Collectors.toList());
 				
-				result.put(count, formatName);
+				long parsedItemCount = parsedItems.size();
+
+				double avgImmediatePropertyCount = parsedItems.stream()
+						.mapToInt(r -> r.listProperties().toList().size())
+						.average().orElse(0);
+
+				// Weight is the average number of properties multiplied by the
+				// fraction of successfully parsed items
+				double parsedFraction = (parsedItemCount / (double)availableItems); 
+				double weight = parsedFraction * avgImmediatePropertyCount;
+				
+				result.put(weight, formatName);
 			} catch(Exception e) {
 				// Ignore
 			}
@@ -316,8 +345,8 @@ public class LsqUtils {
      * @throws IOException
      */
     public static Stream<Resource> createReader(LsqConfigImpl config, String inputResource) throws IOException {
-        InputStream in;
-        if(inputResource != null) {
+    	Callable<InputStream> inSupp;
+    	if(inputResource != null) {
         	// TODO We could make the resource loader part of the config
     		ResourceLoader loader = new DefaultResourceLoader();
     		org.springframework.core.io.Resource resource = loader.getResource(inputResource);
@@ -333,34 +362,65 @@ public class LsqUtils {
     		
 //            File inputFile = new File(inputResource);
 //            inputFile = inputFile.getAbsoluteFile();
-            in = resource.getInputStream();
+            inSupp = resource::getInputStream;
         } else {
-            in = System.in;
+            inSupp = () -> System.in;
         }
         
-        boolean doClose = in != System.in;
+        boolean doClose;
 
 
         Long firstItemOffset = config.getFirstItemOffset();
         String logFormat = config.getInQueryLogFormat();
 
-        Function<InputStream, Stream<Resource>> webLogParser = config.getLogFmtRegistry().get(logFormat);
+        Stream<Resource> result;
 
-        //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
-        if(webLogParser == null) {
-            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+        // RDF Input overrides any log format
+        Lang lang = RDFDataMgr.determineLang(inputResource, null, null);
+        if(lang != null) {
+        	// If quad based, use streaming
+        	// otherwise partition by lsq.text property
+        	if(RDFLanguages.isQuads(lang)) {
+        		logger.info("Quad-based format detected - assuming RDFized log as input");
+        		result = Streams.stream(RDFDataMgrRx.createFlowableResources(inSupp, lang, "")
+        			.blockingIterable()
+        			.iterator());
+        	} else if(RDFLanguages.isTriples(lang)){ 
+        		logger.info("Triple-based format detected - assuming RDFized log as input");
+        		Model model = RDFDataMgr.loadModel(inputResource, lang);
+        		result = Streams.stream(model.listSubjectsWithProperty(LSQ.text));
+        	} else {
+        		throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
+        	}
+
+        } else {
+        	InputStream in;
+			try {
+				in = inSupp.call();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+        	doClose = in != System.in;
+	        
+	        Function<InputStream, Stream<Resource>> webLogParser = config.getLogFmtRegistry().get(logFormat);
+	
+	        //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
+	        if(webLogParser == null) {
+	            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+	        }
+	
+	//        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+	
+	//        Stream<String> stream = reader.lines();
+	
+	        result = webLogParser.apply(in);
+	        if(firstItemOffset != null) {
+	            result = result.limit(firstItemOffset);
+	        }
+
+	        result = postProcessStream(result, in, doClose);
         }
 
-//        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-
-//        Stream<String> stream = reader.lines();
-
-        Stream<Resource> result = webLogParser.apply(in);
-        if(firstItemOffset != null) {
-            result = result.limit(firstItemOffset);
-        }
-
-        result = postProcessStream(result, in, doClose);
         
         //Model logModel = ModelFactory.createDefaultModel();
 

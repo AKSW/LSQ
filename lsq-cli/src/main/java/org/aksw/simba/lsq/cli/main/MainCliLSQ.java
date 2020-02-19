@@ -29,10 +29,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 //@SpringApplicationConfiguration
-public class MainLSQ
+public class MainCliLSQ
 {
 
-    private static final Logger logger = LoggerFactory.getLogger(MainLSQ.class);
+    private static final Logger logger = LoggerFactory.getLogger(MainCliLSQ.class);
 
 //    public static void main(String[] args) throws Exception  {
 //        SpringApplication.run(LsqConfig.class, args);
