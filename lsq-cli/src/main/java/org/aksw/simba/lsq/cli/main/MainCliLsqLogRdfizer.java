@@ -61,10 +61,15 @@ public class MainCliLsqLogRdfizer {
 				String effectiveLogFormat;
 				if(Strings.isNullOrEmpty(logFormat)) {
 					List<String> formats = LsqUtils.probeLogFormat(logFmtRegistry, loader, logSource);
-					if(formats.size() != 1) {
-						throw new RuntimeException("Expected probe to return exactly 1 log format for source " + logSource + ", got: " + formats);
+					if(formats.isEmpty()) {
+						throw new RuntimeException("Could not auto-detect a log format");
 					}
+					
+//					if(formats.size() != 1) {
+//						throw new RuntimeException("Expected probe to return exactly 1 log format for source " + logSource + ", got: " + formats);
+//					}
 					effectiveLogFormat = formats.get(0);
+					logger.info("Auto-selected format [" + effectiveLogFormat + "] among auto-detected candidates " + formats);
 				} else {
 					effectiveLogFormat = logFormat;
 				}
