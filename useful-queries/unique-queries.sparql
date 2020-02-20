@@ -3,14 +3,21 @@
 
 PREFIX lsq: <http://lsq.aksw.org/vocab#>
 CONSTRUCT {
-  GRAPH ?g { ?s lsq:text ?str }
+  GRAPH ?g {
+     ?s lsq:text ?str
+  }
 }
 {
   { SELECT DISTINCT ?str {
-    GRAPH ?x { ?s lsq:text ?str }
+    GRAPH ?x { [] lsq:text ?str }
   } ORDER BY ?str }
-  BIND(SHA256(?str) AS ?hash)
-  BIND(BNODE(?hash) AS ?s)
-  BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
+
+  # Computing the hash twice by inlining the expression because of https://issues.apache.org/jira/browse/JENA-1843
+  # BIND(SHA256(?str) AS ?hash)
+  # BIND(BNODE(?hash) AS ?s)
+  # BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
+
+  BIND(BNODE(SHA256(?hash) AS ?s)
+  BIND(IRI(CONCAT('urn:sha256:', SHA256(?s))) AS ?g)
 }
 
