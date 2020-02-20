@@ -7,7 +7,7 @@ CONSTRUCT {
 }
 {
   { SELECT DISTINCT ?str {
-    GRAPH ?g { ?s lsq:text ?str }
+    GRAPH ?x { ?s lsq:text ?str }
   } ORDER BY ?str }
   BIND(SHA256(?str) AS ?hash)
   BIND(BNODE(?hash) AS ?s)
