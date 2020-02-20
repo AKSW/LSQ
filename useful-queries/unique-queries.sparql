@@ -1,0 +1,14 @@
+# Return the unique queries in lsq data
+# Use sparql-integrate with '-u' flag to scan over named graphs
+
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+CONSTRUCT {
+  ?bnode lsq:text ?queryStr
+}
+{
+  { SELECT DISTINCT ?queryStr {
+    GRAPH ?g { ?s lsq:text ?queryStr }
+  } ORDER BY ?queryStr }
+  BIND(BNODE() AS ?bnode)
+}
+
