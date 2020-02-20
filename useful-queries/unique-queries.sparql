@@ -8,16 +8,19 @@ CONSTRUCT {
   }
 }
 {
-  { SELECT DISTINCT ?str {
-    GRAPH ?x { [] lsq:text ?str }
-  } ORDER BY ?str }
+  # Wrapping with superfluous projection because of https://issues.apache.org/jira/browse/JENA-1844
+  { SELECT ?g ?s ?str {
+    { SELECT DISTINCT ?str {
+      GRAPH ?x { [] lsq:text ?str }
+    } }
 
-  # Computing the hash twice by inlining the expression because of https://issues.apache.org/jira/browse/JENA-1843
-  # BIND(SHA256(?str) AS ?hash)
-  # BIND(BNODE(?hash) AS ?s)
-  # BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
+    # Computing the hash twice by inlining the expression because of https://issues.apache.org/jira/browse/JENA-1843
+    # BIND(SHA256(?str) AS ?hash)
+    # BIND(BNODE(?hash) AS ?s)
+    # BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
 
-  BIND(BNODE(SHA256(?hash) AS ?s)
-  BIND(IRI(CONCAT('urn:sha256:', SHA256(?s))) AS ?g)
+    BIND(BNODE() AS ?s)
+    BIND(IRI(CONCAT('urn:sha256:', SHA256(?str))) AS ?g)
+   } ORDER BY ?g }
 }
 
