@@ -2,14 +2,17 @@
 # Use sparql-integrate with '-u' flag to scan over named graphs
 
 PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX eg: <http://www.example.org/>
 CONSTRUCT {
   GRAPH ?g {
-     ?s lsq:text ?str
+    ?s
+      lsq:text ?str ;
+      eg:sha256 ?hash
   }
 }
 {
   # Wrapping with superfluous projection because of https://issues.apache.org/jira/browse/JENA-1844
-  { SELECT ?g ?s ?str {
+  { SELECT ?g ?s ?str ?hash {
     { SELECT DISTINCT ?str {
       GRAPH ?x { [] lsq:text ?str }
     } }
@@ -20,6 +23,7 @@ CONSTRUCT {
     # BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
 
     BIND(BNODE() AS ?s)
+    BIND(SHA256(?str) AS ?hash)
     BIND(IRI(CONCAT('urn:sha256:', SHA256(?str))) AS ?g)
    } ORDER BY ?g }
 }
