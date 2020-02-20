@@ -3,12 +3,14 @@
 
 PREFIX lsq: <http://lsq.aksw.org/vocab#>
 CONSTRUCT {
-  ?bnode lsq:text ?queryStr
+  GRAPH ?g { ?s lsq:text ?str }
 }
 {
-  { SELECT DISTINCT ?queryStr {
-    GRAPH ?g { ?s lsq:text ?queryStr }
-  } ORDER BY ?queryStr }
-  BIND(BNODE() AS ?bnode)
+  { SELECT DISTINCT ?str {
+    GRAPH ?g { ?s lsq:text ?str }
+  } ORDER BY ?str }
+  BIND(SHA256(?str) AS ?hash)
+  BIND(BNODE(?hash) AS ?s)
+  BIND(IRI(CONCAT('urn:sha256:', ?hash)) AS ?g)
 }
 
