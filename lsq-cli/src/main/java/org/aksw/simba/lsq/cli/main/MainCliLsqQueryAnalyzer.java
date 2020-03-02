@@ -2,10 +2,10 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
@@ -20,6 +20,8 @@ import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.reactivex.Flowable;
+
 /**
  * This is the main class of LSQ's command line interface (CLI)
  * used to RDFise query logs
@@ -29,10 +31,10 @@ import org.slf4j.LoggerFactory;
  *
  */
 //@SpringApplicationConfiguration
-public class MainCliLSQ
+public class MainCliLsqQueryAnalyzer
 {
 
-    private static final Logger logger = LoggerFactory.getLogger(MainCliLSQ.class);
+    private static final Logger logger = LoggerFactory.getLogger(MainCliLsqQueryAnalyzer.class);
 
 //    public static void main(String[] args) throws Exception  {
 //        SpringApplication.run(LsqConfig.class, args);
@@ -70,51 +72,50 @@ public class MainCliLSQ
         // The main setup work is done in LsqUtils following.
         // It follows a classic batch processing approach:
         // Create a reader, a processor and a writer
-        try(Stream<Resource> itemReader = LsqUtils.createReader(config)) {
-        	LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
-        	Sink<Resource> itemWriter = LsqUtils.createWriter(config);
-	
-	        // Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
-	
-	        datasetSize = itemProcessor.getDatasetSize();
-	        // Precounting the workload size is quite expensive
-	        // TODO Add a parameter + implementation do the counting anyway
-	        Long workloadSize = null;
-	
-	        logger.info("About to process " + workloadSize + " queries");
-	        logger.info("Dataset size of " + datasetEndpointUrl + " / " + DatasetDescriptionUtils.toString(datasetDescription) + " - size: " + datasetSize);
-	
-	        NestedResource expBaseRes = new NestedResource(ResourceFactory.createResource(expBaseIri));
+        Flowable<ResourceInDataset> itemReader = LsqUtils.createReader(config);
+    	LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
+    	Sink<Resource> itemWriter = LsqUtils.createWriter(config);
 
-	        // Resource expRes = expBaseRes.nest("-" + expStartStr).get();
-	        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
-	
-	        // Report start / end times of the RDFization if requested
-	        if(config.isEmitProcessMetadata()) {
-	            itemWriter.send(
-	                   expRes.inModel(ModelFactory.createDefaultModel())
-	                       //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-	                       .addLiteral(PROV.startedAtTime, Calendar.getInstance())
-	            );
-	        }
-	
-	        //RDFDataMgr.write(out, expModel, outFormat);
-	
-	        itemReader
-	            .map(itemProcessor)
-	            .filter(x -> x != null)
-	            .forEach(itemWriter::send);
-	
-	        if(config.isEmitProcessMetadata()) {
-	            itemWriter.send(
-	                    expRes.inModel(ModelFactory.createDefaultModel())
-	                        //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
-	                    .addLiteral(PROV.endedAtTime, Calendar.getInstance())
-	            );
-	        }
-	
-	        itemWriter.flush();
-	        itemWriter.close();
+        // Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
+
+        datasetSize = itemProcessor.getDatasetSize();
+        // Precounting the workload size is quite expensive
+        // TODO Add a parameter + implementation do the counting anyway
+        Long workloadSize = null;
+
+        logger.info("About to process " + workloadSize + " queries");
+        logger.info("Dataset size of " + datasetEndpointUrl + " / " + DatasetDescriptionUtils.toString(datasetDescription) + " - size: " + datasetSize);
+
+        NestedResource expBaseRes = new NestedResource(ResourceFactory.createResource(expBaseIri));
+
+        // Resource expRes = expBaseRes.nest("-" + expStartStr).get();
+        Resource expRes = expBaseRes.get();   //we do not need to nest the expStartStr
+
+        // Report start / end times of the RDFization if requested
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                   expRes.inModel(ModelFactory.createDefaultModel())
+                       //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                       .addLiteral(PROV.startedAtTime, Calendar.getInstance())
+            );
         }
+
+        //RDFDataMgr.write(out, expModel, outFormat);
+
+        itemReader
+            .map(itemProcessor::applyForWebLogRecord)
+            .filter(x -> x != null)
+            .forEach(itemWriter::send);
+
+        if(config.isEmitProcessMetadata()) {
+            itemWriter.send(
+                    expRes.inModel(ModelFactory.createDefaultModel())
+                        //  .addProperty(PROV.wasAssociatedWith, expBaseRes.get())
+                    .addLiteral(PROV.endedAtTime, Calendar.getInstance())
+            );
+        }
+
+        itemWriter.flush();
+        itemWriter.close();
     }
 }

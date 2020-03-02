@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqUtils;
+import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFFormat;
@@ -39,7 +40,7 @@ public class LsqCliParser {
     protected OptionParser parser = new OptionParser();
 
     //protected Map<String, Mapper> logFmtRegistry;
-    protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
+    protected Map<String, ResourceParser> logFmtRegistry;
 
     protected OptionSpec<String> inputOs;
     protected OptionSpec<File> outputOs;
@@ -75,7 +76,7 @@ public class LsqCliParser {
         this(LsqUtils.createDefaultLogFmtRegistry());
     }
 
-    public LsqCliParser(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
+    public LsqCliParser(Map<String, ResourceParser> logFmtRegistry) {
         this.parser = new OptionParser();
 
         this.logFmtRegistry = logFmtRegistry;

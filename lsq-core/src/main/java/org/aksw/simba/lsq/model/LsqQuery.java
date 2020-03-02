@@ -10,6 +10,12 @@ import org.apache.jena.rdf.model.Resource;
 /**
  * This class is main entry point for accessing information about a query in LSQ.
  * 
+ * An LsqQuery is a *record* about a sparql query, encompassing the query string,
+ * a spin representation, structural features, mentions in query logs
+ * (unfortunately poorly called 'remote execution') and benchmarking information related to the query
+ * itself (referred to as local execution) and its constituents.
+ * 
+ * 
  * TODO This model keeps the SPIN representation of a query separate from the LSQ record about it,
  * yet I am not totally sure whether actually these should be just two views of a resource which
  * represents a SPARQL query.

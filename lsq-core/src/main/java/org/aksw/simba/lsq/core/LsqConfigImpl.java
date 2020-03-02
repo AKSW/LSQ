@@ -1,16 +1,12 @@
 package org.aksw.simba.lsq.core;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 
 /**
@@ -21,7 +17,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
  *
  */
 public class LsqConfigImpl {
-    protected Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry;
+    protected Map<String, ResourceParser> logFmtRegistry;
 
     // Use LsqUtils.applyDefaults for default values
     public LsqConfigImpl() {
@@ -157,13 +153,13 @@ public class LsqConfigImpl {
 		return this;
 	}
 
-	public Map<String, Function<InputStream, Stream<Resource>>> getLogFmtRegistry() {
+	public Map<String, ResourceParser> getLogFmtRegistry() {
         return logFmtRegistry;
     }
 
 
 
-    public LsqConfigImpl setLogFmtRegistry(Map<String, Function<InputStream, Stream<Resource>>> logFmtRegistry) {
+    public LsqConfigImpl setLogFmtRegistry(Map<String, ResourceParser> logFmtRegistry) {
         this.logFmtRegistry = logFmtRegistry;
         return this;
     }

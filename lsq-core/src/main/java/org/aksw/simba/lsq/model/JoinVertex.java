@@ -5,7 +5,9 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.topbraid.spin.model.Variable;
 
-public interface JoinVertex {
+public interface JoinVertex
+	extends Resource
+{
 	@Iri(LSQ.Strs.proxyFor)
 	Variable getSpinVariable();
 

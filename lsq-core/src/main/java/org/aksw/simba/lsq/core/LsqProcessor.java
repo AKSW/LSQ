@@ -22,9 +22,9 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
+import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.util.NestedResource;
@@ -66,7 +66,7 @@ import com.google.common.collect.Multimap;
  *
  */
 public class LsqProcessor
-    implements Function<Resource, Resource>
+    //implements Function<Resource, Resource>
 {
     private static final Logger logger = LoggerFactory.getLogger(LsqProcessor.class);
 
@@ -140,6 +140,11 @@ public class LsqProcessor
     protected long logEntryIndex = 0l;
     protected int batchSize = 10;
 
+    
+    // If an RDFized web log neither provides a sequence id
+    // nor a timestamp, use this counter to label resources in rdfizeLogRecord()
+    protected long fallbackWebLogRecordSeqId = 0;
+    
     public Function<String, SparqlStmt> getStmtParser() {
         return stmtParser;
     }
@@ -318,10 +323,36 @@ public class LsqProcessor
 //        super();
 //    }
  
+    //@Override
+    /**
+     * LSQ2 approach:  The resource already corresponds to an LsqQuery
+     * which gets enriched by the process
+     * 
+     * @param r
+     * @return
+     */
+    public LsqQuery applyForQueryRecord(Resource r) {
+    	LsqQuery result = applyForQueryOrWebLogRecord(r, true);
+    	return result;
+    }
 
-    @Override
-    public LsqQuery apply(Resource r) {
-
+    //@Override
+    /**
+     * This is legacy mode where the input are web log records.
+     * The newer mode expects records which are created by pre-processing
+     * rdfized web logs.
+     *
+     * 
+     * 
+     * @param r
+     * @return
+     */
+    public LsqQuery applyForWebLogRecord(Resource r) {
+    	LsqQuery result = applyForQueryOrWebLogRecord(r, false);
+    	return result;
+    }
+    
+    public LsqQuery applyForQueryOrWebLogRecord(Resource r, boolean isQueryRecord) {
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
         // Extract the query and add it with the lsq:query property
@@ -335,10 +366,23 @@ public class LsqProcessor
 
         LsqQuery result = null;
 
+        
+        NestedResource baseRes;
         try {
             if(parsed) {
-                Optional<String> str = Optional.ofNullable(r.getProperty(LSQ.query))
-                        .map(queryStmt -> queryStmt.getString());
+                Optional<String> str;
+                if(isQueryRecord) {
+                	str = Optional.ofNullable(r.getProperty(LSQ.text))
+                            .map(queryStmt -> queryStmt.getString());
+                	
+                    baseRes = NestedResource.from(r); 
+                } else {
+                	str = Optional.ofNullable(r.getProperty(LSQ.query))
+                            .map(queryStmt -> queryStmt.getString());
+                	
+                	Model queryModel = ModelFactory.createDefaultModel();
+                	baseRes = NestedResource.from(queryModel, baseUri);
+                }
 
                 //Model m = ResourceUtils.reachableClosure(r);
                 SparqlStmt stmt = str
@@ -346,8 +390,6 @@ public class LsqProcessor
                         .orElse(null);
                 
                 if(stmt != null && stmt.isQuery()) {
-
-                    SparqlStmtUtils.optimizePrefixes(stmt);
 
                     SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
@@ -358,11 +400,12 @@ public class LsqProcessor
                         queryStr = queryStmt.getOriginalString();
                     } else {
                         query = queryStmt.getQuery();
+                        QueryUtils.optimizePrefixes(query);
 
-                        PrefixMapping pm = org.aksw.jena_sparql_api.utils.QueryUtils.usedPrefixes(query);
-                        //Query prefixCleanedQuery = QueryTransformOps.shallowCopy(query);
-                        //prefixCleanedQuery.setPrefixMapping(pm);
-                        query.setPrefixMapping(pm);
+//                        PrefixMapping pm = org.aksw.jena_sparql_api.utils.QueryUtils.usedPrefixes(query);
+//                        //Query prefixCleanedQuery = QueryTransformOps.shallowCopy(query);
+//                        //prefixCleanedQuery.setPrefixMapping(pm);
+//                        query.setPrefixMapping(pm);
 
                         //org.aksw.jena_sparql_api.utils.QueryUtils
 
@@ -380,14 +423,17 @@ public class LsqProcessor
                     }
 
 
-                    Model queryModel = ModelFactory.createDefaultModel();
+                    //Model queryModel = ModelFactory.createDefaultModel();
 
 
                     //Resource logEndpointRes = rawLogEndpointRes == null ? null : rawLogEndpointRes.inModel(queryModel);
 
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
 
-                    NestedResource baseRes = NestedResource.from(queryModel, baseUri);
+                    r = baseRes.get();
+                    if(r.isAnon()) {
+                    	r = ResourceUtils.renameResource(r, baseUri);
+                    }
 
                     Function<String, NestedResource> queryAspectFn;
                     NestedResource queryRes;
@@ -434,8 +480,11 @@ public class LsqProcessor
                         }
                     }
 
-                    if(isRdfizerQueryLogRecordEnabled) {
-                        rdfizeLogRecord(baseRes, r, queryRes, queryAspectFn);
+                    // If the input is a query record, web log record rdfization does not apply
+                    if(!isQueryRecord) {
+	                    if(isRdfizerQueryLogRecordEnabled) {
+	                        rdfizeLogRecord(baseRes, r, queryRes, queryAspectFn);
+	                    }
                     }
 
 
@@ -448,6 +497,7 @@ public class LsqProcessor
                     }
 
 
+                    Model queryModel = r.getModel();
                     // Post processing: Craft global IRIs for SPIN variables
                     Set<Statement> stmts = queryModel.listStatements(null, SP.varName, (RDFNode)null).toSet();
                     for(Statement st : stmts) {
@@ -542,15 +592,20 @@ public class LsqProcessor
         } else if(r.hasProperty(LSQ.sequenceId)) {
         	result = "" + r.getProperty(LSQ.sequenceId).getObject().asLiteral().getLong();
         } else {
-        	result = dt.format(new GregorianCalendar());
+        	// Fallback sequence id
+        	result = "" + (fallbackWebLogRecordSeqId++);
+        	//result = dt.format(new GregorianCalendar().getTime());
         }
         return result;
     }
 
+    @Deprecated
     public void rdfizeLogRecord(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 
         // Deal with log entry (remote execution)
-        String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + r.getProperty(LSQ.host).getString()).substring(0, 16);
+    	String host = org.aksw.jena_sparql_api.rdf.collections.ResourceUtils
+    			.tryGetLiteralPropertyValue(r, LSQ.host, String.class).orElse("unknown-host");
+        String hashedIp = StringUtils.md5Hash("someSaltPrependedToTheIp" + host).substring(0, 16);
 
         Resource agentRes = baseRes.nest("agent-" + hashedIp).get();
 

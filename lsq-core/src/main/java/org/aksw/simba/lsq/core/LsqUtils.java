@@ -10,10 +10,8 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,7 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aksw.commons.util.bean.PropertyUtils;
 import org.aksw.fedx.jsa.FedXFactory;
@@ -43,18 +40,20 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
+import org.aksw.jena_sparql_api.utils.DatasetUtils;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
-import org.apache.jena.graph.Triple;
+import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
@@ -64,8 +63,8 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.DefaultResourceLoader;
@@ -78,18 +77,19 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Streams;
 import com.google.common.collect.TreeMultimap;
+
+import io.reactivex.Flowable;
 
 public class LsqUtils {
 	private static final Logger logger = LoggerFactory.getLogger(LsqUtils.class);
 
 
-	public static List<String> probeLogFormat(String resource) {
+	public static List<Entry<String, Number>> probeLogFormat(String resource) {
 		ResourceLoader loader = new FileSystemResourceLoader();		
-		Map<String, Function<InputStream, Stream<Resource>>> registry = LsqUtils.createDefaultLogFmtRegistry();
+		Map<String, ResourceParser> registry = LsqUtils.createDefaultLogFmtRegistry();
 		
-		List<String> result = probeLogFormat(registry, loader, resource);
+		List<Entry<String, Number>> result = probeLogFormat(registry, loader, resource);
 //		Multimap<Long, String> report = probeLogFormatCore(registry, loader, resource);
 //		
 //		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
@@ -101,16 +101,17 @@ public class LsqUtils {
 
 		return result;
 	}
-
-	public static List<String> probeLogFormat(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String resource) {
+	
+	public static List<Entry<String, Number>> probeLogFormat(Map<String, ResourceParser> registry, ResourceLoader loader, String resource) {
 		
 		Multimap<? extends Number, String> report = probeLogFormatCore(registry, loader, resource);
 		
-		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
+		List<Entry<String, Number>> result = report.entries().stream()
 			.filter(e -> e.getKey().doubleValue() != 0)
+			.map(e -> Maps.immutableEntry(e.getValue(), (Number)e.getKey()))
 //			.limit(2)
-			.map(Entry::getValue)
-			.flatMap(Collection::stream)
+			//.map(Entry::getValue)
+			//.flatMap(Collection::stream)
 			.collect(Collectors.toList());
 
 		return result;
@@ -125,49 +126,47 @@ public class LsqUtils {
 	 * @param filename
 	 * @return
 	 */
-	public static Multimap<Double, String> probeLogFormatCore(Map<String, Function<InputStream, Stream<Resource>>> registry, ResourceLoader loader, String filename) {
+	public static Multimap<Double, String> probeLogFormatCore(Map<String, ResourceParser> registry, ResourceLoader loader, String filename) {
 		org.springframework.core.io.Resource resource = loader.getResource(filename);
 		
 		// succcessCountToFormat
 		Multimap<Double, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		
-		for(Entry<String, Function<InputStream, Stream<Resource>>> entry : registry.entrySet()) {
+		for(Entry<String, ResourceParser> entry : registry.entrySet()) {
 			String formatName = entry.getKey();
 			
 //			if(formatName.equals("wikidata")) {
 //				System.out.println("here");
 //			}
 			
-			Function<InputStream, Stream<Resource>> fn = entry.getValue();
+			ResourceParser fn = entry.getValue();
 			
-			try(InputStream in = resource.getInputStream()) {
-				List<Resource> baseItems = fn.apply(in)
-						.limit(1000)
-						.collect(Collectors.toList());
-				
-				int availableItems = baseItems.size();
-				
-				//List<Resource> items =
-				List<Resource> parsedItems = baseItems.stream()
-						.filter(r -> !r.hasProperty(LSQ.processingError))
-						.collect(Collectors.toList());
-						//.collect(Collectors.toList());
-				
-				long parsedItemCount = parsedItems.size();
+			List<ResourceInDataset> baseItems = fn.parse(() -> resource.getInputStream())
+					.limit(1000)
+					.toList()
+					.onErrorReturn(x -> Collections.emptyList())
+					.blockingGet();
+			
+			int availableItems = baseItems.size();
+			
+			//List<Resource> items =
+			List<Resource> parsedItems = baseItems.stream()
+					.filter(r -> !r.hasProperty(LSQ.processingError))
+					.collect(Collectors.toList());
+					//.collect(Collectors.toList());
+			
+			long parsedItemCount = parsedItems.size();
 
-				double avgImmediatePropertyCount = parsedItems.stream()
-						.mapToInt(r -> r.listProperties().toList().size())
-						.average().orElse(0);
+			double avgImmediatePropertyCount = parsedItems.stream()
+					.mapToInt(r -> r.listProperties().toList().size())
+					.average().orElse(0);
 
-				// Weight is the average number of properties multiplied by the
-				// fraction of successfully parsed items
-				double parsedFraction = (parsedItemCount / (double)availableItems); 
-				double weight = parsedFraction * avgImmediatePropertyCount;
-				
-				result.put(weight, formatName);
-			} catch(Exception e) {
-				// Ignore
-			}
+			// Weight is the average number of properties multiplied by the
+			// fraction of successfully parsed items
+			double parsedFraction = (parsedItemCount / (double)availableItems); 
+			double weight = parsedFraction * avgImmediatePropertyCount;
+			
+			result.put(weight, formatName);
 		}
 
 		return result;
@@ -183,8 +182,8 @@ public class LsqUtils {
 		//PropertyUtils.applyIfAbsent(config::setDataConnection, config::getDataConnection, config::getBenchmarkConnection);
 	}
 
-    public static Map<String, Function<InputStream, Stream<Resource>>> createDefaultLogFmtRegistry() {
-        Map<String, Function<InputStream, Stream<Resource>>> result = new HashMap<>();
+    public static Map<String, ResourceParser> createDefaultLogFmtRegistry() {
+        Map<String, ResourceParser> result = new HashMap<>();
 
         // Load line based log formats
         LsqUtils.wrap(result, WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
@@ -198,23 +197,26 @@ public class LsqUtils {
         return result;
     }
     
-    public static Stream<Resource> createSparqlStream(InputStream in) {
+    public static Flowable<ResourceInDataset> createSparqlStream(Callable<InputStream> inSupp) {
     	String str;
 		try {
-			str = IOUtils.toString(in, StandardCharsets.UTF_8);
-		} catch (IOException e) {
+			try(InputStream in = inSupp.call()) {
+				str = IOUtils.toString(in, StandardCharsets.UTF_8);
+			}
+		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 
 		// Note: Non-query statements will cause an exception
-    	Stream<Resource> result = 
-    			Streams.stream(new SparqlStmtIterator(SparqlStmtParserImpl.create(Syntax.syntaxARQ, true), str))
+    	Flowable<ResourceInDataset> result = 
+    			Flowable.fromIterable(() -> new SparqlStmtIterator(SparqlStmtParserImpl.create(Syntax.syntaxARQ, true), str))
 //    			.map(SparqlStmt::getOriginalString)
     			.map(SparqlStmt::getAsQueryStmt)
     			.map(SparqlStmtQuery::getQuery)
     			.map(Object::toString)
-    			.map(queryStr -> ModelFactory.createDefaultModel().createResource().addLiteral(LSQ.query, queryStr)
-    			);
+    			.map(queryStr -> 
+    				ResourceInDatasetImpl.createAnonInDefaultGraph()
+    					.applyOnResource(r -> r.addLiteral(LSQ.query, queryStr)));
     	
     	return result;
     }
@@ -248,18 +250,30 @@ public class LsqUtils {
     }
 
 
-    public static Stream<Resource> createResourceStreamFromMapperRegistry(InputStream in, Function<String, Mapper> fmtSupplier, String fmtName) {
+    public static Flowable<ResourceInDataset> createResourceStreamFromMapperRegistry(Callable<InputStream> in, Function<String, Mapper> fmtSupplier, String fmtName) {
         Mapper mapper = fmtSupplier.apply(fmtName);
         if(mapper == null) {
             throw new RuntimeException("No mapper found for '" + fmtName + "'");
         }
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-        Stream<String> stream = reader.lines();
+        //BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
+        //Stream<String> stream = reader.lines();
 
-        Stream<Resource> result = stream
+        Flowable<String> flow = Flowable.generate(
+        		() -> new BufferedReader(new InputStreamReader(in.call(), StandardCharsets.UTF_8)),
+        		(reader, emitter) -> {
+        			String line = reader.readLine();
+        			if(line != null) {
+        				emitter.onNext(line);
+        			} else {
+        				emitter.onComplete();
+        			}
+        		},
+        		BufferedReader::close);
+        
+        Flowable<ResourceInDataset> result = flow
                 .map(line -> {
-                    Resource r = ModelFactory.createDefaultModel().createResource();
+                    ResourceInDataset r = ResourceInDatasetImpl.createAnonInDefaultGraph();//ModelFactory.createDefaultModel().createResource();
                     r.addLiteral(RDFS.label, line);
 
                     boolean parsed;
@@ -274,7 +288,6 @@ public class LsqUtils {
                         logger.warn("Parser error", e);
                     }
 
-
                     return r;
                 })
                 ;
@@ -283,27 +296,28 @@ public class LsqUtils {
     }
 
 
-    public static Stream<Resource> createResourceStreamFromRdf(InputStream in, Lang lang, String baseIRI) {
-        Iterator<Triple> it = RDFDataMgr.createIteratorTriples(in, lang, baseIRI);
-
-        // Filter out triples that do not have the right predicateS
-        Stream<Triple> s = Streams.stream(it)
-                .filter(t -> t.getPredicate().equals(LSQ.text.asNode()));
-
-        Stream<Resource> result = s.map(t -> ModelUtils.convertGraphNodeToRDFNode(t.getSubject(), ModelFactory.createDefaultModel()).asResource()
-                    .addLiteral(LSQ.query, t.getObject().getLiteralValue()));
+    public static Flowable<ResourceInDataset> createResourceStreamFromRdf(Callable<InputStream> in, Lang lang, String baseIRI) {
+        
+    	Flowable<ResourceInDataset> result = RDFDataMgrRx.createFlowableTriples(in, lang, baseIRI)
+    			.filter(t -> t.getPredicate().equals(LSQ.text.asNode()))
+    			.map(t -> {
+    				ResourceInDataset r = ResourceInDatasetImpl.createInDefaultGraph(t.getSubject());
+    				r.addLiteral(
+    						LSQ.query, t.getObject().getLiteralValue());
+    				return r;
+    			});
 
         return result;
     }
 
 
-    public static Map<String, Function<InputStream, Stream<Resource>>> wrap(Map<String, Function<InputStream, Stream<Resource>>> result, Map<String, Mapper> webLogParserRegistry) {
-        Map<String, Function<InputStream, Stream<Resource>>> tmp = result == null
+    public static Map<String, ResourceParser> wrap(Map<String, ResourceParser> result, Map<String, Mapper> webLogParserRegistry) {
+        Map<String, ResourceParser> tmp = result == null
                 ? new HashMap<>()
                 : result;
 
         webLogParserRegistry.forEach((name, mapper) -> {
-            Function<InputStream, Stream<Resource>> fn = in -> createResourceStreamFromMapperRegistry(in, webLogParserRegistry::get, name);
+        	ResourceParser fn = inSupp -> createResourceStreamFromMapperRegistry(inSupp, webLogParserRegistry::get, name);
             tmp.put(name, fn);
         });
 
@@ -311,7 +325,7 @@ public class LsqUtils {
     }
 
 
-    public static Stream<Resource> createReader(LsqConfigImpl config) throws IOException {
+    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config) throws IOException {
 
     	List<String> inputResources = config.getInQueryLogFiles();
 		logger.info("Input resources: " + inputResources);
@@ -323,7 +337,7 @@ public class LsqUtils {
 //			
 //		}
 //		
-    	Stream<Resource> result = inputResources.stream()
+    	Flowable<ResourceInDataset> result = Flowable.fromIterable(inputResources)
     			.flatMap(inputResource -> {
 					try {
 						return createReader(config, inputResource);
@@ -344,7 +358,7 @@ public class LsqUtils {
      * @return
      * @throws IOException
      */
-    public static Stream<Resource> createReader(LsqConfigImpl config, String inputResource) throws IOException {
+    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
     	Callable<InputStream> inSupp;
     	if(inputResource != null) {
         	// TODO We could make the resource loader part of the config
@@ -364,16 +378,14 @@ public class LsqUtils {
 //            inputFile = inputFile.getAbsoluteFile();
             inSupp = resource::getInputStream;
         } else {
-            inSupp = () -> System.in;
+            inSupp = () -> new CloseShieldInputStream(System.in);
         }
         
-        boolean doClose;
-
 
         Long firstItemOffset = config.getFirstItemOffset();
         String logFormat = config.getInQueryLogFormat();
 
-        Stream<Resource> result;
+        Flowable<ResourceInDataset> result;
 
         // RDF Input overrides any log format
         Lang lang = RDFDataMgr.determineLang(inputResource, null, null);
@@ -381,28 +393,28 @@ public class LsqUtils {
         	// If quad based, use streaming
         	// otherwise partition by lsq.text property
         	if(RDFLanguages.isQuads(lang)) {
+        		
+        		
+        		// TODO Stream as datasets first, then select any resource with LSQ.text
         		logger.info("Quad-based format detected - assuming RDFized log as input");
-        		result = Streams.stream(RDFDataMgrRx.createFlowableResources(inSupp, lang, "")
-        			.blockingIterable()
-        			.iterator());
+        		result = RDFDataMgrRx.createFlowableDatasets(inSupp, lang, "")
+        				.flatMap(ds -> Flowable.fromIterable(
+        						DatasetUtils.listResourcesWithProperty(ds, LSQ.text).toList()));
+        		
+//        		result = Streams.stream(RDFDataMgrRx.createFlowableResources(inSupp, lang, "")
+//        			.blockingIterable()
+//        			.iterator());
         	} else if(RDFLanguages.isTriples(lang)){ 
         		logger.info("Triple-based format detected - assuming RDFized log as input");
         		Model model = RDFDataMgr.loadModel(inputResource, lang);
-        		result = Streams.stream(model.listSubjectsWithProperty(LSQ.text));
+        		result = null;
+        		//result = Flowable.fromIterable(() -> model.listSubjectsWithProperty(LSQ.text))
         	} else {
         		throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
         	}
 
-        } else {
-        	InputStream in;
-			try {
-				in = inSupp.call();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
-			}
-        	doClose = in != System.in;
-	        
-	        Function<InputStream, Stream<Resource>> webLogParser = config.getLogFmtRegistry().get(logFormat);
+        } else {	        
+	        ResourceParser webLogParser = config.getLogFmtRegistry().get(logFormat);
 	
 	        //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
 	        if(webLogParser == null) {
@@ -413,12 +425,12 @@ public class LsqUtils {
 	
 	//        Stream<String> stream = reader.lines();
 	
-	        result = webLogParser.apply(in);
+	        result = webLogParser.parse(inSupp);
 	        if(firstItemOffset != null) {
 	            result = result.limit(firstItemOffset);
 	        }
 
-	        result = postProcessStream(result, in, doClose);
+	        //result = postProcessStream(result, in);
         }
 
         
@@ -471,36 +483,34 @@ public class LsqUtils {
         return result;
     }
 
-	public static Stream<Resource> postProcessStream(Stream<Resource> result, InputStream in, boolean doClose) {
-		// Enrich potentially missing information
-        result = Streams.mapWithIndex(result, (r, i) -> {
-        	if(!r.hasProperty(LSQ.host)) {
-        		// TODO Potentially make host configurable
-        		r.addLiteral(LSQ.host, "localhost");
-        	}
-
-// Note: Avoid instantiating new dates as this breaks determinacy
-//        	if(!r.hasProperty(PROV.atTime)) {
-//        		r.addLiteral(PROV.atTime, new GregorianCalendar());
+//	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {
+//		// Enrich potentially missing information
+//        result = Streams.mapWithIndex(result, (r, i) -> {
+//        	if(!r.hasProperty(LSQ.host)) {
+//        		// TODO Potentially make host configurable
+//        		r.addLiteral(LSQ.host, "localhost");
 //        	}
-        	
-        	if(!r.hasProperty(LSQ.sequenceId)) {
-        		r.addLiteral(LSQ.sequenceId, i);
-        	}
-        	
-        	return r;
-        }).onClose(() -> {
-			try {
-				if(doClose) {
-					in.close();
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		});
-		return result;
-	}
-	
+//
+//// Note: Avoid instantiating new dates as this breaks determinacy
+////        	if(!r.hasProperty(PROV.atTime)) {
+////        		r.addLiteral(PROV.atTime, new GregorianCalendar());
+////        	}
+//        	
+//        	if(!r.hasProperty(LSQ.sequenceId)) {
+//        		r.addLiteral(LSQ.sequenceId, i);
+//        	}
+//        	
+//        	return r;
+//        }).onClose(() -> {
+//			try {
+//				in.close();
+//			} catch (IOException e) {
+//				throw new RuntimeException(e);
+//			}
+//		});
+//		return result;
+//	}
+//	
 
 	/**
 	 * Extends a list of prefix sources by adding a snapshot of prefix.cc

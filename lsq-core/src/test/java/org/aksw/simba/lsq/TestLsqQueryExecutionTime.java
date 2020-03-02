@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import org.aksw.jena_sparql_api.cache.extra.CacheBackend;
 import org.aksw.jena_sparql_api.cache.file.CacheBackendFile;
@@ -14,10 +13,12 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionJsa;
 import org.aksw.jena_sparql_api.utils.ModelDiff;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.Skolemize;
+import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
@@ -37,6 +38,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.google.common.collect.Streams;
+
+import io.reactivex.Flowable;
 
 
 public class TestLsqQueryExecutionTime {
@@ -121,14 +124,17 @@ public class TestLsqQueryExecutionTime {
 
 
 		LsqUtils.applyDefaults(config);
-		Stream<Resource> stream = LsqUtils.createReader(config);
+		Flowable<ResourceInDataset> stream = LsqUtils.createReader(config);
 		LsqProcessor processor = LsqUtils.createProcessor(config);
 
 		//Path expectedResult = 
-		Resource actualRes = stream
-				//.peek(r -> RDFDataMgr.write(System.out, r.getModel(), RDFFormat.TURTLE))
-				.map(processor)
-				.findFirst().orElse(null);
+		LsqQuery actualRes = stream
+//				.doAfterNext(r -> RDFDataMgr.write(System.out, r.getModel(), RDFFormat.TURTLE))
+				.map(rid -> {
+					LsqQuery r = processor.applyForWebLogRecord(rid);
+					return r;
+				})
+				.blockingFirst(null);
 
 		Model actual = actualRes.getModel();
 		Model expected = RDFDataMgr.loadModel("lsq-tests/triple-pattern-selectivity/tpsel01.ttl");
@@ -154,13 +160,13 @@ public class TestLsqQueryExecutionTime {
 //		RDFDataMgr.write(System.out, actual, RDFFormat.NTRIPLES);
 //		System.out.println("END OF ACTUAL");
 		
-		ModelDiff diff = ModelDiff.create(actual, expected);
+		ModelDiff diff = ModelDiff.create(expected, actual);
 
 		if(!diff.isEmpty()) {
 			System.err.println("Excessive: ---------------------");
-			RDFDataMgr.write(System.out, diff.getAdded(), RDFFormat.NTRIPLES);
+			RDFDataMgr.write(System.err, diff.getAdded(), RDFFormat.TURTLE_PRETTY);
 			System.err.println("Missing: ---------------------");
-			RDFDataMgr.write(System.out, diff.getRemoved(), RDFFormat.NTRIPLES);
+			RDFDataMgr.write(System.err, diff.getRemoved(), RDFFormat.TURTLE_PRETTY);
 		}
 		
 		Assert.assertTrue(diff.isEmpty());
