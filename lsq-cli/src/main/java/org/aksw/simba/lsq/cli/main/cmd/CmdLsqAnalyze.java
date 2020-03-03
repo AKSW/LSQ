@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.cli.main.cmd;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
 
 @Parameters(separators = "=", commandDescription = "Show LSQ RDFizer options")
-public class CommandMain {
+public class CmdLsqAnalyze {
 	@Parameter(names={"-h", "--help"}, help=true)
 	public boolean help = false;
 

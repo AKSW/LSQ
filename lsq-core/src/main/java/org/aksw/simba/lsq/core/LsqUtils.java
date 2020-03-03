@@ -163,7 +163,7 @@ public class LsqUtils {
 
 			// Weight is the average number of properties multiplied by the
 			// fraction of successfully parsed items
-			double parsedFraction = (parsedItemCount / (double)availableItems); 
+			double parsedFraction = availableItems == 0 ? 0 : (parsedItemCount / (double)availableItems); 
 			double weight = parsedFraction * avgImmediatePropertyCount;
 			
 			result.put(weight, formatName);
@@ -285,7 +285,7 @@ public class LsqUtils {
                     } catch(Exception e) {
                         parsed = false;
                         r.addLiteral(LSQ.processingError, "Failed to parse log line: " + e);
-                        logger.warn("Parser error", e);
+                        // logger.warn("Parser error", e);
                     }
 
                     return r;

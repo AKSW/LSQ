@@ -23,17 +23,29 @@ The main improvements of the now approach of LSQ are:
 
 ### Probing for best matching format
 
-The `lsq-probe` command attempts to parse a sample of `n` lines from a given file with all registered parser ordered by weight.
+The `lsq probe` sub-command attempts to parse a sample of `n` lines from each given files with all registered parser ordered by weight.
 The weight corresponds to the average number of predicates obtained by parsing the sample using a format.
 In detail, the weight is `w := parseRatio * avgNumberOfImmediatePredicates` with
 `parseRatio = number of successfully parsed lines / n` and avgNumberOfImmediatePredicates is the average number of predicates among the successfully parsed lines.
+Note, that that multiple files can be processed at once using globbing.
+The following is the output on the test resources of the lsq project, and at the time of writing all resources were correctly classified.
 
 
-```bash
-$> lsq-probe wikidata-sample.log
-
-wikidata-sample.log [wikidata, sparql2]
 ```
+➜  lsq probe lsq-core/src/test/resources/logs/*
+lsq-core/src/test/resources/logs/bio2rdf.unknown.log	[bio2rdf=7.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/combined.swdf.log	[combined=10.0, common=9.0, distributed=9.0, bio2rdf=7.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/combined.swdf.single-query.log	[combined=10.0, common=9.0, distributed=9.0, bio2rdf=7.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/combined.swdf.single-triple-pattern.log	[combined=10.0, common=9.0, distributed=9.0, bio2rdf=7.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/commonVirtuoso.dbpedia.20151025-1.log	[commonVirtuoso=9.0, virtuoso=5.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/commonVirtuoso.dbpedia.20160411-1000.log	[commonVirtuoso=9.0, virtuoso=5.036, sparql2=2.0]
+lsq-core/src/test/resources/logs/sparql2.debug.log	[sparql2=2.0, sparql=1.0]
+lsq-core/src/test/resources/logs/sparql2.debug.ttl	[sparql2=2.0]
+lsq-core/src/test/resources/logs/virtuoso.dbpedia351.log	[virtuoso=6.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/virtuoso.dbpedia.log	[virtuoso=6.0, sparql2=2.0]
+lsq-core/src/test/resources/logs/wikidata.wikidata.20170612-10.log	[wikidata=4.0, sparql2=2.0]
+```
+
 
 ## A-priori deduplication of queries
 

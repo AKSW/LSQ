@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -29,7 +30,7 @@ public class MainCliLsqLogRdfizer {
 	private static final Logger logger = LoggerFactory.getLogger(MainCliLsqLogRdfizer.class);
 	
 	public static void main(String[] args) throws Exception {
-		CommandMain cm = new CommandMain();
+		CmdLsqAnalyze cm = new CmdLsqAnalyze();
 
 		JCommander jc = new JCommander.Builder()
 	    	  .addObject(cm)
