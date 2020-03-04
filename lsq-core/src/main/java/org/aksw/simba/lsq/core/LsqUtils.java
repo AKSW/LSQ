@@ -63,6 +63,7 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.core.DatasetDescription;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
@@ -587,7 +588,11 @@ public class LsqUtils {
         Function<String, SparqlStmt> sparqlStmtParser = createSparqlParser(config.getPrefixSources());
 
 
-        SparqlServiceReference benchmarkEndpointDescription = config.getBenchmarkEndpointDescription();
+        String benchmarkEndpoint = config.getBenchmarkEndpoint();
+        SparqlServiceReference benchmarkEndpointDescription = benchmarkEndpoint == null
+        		? null
+        		: new SparqlServiceReference(benchmarkEndpoint, config.getBenchmarkDs());
+        
         Long datasetSize = config.getDatasetSize();
         //String localDatasetEndpointUrl = config.getLocalDatasetEndpointUrl()
         //List<String> datasetDefaultGraphIris = config.getDatasetDefaultGraphIris();
@@ -600,8 +605,8 @@ public class LsqUtils {
         String baseIri = config.getOutBaseIri();
 
 
-        SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
-        String datasetEndpointUri = datasetEndpointDescription == null ? null : datasetEndpointDescription.getServiceURL();
+        //SparqlServiceReference datasetEndpointDescription = config.getDatasetEndpointDescription();
+        String datasetEndpointUri = config.getDatasetEndpoint(); //datasetEndpointDescription == null ? null : datasetEndpointDescription.getServiceURL();
 
         //Resource datasetEndpointRes = datasetEndpointUrl == null ? null : ResourceFactory.createResource(datasetEndpointUrl);
 

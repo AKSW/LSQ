@@ -2,12 +2,13 @@ package org.aksw.simba.lsq.core;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.sparql.core.DatasetDescription;
 
 /**
  * Bean implementation of the LSQ config.
@@ -48,10 +49,14 @@ public class LsqConfigImpl {
 
     protected String datasetLabel;
 
-    protected SparqlServiceReference datasetEndpointDescription;
+//    protected SparqlServiceReference datasetEndpointDescription;
+//    protected SparqlServiceReference benchmarkEndpointDescription;
+
+    protected String datasetEndpoint;
+    protected DatasetDescription datasetDs = new DatasetDescription();
     
-    
-    protected SparqlServiceReference benchmarkEndpointDescription;
+    protected String benchmarkEndpoint;
+    protected DatasetDescription benchmarkDs = new DatasetDescription();
     
     // If no benchmark connection is set, the endpoint description will be used to create one
     // Conversely, if the connection is set, it will be used regardless of the benchmarkEndpointDescripton
@@ -112,21 +117,60 @@ public class LsqConfigImpl {
         return isFetchDatasetSizeEnabled;
     }
 
+    
+//  public SparqlServiceReference getBenchmarkEndpointDescription() {
+//  //return benchmarkEndpointDescription;
+//}
+//
+//public LsqConfigImpl setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
+//this.benchmarkEndpointDescription = benchmarkEndpointDescription;
+//return this;
+//}
 
 
-    public SparqlServiceReference getBenchmarkEndpointDescription() {
-        return benchmarkEndpointDescription;
+    public String getBenchmarkEndpoint() {
+		return benchmarkEndpoint;
+	}
+
+    public LsqConfigImpl setBenchmarkEndpoint(String url) {
+    	// benchmarkEndpointDescription = ModelFactory.createDefaultModel().createResource().as(SparqlServiceReference.class);
+    	this.benchmarkEndpoint = url;
+    	return this;
     }
 
+    public DatasetDescription getBenchmarkDs() {
+		return benchmarkDs;
+	}
+   
+    public void setBenchmarkDs(DatasetDescription benchmarkDs) {
+		this.benchmarkDs = benchmarkDs;
+	}
 
+    public String getDatasetEndpoint() {
+		return datasetEndpoint;
+	}
+    
+    public LsqConfigImpl setDatasetEndpoint(String datasetEndpoint) {
+		this.datasetEndpoint = datasetEndpoint;
+		return this;
+	}
+    
+    public LsqConfigImpl setDatasetDs(DatasetDescription datasetDs) {
+		this.datasetDs = datasetDs;
+		return this;
+	}
 
-    public LsqConfigImpl setBenchmarkEndpointDescription(SparqlServiceReference benchmarkEndpointDescription) {
-        this.benchmarkEndpointDescription = benchmarkEndpointDescription;
-        return this;
+    public LsqConfigImpl addDatasetDefaultGraphs(Collection<String> graphURIs) {
+    	this.datasetDs.addAllDefaultGraphURIs(graphURIs);
+    	return this;
     }
 
-
-
+    
+    public LsqConfigImpl addBenchmarkDefaultGraphs(Collection<String> graphURIs) {
+    	this.benchmarkDs.addAllDefaultGraphURIs(graphURIs);
+    	return this;
+    }
+    
     public LsqConfigImpl setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
         this.isFetchDatasetSizeEnabled = isFetchDatasetSizeEnabled;
         return this;
@@ -338,15 +382,15 @@ public class LsqConfigImpl {
         return this;
     }
 
-    public SparqlServiceReference getDatasetEndpointDescription() {
-        return datasetEndpointDescription;
-    }
-
-
-    public LsqConfigImpl setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
-        this.datasetEndpointDescription = datasetEndpointDescription;
-        return this;
-    }
+//    public SparqlServiceReference getDatasetEndpointDescription() {
+//        return datasetEndpointDescription;
+//    }
+//
+//
+//    public LsqConfigImpl setDatasetEndpointDescription(SparqlServiceReference datasetEndpointDescription) {
+//        this.datasetEndpointDescription = datasetEndpointDescription;
+//        return this;
+//    }
 
     public List<String> getFederationEndpoints() {
         return federationEndpoints;
@@ -424,8 +468,9 @@ public class LsqConfigImpl {
 		return httpUserAgent;
 	}
 
-	public void setHttpUserAgent(String httpUserAgent) {
+	public LsqConfigImpl setHttpUserAgent(String httpUserAgent) {
 		this.httpUserAgent = httpUserAgent;
+		return this;
 	}
 
 	public Long getDelayInMs() {

@@ -14,15 +14,19 @@ import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
+import org.aksw.simba.lsq.core.LsqConfigImpl;
+import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
+import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sys.JenaSystem;
@@ -34,7 +38,6 @@ import org.springframework.core.io.ResourceLoader;
 import com.beust.jcommander.JCommander;
 
 import io.reactivex.Flowable;
-import joptsimple.internal.Strings;
 
 
 
@@ -53,12 +56,14 @@ public class MainCliLsq {
 		CmdLsqProbe cmdProbe = new  CmdLsqProbe();
 		CmdLsqRdfize cmdRdfize = new  CmdLsqRdfize();
 		CmdLsqInvert cmdInvert = new  CmdLsqInvert();
+		CmdLsqAnalyze cmdAnalyze = new  CmdLsqAnalyze();
 
 		JCommander jc = JCommander.newBuilder()
 				.addObject(cmdMain)
 				.addCommand("probe", cmdProbe)
 				.addCommand("rdfize", cmdRdfize)
 				.addCommand("invert", cmdInvert)
+				.addCommand("analyze", cmdAnalyze)
 				.build();
 
 
@@ -82,6 +87,10 @@ public class MainCliLsq {
 		}
 		case "invert": {
 			invert(cmdInvert);
+			break;
+		}
+		case "analye": {
+			analyze(cmdAnalyze);
 			break;
 		}
 		default:
@@ -185,6 +194,26 @@ public class MainCliLsq {
 		
 		JenaSystem.init();
 		MainCliNamedGraphStream.map(DefaultPrefixes.prefixes, cmd);
+	}
+
+	public static void analyze(CmdLsqAnalyze cmdAnalyze) throws FileNotFoundException, IOException, ParseException {
+	}
+
+	public static LsqProcessor createLsqProcessor(CmdLsqAnalyze cmdAnalyze) throws FileNotFoundException, IOException, ParseException {
+
+		LsqConfigImpl config = new LsqConfigImpl();
+		config
+			.setHttpUserAgent(cmdAnalyze.userAgent)
+			.setDatasetSize(cmdAnalyze.datasetSize)
+			.setBenchmarkEndpoint(cmdAnalyze.endpoint)
+			.addBenchmarkDefaultGraphs(cmdAnalyze.defaultGraphs)
+			.setBenchmarkQueryExecutionTimeoutInMs(cmdAnalyze.timeoutInMs)
+			.setDelayInMs(cmdAnalyze.delayInMs)
+			.setExperimentIri(cmdAnalyze.experimentIri)
+			;
+
+		LsqProcessor result = LsqUtils.createProcessor(config);
+		return result;
 	}
 
 }

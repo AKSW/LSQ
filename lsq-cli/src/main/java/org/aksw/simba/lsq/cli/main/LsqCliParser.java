@@ -2,23 +2,18 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
-import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.sparql.core.DatasetDescription;
@@ -273,14 +268,14 @@ public class LsqCliParser {
         String benchmarkEndpointUrl = benchmarkEndpointUrlOs.value(options);
         List<String> benchmarkDefaultGraphIris = graphUriOs.values(options);
         DatasetDescription benchmarkDatasetDescription = DatasetDescription.create(benchmarkDefaultGraphIris, Collections.emptyList());
-        SparqlServiceReference benchmarkEndpointDescription = new SparqlServiceReference(benchmarkEndpointUrl, benchmarkDatasetDescription);
+        // SparqlServiceReference benchmarkEndpointDescription = new SparqlServiceReference(benchmarkEndpointUrl, benchmarkDatasetDescription);
 
 
         String datasetEndpointUri = datasetEndpointUriOs.value(options);
         List<String> datasetDefaultGraphIris = graphUriOs.values(options);
 
-        DatasetDescription datasetDescription = DatasetDescription.create(datasetDefaultGraphIris, Collections.emptyList());
-        SparqlServiceReference datasetEndpointDescription = new SparqlServiceReference(datasetEndpointUri, datasetDescription);
+        //DatasetDescription datasetDescription = DatasetDescription.create(datasetDefaultGraphIris, Collections.emptyList());
+        // SparqlServiceReference datasetEndpointDescription = new SparqlServiceReference(datasetEndpointUri, datasetDescription);
 
 
 
@@ -318,16 +313,17 @@ public class LsqCliParser {
         config.setReuseLogIri(reuseLogIris);
         config.setQueryIdPattern(queryIdPattern);
 
-
-
         config.setFetchDatasetSizeEnabled(fetchDatasetSize);
 
         config.setDatasetLabel(datasetLabel);
-        config.setDatasetEndpointDescription(datasetEndpointDescription);
+        config.setDatasetEndpoint(datasetEndpointUri);
+        config.addDatasetDefaultGraphs(datasetDefaultGraphIris);
 
         config.setDatasetSize(datasetSize);
 
-        config.setBenchmarkEndpointDescription(benchmarkEndpointDescription);
+        config.setBenchmarkEndpoint(benchmarkEndpointUrl);
+        config.addBenchmarkDefaultGraphs(benchmarkDatasetDescription.getDefaultGraphURIs());
+        
         config.setBenchmarkQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
         config.setFirstItemOffset(head);
 

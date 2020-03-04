@@ -56,9 +56,9 @@ public class MainCliLsqQueryAnalyzer
 
     public static void run(LsqConfigImpl config) throws Exception  {
 
-        SparqlServiceReference ssr = config.getBenchmarkEndpointDescription();
-        String datasetEndpointUrl = ssr.getServiceURL();
-        DatasetDescription datasetDescription = ssr.getDatasetDescription();
+        //SparqlServiceReference ssr = config.getBenchmarkEndpointDescription();
+        String datasetEndpointUrl = config.getBenchmarkEndpoint();// ssr.getServiceURL();
+        DatasetDescription datasetDescription = config.getBenchmarkDs(); //ssr.getDatasetDescription();
         Long datasetSize = config.getDatasetSize();
 
         String expBaseIri = config.getExperimentIri();
