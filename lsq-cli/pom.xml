@@ -1,71 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <artifactId>lsq-cli</artifactId>
-    <packaging>jar</packaging>
+	<artifactId>lsq-cli</artifactId>
+	<packaging>jar</packaging>
 
-    <parent>
-        <groupId>org.aksw.simba.lsq</groupId>
-        <artifactId>lsq-parent</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
-    </parent>
+	<parent>
+		<groupId>org.aksw.simba.lsq</groupId>
+		<artifactId>lsq-parent</artifactId>
+		<version>1.1.1-SNAPSHOT</version>
+	</parent>
 
-    <dependencies>
-        <!-- <dependency> -->
-        <!-- <groupId>org.springframework.boot</groupId> -->
-        <!-- <artifactId>spring-boot</artifactId> -->
-        <!-- </dependency> -->
+	<dependencies>
+		<!-- FIXME Get rid of this dependency; right now we use some ngs code which should go into a common module -->
+		<dependency>
+			<groupId>org.aksw.sparql-integrate</groupId>
+			<artifactId>sparql-integrate-cli</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework.boot</groupId> -->
+		<!-- <artifactId>spring-boot</artifactId> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
 		</dependency>
 
-        <dependency>
-            <groupId>net.sf.jopt-simple</groupId>
-            <artifactId>jopt-simple</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>net.sf.jopt-simple</groupId>
+			<artifactId>jopt-simple</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.aksw.simba.lsq</groupId>
-            <artifactId>lsq-core</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-core</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
 
-        <dependency>
-            <groupId>org.aksw.jena-sparql-api</groupId>
-            <artifactId>jena-sparql-api-server-standalone</artifactId>
-            <version>${jsa.version}</version>
-        </dependency>
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-server-standalone</artifactId>
+			<version>${jsa.version}</version>
+		</dependency>
 
-    </dependencies>
+	</dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                </configuration>
-            </plugin>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
 
 </project>
