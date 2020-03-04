@@ -1,0 +1,24 @@
+# Return the unique queries in lsq data
+# Use sparql-integrate with '-u' flag to scan over named graphs
+
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+# PREFIX eg: <http://www.example.org/>
+CONSTRUCT {
+  GRAPH ?s {
+    ?s
+      lsq:text ?str ;
+      lsq:hash ?hash ;
+      lsq:sourceGraph ?x
+  }
+}
+{
+  # Wrapping with superfluous projection because of https://issues.apache.org/jira/browse/JENA-1844
+  { SELECT ?x ?s ?str ?hash {
+      GRAPH ?x { [] lsq:text ?str }
+
+      # Computing the hash twice by inlining the expression because of https://issues.apache.org/jira/browse/JENA-1843
+      BIND(SHA256(?str) AS ?hash)
+      BIND(IRI(CONCAT('urn:lsq:query:sha256:', SHA256(?str))) AS ?s)
+   } }
+}
+
