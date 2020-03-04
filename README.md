@@ -55,7 +55,7 @@ cat unsorted-files/sparqlqc-all.nt | lsq -e http://localhost:8890/sparql -m rdf 
 
 Notes:
 
-* `-u`: Do not reuse the subject of the input triple for the output; i.e. given an input triple <s> <p> <o>, the output will *not* be attached to 's', rather a new resource will be allocated.
+* `-u`: Do not reuse the subject of the input triple for the output; i.e. given an input triple 's p o', the output will *not* be attached to 's', rather a new resource will be allocated.
 * `-m rdf`: rdf is a currently hard-coded pseudo-log format (i.e. not configurable via the default log formats mentioned above).
 
 
