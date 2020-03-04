@@ -89,7 +89,7 @@ public class MainCliLsq {
 			invert(cmdInvert);
 			break;
 		}
-		case "analye": {
+		case "analyze": {
 			analyze(cmdAnalyze);
 			break;
 		}
