@@ -111,7 +111,7 @@ public class MainCliLsq {
 		    	
 				String effectiveLogFormat;
 				if(Strings.isNullOrEmpty(logFormat)) {
-					List<Entry<String, Number>> formats = LsqUtils.probeLogFormat(logFmtRegistry, loader, logSource);
+					List<Entry<String, Number>> formats = LsqUtils.probeLogFormat(logFmtRegistry, logSource);
 					if(formats.isEmpty()) {
 						throw new RuntimeException("Could not auto-detect a log format");
 					}
@@ -138,7 +138,7 @@ public class MainCliLsq {
 		        	.doOnNext(x -> x.addLiteral(LSQ.sequenceId, nextId[0]++))	
 		        	.map(x -> {
 		        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
-		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, filename + "-" + seqId);
+		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, "urn:lsq:" + filename + "-" + seqId);
 		        	
 		        	try {
 		        		LsqUtils.postProcessSparqlStmt(xx, sparqlStmtParser);

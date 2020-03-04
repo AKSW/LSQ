@@ -17,6 +17,6 @@ public class CmdLsqRdfize {
 	@Parameter(names={"-n", "--namespaces"}, description="Namespace prefix sources")
 	public List<String> prefixSources = new ArrayList<>();
 
-	@Parameter(description="Non option args")
-	public List<String> nonOptionArgs = new ArrayList<>();	
+	@Parameter(description="log sources")
+	public List<String> nonOptionArgs = new ArrayList<>();
 }

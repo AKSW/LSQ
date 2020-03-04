@@ -86,10 +86,10 @@ public class LsqUtils {
 
 
 	public static List<Entry<String, Number>> probeLogFormat(String resource) {
-		ResourceLoader loader = new FileSystemResourceLoader();		
+		//FileSystemResourceLoader loader = new FileSystemResourceLoader();		
 		Map<String, ResourceParser> registry = LsqUtils.createDefaultLogFmtRegistry();
 		
-		List<Entry<String, Number>> result = probeLogFormat(registry, loader, resource);
+		List<Entry<String, Number>> result = probeLogFormat(registry, resource);
 //		Multimap<Long, String> report = probeLogFormatCore(registry, loader, resource);
 //		
 //		List<String> result = Streams.stream(report.asMap().entrySet().iterator())
@@ -102,9 +102,9 @@ public class LsqUtils {
 		return result;
 	}
 	
-	public static List<Entry<String, Number>> probeLogFormat(Map<String, ResourceParser> registry, ResourceLoader loader, String resource) {
+	public static List<Entry<String, Number>> probeLogFormat(Map<String, ResourceParser> registry, String resource) {
 		
-		Multimap<? extends Number, String> report = probeLogFormatCore(registry, loader, resource);
+		Multimap<? extends Number, String> report = probeLogFormatCore(registry, resource);
 		
 		List<Entry<String, Number>> result = report.entries().stream()
 			.filter(e -> e.getKey().doubleValue() != 0)
@@ -126,8 +126,9 @@ public class LsqUtils {
 	 * @param filename
 	 * @return
 	 */
-	public static Multimap<Double, String> probeLogFormatCore(Map<String, ResourceParser> registry, ResourceLoader loader, String filename) {
-		org.springframework.core.io.Resource resource = loader.getResource(filename);
+	public static Multimap<Double, String> probeLogFormatCore(Map<String, ResourceParser> registry, String filename) {
+		//org.springframework.core.io.Resource resource = loader.getResource(filename);
+		// SparqlStmtUtils.openInputStream(filenameOrURI)
 		
 		// succcessCountToFormat
 		Multimap<Double, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
@@ -141,7 +142,7 @@ public class LsqUtils {
 			
 			ResourceParser fn = entry.getValue();
 			
-			List<ResourceInDataset> baseItems = fn.parse(() -> resource.getInputStream())
+			List<ResourceInDataset> baseItems = fn.parse(() -> SparqlStmtUtils.openInputStream(filename))
 					.limit(1000)
 					.toList()
 					.onErrorReturn(x -> Collections.emptyList())
