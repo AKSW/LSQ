@@ -57,8 +57,8 @@ public class MainCliLsq {
 		JCommander jc = JCommander.newBuilder()
 				.addObject(cmdMain)
 				.addCommand("probe", cmdProbe)
-				.addCommand("rdfize", cmdProbe)
-				.addCommand("invert", cmdProbe)
+				.addCommand("rdfize", cmdRdfize)
+				.addCommand("invert", cmdInvert)
 				.build();
 
 
@@ -132,7 +132,11 @@ public class MainCliLsq {
 		        Flowable<ResourceInDataset> st = webLogParser.parse(() -> loader.getResource(logSource).getInputStream());
 		        //st = LsqUtils.postProcessStream(st, in, true);
 		        
-		        st = st.map(x -> {
+		        long[] nextId = {0};
+		        st = st
+		        	//.zipWith(, zipper)
+		        	.doOnNext(x -> x.addLiteral(LSQ.sequenceId, nextId[0]++))	
+		        	.map(x -> {
 		        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
 		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, filename + "-" + seqId);
 		        	
