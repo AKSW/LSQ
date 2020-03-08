@@ -33,6 +33,7 @@ import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
+import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
@@ -48,6 +49,7 @@ import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.IOUtils;
 import org.apache.jena.atlas.lib.Sink;
+import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.query.Query;
@@ -191,10 +193,10 @@ public class LsqUtils {
         LsqUtils.wrap(result, WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl")));
 
         // Add custom RDF based log format(s)
-        result.put("rdf", (in) -> LsqUtils.createResourceStreamFromRdf(in, Lang.NTRIPLES, "http://example.org/"));
+        result.put("rdf", in -> LsqUtils.createResourceStreamFromRdf(in, Lang.NTRIPLES, "http://example.org/"));
 
         // Add multi-line sparql format
-        result.put("sparql", (in) -> LsqUtils.createSparqlStream(in));
+        result.put("sparql", in -> LsqUtils.createSparqlStream(in));
         
         return result;
     }
@@ -276,7 +278,7 @@ public class LsqUtils {
         Flowable<ResourceInDataset> result = flow
                 .map(line -> {
                     ResourceInDataset r = ResourceInDatasetImpl.createAnonInDefaultGraph();//ModelFactory.createDefaultModel().createResource();
-                    r.addLiteral(RDFS.label, line);
+                    r.addLiteral(LSQ.logRecord, line);
 
                     boolean parsed;
                     try {
@@ -351,6 +353,23 @@ public class LsqUtils {
     	return result;
     }
     
+    
+
+    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
+        Long itemLimit = config.getItemLimit();
+        String logFormat = config.getInQueryLogFormat();
+
+        Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
+        Flowable<ResourceInDataset> result = createReader(inputResource, logFormat, logFmtRegistry);
+
+        if(itemLimit != null) {
+            result = result.limit(itemLimit);
+        }
+
+        
+        return result;
+    }
+    
     /**
      * Method that creates a reader for a specific inputResource under the give config.
      * The config's inputResources are ignored.
@@ -360,42 +379,31 @@ public class LsqUtils {
      * @return
      * @throws IOException
      */
-    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
-    	Callable<InputStream> inSupp;
-    	if(inputResource != null) {
-        	// TODO We could make the resource loader part of the config
-    		ResourceLoader loader = new DefaultResourceLoader();
-    		org.springframework.core.io.Resource resource = loader.getResource(inputResource);
-    		
-    		// Retry with prepending file:
-    		if(!resource.exists()) {
-    			Path path = Paths.get(inputResource);
-    			path = path.toAbsolutePath();
-    			path = path.normalize();
-    			logger.info("Attempting to open: [" + path + "]");
-    			resource = new FileSystemResource(path.toFile());
-    		}
-    		
-//            File inputFile = new File(inputResource);
-//            inputFile = inputFile.getAbsoluteFile();
-            inSupp = resource::getInputStream;
-        } else {
-            inSupp = () -> new CloseShieldInputStream(System.in);
+    public static Flowable<ResourceInDataset> createReader(
+    		String logSource,
+    		String logFormat,
+    		Map<String, ResourceParser> logFmtRegistry) throws IOException {
+
+        Callable<InputStream> inSupp = logSource == null
+        		? () -> new CloseShieldInputStream(System.in)
+        		: () -> RDFDataMgr.open(logSource); // Alteratively StreamMgr.open()
+
+        Lang lang = logFormat == null
+        		? null
+        		: RDFLanguages.nameToLang(logFormat);
+ 
+        if(lang == null) {
+        	lang = RDFDataMgr.determineLang(logSource, null, null);
         }
+
+        Flowable<ResourceInDataset> result = null;
+
         
-
-        Long firstItemOffset = config.getFirstItemOffset();
-        String logFormat = config.getInQueryLogFormat();
-
-        Flowable<ResourceInDataset> result;
-
-        // RDF Input overrides any log format
-        Lang lang = RDFDataMgr.determineLang(inputResource, null, null);
+		// Check if we are dealing with RDF
         if(lang != null) {
         	// If quad based, use streaming
         	// otherwise partition by lsq.text property
         	if(RDFLanguages.isQuads(lang)) {
-        		
         		
         		// TODO Stream as datasets first, then select any resource with LSQ.text
         		logger.info("Quad-based format detected - assuming RDFized log as input");
@@ -408,32 +416,81 @@ public class LsqUtils {
 //        			.iterator());
         	} else if(RDFLanguages.isTriples(lang)){ 
         		logger.info("Triple-based format detected - assuming RDFized log as input");
-        		Model model = RDFDataMgr.loadModel(inputResource, lang);
+        		Model model = RDFDataMgr.loadModel(logSource, lang);
         		result = null;
+        		throw new RuntimeException("Triple based format not implemented");
         		//result = Flowable.fromIterable(() -> model.listSubjectsWithProperty(LSQ.text))
         	} else {
         		throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
         	}
 
-        } else {	        
-	        ResourceParser webLogParser = config.getLogFmtRegistry().get(logFormat);
-	
-	        //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
-	        if(webLogParser == null) {
-	            throw new RuntimeException("No log format parser found for '" + logFormat + "'");
-	        }
-	
-	//        BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8));
-	
-	//        Stream<String> stream = reader.lines();
-	
-	        result = webLogParser.parse(inSupp);
-	        if(firstItemOffset != null) {
-	            result = result.limit(firstItemOffset);
-	        }
+        } 
+        
+		String effectiveLogFormat = null;
 
-	        //result = postProcessStream(result, in);
+        // If the result is still null, probe for log formats
+        if(result == null) {
+            // Probe for known RDF or know log format
+        	logger.info("Processing log source " + logSource);
+        	
+    		if(Strings.isNullOrEmpty(logFormat)) {
+    			List<Entry<String, Number>> formats = LsqUtils.probeLogFormat(logFmtRegistry, logSource);
+    			if(formats.isEmpty()) {
+    				throw new RuntimeException("Could not auto-detect a log format");
+    			}
+    			
+//    				if(formats.size() != 1) {
+//    					throw new RuntimeException("Expected probe to return exactly 1 log format for source " + logSource + ", got: " + formats);
+//    				}
+    			effectiveLogFormat = formats.get(0).getKey();
+    			logger.info("Auto-selected format [" + effectiveLogFormat + "] among auto-detected candidates " + formats);
+    		} else {
+    			effectiveLogFormat = logFormat;
+    		}
+    		
+            ResourceParser webLogParser = logFmtRegistry.get(effectiveLogFormat);
+
+            //Mapper webLogParser = config.getLogFmtRegistry().get(logFormat);
+            if(webLogParser == null) {
+                throw new RuntimeException("No log format parser found for '" + logFormat + "'");
+            }
+
+            result = webLogParser.parse(() -> RDFDataMgr.open(logSource));
         }
+
+        // effective log format is now non-null
+//        if(effectiveLogFormat == null) {
+//            throw new RuntimeException("Could not obtain effective log format for '" + logFormat + "'");
+//        }
+
+    	
+    	
+//    	Callable<InputStream> inSupp;
+//    	if(inputResource != null) {
+//        	// TODO We could make the resource loader part of the config
+//    		ResourceLoader loader = new DefaultResourceLoader();
+//    		org.springframework.core.io.Resource resource = loader.getResource(inputResource);
+//    		
+//    		// Retry with prepending file:
+//    		if(!resource.exists()) {
+//    			Path path = Paths.get(inputResource);
+//    			path = path.toAbsolutePath();
+//    			path = path.normalize();
+//    			logger.info("Attempting to open: [" + path + "]");
+//    			resource = new FileSystemResource(path.toFile());
+//    		}
+    		
+//            File inputFile = new File(inputResource);
+//            inputFile = inputFile.getAbsoluteFile();
+//            inSupp = resource::getInputStream;
+//        } else {
+//            inSupp = () -> new CloseShieldInputStream(System.in);
+//        }
+        
+
+
+
+        // RDF Input overrides any log format
 
         
         //Model logModel = ModelFactory.createDefaultModel();

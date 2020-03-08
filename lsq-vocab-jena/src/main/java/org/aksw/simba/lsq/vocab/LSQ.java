@@ -205,6 +205,11 @@ public class LSQ {
 
     public static final Property sequenceId = property("sequenceId");
 
+    
+    /**
+     * logRecord: String representation of the original log entry - usually a line
+     */
+    public static final Property logRecord = property("logRecord");
     public static final Property host = property("host");
     public static final Property user = property("user");
     public static final Property request = property("request");

@@ -325,7 +325,7 @@ public class LsqCliParser {
         config.addBenchmarkDefaultGraphs(benchmarkDatasetDescription.getDefaultGraphURIs());
         
         config.setBenchmarkQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
-        config.setFirstItemOffset(head);
+        config.setItemLimit(head);
 
         config.setFederationEndpoints(fedEndpoints);
 

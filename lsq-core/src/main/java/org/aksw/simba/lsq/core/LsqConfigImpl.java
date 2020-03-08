@@ -77,7 +77,7 @@ public class LsqConfigImpl {
     protected String experimentIri;
     protected Long datasetSize;
 
-    protected Long firstItemOffset;
+    protected Long itemLimit;
 
     protected List<String> federationEndpoints;
     protected File federationConfigFile;
@@ -401,12 +401,12 @@ public class LsqConfigImpl {
         return this;
     }
 
-    public Long getFirstItemOffset() {
-        return firstItemOffset;
+    public Long getItemLimit() {
+        return itemLimit;
     }
 
-    public LsqConfigImpl setFirstItemOffset(Long firstItemOffset) {
-        this.firstItemOffset = firstItemOffset;
+    public LsqConfigImpl setItemLimit(Long itemLimit) {
+        this.itemLimit = itemLimit;
         return this;
     }
 

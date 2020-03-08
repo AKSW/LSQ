@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
+import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
@@ -25,19 +26,23 @@ import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
+import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
+import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
+import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
 import org.apache.jena.ext.com.google.common.base.Strings;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sys.JenaSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 
 import com.beust.jcommander.JCommander;
 
 import io.reactivex.Flowable;
+import io.reactivex.FlowableTransformer;
 
 
 
@@ -49,6 +54,8 @@ import io.reactivex.Flowable;
  */
 public class MainCliLsq {
 	private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class); 
+	
+	// public static void displayUsageIf()
 	
 	public static void main(String[] args) throws Exception {
 		CmdLsqMain cmdMain = new CmdLsqMain();
@@ -107,15 +114,23 @@ public class MainCliLsq {
 		Function<String, SparqlStmt> sparqlStmtParser = LsqUtils.createSparqlParser(prefixSources);
 		
 		
-		ResourceLoader loader = new FileSystemResourceLoader(); // new DefaultResourceLoader();
 		Map<String, ResourceParser> logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
+
 		
 		Flowable<ResourceInDataset> logRdfEvents = Flowable
 			.fromIterable(logSources)
 			.flatMap(logSource -> {
-		    	Path path = Paths.get(logSource);
-		    	String filename = path.getFileName().toString();
+				Flowable<ResourceInDataset> st = LsqUtils.createReader(logSource, logFormat, logFmtRegistry);
+		    	
+				String filename;
+				if(logSource == null) {
+					filename = "stdin";
+				} else {
+					Path path = Paths.get(logSource);
+					filename = path.getFileName().toString();
+				}
 
+		    	/*
 		    	logger.info("Processing log source " + logSource);
 		    	
 				String effectiveLogFormat;
@@ -136,9 +151,10 @@ public class MainCliLsq {
 
 		        ResourceParser webLogParser = logFmtRegistry.get(effectiveLogFormat);
 		        
-		        // TODO This does not properly close the input stream - we should switch
-		        // to rxjava completely
-		        Flowable<ResourceInDataset> st = webLogParser.parse(() -> loader.getResource(logSource).getInputStream());
+		        Flowable<ResourceInDataset> st = webLogParser.parse(() -> RDFDataMgr.open(logSource));
+*/
+				// st = st.doOnNext(x -> System.out.println("GOT GRAPH: " + x.getDataset().getDefaultModel().size() + " " + Lists.newArrayList(x.getDataset().listNames())));
+
 		        //st = LsqUtils.postProcessStream(st, in, true);
 		        
 		        long[] nextId = {0};
@@ -147,7 +163,9 @@ public class MainCliLsq {
 		        	.doOnNext(x -> x.addLiteral(LSQ.sequenceId, nextId[0]++))	
 		        	.map(x -> {
 		        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
-		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, "urn:lsq:" + filename + "-" + seqId);
+		        	String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
+		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, graphAndResourceIri);
+		        	xx = ResourceInDatasetImpl.renameGraph(xx, graphAndResourceIri);		        	
 		        	
 		        	try {
 		        		LsqUtils.postProcessSparqlStmt(xx, sparqlStmtParser);
@@ -167,6 +185,36 @@ public class MainCliLsq {
 				return st;
 			});
 		
+		
+		if(cmdRdfize.slimMode) {
+			CmdNgsMap cmd = new CmdNgsMap();
+			cmd.stmts.add("lsq-slimify.sparql");
+//			cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
+			
+//			JenaSystem.init();
+			//RDFDataMgrEx.loadQueries("lsq-slimify.sparql", PrefixMapping.Extended);
+			
+//			SparqlStmtUtils.processFile(pm, "lsq-slimify.sparql");
+//			MainCliNamedGraphStream.createMapper2(); //map(DefaultPrefixes.prefixes, cmd);
+			FlowableTransformer<ResourceInDataset, ResourceInDataset> mapper =
+					MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd,
+							r -> r.getDataset(),
+							(r, ds) -> r.inDataset(ds));
+			
+			
+			logRdfEvents = logRdfEvents
+					.compose(mapper);
+		}
+		
+		if(!cmdRdfize.noMerge) {
+			CmdNgsSort sortCmd = new CmdNgsSort();
+			
+			FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
+			logRdfEvents = logRdfEvents
+					.compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
+					.compose(sorter)
+					.flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset);
+		}		
 		
 		RDFDataMgrRx.writeResources(logRdfEvents, System.out, RDFFormat.TRIG_PRETTY);
 	}
@@ -193,7 +241,7 @@ public class MainCliLsq {
 		cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 		
 		JenaSystem.init();
-		MainCliNamedGraphStream.map(DefaultPrefixes.prefixes, cmd);
+		NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd);
 	}
 
 	public static void analyze(CmdLsqAnalyze cmdAnalyze) throws FileNotFoundException, IOException, ParseException {

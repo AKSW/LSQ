@@ -8,17 +8,27 @@ CONSTRUCT {
     ?s
       lsq:text ?str ;
       lsq:hash ?hash ;
-      lsq:sourceGraph ?x
+      lsq:hasRemoteExec ?x .
+
+    ?x
+      ?p ?o
   }
 }
 {
   # Wrapping with superfluous projection because of https://issues.apache.org/jira/browse/JENA-1844
   { SELECT ?x ?s ?str ?hash {
-      GRAPH ?x { [] lsq:text ?str }
+      GRAPH ?x {
+        ?e lsq:text ?str
+      }
 
       # Computing the hash twice by inlining the expression because of https://issues.apache.org/jira/browse/JENA-1843
       BIND(SHA256(?str) AS ?hash)
       BIND(IRI(CONCAT('urn:lsq:query:sha256:', SHA256(?str))) AS ?s)
    } }
+   OPTIONAL {
+     GRAPH ?x {
+       ?x ?p ?o
+     }
+   }
 }
 

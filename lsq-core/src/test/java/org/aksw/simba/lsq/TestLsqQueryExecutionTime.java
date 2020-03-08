@@ -102,7 +102,7 @@ public class TestLsqQueryExecutionTime {
 		//FluentRDFConnectionFn.
 		
 		LsqConfigImpl config = new LsqConfigImpl()
-			.setInQueryLogFiles(Collections.singletonList("classpath:/lsq-tests/triple-pattern-selectivity/tpsel01.sparql"))
+			.setInQueryLogFiles(Collections.singletonList("lsq-tests/triple-pattern-selectivity/tpsel01.sparql"))
 			.setInQueryLogFormat("sparql")
 			
 			.setOutBaseIri("http://example.org/")
