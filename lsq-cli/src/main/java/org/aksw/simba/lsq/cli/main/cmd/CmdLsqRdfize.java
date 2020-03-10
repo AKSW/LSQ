@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.cli.main.cmd;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.beust.jcommander.Parameter;
@@ -18,7 +19,7 @@ public class CmdLsqRdfize {
 	public String inputLogFormat;
 
 	@Parameter(names={"-n", "--namespaces"}, description="Namespace prefix sources")
-	public List<String> prefixSources = new ArrayList<>();
+	public List<String> prefixSources = new ArrayList<>(Arrays.asList("rdf-prefixes/prefix.cc.2019-12-17.jsonld"));
 
 	@Parameter(names={"--no-merge"}, description="Neither sort name graphs nor merge consecutive ones of same name")
 	public boolean noMerge = false;

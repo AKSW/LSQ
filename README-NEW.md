@@ -14,14 +14,16 @@ The main improvements of the now approach of LSQ are:
 
 
 
-## New features in LSQ 2
+## New features in LSQ2
 
-* Java API - LSQ Java domain views based on Jena Resource subclasses
-* Format probing 
-* Standalone log rdfization
-* A-priori deduplication
+* Java API to access the generated RDF
+* Automatic log format probing
+* Support for costumizable prefix sources
+* Greatly simplified log rdfization
+* Greatly improved scalability on query deduplication
 * Consolidated command line interface tool
-
+* Output data backward compatible (no changes in output data model)
+* Query strings are now hashed using sha256 and the full hash string is used. Before we used the first 8 hex chars of MD5 but that caused a noticable number of clashes.
 
 ### Probing for best matching format
 
