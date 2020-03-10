@@ -67,7 +67,7 @@ public class TestLsqSelectivity {
         	
             Resource logRes = ModelFactory.createDefaultModel().createResource();
             mapper.parse(logRes, queryStr);
-            Resource queryRes = processor.applyForWebLogRecord(logRes);
+            Resource queryRes = processor.applyForQueryOrWebLogRecord(logRes, true);
             if(queryRes != null) {
                 RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_BLOCKS);
             }

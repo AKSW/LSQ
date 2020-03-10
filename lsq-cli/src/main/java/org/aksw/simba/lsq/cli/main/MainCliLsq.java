@@ -2,8 +2,7 @@ package org.aksw.simba.lsq.cli.main;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -14,8 +13,8 @@ import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmark;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
@@ -24,14 +23,18 @@ import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
-import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.core.Skolemize;
+import org.aksw.simba.lsq.model.LsqQuery;
+import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
+import org.aksw.sparql_integrate.ngs.cli.main.DatasetFlowOps;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
-import org.apache.jena.ext.com.google.common.base.Strings;
-import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
@@ -60,17 +63,19 @@ public class MainCliLsq {
 	public static void main(String[] args) throws Exception {
 		CmdLsqMain cmdMain = new CmdLsqMain();
 		
-		CmdLsqProbe cmdProbe = new  CmdLsqProbe();
-		CmdLsqRdfize cmdRdfize = new  CmdLsqRdfize();
-		CmdLsqInvert cmdInvert = new  CmdLsqInvert();
-		CmdLsqAnalyze cmdAnalyze = new  CmdLsqAnalyze();
+		CmdLsqProbe probeCmd = new  CmdLsqProbe();
+		CmdLsqRdfize rdfizeCmd = new  CmdLsqRdfize();
+//		CmdLsqInvert invertCmd = new  CmdLsqInvert();
+		CmdLsqBenchmark benchmarkCmd = new  CmdLsqBenchmark();
+		CmdLsqAnalyze analyzeCmd = new  CmdLsqAnalyze();
 
 		JCommander jc = JCommander.newBuilder()
 				.addObject(cmdMain)
-				.addCommand("probe", cmdProbe)
-				.addCommand("rdfize", cmdRdfize)
-				.addCommand("invert", cmdInvert)
-				.addCommand("analyze", cmdAnalyze)
+				.addCommand("probe", probeCmd)
+				.addCommand("rdfize", rdfizeCmd)
+//				.addCommand("invert", invertCmd)
+				.addCommand("analyze", analyzeCmd)
+				.addCommand("benchmark", benchmarkCmd)
 				.build();
 
 
@@ -85,19 +90,23 @@ public class MainCliLsq {
 		String cmd = jc.getParsedCommand();
 		switch (cmd) {
 		case "probe": {
-			probe(cmdProbe);
+			probe(probeCmd);
 			break;
 		}
 		case "rdfize": {
-			rdfize(cmdRdfize);
+			rdfize(rdfizeCmd);
 			break;
 		}
-		case "invert": {
-			invert(cmdInvert);
-			break;
-		}
+//		case "invert": {
+//			invert(invertCmd);
+//			break;
+//		}
 		case "analyze": {
-			analyze(cmdAnalyze);
+			analyze(analyzeCmd);
+			break;
+		}
+		case "benchmark": {
+			benchmark(benchmarkCmd);
 			break;
 		}
 		default:
@@ -105,9 +114,11 @@ public class MainCliLsq {
 		}
 	}
 
-	public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
+	
+	public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfize cmdRdfize) throws FileNotFoundException, IOException, ParseException {
 		String logFormat = cmdRdfize.inputLogFormat;
 		List<String> logSources = cmdRdfize.nonOptionArgs;
+		String baseIri = cmdRdfize.baseIri;
 		
 		List<String> rawPrefixSources = cmdRdfize.prefixSources;
 		Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(rawPrefixSources);
@@ -120,67 +131,12 @@ public class MainCliLsq {
 		Flowable<ResourceInDataset> logRdfEvents = Flowable
 			.fromIterable(logSources)
 			.flatMap(logSource -> {
-				Flowable<ResourceInDataset> st = LsqUtils.createReader(logSource, logFormat, logFmtRegistry);
-		    	
-				String filename;
-				if(logSource == null) {
-					filename = "stdin";
-				} else {
-					Path path = Paths.get(logSource);
-					filename = path.getFileName().toString();
-				}
-
-		    	/*
-		    	logger.info("Processing log source " + logSource);
-		    	
-				String effectiveLogFormat;
-				if(Strings.isNullOrEmpty(logFormat)) {
-					List<Entry<String, Number>> formats = LsqUtils.probeLogFormat(logFmtRegistry, logSource);
-					if(formats.isEmpty()) {
-						throw new RuntimeException("Could not auto-detect a log format");
-					}
-					
-//						if(formats.size() != 1) {
-//							throw new RuntimeException("Expected probe to return exactly 1 log format for source " + logSource + ", got: " + formats);
-//						}
-					effectiveLogFormat = formats.get(0).getKey();
-					logger.info("Auto-selected format [" + effectiveLogFormat + "] among auto-detected candidates " + formats);
-				} else {
-					effectiveLogFormat = logFormat;
-				}
-
-		        ResourceParser webLogParser = logFmtRegistry.get(effectiveLogFormat);
-		        
-		        Flowable<ResourceInDataset> st = webLogParser.parse(() -> RDFDataMgr.open(logSource));
-*/
-				// st = st.doOnNext(x -> System.out.println("GOT GRAPH: " + x.getDataset().getDefaultModel().size() + " " + Lists.newArrayList(x.getDataset().listNames())));
-
-		        //st = LsqUtils.postProcessStream(st, in, true);
-		        
-		        long[] nextId = {0};
-		        st = st
-		        	//.zipWith(, zipper)
-		        	.doOnNext(x -> x.addLiteral(LSQ.sequenceId, nextId[0]++))	
-		        	.map(x -> {
-		        	long seqId = x.getProperty(LSQ.sequenceId).getLong();
-		        	String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
-		        	ResourceInDataset xx = ResourceInDatasetImpl.renameResource(x, graphAndResourceIri);
-		        	xx = ResourceInDatasetImpl.renameGraph(xx, graphAndResourceIri);		        	
-		        	
-		        	try {
-		        		LsqUtils.postProcessSparqlStmt(xx, sparqlStmtParser);
-		        	} catch(Exception e) {
-		                xx.addLiteral(LSQ.processingError, e.toString());
-		        	}
-
-		        	// Remove text and query properties, as LSQ.text is
-		        	// the polished one
-		        	// xx.removeAll(LSQ.query);
-		        	// xx.removeAll(RDFS.label);
-
-		        	return xx;
-		        })
-		        .filter(x -> x != null);
+				Flowable<ResourceInDataset> st = LsqUtils.createReader(
+						logSource,
+						sparqlStmtParser,
+						logFormat,
+						logFmtRegistry,
+						baseIri);
 
 				return st;
 			});
@@ -197,7 +153,7 @@ public class MainCliLsq {
 //			SparqlStmtUtils.processFile(pm, "lsq-slimify.sparql");
 //			MainCliNamedGraphStream.createMapper2(); //map(DefaultPrefixes.prefixes, cmd);
 			FlowableTransformer<ResourceInDataset, ResourceInDataset> mapper =
-					MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd,
+					MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd.stmts,
 							r -> r.getDataset(),
 							(r, ds) -> r.inDataset(ds));
 			
@@ -206,16 +162,22 @@ public class MainCliLsq {
 					.compose(mapper);
 		}
 		
-		if(!cmdRdfize.noMerge) {
+		if(!cmdRdfize.noSquash) {
 			CmdNgsSort sortCmd = new CmdNgsSort();
 			
 			FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
 			logRdfEvents = logRdfEvents
 					.compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
 					.compose(sorter)
+					.compose(ResourceInDatasetFlowOps::mergeConsecutiveResourceInDatasets)
 					.flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset);
-		}		
+		}
 		
+		return logRdfEvents;
+	}
+	
+	public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
+		Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
 		RDFDataMgrRx.writeResources(logRdfEvents, System.out, RDFFormat.TRIG_PRETTY);
 	}
 
@@ -235,6 +197,8 @@ public class MainCliLsq {
 		}
 	}
 
+	@Deprecated // The process was changed that inversion of the
+	// log-record-to-query relation is no longer needed as it is now how the process works
 	public static void invert(CmdLsqInvert cmdInvert) throws FileNotFoundException, IOException, ParseException {
 		CmdNgsMap cmd = new CmdNgsMap();
 		cmd.stmts.add("lsq-invert-rdfized-log.sparql");
@@ -243,21 +207,73 @@ public class MainCliLsq {
 		JenaSystem.init();
 		NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd);
 	}
+	
+	// FIXME hasRemoteExec needs to be skolemized - this
+	// should probably be done in 'rdfize'
+	public static void analyze(CmdLsqAnalyze analyzeCmd) throws Exception {
+		CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
+		rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
+		
+		
+		Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
+		
+		Flowable<Dataset> dsFlow = flow.map(rid -> {
+			LsqQuery q = rid.as(LsqQuery.class);
+		
+            NestedResource queryRes = NestedResource.from(q);
+            Function<String, NestedResource> queryAspectFn =
+            		aspect -> queryRes.nest("-" + aspect);
+			
+			String queryStr = q.getText();
+			Query query = QueryFactory.create(queryStr);
+			//SparqlQueryParser parser = SparqlQueryParserImpl.create(); 
+			
+			LsqProcessor.rdfizeQueryStructuralFeatures(q, queryAspectFn, query);
+			
+            // Post processing: Remove skolem identifiers
+            q.getModel().removeAll(null, Skolemize.skolemId, null);
 
-	public static void analyze(CmdLsqAnalyze cmdAnalyze) throws FileNotFoundException, IOException, ParseException {
+
+			return rid;
+		})
+		.map(ResourceInDataset::getDataset);
+		
+		RDFDataMgrRx.writeDatasets(dsFlow, System.out, RDFFormat.TRIG_PRETTY);
 	}
 
-	public static LsqProcessor createLsqProcessor(CmdLsqAnalyze cmdAnalyze) throws FileNotFoundException, IOException, ParseException {
+	public static void benchmark(CmdLsqBenchmark benchmarkCmd) throws Exception {
+		CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
+		rdfizeCmd.nonOptionArgs = benchmarkCmd.nonOptionArgs;
+		
+		LsqProcessor processor = createLsqProcessor(benchmarkCmd);
+
+		
+		Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
+		
+		Flowable<Dataset> dsFlow = flow.map(rid -> {
+			processor.applyForQueryOrWebLogRecord(rid, false);
+
+			return rid;
+		})
+		.map(ResourceInDataset::getDataset);
+		
+		RDFDataMgrRx.writeDatasets(dsFlow, System.out, RDFFormat.TRIG_PRETTY);
+	}
+	
+	
+	public static LsqProcessor createLsqProcessor(CmdLsqBenchmark benchmarkCmd) throws FileNotFoundException, IOException, ParseException {
 
 		LsqConfigImpl config = new LsqConfigImpl();
 		config
-			.setHttpUserAgent(cmdAnalyze.userAgent)
-			.setDatasetSize(cmdAnalyze.datasetSize)
-			.setBenchmarkEndpoint(cmdAnalyze.endpoint)
-			.addBenchmarkDefaultGraphs(cmdAnalyze.defaultGraphs)
-			.setBenchmarkQueryExecutionTimeoutInMs(cmdAnalyze.timeoutInMs)
-			.setDelayInMs(cmdAnalyze.delayInMs)
-			.setExperimentIri(cmdAnalyze.experimentIri)
+			.setPrefixSources(Collections.emptyList())
+			.setHttpUserAgent(benchmarkCmd.userAgent)
+			.setDatasetSize(benchmarkCmd.datasetSize)
+			.setBenchmarkEndpoint(benchmarkCmd.endpoint)
+			.addBenchmarkDefaultGraphs(benchmarkCmd.defaultGraphs)
+			.setBenchmarkQueryExecutionTimeoutInMs(benchmarkCmd.timeoutInMs)
+			.setRdfizerQueryExecutionEnabled(true)
+			.setDelayInMs(benchmarkCmd.delayInMs)
+			.setExperimentIri(benchmarkCmd.experimentIri)
 			;
 
 		LsqProcessor result = LsqUtils.createProcessor(config);

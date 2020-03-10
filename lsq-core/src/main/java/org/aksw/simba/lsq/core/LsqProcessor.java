@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.core;
 
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
+import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.graph.Node;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -337,26 +339,12 @@ public class LsqProcessor
     }
 
     //@Override
-    /**
-     * This is legacy mode where the input are web log records.
-     * The newer mode expects records which are created by pre-processing
-     * rdfized web logs.
-     *
-     * 
-     * 
-     * @param r
-     * @return
-     */
-    public LsqQuery applyForWebLogRecord(Resource r) {
-    	LsqQuery result = applyForQueryOrWebLogRecord(r, false);
-    	return result;
-    }
-    
-    public LsqQuery applyForQueryOrWebLogRecord(Resource r, boolean isQueryRecord) {
+
+    public LsqQuery applyForQueryOrWebLogRecord(Resource r, boolean isLegacyMode) {
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
         // Extract the query and add it with the lsq:query property
-        WebLogParser.extractQuery(r);
+        WebLogParser.extractQueryString(r);
 
         // If the resource is null, we could not parse the log entry
         // therefore count this as an error
@@ -367,21 +355,26 @@ public class LsqProcessor
         LsqQuery result = null;
 
         
-        NestedResource baseRes;
+        NestedResource tmpBaseRes;
         try {
             if(parsed) {
                 Optional<String> str;
-                if(isQueryRecord) {
+                if(isLegacyMode) {
+                	// In legacy mode, use the raw query string
+                	// (which has not yet been parsed with e.g. external namespaces)
+                	str = Optional.ofNullable(r.getProperty(LSQ.hasRemoteExec))
+                			.map(x -> x.getProperty(LSQ.query))
+                            .map(queryStmt -> queryStmt.getString());
+                	
+                	// In legacy mode, we create a fresh model - so the output does not
+                	// contain the information we got on input
+                	Model queryModel = ModelFactory.createDefaultModel();
+                	tmpBaseRes = NestedResource.from(queryModel, baseUri);
+                } else {
                 	str = Optional.ofNullable(r.getProperty(LSQ.text))
                             .map(queryStmt -> queryStmt.getString());
                 	
-                    baseRes = NestedResource.from(r); 
-                } else {
-                	str = Optional.ofNullable(r.getProperty(LSQ.query))
-                            .map(queryStmt -> queryStmt.getString());
-                	
-                	Model queryModel = ModelFactory.createDefaultModel();
-                	baseRes = NestedResource.from(queryModel, baseUri);
+                    tmpBaseRes = NestedResource.from(r); 
                 }
 
                 //Model m = ResourceUtils.reachableClosure(r);
@@ -430,11 +423,14 @@ public class LsqProcessor
 
                     //NestedResource baseRes = new NestedResource(generatorRes).nest(datasetLabel).nest("-");
 
-                    r = baseRes.get();
-                    if(r.isAnon()) {
+                    r = tmpBaseRes.get();
+                    if(r.isAnon() || isLegacyMode) {
                     	r = ResourceUtils.renameResource(r, baseUri);
+                    	tmpBaseRes = NestedResource.from(r);
                     }
 
+                    NestedResource baseRes = tmpBaseRes;
+                    
                     Function<String, NestedResource> queryAspectFn;
                     NestedResource queryRes;
                     if(reuseLogIri && r.isURIResource()) {
@@ -460,7 +456,10 @@ public class LsqProcessor
                         }
                     } else {
 
-                        String queryHash = StringUtils.md5Hash(queryStr).substring(0, 8);
+                        String queryHash = isLegacyMode
+                        		? StringUtils.md5Hash(queryStr).substring(0, 8)
+                        		: Hashing.sha256().hashString(queryStr, StandardCharsets.UTF_8).toString();
+
                         queryRes = baseRes.nest("q-" + queryHash);
                         queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
                     }
@@ -481,7 +480,7 @@ public class LsqProcessor
                     }
 
                     // If the input is a query record, web log record rdfization does not apply
-                    if(!isQueryRecord) {
+                    if(isLegacyMode) {
 	                    if(isRdfizerQueryLogRecordEnabled) {
 	                        rdfizeLogRecord(baseRes, r, queryRes, queryAspectFn);
 	                    }
@@ -639,11 +638,13 @@ public class LsqProcessor
         }
     }
 
-    public static void rdfizeQueryStructuralFeatures(Resource queryRes, Function<String, NestedResource> queryAspectFn, Query query) {
+
+    public static void rdfizeQueryStructuralFeatures(
+    		Resource queryRes,
+    		Function<String, NestedResource> queryAspectFn,
+    		Query query) {
 
         //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
-
-
         try {
             query = query.cloneQuery();
             query.getGraphURIs().clear();
@@ -654,8 +655,8 @@ public class LsqProcessor
         // .. generate the spin model ...
             //Model spinModel = queryRes.getModel();
             Model spinModel = ModelFactory.createDefaultModel();
-          LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
-          Resource tmpSpinRes = arq2spin.createQuery(query, null);
+            LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
+            Resource tmpSpinRes = arq2spin.createQuery(query, null);
 
 
 

@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.model;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -24,6 +25,7 @@ import org.apache.jena.rdf.model.Resource;
  * @author Claus Stadler, Jan 7, 2019
  *
  */
+@ResourceView
 public interface LsqQuery
 	extends Resource
 {
@@ -34,21 +36,29 @@ public interface LsqQuery
 	@Iri(LSQ.Strs.hasSpin)
 	org.topbraid.spin.model.Query getSpinQuery();
 	LsqQuery setSpinQuery(Resource resource);
-	
+
+	@Iri(LSQ.Strs.hash)
+	String getHash();
+	LsqQuery setHash(String hash);
+
 	// TODO We should investigate whether an extension of the model to shacl makes sense
 	// The main question is which (sub-)set of all possible
 	// sparql queries can be represented as shacl
 	
 	@Iri(LSQ.Strs.hasStructuralFeatures)
-	LsqFeatureSummary getStructuralFeatures();
-	LsqQuery setFeatureSummary(Resource r);
+	LsqStructuralFeatures getStructuralFeatures();
+	LsqQuery setStructuralFeatures(LsqStructuralFeatures r);
 	
 	@Iri(LSQ.Strs.hasLocalExec)
 	<T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
+
+	// Set<LocalExecution> getLocalExecutions();
 
 	//Set<>getLocalExecutions();
 	
 	@Iri(LSQ.Strs.hasRemoteExec)
 	<T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
+
+	// Set<RemoteExecution> getRemoteExecutions();
 }
 

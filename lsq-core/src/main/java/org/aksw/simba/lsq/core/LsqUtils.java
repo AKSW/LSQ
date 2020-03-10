@@ -8,14 +8,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -32,8 +29,8 @@ import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQuery
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
+import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
@@ -44,6 +41,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
+import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -52,6 +50,7 @@ import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Maps;
+import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
@@ -65,15 +64,9 @@ import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.core.DatasetDescription;
-import org.apache.jena.vocabulary.RDFS;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.FileSystemResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
 import com.google.common.cache.Cache;
@@ -358,9 +351,13 @@ public class LsqUtils {
     public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
         Long itemLimit = config.getItemLimit();
         String logFormat = config.getInQueryLogFormat();
+        String baseIri = config.outBaseIri;
+
+        Function<String, SparqlStmt> sparqlParser = SparqlStmtParserImpl.create(new PrefixMappingImpl());
 
         Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
-        Flowable<ResourceInDataset> result = createReader(inputResource, logFormat, logFmtRegistry);
+        Flowable<ResourceInDataset> result = createReader(
+        		inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri);
 
         if(itemLimit != null) {
             result = result.limit(itemLimit);
@@ -381,8 +378,18 @@ public class LsqUtils {
      */
     public static Flowable<ResourceInDataset> createReader(
     		String logSource,
+    		Function<String, SparqlStmt> sparqlStmtParser,
     		String logFormat,
-    		Map<String, ResourceParser> logFmtRegistry) throws IOException {
+    		Map<String, ResourceParser> logFmtRegistry,
+    		String baseIri) throws IOException {
+
+//		String filename;
+//		if(logSource == null) {
+//			filename = "stdin";
+//		} else {
+//			Path path = Paths.get(logSource);
+//			filename = path.getFileName().toString();
+//		}
 
         Callable<InputStream> inSupp = logSource == null
         		? () -> new CloseShieldInputStream(System.in)
@@ -407,7 +414,7 @@ public class LsqUtils {
         		
         		// TODO Stream as datasets first, then select any resource with LSQ.text
         		logger.info("Quad-based format detected - assuming RDFized log as input");
-        		result = RDFDataMgrRx.createFlowableDatasets(inSupp, lang, "")
+        		result = RDFDataMgrRx.createFlowableDatasets(inSupp, lang, null)
         				.flatMap(ds -> Flowable.fromIterable(
         						DatasetUtils.listResourcesWithProperty(ds, LSQ.text).toList()));
         		
@@ -456,8 +463,82 @@ public class LsqUtils {
             }
 
             result = webLogParser.parse(() -> RDFDataMgr.open(logSource));
+            
+            
+            // The webLogParser yields resources (blank nodes) for the log entry
+            // First add a sequence id attribute
+            // Then invert the entry: 
+                        
+	        long[] nextId = {0};
+	        result = result
+	        	//.zipWith(, zipper)
+	        	//.doOnNext()	
+	        	.map(x -> {
+	        		Number presentSeqId = ResourceUtils.getLiteralPropertyValue(x, LSQ.sequenceId, Number.class);
+
+	        		long seqId;
+	        		if(presentSeqId != null) {
+	        			seqId = presentSeqId.longValue();
+	        		} else {
+	        			seqId = nextId[0]++;
+		        		x.addLiteral(LSQ.sequenceId, seqId);
+	        		}
+
+	        		// Invert; map from query to log entry
+	        		ResourceInDataset qq = x.wrapCreate(Model::createResource);
+	        		LsqQuery q = qq.as(LsqQuery.class);
+	        		q.getRemoteExecutions(Resource.class).add(x);
+//        			String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
+//        			ResourceInDataset xx;
+//        			
+//        			if(x.isAnon()) {
+//        				xx = ResourceInDatasetImpl.renameResource(x, graphAndResourceIri);
+//        				xx = ResourceInDatasetImpl.renameGraph(xx, graphAndResourceIri);
+//        			} else {
+//        				xx = x;
+//        			}
+//        			String graphAndResourceIri = "urn:lsq:query:sha256:" + filename + "-" + seqId;
+        			
+	        	try {
+	        		Query parsedQuery = getParsedQuery(x, sparqlStmtParser);
+	        		if(parsedQuery != null) {
+	        			String str = parsedQuery.toString();
+	        			String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+	        			q.setText(str);
+	        			q.setHash(hash);
+	        			// String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
+	        			String graphAndResourceIri = baseIri + "q-" + hash;
+	        			// Note: We could also leave the resource as a blank node
+	        			// The only important part is to have a named graph with the query hash
+	        			// in order to merge records about equivalent queries
+        				qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
+        				qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
+	        		}
+
+	        		//LsqUtils.postProcessSparqlStmt(x, sparqlStmtParser);
+	        	} catch(Exception e) {
+	                qq.addLiteral(LSQ.processingError, e.toString());
+	        	}
+
+	        	// Remove text and query properties, as LSQ.text is
+	        	// the polished one
+	        	// xx.removeAll(LSQ.query);
+	        	// xx.removeAll(RDFS.label);
+
+	        	return qq;
+	        })
+	        .filter(x -> x != null);
+
+//    		result = result
+//    			.map(ResourceInDataset::getDataset)
+//    			.compose(MainCliNamedGraphStream.createMapper("lsq-invert-rdfized-log.sparql"))
+//    			.flatMap(ds -> Flowable.fromIterable(ResourceInDatasetImpl.selectByProperty(ds, LSQ.text)));
+            
         }
 
+        
+        
+        
         // effective log format is now non-null
 //        if(effectiveLogFormat == null) {
 //            throw new RuntimeException("Could not obtain effective log format for '" + logFormat + "'");
@@ -598,12 +679,22 @@ public class LsqUtils {
 	}
 
 	
-    public static void postProcessSparqlStmt(Resource r, Function<String, SparqlStmt> sparqlStmtParser) {
+	/**
+	 * If a log entry could be processed without error, it is assumed that there is a
+	 * LSQ.query property available.
+	 * LSQ.query is a raw query, i.e. it may not be parsable as is because namespaces may be implicit
+	 * 
+	 * 
+	 * @param r A log entry resource
+	 * @param sparqlStmtParser
+	 */
+    public static Query getParsedQuery(Resource r, Function<String, SparqlStmt> sparqlStmtParser) {
 
+    	Query result = null; // the parsed query string - if possible
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
         // Extract the query and add it with the lsq:query property
-        WebLogParser.extractQuery(r);
+        WebLogParser.extractQueryString(r);
 
         // If the resource is null, we could not parse the log entry
         // therefore count this as an error
@@ -625,11 +716,13 @@ public class LsqUtils {
 
                 SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
-                Query query = queryStmt.getQuery();
-                String queryStr = Objects.toString(query);
-                r.addLiteral(LSQ.text, queryStr);
+                result = queryStmt.getQuery();
+                //String queryStr = Objects.toString(query);
+                //r.addLiteral(LSQ.text, queryStr);
             }
         }
+        
+        return result;
     }
 
     public static LsqProcessor createProcessor(LsqConfigImpl config) {

@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.cli.trash;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,7 +11,7 @@ import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmark;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -30,7 +30,7 @@ public class MainCliLsqLogRdfizer {
 	private static final Logger logger = LoggerFactory.getLogger(MainCliLsqLogRdfizer.class);
 	
 	public static void main(String[] args) throws Exception {
-		CmdLsqAnalyze cm = new CmdLsqAnalyze();
+		CmdLsqBenchmark cm = new CmdLsqBenchmark();
 
 		JCommander jc = new JCommander.Builder()
 	    	  .addObject(cm)

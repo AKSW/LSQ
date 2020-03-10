@@ -16,9 +16,11 @@ The main improvements of the now approach of LSQ are:
 
 ## New features in LSQ 2
 
-* format probing
-* standalone log rdfization
-* a-priori deduplication
+* Java API - LSQ Java domain views based on Jena Resource subclasses
+* Format probing 
+* Standalone log rdfization
+* A-priori deduplication
+* Consolidated command line interface tool
 
 
 ### Probing for best matching format

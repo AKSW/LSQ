@@ -18,6 +18,7 @@ public class LSQ {
 	    public static final String Query = ns + "Query";
 
 	    public static final String text = ns + "text";
+	    public static final String hash = ns + "hash";
 	    public static final String resultSize = ns + "resultSize";
 	    public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
 	    public static final String hasSpin = ns + "hasSpin";
@@ -75,6 +76,10 @@ public class LSQ {
 	    public static final String mentionsObject = ns + "mentionsObject";
 
 	    public static final String mentionsTuple = ns + "mentionsTuple";
+	    
+	    public static final String sequenceId = ns + "sequenceId";
+
+	    public static final String host = ns + "host";
 	}
 	
 	
@@ -203,14 +208,14 @@ public class LSQ {
     public static final Resource WebAccessLogFormat = resource("WebAccessLogFormat");
     public static final Property pattern = property("pattern");
 
-    public static final Property sequenceId = property("sequenceId");
+    public static final Property sequenceId = ResourceFactory.createProperty(Strs.sequenceId);
 
     
     /**
      * logRecord: String representation of the original log entry - usually a line
      */
     public static final Property logRecord = property("logRecord");
-    public static final Property host = property("host");
+    public static final Property host = ResourceFactory.createProperty(Strs.host);
     public static final Property user = property("user");
     public static final Property request = property("request");
     public static final Property query = property("query");

@@ -131,10 +131,11 @@ public class TestLsqQueryExecutionTime {
 		LsqQuery actualRes = stream
 //				.doAfterNext(r -> RDFDataMgr.write(System.out, r.getModel(), RDFFormat.TURTLE))
 				.map(rid -> {
-					LsqQuery r = processor.applyForWebLogRecord(rid);
+					LsqQuery r = processor.applyForQueryOrWebLogRecord(rid, true);
 					return r;
 				})
-				.blockingFirst(null);
+				.firstOrError()
+				.blockingGet();
 
 		Model actual = actualRes.getModel();
 		Model expected = RDFDataMgr.loadModel("lsq-tests/triple-pattern-selectivity/tpsel01.ttl");

@@ -393,7 +393,7 @@ public class WebLogParser {
     }
 
 
-    public static void extractQuery(Resource r) {
+    public static void extractQueryString(Resource r) {
         List<Function<Resource, String>> extractors = Arrays.asList(
                 x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
                 x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null

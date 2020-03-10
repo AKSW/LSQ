@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.cli.trash;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -6,6 +6,7 @@ import java.util.Calendar;
 import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.simba.lsq.cli.main.LsqCliParser;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
@@ -103,7 +104,7 @@ public class MainCliLsqQueryAnalyzer
         //RDFDataMgr.write(out, expModel, outFormat);
 
         itemReader
-            .map(itemProcessor::applyForWebLogRecord)
+            .map(x -> itemProcessor.applyForQueryOrWebLogRecord(x, true))
             .filter(x -> x != null)
             .forEach(itemWriter::send);
 

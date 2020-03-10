@@ -28,6 +28,7 @@ CONSTRUCT {
    OPTIONAL {
      GRAPH ?x {
        ?x ?p ?o
+       FILTER(?p != lsq:text)
      }
    }
 }

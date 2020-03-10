@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.model;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -14,14 +15,17 @@ import org.apache.jena.rdf.model.Resource;
  * @author Claus Stadler, Jan 7, 2019
  *
  */
-public interface LsqFeatureSummary {
+@ResourceView
+public interface LsqStructuralFeatures
+	extends Resource
+{
 //	@Iri
 //	LsqQuery query();
 	
 	// numProjectVars
 	@Iri(LSQ.Strs.projectVars)
 	Integer getNumProjectVars();
-	LsqFeatureSummary setNumProjectVars(Integer number);
+	LsqStructuralFeatures setNumProjectVars(Integer number);
 
 	// Bgp summary
 //    targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
