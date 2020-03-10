@@ -76,6 +76,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 
 public class LsqUtils {
 	private static final Logger logger = LoggerFactory.getLogger(LsqUtils.class);
@@ -137,13 +138,21 @@ public class LsqUtils {
 //			}
 			
 			ResourceParser fn = entry.getValue();
-			
-			List<ResourceInDataset> baseItems = fn.parse(() -> SparqlStmtUtils.openInputStream(filename))
-					.limit(1000)
-					.toList()
-					.onErrorReturn(x -> Collections.emptyList())
-					.blockingGet();
-			
+
+			// Try-catch block because fn.parse may throw an exception before the flowable is created
+			// For example, a format may attempt ot read the input stream into a buffer
+			List<ResourceInDataset> baseItems;
+			try {
+				baseItems = fn.parse(() -> SparqlStmtUtils.openInputStream(filename))
+						.limit(1000)
+						.toList()
+						.onErrorReturn(x -> Collections.emptyList())
+						.blockingGet();
+			} catch(Exception e) {
+				baseItems = Collections.emptyList();
+				logger.debug("Probing against format " + formatName + " raised exception", e);
+			}
+
 			int availableItems = baseItems.size();
 			
 			//List<Resource> items =
@@ -198,7 +207,13 @@ public class LsqUtils {
     	String str;
 		try {
 			try(InputStream in = inSupp.call()) {
-				str = IOUtils.toString(in, StandardCharsets.UTF_8);
+				// If the buffer gets completely filled, our input is too large
+				byte[] buffer = new byte[16 * 1024 * 1024];
+				int n = IOUtils.read(in, buffer);
+				if(n == buffer.length) {
+					throw new RuntimeException("Input is too large for sparql stream; reached limit of " + buffer.length + " bytes");
+				}
+				str = new String(buffer, 0, n, StandardCharsets.UTF_8);
 			}
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -473,7 +488,7 @@ public class LsqUtils {
 	        result = result
 	        	//.zipWith(, zipper)
 	        	//.doOnNext()	
-	        	.map(x -> {
+	        	.flatMapMaybe(x -> {
 	        		Number presentSeqId = ResourceUtils.getLiteralPropertyValue(x, LSQ.sequenceId, Number.class);
 
 	        		long seqId;
@@ -483,6 +498,9 @@ public class LsqUtils {
 	        			seqId = nextId[0]++;
 		        		x.addLiteral(LSQ.sequenceId, seqId);
 	        		}
+
+	        		// If we cannot obtain a query from the log record, we omit the entry
+	        		Maybe<ResourceInDataset> r = Maybe.empty();
 
 	        		// Invert; map from query to log entry
 	        		ResourceInDataset qq = x.wrapCreate(Model::createResource);
@@ -499,13 +517,22 @@ public class LsqUtils {
 //        			}
 //        			String graphAndResourceIri = "urn:lsq:query:sha256:" + filename + "-" + seqId;
         			
-	        	try {
-	        		Query parsedQuery = getParsedQuery(x, sparqlStmtParser);
-	        		if(parsedQuery != null) {
-	        			String str = parsedQuery.toString();
+	        	//try {
+	        		SparqlStmtQuery parsedQuery = getParsedQuery(x, sparqlStmtParser);	        		
+	        		if(parsedQuery != null) {	        			
+	        			String str = parsedQuery.isParsed()
+	        					? parsedQuery.getQuery().toString()
+	        					: parsedQuery.getOriginalString();
+
 	        			String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
 	        			q.setText(str);
 	        			q.setHash(hash);
+	        			
+	        			Throwable t = parsedQuery.getParseException();
+	        			if(t != null) {
+	        				q.setParseError(t.toString());
+	        			}
+	        			
 	        			// String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
 	        			String graphAndResourceIri = baseIri + "q-" + hash;
 	        			// Note: We could also leave the resource as a blank node
@@ -513,21 +540,23 @@ public class LsqUtils {
 	        			// in order to merge records about equivalent queries
         				qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
         				qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
+
+        				r = Maybe.just(qq);
 	        		}
 
 	        		//LsqUtils.postProcessSparqlStmt(x, sparqlStmtParser);
-	        	} catch(Exception e) {
-	                qq.addLiteral(LSQ.processingError, e.toString());
-	        	}
+//	        	} catch(Exception e) {
+//	                qq.addLiteral(LSQ.processingError, e.toString());
+//	        	}
 
 	        	// Remove text and query properties, as LSQ.text is
 	        	// the polished one
 	        	// xx.removeAll(LSQ.query);
 	        	// xx.removeAll(RDFS.label);
 
-	        	return qq;
-	        })
-	        .filter(x -> x != null);
+	        	return r;
+	        });
+	        //.filter(x -> x != null);
 
 //    		result = result
 //    			.map(ResourceInDataset::getDataset)
@@ -688,13 +717,13 @@ public class LsqUtils {
 	 * @param r A log entry resource
 	 * @param sparqlStmtParser
 	 */
-    public static Query getParsedQuery(Resource r, Function<String, SparqlStmt> sparqlStmtParser) {
+    public static SparqlStmtQuery getParsedQuery(Resource r, Function<String, SparqlStmt> sparqlStmtParser) {
 
-    	Query result = null; // the parsed query string - if possible
+    	SparqlStmtQuery result = null; // the parsed query string - if possible
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
-        // Extract the query and add it with the lsq:query property
-        WebLogParser.extractQueryString(r);
+        // Extract the raw query string and add it with the lsq:query property to the log entry resource
+        WebLogParser.extractRawQueryString(r);
 
         // If the resource is null, we could not parse the log entry
         // therefore count this as an error
@@ -710,15 +739,17 @@ public class LsqUtils {
                     .map(sparqlStmtParser)
                     .orElse(null);
             
-            if(stmt != null && stmt.isQuery() && stmt.isParsed()) {
-
-                SparqlStmtUtils.optimizePrefixes(stmt);
-
-                SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
-
-                result = queryStmt.getQuery();
-                //String queryStr = Objects.toString(query);
-                //r.addLiteral(LSQ.text, queryStr);
+            if(stmt != null && stmt.isQuery()) { 
+            	if(stmt.isParsed()) {
+	                SparqlStmtUtils.optimizePrefixes(stmt);	
+	                SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+	
+	                //result = queryStmt.getQuery();
+	                //String queryStr = Objects.toString(query);
+	                //r.addLiteral(LSQ.text, queryStr);
+            	}
+            	
+            	result = stmt.getAsQueryStmt();
             }
         }
         

@@ -20,8 +20,8 @@ public class CmdLsqRdfize {
 	@Parameter(names={"-n", "--namespaces"}, description="Namespace prefix sources")
 	public List<String> prefixSources = new ArrayList<>();
 
-	@Parameter(names={"--no-squash"}, description="Neither sort name graphs nor merge consecutive ones of same name")
-	public boolean noSquash = false;
+	@Parameter(names={"--no-merge"}, description="Neither sort name graphs nor merge consecutive ones of same name")
+	public boolean noMerge = false;
 	
 	@Parameter(names={"--no-hash"}, description="For privacy, host names are hashed by default. This option prevents it.")
 	public boolean noHostHash = false;

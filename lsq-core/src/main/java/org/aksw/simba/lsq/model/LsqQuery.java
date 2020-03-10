@@ -32,7 +32,11 @@ public interface LsqQuery
 	@Iri(LSQ.Strs.text)
 	String getText();
 	LsqQuery setText(String text);
-	
+
+	@Iri(LSQ.Strs.parseError)
+	String getParseError();
+	LsqQuery setParseError(String text);
+
 	@Iri(LSQ.Strs.hasSpin)
 	org.topbraid.spin.model.Query getSpinQuery();
 	LsqQuery setSpinQuery(Resource resource);

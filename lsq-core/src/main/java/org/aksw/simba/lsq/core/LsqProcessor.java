@@ -344,7 +344,7 @@ public class LsqProcessor
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
         // Extract the query and add it with the lsq:query property
-        WebLogParser.extractQueryString(r);
+        WebLogParser.extractRawQueryString(r);
 
         // If the resource is null, we could not parse the log entry
         // therefore count this as an error
@@ -464,10 +464,12 @@ public class LsqProcessor
                         queryAspectFn = (aspect) -> baseRes.nest(aspect + "-").nest("q-" + queryHash);
                     }
 
-                    result = queryRes.get()
-                            .addProperty(RDF.type, LSQ.Query)
-                            .as(LsqQuery.class)
-                            .setText(("" + queryStr).replace("\n", " "));
+                    if(isLegacyMode) {
+	                    result = queryRes.get()
+	                            .addProperty(RDF.type, LSQ.Query)
+	                            .as(LsqQuery.class)
+	                            .setText(("" + queryStr).replace("\n", " "));
+                    }
 
                     if(!queryStmt.isParsed()) {
                         String msg = queryStmt.getParseException().getMessage();

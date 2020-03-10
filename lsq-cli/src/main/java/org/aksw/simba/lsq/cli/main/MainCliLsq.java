@@ -162,7 +162,7 @@ public class MainCliLsq {
 					.compose(mapper);
 		}
 		
-		if(!cmdRdfize.noSquash) {
+		if(!cmdRdfize.noMerge) {
 			CmdNgsSort sortCmd = new CmdNgsSort();
 			
 			FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
