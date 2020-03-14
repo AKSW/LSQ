@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import org.aksw.commons.util.bean.PropertyUtils;
 import org.aksw.fedx.jsa.FedXFactory;
@@ -29,7 +31,6 @@ import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQuery
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
-import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
@@ -42,6 +43,7 @@ import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.model.LsqQuery;
+import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -154,13 +156,13 @@ public class LsqUtils {
 			}
 
 			int availableItems = baseItems.size();
-			
+
 			//List<Resource> items =
 			List<Resource> parsedItems = baseItems.stream()
 					.filter(r -> !r.hasProperty(LSQ.processingError))
 					.collect(Collectors.toList());
 					//.collect(Collectors.toList());
-			
+
 			long parsedItemCount = parsedItems.size();
 
 			double avgImmediatePropertyCount = parsedItems.stream()
@@ -282,7 +284,7 @@ public class LsqUtils {
         			}
         		},
         		BufferedReader::close);
-        
+
         Flowable<ResourceInDataset> result = flow
                 .map(line -> {
                     ResourceInDataset r = ResourceInDatasetImpl.createAnonInDefaultGraph();//ModelFactory.createDefaultModel().createResource();
@@ -367,12 +369,15 @@ public class LsqUtils {
         Long itemLimit = config.getItemLimit();
         String logFormat = config.getInQueryLogFormat();
         String baseIri = config.outBaseIri;
+        //String datasetUrl = config.iri;
+        String hostHashSalt = "";
+        String serviceUrl = null;
 
         Function<String, SparqlStmt> sparqlParser = SparqlStmtParserImpl.create(new PrefixMappingImpl());
 
         Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
         Flowable<ResourceInDataset> result = createReader(
-        		inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri);
+        		inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri, hostHashSalt, serviceUrl);
 
         if(itemLimit != null) {
             result = result.limit(itemLimit);
@@ -381,8 +386,8 @@ public class LsqUtils {
         
         return result;
     }
-    
-    /**
+
+	/**
      * Method that creates a reader for a specific inputResource under the give config.
      * The config's inputResources are ignored.
      * 
@@ -396,7 +401,10 @@ public class LsqUtils {
     		Function<String, SparqlStmt> sparqlStmtParser,
     		String logFormat,
     		Map<String, ResourceParser> logFmtRegistry,
-    		String baseIri) throws IOException {
+    		String baseIri,
+    		String hostHashSalt,
+    		String serviceUrl
+    		) throws IOException {
 
 //		String filename;
 //		if(logSource == null) {
@@ -458,7 +466,7 @@ public class LsqUtils {
     		if(Strings.isNullOrEmpty(logFormat)) {
     			List<Entry<String, Number>> formats = LsqUtils.probeLogFormat(logFmtRegistry, logSource);
     			if(formats.isEmpty()) {
-    				throw new RuntimeException("Could not auto-detect a log format");
+    				throw new RuntimeException("Could not auto-detect a log format for " + logSource);
     			}
     			
 //    				if(formats.size() != 1) {
@@ -483,22 +491,37 @@ public class LsqUtils {
             // The webLogParser yields resources (blank nodes) for the log entry
             // First add a sequence id attribute
             // Then invert the entry: 
-                        
-	        long[] nextId = {0};
+            
 	        result = result
+	        	.zipWith(LongStream.iterate(1, x -> x + 1)::iterator, Maps::immutableEntry)
+	        	// Add the zipped index to the resource
+	        	.map(e -> {
+	        		ResourceInDataset r = e.getKey();
+	        		Long idx = e.getValue();
+	        		
+	        		RemoteExecution re = r.as(RemoteExecution.class);
+	        		re.setSequenceId(idx);
+	        		
+	        		return r;
+	        	})
 	        	//.zipWith(, zipper)
 	        	//.doOnNext()	
 	        	.flatMapMaybe(x -> {
-	        		Number presentSeqId = ResourceUtils.getLiteralPropertyValue(x, LSQ.sequenceId, Number.class);
+	        		RemoteExecution re = x.as(RemoteExecution.class);
 
-	        		long seqId;
-	        		if(presentSeqId != null) {
-	        			seqId = presentSeqId.longValue();
-	        		} else {
-	        			seqId = nextId[0]++;
-		        		x.addLiteral(LSQ.sequenceId, seqId);
-	        		}
-
+	        		
+//	        		// Long seqId = re.getSequenceId();
+//	        		
+//	        		Number presentSeqId = ResourceUtils.getLiteralPropertyValue(x, LSQ.sequenceId, Number.class);
+//
+//	        		long seqId;
+//	        		if(presentSeqId != null) {
+//	        			seqId = presentSeqId.longValue();
+//	        		} else {
+//	        			seqId = nextId[0]++;
+//		        		x.addLiteral(LSQ.sequenceId, seqId);
+//	        		}
+//
 	        		// If we cannot obtain a query from the log record, we omit the entry
 	        		Maybe<ResourceInDataset> r = Maybe.empty();
 
@@ -524,9 +547,9 @@ public class LsqUtils {
 	        					? parsedQuery.getQuery().toString()
 	        					: parsedQuery.getOriginalString();
 
-	        			String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+	        			String queryHash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
 	        			q.setText(str);
-	        			q.setHash(hash);
+	        			q.setHash(queryHash);
 	        			
 	        			Throwable t = parsedQuery.getParseException();
 	        			if(t != null) {
@@ -534,16 +557,45 @@ public class LsqUtils {
 	        			}
 	        			
 	        			// String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
-	        			String graphAndResourceIri = baseIri + "q-" + hash;
+	        			String graphAndResourceIri = baseIri + "q-" + queryHash;
 	        			// Note: We could also leave the resource as a blank node
 	        			// The only important part is to have a named graph with the query hash
 	        			// in order to merge records about equivalent queries
         				qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
+
+        				
+        				/*
+        				 * Generate IRI for log record
+        				 */
+
+    	        		String host = re.getHost();
+    	        		if(host != null) {
+    	        	        String hostHash = Hashing.sha256().hashString(hostHashSalt + host, StandardCharsets.UTF_8).toString();
+    	        	        re.setHostHash(hostHash);
+    	        	        re.setHost(null);
+    	        	        
+    	        	        Calendar timestamp = re.getTimestamp();
+    	        	        
+    	        	        long seqId = re.getSequenceId();
+    	        	        // TODO If there is a timestamp then use it
+    	        	        // Otherwise, use sourceFileName + sequenceId
+    	        	        String logEntryId = hostHash + "_" + (timestamp != null
+    	        	        		? timestamp.toInstant().toString()
+    	        	        		: seqId);
+    	        	        		
+   	        	        
+    	        			String reIri = baseIri + "re-" + logEntryId;
+    	        			org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
+    	        		}
+        				
+        				
         				qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
 
+        				
         				r = Maybe.just(qq);
 	        		}
 
+	        		
 	        		//LsqUtils.postProcessSparqlStmt(x, sparqlStmtParser);
 //	        	} catch(Exception e) {
 //	                qq.addLiteral(LSQ.processingError, e.toString());

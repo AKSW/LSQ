@@ -80,6 +80,10 @@ public class LSQ {
 	    public static final String sequenceId = ns + "sequenceId";
 
 	    public static final String host = ns + "host";
+	    public static final String hostHash = ns + "hostHash";
+	    public static final String atTime = PROV.ns + "atTime";
+	    public static final String endpoint = ns + "endpoint";
+	    public static final String userAgent = ns + "userAgent";
 	}
 	
 	
@@ -201,7 +205,8 @@ public class LSQ {
 
     public static final Property dataset = property("dataset");
 
-    public static final Property endpoint = property("endpoint");
+    public static final Property endpoint = ResourceFactory.createProperty(Strs.endpoint);
+    public static final Property userAgent = ResourceFactory.createProperty(Strs.userAgent);
 
 
     // TODO This is actually the vocab for apache log parsing - move it elsewhere
@@ -216,6 +221,9 @@ public class LSQ {
      */
     public static final Property logRecord = property("logRecord");
     public static final Property host = ResourceFactory.createProperty(Strs.host);
+    public static final Property hostHash = ResourceFactory.createProperty(Strs.hostHash);
+    //public static final Property timestamp = ResourceFactory.createProperty(Strs.timestamp);
+
     public static final Property user = property("user");
     public static final Property request = property("request");
     public static final Property query = property("query");

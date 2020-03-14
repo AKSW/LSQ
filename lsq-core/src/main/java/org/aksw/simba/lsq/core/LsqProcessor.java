@@ -1,10 +1,10 @@
 package org.aksw.simba.lsq.core;
 
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -72,9 +72,11 @@ public class LsqProcessor
 {
     private static final Logger logger = LoggerFactory.getLogger(LsqProcessor.class);
 
+    // public static final DateFormat DEFAULT_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-ddThh:mm:ss");
+
 
     protected Function<String, SparqlStmt> stmtParser;
-    protected SimpleDateFormat dt = new SimpleDateFormat("yyyy-mm-dd_hh:mm:ss");
+    protected SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss");
 
 
     protected boolean reuseLogIri;
@@ -600,6 +602,8 @@ public class LsqProcessor
         return result;
     }
 
+    
+    
     @Deprecated
     public void rdfizeLogRecord(NestedResource baseRes, Resource r, NestedResource queryRes, Function<String, NestedResource> queryAspectFn) {
 

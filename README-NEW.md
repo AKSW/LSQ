@@ -50,6 +50,34 @@ lsq-core/src/test/resources/logs/virtuoso.dbpedia.log	[virtuoso=6.0, sparql2=2.0
 lsq-core/src/test/resources/logs/wikidata.wikidata.20170612-10.log	[wikidata=4.0, sparql2=2.0]
 ```
 
+### RDFizing SPARQL Endpoint Log Files
+RDFization converts each record of a log into a query centric named graph:
+
+```
+<http://ex.org/q-queryhash> {
+  <http://ex.org/q-queryhash>
+    hasRemoteExec <http://ex.org/re-endpointhash-hosthash_2020-01-01T01:01:01Z>
+    lsq:asText "SELECT * ..."
+    .
+  
+  <http://ex.org/re-endpointhash-hosthash_2020-01-01T01:01:01Z>
+    lsq:endpoint "http://dbpedia.org/sparql" ;
+    lsq:hostHash "hostHash" ; # Hashed IP; by default every invocation of lsq uses as fresh UUID as salt for privacy
+    prov:atTime "2020-01-01_01:01:01" ;
+    .
+}
+```
+
+
+The only mandatory option for RDFization of log files is to provide a URL of the service the log is associated with:
+```
+rdfize -e "http://dbpedia.org/sparql" access.2020-01-01.log
+```
+
+
+
+
+
 
 ## A-priori deduplication of queries
 

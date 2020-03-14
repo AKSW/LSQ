@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.Map.Entry;
 import java.util.function.Function;
 
@@ -115,12 +116,26 @@ public class MainCliLsq {
 	}
 
 	
-	public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfize cmdRdfize) throws FileNotFoundException, IOException, ParseException {
-		String logFormat = cmdRdfize.inputLogFormat;
-		List<String> logSources = cmdRdfize.nonOptionArgs;
-		String baseIri = cmdRdfize.baseIri;
+	public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfize rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
+		String logFormat = rdfizeCmd.inputLogFormat;
+		List<String> logSources = rdfizeCmd.nonOptionArgs;
+		String baseIri = rdfizeCmd.baseIri;
 		
-		List<String> rawPrefixSources = cmdRdfize.prefixSources;
+		String tmpHostHashSalt = rdfizeCmd.hostSalt;
+		if(tmpHostHashSalt == null) {
+			tmpHostHashSalt = UUID.randomUUID().toString();
+			logger.info("Auto generated host hash salt: " + tmpHostHashSalt);
+		}
+		
+		String hostHashSalt = tmpHostHashSalt;
+		
+		String endpointUrl = rdfizeCmd.endpointUrl;
+		if(endpointUrl == null) {
+			throw new RuntimeException("Please specify the URL of the endpoint the provided query logs are assigned to.");
+		}
+		
+		
+		List<String> rawPrefixSources = rdfizeCmd.prefixSources;
 		Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(rawPrefixSources);
 		Function<String, SparqlStmt> sparqlStmtParser = LsqUtils.createSparqlParser(prefixSources);
 		
@@ -136,13 +151,15 @@ public class MainCliLsq {
 						sparqlStmtParser,
 						logFormat,
 						logFmtRegistry,
-						baseIri);
+						baseIri,
+						hostHashSalt,
+						endpointUrl);
 
 				return st;
 			});
 		
 		
-		if(cmdRdfize.slimMode) {
+		if(rdfizeCmd.slimMode) {
 			CmdNgsMap cmd = new CmdNgsMap();
 			cmd.stmts.add("lsq-slimify.sparql");
 //			cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
@@ -162,8 +179,10 @@ public class MainCliLsq {
 					.compose(mapper);
 		}
 		
-		if(!cmdRdfize.noMerge) {
+		if(!rdfizeCmd.noMerge) {
 			CmdNgsSort sortCmd = new CmdNgsSort();
+			sortCmd.bufferSize = rdfizeCmd.bufferSize;
+			sortCmd.temporaryDirectory = rdfizeCmd.temporaryDirectory;
 			
 			FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
 			logRdfEvents = logRdfEvents
