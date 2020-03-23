@@ -76,6 +76,69 @@ rdfize -e "http://dbpedia.org/sparql" access.2020-01-01.log
 
 
 
+### Benchmarking queries
+An LSQ benchmark run is an experiment that yields observations.
+The identity of an experiment is defined by three attributes
+* an Id of the agent that launches it
+* a distribution of a dataset through a SPARQL endpoint data service
+* a time at which it was started
+
+```
+lsq benchmark-create
+
+```
+
+
+```
+lsq benchmark run
+```
+
+
+
+
+Execution of a benchmark of SPARQL queries has to run against a concrete distribution of a dataset in a SPARQL service.
+The DCAT2 data model supports descriptions of just that.
+
+* Why not provide the endpointURL to LSQ directly and later link it to a distribution ID?
+For benchmarking, you will most likely use an endpoint URL such as `http://localhost:1234/sparql`. You may even start multiple instances of the
+endpoint under the same URL - fixing this retroactively is just painful, so avoid it.
+
+
+* The recommended approach is to create a small RDF snippet as follows. `lsq dist-template` helps with that.
+```
+#cat.ttl
+
+@prefix eg: <http://www.example.org/>
+
+eg:yourDataset # <-- ID of your dataset
+  dcat:distribution yourDownloadableDistribution, eg:yourSparqlEndpointDistribution .
+
+
+# vvv Valuable ID! vvv
+eg:yourDatasetInYourEndpoint # <-- The techical manifestation of your dataset
+  dcat:endpointURL <http://foo.bar/sparql> ;
+  dcatx:defaultGraphs (<http://dbpedia.org) ;
+  .
+```
+
+Why is the ID of the distribution valuable? Because it is linked to both an ID of the dataset so we know what is being queried,
+as well as the concrete endpoint the benchmark system can connect to. This allows you to run
+
+```
+lsq benchmark --catalog cat.ttl --distribution eg:yourDatasetInYourEndpoint querylog.trig
+```
+Now lsq can connect to the provided endpoint as well as link the generated benchmarks to the given dataset identifier.
+The dataset identifier has a greater chance of remaining stable than thet benchmark endpoint which typically will be discarded at some point.
+
+
+* If you have a rather stable URL for the data and want a 'lazy' approach to assign IDs for datasets and distributions, consider using these '#' suffixes:
+
+* `http://foo.bar/sparql#service`      - The data service 
+* `http://foo.bar/sparql#dataset`      - The content of the dataset as hosted at this service, may be distributed elsewhere in addition
+* `http://foo.bar/sparql#distribution` - The distribution of the dataset using this concrete service
+* `http://foo.bar/sparql#content`      - The identify of DCAT2 datasets includes the publishing authority. The content is the just the data without the data. All RDF content that is isomporhic to each other is equivalent by definition.
+
+
 
 
 

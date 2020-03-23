@@ -7,28 +7,31 @@ PREFIX prov: <http://www.w3.org/ns/prov#>
 
 DELETE {
   GRAPH ?g {
-    ?s ?p ?o
+    ?s ?p ?o .
+    ?o ?x ?y
   }
 }
 WHERE {
   { SELECT DISTINCT ?g ?s {
       GRAPH ?g {
-        ?s lsq:host [] .
+        ?s lsq:query [] .
       }
    } }
    GRAPH ?g {
      ?s ?p ?o
-     FILTER(?p NOT IN (lsq:host, prov:atTime))
+     # Optional in order to delete orphaned lsq:header resources (such as Referer, User-agent)
+     OPTIONAL{ ?o ?x ?y }
+     FILTER(?p NOT IN (lsq:host, lsq:hostHash, lsq:uri, lsq:endpoint, prov:atTime))
 
      
      # Remove lsq:text if ?s is referenced by remote execution with that that attribute
-     FILTER(?p != lsq:text || EXISTS {
-       GRAPH ?g {
-         []
-           lsq:hasRemoteExec ?s ;
-           lsq:text ?[]
-       } 
-     })
+     # FILTER(?p != lsq:text || EXISTS {
+     #  GRAPH ?g {
+     #    []
+     #      lsq:hasRemoteExec ?s ;
+     #      lsq:text []
+     #  } 
+     # })
 
    }
 }

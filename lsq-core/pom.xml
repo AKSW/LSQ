@@ -19,7 +19,7 @@
 		<dependency>
 			<groupId>org.aksw.sparql-integrate</groupId>
 			<artifactId>sparql-integrate-cli</artifactId>
-			<version>1.0.1-SNAPSHOT</version>
+			<version>1.0.2-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -45,6 +45,11 @@
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-conjure</artifactId>
 		</dependency>
 
 		<dependency>

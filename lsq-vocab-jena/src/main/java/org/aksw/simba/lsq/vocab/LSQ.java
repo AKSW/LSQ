@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.vocab;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.DCTerms;
 
 /**
  * LSQ vocabulary
@@ -13,80 +14,88 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public class LSQ {
     public static final String ns = "http://lsq.aksw.org/vocab#";
 
-    
-	public static class Strs {
-	    public static final String Query = ns + "Query";
 
-	    public static final String text = ns + "text";
-	    public static final String hash = ns + "hash";
-	    public static final String resultSize = ns + "resultSize";
-	    public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
-	    public static final String hasSpin = ns + "hasSpin";
-	    public static final String hasTP = ns + "hasTP";
-	    public static final String hasBGP = ns + "hasBGP";
-	    //public static final String tpText = ns + "tpText";
-	    //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
-	    public static final String execError = ns + "execError";
-	    public static final String processingError = ns + "processingError";
-	    public static final String parseError = ns + "parseError";
-	    public static final String runTimeMs = ns + "runTimeMs";
+    public static class Strs {
+        public static final String Query = ns + "Query";
 
-	    public static final String hasExec = ns + "hasExec";
-	    public static final String hasLocalExec =  ns + "hasLocalExec";
-	    public static final String hasRemoteExec = ns + "hasRemoteExec";
+        public static final String text = ns + "text";
+        public static final String hash = ns + "hash";
+        public static final String resultSize = ns + "resultSize";
+        public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
+        public static final String hasSpin = ns + "hasSpin";
+        public static final String hasTP = ns + "hasTP";
+        public static final String hasBGP = ns + "hasBGP";
+        //public static final String tpText = ns + "tpText";
+        //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
+        public static final String execError = ns + "execError";
+        public static final String processingError = ns + "processingError";
+        public static final String parseError = ns + "parseError";
+        public static final String runTimeMs = ns + "runTimeMs";
 
-	    public static final String hasBGPExec = ns + "hasBGPExec";
-	    public static final String hasTPExec = ns + "hasTPExec";
-	    public static final String hasJoinVarExec = ns + "hasJoinVarExec";
-	    
-	    
-	    public static final String Vertex = ns + ns + "Vertex";
-	    public static final String Edge = ns + ns + "Edge";
+        public static final String hasExec = ns + "hasExec";
+        public static final String hasLocalExec =  ns + "hasLocalExec";
+        public static final String hasRemoteExec = ns + "hasRemoteExec";
 
-	    public static final String in = ns + "in";
-	    public static final String out = ns + "out";
-	    // Internal use. Indicates that one resource represents another one
-	    public static final String proxyFor = ns + "proxyFor";
+        public static final String hasBGPExec = ns + "hasBGPExec";
+        public static final String hasTPExec = ns + "hasTPExec";
+        public static final String hasJoinVarExec = ns + "hasJoinVarExec";
 
 
+        public static final String Vertex = ns + ns + "Vertex";
+        public static final String Edge = ns + ns + "Edge";
 
-	    public static final String Star = ns + "Star";
-	    public static final String Sink = ns + "Sink";
-	    public static final String Path = ns + "Path";
-	    public static final String Hybrid = ns + "Hybrid";
+        public static final String in = ns + "in";
+        public static final String out = ns + "out";
+        // Internal use. Indicates that one resource represents another one
+        public static final String proxyFor = ns + "proxyFor";
 
 
-	    public static final String joinVertex = ns + "joinVertex";
-	    public static final String joinVertexType = ns + "joinVertexType";
-	    public static final String joinVertexDegree = ns + "joinVertexDegree";
 
-	    public static final String bgps = ns + "bgps";
-	    public static final String tps = ns + "tps";
-	    public static final String minBGPTriples = ns + "minBGPTriples";
-	    public static final String maxBGPTriples = ns + "maxBGPTriples";
-	    public static final String joinVertices = ns + "joinVertices";
-	    public static final String projectVars = ns + "projectVars";
+        public static final String Star = ns + "Star";
+        public static final String Sink = ns + "Sink";
+        public static final String Path = ns + "Path";
+        public static final String Hybrid = ns + "Hybrid";
 
-	    //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
-	    public static final String meanJoinVertexDegree = ns + "meanJoinVertexDegree";
-	    public static final String medianJoinVertexsDegree = ns + "medianJoinVertexDegree";
 
-	    public static final String mentionsSubject = ns + "mentionsSubject";
-	    public static final String mentionsPredicate = ns + "mentionsPredicate";
-	    public static final String mentionsObject = ns + "mentionsObject";
+        public static final String joinVertex = ns + "joinVertex";
+        public static final String joinVertexType = ns + "joinVertexType";
+        public static final String joinVertexDegree = ns + "joinVertexDegree";
 
-	    public static final String mentionsTuple = ns + "mentionsTuple";
-	    
-	    public static final String sequenceId = ns + "sequenceId";
+        public static final String bgps = ns + "bgps";
+        public static final String tps = ns + "tps";
+        public static final String minBGPTriples = ns + "minBGPTriples";
+        public static final String maxBGPTriples = ns + "maxBGPTriples";
+        public static final String joinVertices = ns + "joinVertices";
+        public static final String projectVars = ns + "projectVars";
 
-	    public static final String host = ns + "host";
-	    public static final String hostHash = ns + "hostHash";
-	    public static final String atTime = PROV.ns + "atTime";
-	    public static final String endpoint = ns + "endpoint";
-	    public static final String userAgent = ns + "userAgent";
-	}
-	
-	
+        //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
+        public static final String meanJoinVertexDegree = ns + "meanJoinVertexDegree";
+        public static final String medianJoinVertexsDegree = ns + "medianJoinVertexDegree";
+
+        public static final String mentionsSubject = ns + "mentionsSubject";
+        public static final String mentionsPredicate = ns + "mentionsPredicate";
+        public static final String mentionsObject = ns + "mentionsObject";
+
+        public static final String mentionsTuple = ns + "mentionsTuple";
+
+        public static final String sequenceId = ns + "sequenceId";
+
+        public static final String host = ns + "host";
+        public static final String hostHash = ns + "hostHash";
+        public static final String atTime = PROV.ns + "atTime";
+        public static final String endpoint = ns + "endpoint";
+        public static final String userAgent = ns + "userAgent";
+
+        public static final String config = ns + "config";
+        public static final String requestDelay = ns + "requestDelay";
+        public static final String connectionTimeout = ns + "connectionTimeout";
+        public static final String queryTimeout = ns + "queryTimeout";
+        public static final String datasetSize = ns + "datasetSize";
+        public static final String datasetLabel = ns + "datasetLabel";
+        public static final String datasetIri = ns + "datasetIri";
+    }
+
+
 
     public static Resource resource(String local) { return ResourceFactory.createResource(ns + local); }
     public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
@@ -215,7 +224,7 @@ public class LSQ {
 
     public static final Property sequenceId = ResourceFactory.createProperty(Strs.sequenceId);
 
-    
+
     /**
      * logRecord: String representation of the original log entry - usually a line
      */

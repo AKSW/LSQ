@@ -1,4 +1,4 @@
 #!/bin/sh
 
-java -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLsq "$@"
+java $JAVA_OPTS -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLsq $@
 

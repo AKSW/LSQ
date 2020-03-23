@@ -22,7 +22,7 @@ public class CmdLsqRdfize {
 	public String inputLogFormat;
 
 	@Parameter(names={"-n", "--namespaces"}, description="Namespace prefix sources")
-	public List<String> prefixSources = new ArrayList<>(Arrays.asList("rdf-prefixes/prefix.cc.2019-12-17.jsonld"));
+	public List<String> prefixSources = new ArrayList<>(Arrays.asList("rdf-prefixes/prefix.cc.2019-12-17.ttl"));
 
 	@Parameter(names={"--no-merge"}, description="Neither sort name graphs nor merge consecutive ones of same name")
 	public boolean noMerge = false;

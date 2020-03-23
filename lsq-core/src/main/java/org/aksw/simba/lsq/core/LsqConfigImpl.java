@@ -13,7 +13,7 @@ import org.apache.jena.sparql.core.DatasetDescription;
 /**
  * Bean implementation of the LSQ config.
  * The code base should use the interface
- * 
+ *
  * @author Claus Stadler, Jan 28, 2019
  *
  */
@@ -22,10 +22,10 @@ public class LsqConfigImpl {
 
     // Use LsqUtils.applyDefaults for default values
     public LsqConfigImpl() {
-    	//this.logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
-    	this.federationEndpoints = new ArrayList<>();
+        //this.logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
+        this.federationEndpoints = new ArrayList<>();
     }
-    
+
     //protected Map<String, Mapper> logFmtRegistry;
 
     protected List<String> inQueryLogFiles;
@@ -54,16 +54,16 @@ public class LsqConfigImpl {
 
     protected String datasetEndpoint;
     protected DatasetDescription datasetDs = new DatasetDescription();
-    
+
     protected String benchmarkEndpoint;
     protected DatasetDescription benchmarkDs = new DatasetDescription();
-    
+
     // If no benchmark connection is set, the endpoint description will be used to create one
     // Conversely, if the connection is set, it will be used regardless of the benchmarkEndpointDescripton
     protected RDFConnection benchmarkConnection;
-    
+
     protected RDFConnection dataConnection;
-    
+
     //protected Long datasetEndpointPagination;
     protected boolean isFetchDatasetSizeEnabled;
     //protected boolean fetchDatasetEndpointSize;
@@ -74,6 +74,17 @@ public class LsqConfigImpl {
 
     protected Long benchmarkQueryExecutionTimeoutInMs;
 
+    /**
+     * Experiment short label. By default "x-" + distribution short label + timestamp.
+     * e.g. x-www.mydomain-sparql_9999-12-24
+     */
+    protected String experimentId;
+
+    /**
+     * Experiment IRI.
+     * By default base IRI + experimentID
+     * E.g. http://my-base/x-www.mydomain-sparql_9999-12-24
+     */
     protected String experimentIri;
     protected Long datasetSize;
 
@@ -87,27 +98,27 @@ public class LsqConfigImpl {
     protected boolean emitProcessMetadata;
 
     protected Long seenQueryCacheSize;
-    
-    
+
+
     protected boolean deterministicPseudoTimestamps;
-    
-    
+
+
     protected String httpUserAgent;
     protected Long delayInMs;
-    
-    
+
+
     protected Iterable<String> prefixSources;
 
-    
+
     public Long getSeenQueryCacheSize() {
-		return seenQueryCacheSize;
-	}
+        return seenQueryCacheSize;
+    }
 
-	public void setSeenQueryCacheSize(Long seenQueryCacheSize) {
-		this.seenQueryCacheSize = seenQueryCacheSize;
-	}
+    public void setSeenQueryCacheSize(Long seenQueryCacheSize) {
+        this.seenQueryCacheSize = seenQueryCacheSize;
+    }
 
-	/**
+    /**
      * Regex for matching a query ID from a prior IRI;
      * only applicable when processing queries from RDF input
      */
@@ -117,7 +128,7 @@ public class LsqConfigImpl {
         return isFetchDatasetSizeEnabled;
     }
 
-    
+
 //  public SparqlServiceReference getBenchmarkEndpointDescription() {
 //  //return benchmarkEndpointDescription;
 //}
@@ -129,48 +140,48 @@ public class LsqConfigImpl {
 
 
     public String getBenchmarkEndpoint() {
-		return benchmarkEndpoint;
-	}
+        return benchmarkEndpoint;
+    }
 
     public LsqConfigImpl setBenchmarkEndpoint(String url) {
-    	// benchmarkEndpointDescription = ModelFactory.createDefaultModel().createResource().as(SparqlServiceReference.class);
-    	this.benchmarkEndpoint = url;
-    	return this;
+        // benchmarkEndpointDescription = ModelFactory.createDefaultModel().createResource().as(SparqlServiceReference.class);
+        this.benchmarkEndpoint = url;
+        return this;
     }
 
     public DatasetDescription getBenchmarkDs() {
-		return benchmarkDs;
-	}
-   
+        return benchmarkDs;
+    }
+
     public void setBenchmarkDs(DatasetDescription benchmarkDs) {
-		this.benchmarkDs = benchmarkDs;
-	}
+        this.benchmarkDs = benchmarkDs;
+    }
 
     public String getDatasetEndpoint() {
-		return datasetEndpoint;
-	}
-    
+        return datasetEndpoint;
+    }
+
     public LsqConfigImpl setDatasetEndpoint(String datasetEndpoint) {
-		this.datasetEndpoint = datasetEndpoint;
-		return this;
-	}
-    
+        this.datasetEndpoint = datasetEndpoint;
+        return this;
+    }
+
     public LsqConfigImpl setDatasetDs(DatasetDescription datasetDs) {
-		this.datasetDs = datasetDs;
-		return this;
-	}
+        this.datasetDs = datasetDs;
+        return this;
+    }
 
     public LsqConfigImpl addDatasetDefaultGraphs(Collection<String> graphURIs) {
-    	this.datasetDs.addAllDefaultGraphURIs(graphURIs);
-    	return this;
+        this.datasetDs.addAllDefaultGraphURIs(graphURIs);
+        return this;
     }
 
-    
+
     public LsqConfigImpl addBenchmarkDefaultGraphs(Collection<String> graphURIs) {
-    	this.benchmarkDs.addAllDefaultGraphURIs(graphURIs);
-    	return this;
+        this.benchmarkDs.addAllDefaultGraphURIs(graphURIs);
+        return this;
     }
-    
+
     public LsqConfigImpl setFetchDatasetSizeEnabled(boolean isFetchDatasetSizeEnabled) {
         this.isFetchDatasetSizeEnabled = isFetchDatasetSizeEnabled;
         return this;
@@ -186,18 +197,18 @@ public class LsqConfigImpl {
 //        this.sparqlStmtParser = sparqlStmtParser;
 //        return this;
 //    }
-    
+
     // Use sequence ids for local executions
     public boolean isDeterministicPseudoTimestamps() {
-		return deterministicPseudoTimestamps;
-	}
+        return deterministicPseudoTimestamps;
+    }
 
-	public LsqConfigImpl setDeterministicPseudoTimestamps(boolean deterministicPseudoTimestamps) {
-		this.deterministicPseudoTimestamps = deterministicPseudoTimestamps;
-		return this;
-	}
+    public LsqConfigImpl setDeterministicPseudoTimestamps(boolean deterministicPseudoTimestamps) {
+        this.deterministicPseudoTimestamps = deterministicPseudoTimestamps;
+        return this;
+    }
 
-	public Map<String, ResourceParser> getLogFmtRegistry() {
+    public Map<String, ResourceParser> getLogFmtRegistry() {
         return logFmtRegistry;
     }
 
@@ -220,29 +231,29 @@ public class LsqConfigImpl {
 
 
     public RDFConnection getBenchmarkConnection() {
-		return benchmarkConnection;
-	}
+        return benchmarkConnection;
+    }
 
-	public LsqConfigImpl setBenchmarkConnection(RDFConnection benchmarkConnection) {
-		this.benchmarkConnection = benchmarkConnection;
-		return this;
-	}
+    public LsqConfigImpl setBenchmarkConnection(RDFConnection benchmarkConnection) {
+        this.benchmarkConnection = benchmarkConnection;
+        return this;
+    }
 
     public RDFConnection getDataConnection() {
-		return dataConnection;
-	}
+        return dataConnection;
+    }
 
-	public LsqConfigImpl setDataConnection(RDFConnection dataConnection) {
-		this.dataConnection = dataConnection;
-		return this;
-	}
+    public LsqConfigImpl setDataConnection(RDFConnection dataConnection) {
+        this.dataConnection = dataConnection;
+        return this;
+    }
 
-	public File getOutFile() {
+    public File getOutFile() {
         return outFile;
     }
 
 
-	public LsqConfigImpl setOutFile(File outFile) {
+    public LsqConfigImpl setOutFile(File outFile) {
         this.outFile = outFile;
         return this;
     }
@@ -372,6 +383,17 @@ public class LsqConfigImpl {
         return this;
     }
 
+    public String getExperimentId() {
+        return experimentId;
+    }
+
+    public LsqConfigImpl setExperimentId(String experimentId) {
+        this.experimentId = experimentId;
+        return this;
+    }
+
+
+
     public boolean isRdfizerQueryEnabled() {
         return isRdfizerQueryStructuralFeaturesEnabled;
     }
@@ -464,33 +486,33 @@ public class LsqConfigImpl {
         return this;
     }
 
-	public String getHttpUserAgent() {
-		return httpUserAgent;
-	}
+    public String getHttpUserAgent() {
+        return httpUserAgent;
+    }
 
-	public LsqConfigImpl setHttpUserAgent(String httpUserAgent) {
-		this.httpUserAgent = httpUserAgent;
-		return this;
-	}
+    public LsqConfigImpl setHttpUserAgent(String httpUserAgent) {
+        this.httpUserAgent = httpUserAgent;
+        return this;
+    }
 
-	public Long getDelayInMs() {
-		return delayInMs;
-	}
+    public Long getDelayInMs() {
+        return delayInMs;
+    }
 
-	public LsqConfigImpl setDelayInMs(Long delayInMs) {
-		this.delayInMs = delayInMs;
-		return this;
-	}
+    public LsqConfigImpl setDelayInMs(Long delayInMs) {
+        this.delayInMs = delayInMs;
+        return this;
+    }
 
-	public Iterable<String> getPrefixSources() {
-		return prefixSources;
-	}
+    public Iterable<String> getPrefixSources() {
+        return prefixSources;
+    }
 
-	public LsqConfigImpl setPrefixSources(Iterable<String> prefixSources) {
-		this.prefixSources = prefixSources;
-		return this;
-	}
-	
-	
+    public LsqConfigImpl setPrefixSources(Iterable<String> prefixSources) {
+        this.prefixSources = prefixSources;
+        return this;
+    }
+
+
 }
 
