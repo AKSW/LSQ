@@ -55,6 +55,9 @@ import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
@@ -69,6 +72,8 @@ import org.apache.jena.riot.RDFWriterRegistry;
 import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.ARQConstants;
+import org.apache.jena.sparql.core.Var;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1015,6 +1020,51 @@ public class LsqUtils {
 
 
         result.setSeenQueryCache(seenQueryCache);
+
+        return result;
+    }
+
+    public static Triple effectiveTriple(Triple t) {
+        return new Triple(
+                effectiveNode(t.getSubject()),
+                effectiveNode(t.getPredicate()),
+                effectiveNode(t.getObject()));
+    }
+
+    public static Node effectiveNode(Node node) {
+        Node result;
+        if(Var.isVar(node)) {
+            String rawName = node.getName();
+            String name = separateMarkerFromVarName(rawName)[0];
+
+            if(Var.isBlankNodeVar(node) || Var.isAllocVar(node)) {
+                result = NodeFactory.createBlankNode(name);
+            } else {
+                result = node;
+            }
+
+        } else {
+            result = node;
+        }
+
+        return result;
+    }
+
+    public static String[] separateMarkerFromVarName(String rawName) {
+        String[] result = new String[] {"", null};
+
+        if(Var.isAllocVarName(rawName)) {
+            result[0] = ARQConstants.allocVarMarker;
+            result[1] = rawName.substring(ARQConstants.allocVarMarker.length());
+        } else if(Var.isBlankNodeVarName(rawName)) {
+            result[0] = ARQConstants.allocVarAnonMarker;
+            result[1] = rawName.substring(ARQConstants.allocVarAnonMarker.length());
+        } else if(Var.isRenamedVar(rawName)) {
+            result[0] = ARQConstants.allocVarScopeHiding;
+            result[1] = rawName.substring(ARQConstants.allocVarScopeHiding.length());
+        } else {
+            result[1] = rawName;
+        }
 
         return result;
     }

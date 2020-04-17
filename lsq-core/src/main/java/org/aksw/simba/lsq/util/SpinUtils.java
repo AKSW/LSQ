@@ -29,6 +29,7 @@ import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
+import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
@@ -211,7 +212,8 @@ public class SpinUtils {
         Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
 
         triplePatternIndex.forEach((r, t) -> r.inModel(queryRes.getModel())
-                .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
+                .addProperty(RDFS.label, FmtUtils.stringForTriple(t) + " .")
+                // .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
                 );
                 //.addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
     }
@@ -239,7 +241,7 @@ public class SpinUtils {
 
         long result;
         try(QueryExecution qe = qef.createQueryExecution(query)) {
-        	result = ServiceUtils.fetchInteger(qe, Vars.c);
+            result = ServiceUtils.fetchInteger(qe, Vars.c);
         }
         return result;
     }

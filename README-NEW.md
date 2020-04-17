@@ -84,13 +84,16 @@ The identity of an experiment is defined by three attributes
 * a time at which it was started
 
 ```
-lsq benchmark-create
+lsq benchmark create -d datasetId -e endpointUrl -g defaultGraph
 
 ```
 
+Notably, there are two modes for observation resources:
+* Append a suffix to the query resource - e.g. `http://lsq.aksw.org/q-123_xc_dbpedia_2020-01-01_at-2020-02-02`
+* Standalone resources `http://my-experiment/xc-dbpedia_2020-01-01_at-2020-02-02`
 
 ```
-lsq benchmark run
+lsq benchmark run --config config.ttl logs*
 ```
 
 

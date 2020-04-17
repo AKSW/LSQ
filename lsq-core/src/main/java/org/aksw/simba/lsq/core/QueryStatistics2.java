@@ -38,6 +38,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
@@ -56,6 +57,7 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.PatternVars;
+import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -121,7 +123,7 @@ public class QueryStatistics2 {
             subQuery.setQueryPattern(lhs);
             sub = new ElementSubQuery(subQuery);
         } else {
-        	sub = lhs;
+            sub = lhs;
         }
 
         Query query = new Query();
@@ -398,7 +400,10 @@ public class QueryStatistics2 {
         if (node.isURI()) {
             result = StringUtils.urlEncode(node.getURI()).replaceAll("\\%..", "-").replaceAll("\\-+", "-");
         } else if (node.isVariable()) {
-            result = ((Var) node).getName();
+            // result = ((Var) node).getName();
+            // result = NodeFmtLib.displayStr(node);
+            // FmtUtils is older, but is decodes bnode labels correctly
+            result = FmtUtils.stringForNode(node);
         } else {
             result = "" + node;
         }
@@ -461,7 +466,8 @@ public class QueryStatistics2 {
             ox.addProperty(RDF.type, LSQ.Vertex).addProperty(RDF.object, oo).addProperty(LSQ.proxyFor, oo)
                     .addLiteral(RDFS.label, getLabel(o));
 
-            tx.addProperty(RDF.type, LSQ.Edge).addLiteral(RDFS.label, "" + t);
+            String tripleStr = FmtUtils.stringForTriple(t) + " .";
+            tx.addProperty(RDF.type, LSQ.Edge).addLiteral(RDFS.label, "" + tripleStr);
 
             result.add(sx, LSQ.out, tx);
             result.add(px, LSQ.in, tx);
