@@ -400,7 +400,8 @@ public class QueryStatistics2 {
         if (node.isURI()) {
             result = StringUtils.urlEncode(node.getURI()).replaceAll("\\%..", "-").replaceAll("\\-+", "-");
         } else if (node.isVariable()) {
-            // result = ((Var) node).getName();
+            result = ((Var) node).getName();
+        } else if(node.isBlank()) {
             // result = NodeFmtLib.displayStr(node);
             // FmtUtils is older, but is decodes bnode labels correctly
             result = FmtUtils.stringForNode(node);

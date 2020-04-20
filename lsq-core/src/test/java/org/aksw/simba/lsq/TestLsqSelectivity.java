@@ -40,8 +40,8 @@ public class TestLsqSelectivity {
         QueryExecutionFactory dataQef = FluentQueryExecutionFactory.from(dataModel).create();
 
         Stream<String> queryStrs = new BufferedReader(new InputStreamReader(new ClassPathResource("lsq-tests/01/query.sparql.log").getInputStream())).lines()
-        		.map(String::trim)
-        		.filter(str -> !Strings.isNullOrEmpty(str));//.collect(Collectors.joining("\n"));
+                .map(String::trim)
+                .filter(str -> !Strings.isNullOrEmpty(str));//.collect(Collectors.joining("\n"));
         //Stream<String> queryStr = queryStrs.findFirst();
 
         // TODO Consider specifying the pattern directly without going over the registry
@@ -60,14 +60,15 @@ public class TestLsqSelectivity {
         processor.setRdfizerQueryExecutionEnabled(true);
         processor.setRdfizerQueryLogRecordEnabled(true);
         processor.setDataQef(dataQef);
+        processor.setLegacyMode(true);
         //processor.setQueryAspectFn(queryAspectFn);
 
 
         queryStrs.forEach(queryStr -> {
-        	
+
             Resource logRes = ModelFactory.createDefaultModel().createResource();
             mapper.parse(logRes, queryStr);
-            Resource queryRes = processor.applyForQueryOrWebLogRecord(logRes, true);
+            Resource queryRes = processor.applyForQueryOrWebLogRecord(logRes);
             if(queryRes != null) {
                 RDFDataMgr.write(System.out, queryRes.getModel(), RDFFormat.TURTLE_BLOCKS);
             }

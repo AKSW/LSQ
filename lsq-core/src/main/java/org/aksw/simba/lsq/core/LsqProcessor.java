@@ -150,6 +150,8 @@ public class LsqProcessor
     protected long logEntryIndex = 0l;
     protected int batchSize = 10;
 
+    protected boolean isLegacyMode = false;
+
 
     // If an RDFized web log neither provides a sequence id
     // nor a timestamp, use this counter to label resources in rdfizeLogRecord()
@@ -225,6 +227,14 @@ public class LsqProcessor
 
     public void setWorkloadSize(Long workloadSize) {
         this.workloadSize = workloadSize;
+    }
+
+    public void setLegacyMode(boolean isLegacyMode) {
+        this.isLegacyMode = isLegacyMode;
+    }
+
+    public boolean isLegacyMode() {
+        return isLegacyMode;
     }
 
 
@@ -350,7 +360,7 @@ public class LsqProcessor
      * @return
      */
     public LsqQuery applyForQueryRecord(Resource r) {
-        LsqQuery result = applyForQueryOrWebLogRecord(r, true);
+        LsqQuery result = applyForQueryOrWebLogRecord(r);
         return result;
     }
 
@@ -423,7 +433,7 @@ public class LsqProcessor
 
 
     @Deprecated
-    public LsqQuery applyForQueryOrWebLogRecord(Resource r, boolean isLegacyMode) {
+    public LsqQuery applyForQueryOrWebLogRecord(Resource r) {
         // logger.debug(RDFDataMgr.write(out, dataset, lang););
 
         // Extract the query and add it with the lsq:query property
@@ -650,7 +660,9 @@ public class LsqProcessor
                 nowStr = dt.format(now.getTime());
             }
 
-            Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).nest("_run-" + nowStr).get();
+            String suffix = isLegacyMode ? "-" + nowStr : "_run-" + nowStr;
+
+            Resource queryExecRes = queryAspectFn.apply("le-" + datasetLabel).nest(suffix).get();
 
             if(expRes != null) {
                 queryExecRes

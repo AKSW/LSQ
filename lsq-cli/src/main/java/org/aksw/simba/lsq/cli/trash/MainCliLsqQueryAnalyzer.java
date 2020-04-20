@@ -26,7 +26,7 @@ import io.reactivex.Flowable;
 /**
  * This is the main class of LSQ's command line interface (CLI)
  * used to RDFise query logs
- * 
+ *
  * @author Saleem
  * @author Claus Stadler
  *
@@ -64,18 +64,19 @@ public class MainCliLsqQueryAnalyzer
 
         String expBaseIri = config.getExperimentIri();
 
-        
+
         String httpUserAgent = config.getHttpUserAgent();
         if(httpUserAgent != null) {
-        	HttpOp.setUserAgent(httpUserAgent);
+            HttpOp.setUserAgent(httpUserAgent);
         }
 
         // The main setup work is done in LsqUtils following.
         // It follows a classic batch processing approach:
         // Create a reader, a processor and a writer
         Flowable<ResourceInDataset> itemReader = LsqUtils.createReader(config);
-    	LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
-    	Sink<Resource> itemWriter = LsqUtils.createWriter(config);
+        LsqProcessor itemProcessor = LsqUtils.createProcessor(config);
+        itemProcessor.setLegacyMode(true);
+        Sink<Resource> itemWriter = LsqUtils.createWriter(config);
 
         // Runtime.getRuntime().addShutdownHook(new Thread(() -> itemReader.close()));
 
@@ -104,7 +105,7 @@ public class MainCliLsqQueryAnalyzer
         //RDFDataMgr.write(out, expModel, outFormat);
 
         itemReader
-            .map(x -> itemProcessor.applyForQueryOrWebLogRecord(x, true))
+            .map(x -> itemProcessor.applyForQueryOrWebLogRecord(x))
             .filter(x -> x != null)
             .forEach(itemWriter::send);
 
