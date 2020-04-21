@@ -44,6 +44,7 @@ import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
+import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
@@ -241,7 +242,11 @@ public class MainCliLsq {
 
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
-        RDFDataMgrRx.writeResources(logRdfEvents, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
+        try {
+            RDFDataMgrRx.writeResources(logRdfEvents, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
+        } catch(IOException e) {
+            ExceptionUtils.rethrowIfNotBrokenPipe(e);
+        }
     }
 
     public static void probe(CmdLsqProbe cmdProbe) {
