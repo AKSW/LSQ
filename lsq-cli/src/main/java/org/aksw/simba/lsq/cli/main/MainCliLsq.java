@@ -9,12 +9,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -266,13 +262,13 @@ public class MainCliLsq {
 
     @Deprecated // The process was changed that inversion of the
     // log-record-to-query relation is no longer needed as it is now how the process works
-    public static void invert(CmdLsqInvert cmdInvert) throws FileNotFoundException, IOException, ParseException {
+    public static void invert(CmdLsqInvert cmdInvert) throws Exception {
         CmdNgsMap cmd = new CmdNgsMap();
         cmd.stmts.add("lsq-invert-rdfized-log.sparql");
         cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         JenaSystem.init();
-        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd);
+        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, new FileOutputStream(FileDescriptor.out));
     }
 
     // FIXME hasRemoteExec needs to be skolemized - this
