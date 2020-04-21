@@ -404,7 +404,8 @@ public class QueryStatistics2 {
         } else if(node.isBlank()) {
             // result = NodeFmtLib.displayStr(node);
             // FmtUtils is older, but is decodes bnode labels correctly
-            result = FmtUtils.stringForNode(node);
+            // Avoid another colon in the URL - may get encoded into an ugly "%3A"
+            result = "__" + node.getBlankNodeLabel(); // FmtUtils.stringForNode(node);
         } else {
             result = "" + node;
         }

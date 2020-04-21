@@ -137,6 +137,8 @@ public class LsqUtils {
         //org.springframework.core.io.Resource resource = loader.getResource(filename);
         // SparqlStmtUtils.openInputStream(filenameOrURI)
 
+        registry = Collections.singletonMap("wikidata", registry.get("wikidata"));
+
         // succcessCountToFormat
         Multimap<Double, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 
@@ -305,8 +307,7 @@ public class LsqUtils {
                         if(!parsed) {
                             r.addLiteral(LSQ.processingError, "Failed to parse log line (no detailed information available)");
                         }
-                    // Do not catch e.g. IOException when the output stream where we write the RDF to gets closed
-                    } catch(JenaException e) {
+                    } catch(Exception e) {
                         parsed = false;
                         r.addLiteral(LSQ.processingError, "Failed to parse log line: " + e);
                         // logger.warn("Parser error", e);
@@ -457,7 +458,8 @@ public class LsqUtils {
                 result = null;
                 throw new RuntimeException("Triple based format not implemented");
                 //result = Flowable.fromIterable(() -> model.listSubjectsWithProperty(LSQ.text))
-            } else {
+            }
+            else {
                 throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
             }
 

@@ -40,6 +40,10 @@ public class LSQ {
         public static final String hasTPExec = ns + "hasTPExec";
         public static final String hasJoinVarExec = ns + "hasJoinVarExec";
 
+        public static final String usesFeature = "usesFeature";
+        public static final String feature = "feature";
+        public static final String count = ns + "count";
+
 
         public static final String Vertex = ns + ns + "Vertex";
         public static final String Edge = ns + ns + "Edge";
@@ -200,7 +204,7 @@ public class LSQ {
     // TODO This is PROV vocab
     //public static final Property wasAssociatedWith = property("wasAssociatedWith");
 
-    public static final Property usesFeature = property("usesFeature");
+    public static final Property usesFeature = property(Strs.usesFeature);
 
     public static final Property triplePath = property("triplePath");
 
