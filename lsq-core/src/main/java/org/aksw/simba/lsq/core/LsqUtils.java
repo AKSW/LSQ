@@ -459,9 +459,9 @@ public class LsqUtils {
                 throw new RuntimeException("Triple based format not implemented");
                 //result = Flowable.fromIterable(() -> model.listSubjectsWithProperty(LSQ.text))
             }
-            else {
-                throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
-            }
+//            else {
+//                throw new RuntimeException("Unknown RDF input format; neither triples nor quads");
+//            }
 
         }
 
