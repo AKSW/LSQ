@@ -244,7 +244,7 @@ public class MainCliLsq {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
             RDFDataMgrRx.writeResources(logRdfEvents, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
-        } catch(IOException e) {
+        } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
         }
     }
