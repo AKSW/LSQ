@@ -580,7 +580,9 @@ public class LsqUtils {
                         //if(host != null) {
 
                         // http://www.example.org/sparql -> example.org-sparql
-                        String serviceId = UriToPathUtils.resolvePath(serviceUrl).toString()
+                        String serviceId = serviceUrl == null
+                                ? "unknown-service"
+                                : UriToPathUtils.resolvePath(serviceUrl).toString()
                                 .replace('/', '-');
 
                         // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
