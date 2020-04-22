@@ -577,37 +577,38 @@ public class LsqUtils {
                          * Generate IRI for log record
                          */
 
+                        //if(host != null) {
+
+                        // http://www.example.org/sparql -> example.org-sparql
+                        String serviceId = UriToPathUtils.resolvePath(serviceUrl).toString()
+                                .replace('/', '-');
+
+                        // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
+
                         String host = re.getHost();
-                        if(host != null) {
-
-                            // http://www.example.org/sparql -> example.org-sparql
-                            String serviceId = UriToPathUtils.resolvePath(serviceUrl).toString()
-                                    .replace('/', '-');
-
-                            // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
-
-                            String hostHash = Hashing.sha256()
+                        String hostHash = host == null
+                                ? null
+                                : Hashing.sha256()
                                     .hashString(hostHashSalt + host, StandardCharsets.UTF_8)
                                     .toString();
 
-                            re.setHostHash(hostHash);
-                            re.setHost(null);
+                        re.setHostHash(hostHash);
+                        re.setHost(null);
 
-                            re.setEndpointUrl(serviceUrl);
+                        re.setEndpointUrl(serviceUrl);
 
-                            Calendar timestamp = re.getTimestamp();
+                        Calendar timestamp = re.getTimestamp();
 
-                            long seqId = re.getSequenceId();
-                            // TODO If there is a timestamp then use it
-                            // Otherwise, use sourceFileName + sequenceId
-                            String logEntryId = serviceId + "_" + (timestamp != null
-                                    ? timestamp.toInstant().toString()
-                                    : seqId);
+                        long seqId = re.getSequenceId();
+                        // TODO If there is a timestamp then use it
+                        // Otherwise, use sourceFileName + sequenceId
+                        String logEntryId = serviceId + "_" + (timestamp != null
+                                ? timestamp.toInstant().toString()
+                                : seqId);
 
 
-                            String reIri = baseIri + "re-" + logEntryId;
-                            org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
-                        }
+                        String reIri = baseIri + "re-" + logEntryId;
+                        org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
 
 
                         qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
