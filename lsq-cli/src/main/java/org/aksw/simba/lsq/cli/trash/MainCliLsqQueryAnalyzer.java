@@ -3,7 +3,6 @@ package org.aksw.simba.lsq.cli.trash;
 import java.io.IOException;
 import java.util.Calendar;
 
-import org.aksw.jena_sparql_api.core.SparqlServiceReference;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.cli.main.LsqCliParser;
@@ -21,7 +20,7 @@ import org.apache.jena.sparql.core.DatasetDescription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Flowable;
 
 /**
  * This is the main class of LSQ's command line interface (CLI)
