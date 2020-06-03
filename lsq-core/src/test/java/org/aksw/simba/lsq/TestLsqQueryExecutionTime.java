@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import com.google.common.collect.Streams;
 
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Flowable;
 
 
 public class TestLsqQueryExecutionTime {

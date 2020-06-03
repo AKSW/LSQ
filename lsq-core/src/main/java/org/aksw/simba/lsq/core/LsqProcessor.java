@@ -49,6 +49,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
@@ -862,6 +863,7 @@ public class LsqProcessor
 
                 delayer.doDelay();
             }
+            logger.info("Benchmarking " + queryRes.asNode());
 
             rdfizeQueryExecutionBenchmark(query, queryExecRes, qef);
             rdfizeQueryExecutionStats(queryRes, query, queryExecRes, cachedQef, datasetSize);

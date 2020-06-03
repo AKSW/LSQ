@@ -69,7 +69,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
-import org.apache.jena.shared.JenaException;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.ARQConstants;
@@ -85,8 +84,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-import io.reactivex.Flowable;
-import io.reactivex.Maybe;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 
 public class LsqUtils {
     private static final Logger logger = LoggerFactory.getLogger(LsqUtils.class);
@@ -156,7 +155,7 @@ public class LsqUtils {
             List<ResourceInDataset> baseItems;
             try {
                 baseItems = fn.parse(() -> SparqlStmtUtils.openInputStream(filename))
-                        .limit(1000)
+                        .take(1000)
                         .toList()
                         .onErrorReturn(x -> Collections.emptyList())
                         .blockingGet();
@@ -388,7 +387,7 @@ public class LsqUtils {
                 inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri, hostHashSalt, serviceUrl);
 
         if(itemLimit != null) {
-            result = result.limit(itemLimit);
+            result = result.take(itemLimit);
         }
 
 

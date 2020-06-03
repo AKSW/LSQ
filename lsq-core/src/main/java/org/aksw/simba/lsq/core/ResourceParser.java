@@ -5,8 +5,8 @@ import java.util.concurrent.Callable;
 
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 
-import io.reactivex.Flowable;
+import io.reactivex.rxjava3.core.Flowable;
 
 public interface ResourceParser {
-	Flowable<ResourceInDataset> parse(Callable<InputStream> inSupp);
+    Flowable<ResourceInDataset> parse(Callable<InputStream> inSupp);
 }
