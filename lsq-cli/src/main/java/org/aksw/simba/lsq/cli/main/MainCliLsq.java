@@ -281,6 +281,7 @@ public class MainCliLsq {
     public static void analyze(CmdLsqAnalyze analyzeCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
+        rdfizeCmd.noMerge = true;
 
 
         Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
@@ -396,6 +397,7 @@ public class MainCliLsq {
     public static void benchmarkRun(CmdLsqBenchmarkRun benchmarkCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = benchmarkCmd.logSources;
+        rdfizeCmd.noMerge = true;
 
         String configSrc = benchmarkCmd.config;
 

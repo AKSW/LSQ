@@ -739,6 +739,41 @@ public class LsqProcessor
     }
 
 
+    public static org.topbraid.spin.model.Query createSpinModel(
+            Query query,
+            Resource spinRes) {
+        query = query.cloneQuery();
+        query.getGraphURIs().clear();
+
+//      queryNo++;
+
+    // .. generate the spin model ...
+        //Model spinModel = queryRes.getModel();
+        Model spinModel = ModelFactory.createDefaultModel();
+        LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
+        org.topbraid.spin.model.Query tmpSpinRes = arq2spin.createQuery(query, null);
+
+        // ... and rename the blank node of the query
+        ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
+
+        // ... and skolemize the rest
+        Skolemize.skolemize(spinRes);
+
+
+        return tmpSpinRes;
+
+
+//      System.out.println("TEST {");
+//      SpinUtils.indexTriplePatterns2(tmpSpinRes.getModel()).forEach(System.out::println);
+//      SpinUtils.itp(tmpSpinRes).forEach(System.out::println);
+//      System.out.println("}");
+//tmpSpinRes.as(org.topbraid.spin.model.Query.class).getWhereElements().forEach(e -> {
+//System.out.println("XXElement: " + e.asResource().getId() + ": " + e);
+//});
+
+
+    }
+
     public static void rdfizeQueryStructuralFeatures(
             Resource queryRes,
             Function<String, NestedResource> queryAspectFn,
@@ -746,38 +781,16 @@ public class LsqProcessor
 
         //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
         try {
-            query = query.cloneQuery();
-            query.getGraphURIs().clear();
 
             Resource spinRes = queryAspectFn.apply("spin").get();
-//          queryNo++;
 
-        // .. generate the spin model ...
-            //Model spinModel = queryRes.getModel();
-            Model spinModel = ModelFactory.createDefaultModel();
-            LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
-            Resource tmpSpinRes = arq2spin.createQuery(query, null);
+            org.topbraid.spin.model.Query spinQuery = createSpinModel(query, spinRes);
+
+            Model spinModel = spinQuery.getModel();
+            spinRes.getModel().add(spinModel);
 
 
-
-//          System.out.println("TEST {");
-//          SpinUtils.indexTriplePatterns2(tmpSpinRes.getModel()).forEach(System.out::println);
-//          SpinUtils.itp(tmpSpinRes).forEach(System.out::println);
-//          System.out.println("}");
-//tmpSpinRes.as(org.topbraid.spin.model.Query.class).getWhereElements().forEach(e -> {
-//    System.out.println("XXElement: " + e.asResource().getId() + ": " + e);
-//});
-
-
-          // ... and rename the blank node of the query
-          ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
-
-          spinRes.getModel().add(spinModel);
-
-          // ... and skolemize the rest
-          Skolemize.skolemize(spinRes);
-
-          queryRes.addProperty(LSQ.hasSpin, spinRes);
+            queryRes.addProperty(LSQ.hasSpin, spinRes);
 
           //RDFDataMgr.write(System.out, spinRes.getModel(), RDFFormat.TURTLE);
 
@@ -919,6 +932,8 @@ public class LsqProcessor
             //Calendar start = Calendar.getInstance();
             //long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
 //System.out.println(query);
+
+
 
 
             SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);

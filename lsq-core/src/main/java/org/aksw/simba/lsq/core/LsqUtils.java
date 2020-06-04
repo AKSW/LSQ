@@ -136,7 +136,7 @@ public class LsqUtils {
         //org.springframework.core.io.Resource resource = loader.getResource(filename);
         // SparqlStmtUtils.openInputStream(filenameOrURI)
 
-        registry = Collections.singletonMap("wikidata", registry.get("wikidata"));
+//        registry = Collections.singletonMap("wikidata", registry.get("wikidata"));
 
         // succcessCountToFormat
         Multimap<Double, String> result = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
