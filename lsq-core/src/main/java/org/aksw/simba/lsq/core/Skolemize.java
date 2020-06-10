@@ -24,10 +24,52 @@ import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.graph.GraphUtils;
 import org.apache.jena.util.ResourceUtils;
 
+//class ConciseBoundedDescription {
+//    public Set<RDFNode> resolveCbd(RDFNode root) {
+//        Set<RDFNode> open = new LinkedHashSet<>();
+//        Set<RDFNode> seen = new HashSet<>();
+//        Set<RDFNode> border = new LinkedHashSet<>();
+//        open.add(root);
+//
+//        while(!open.isEmpty()) {
+//            Iterator<RDFNode> it = open.iterator();
+//            RDFNode node = it.next();
+//            it.remove();
+//
+//            if(!root.isAnon()) {
+//                border.add(node);
+//            } else {
+//                open.add(node);
+//            }
+//
+//
+//        }
+//    }
+//
+//    /**
+//     *
+//     * @param model
+//     * @param tgtId Read existing id from and write to this property (if present)
+//     * @param srcId Read id from this property if tgtId has not yet been set
+//     */
+//    public void skolemize(Model model, Property tgtId, Property srcId) {
+//        Traverser.forGraph(graph)
+//        // For each blank node find the set of all paths to non-blank node resources
+//        // So there is only the set of property paths across nodes to non-blank-node resources
+//        // (fwd/bwd traversals?)
+//    }
+//}
+
+// Eventually switch to http://blabel.github.io/
 public class Skolemize {
     // Property for the skolemized id (without uri prefix and such)
     public static final Property skolemId = ResourceFactory.createProperty("http://tmp.aksw.org/skolemId");
 
+
+
+    public static void skolemize2(Resource r) {
+
+    }
 
     /**
      * Skolemizes blank nodes using a two phase approach:

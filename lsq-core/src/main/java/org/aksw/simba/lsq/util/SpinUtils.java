@@ -13,7 +13,6 @@ import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -100,28 +99,31 @@ public class SpinUtils {
     }
 
     public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
-        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
+        Set<Resource> ress = ConceptModelUtils
+                .listResources(spinModel, basicPatterns, Resource.class)
+                .collect(Collectors.toSet()).blockingGet();
 
         Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
 
-        ress.forEach(t -> {
-            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(t);
-            result.putAll(t, tmp);
-        });
+        for(Resource r : ress) {
+            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(r);
+            result.putAll(r, tmp);
+        }
 
         return result;
     }
 
-    public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r, Map<RDFNode, Node> modelToNode) {
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Resource r) {
         Model spinModel = ResourceUtils.reachableClosure(r);
-        Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel, modelToNode);
+        Map<Resource, BasicPattern> result = indexBasicPatterns(spinModel);
         return result;
     }
 
-    public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel, Map<RDFNode, Node> modelToNode) {
+    public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
 //        spinModel.write(System.out, "NTRIPLES");
 
-        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns);
+        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns, Resource.class)
+                .toList().blockingGet();
 
 //        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
 
@@ -130,9 +132,9 @@ public class SpinUtils {
                 .collect(Collectors.toMap(
                         Function.identity(),
                         t -> {
-                            Map<Resource, Triple> tmp = indexTriplePatterns(t, modelToNode);
+                            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns(t);
                             BasicPattern r = new BasicPattern();
-                            tmp.values().forEach(r::add);
+                            tmp.forEach(x -> r.add(toJenaTriple(x)));
                             return r;
                         }));
 
@@ -155,18 +157,22 @@ public class SpinUtils {
 //    }
 
 
-    public static Map<Resource, Triple> indexTriplePatterns(Resource res, Map<RDFNode, Node> modelToNode) {
+    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns(Resource res) {
         Model spinModel = ResourceUtils.reachableClosure(res);
-        Map<Resource, Triple> result = indexTriplePatterns(spinModel, modelToNode);
+        Set<org.topbraid.spin.model.Triple> result = indexTriplePatterns(spinModel);
         return result;
     }
 
-    public static Map<Resource, Triple> indexTriplePatterns(Model spinModel, Map<RDFNode, Node> modelToNode) {
-        Map<Resource, Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
-                .stream()
-                .collect(Collectors.toMap(
-                        Function.identity(),
-                        t -> readTriple(t, modelToNode).get()));
+    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns(Model spinModel) {
+        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResources(
+                    spinModel, triplePatterns, org.topbraid.spin.model.Triple.class)
+                .collect(Collectors.toSet())
+                .blockingGet();
+//        Map<Resource, Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns, )
+//                .stream()
+//                .collect(Collectors.toMap(
+//                        Function.identity(),
+//                        t -> readTriple(t, modelToNode).get()));
         return result;
     }
 
@@ -188,20 +194,17 @@ public class SpinUtils {
         return result;
     }
     public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
-        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns)
-                .stream()
-                .map(r -> r.as(org.topbraid.spin.model.TriplePattern.class))
-                //.peek(x -> System.out.println(x.getSubject()))
-                //.map(r -> {System.out.println(r + ": " + r.getModel()); return r.as(org.topbraid.spin.model.TriplePattern.class); })
-                .collect(Collectors.toSet());
+        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.<org.topbraid.spin.model.Triple>listResources(spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
+                .collect(Collectors.toSet())
+                .blockingGet();
         return result;
     }
 
     public static void enrichWithHasTriplePattern(Resource targetRes, Resource spinRes) {
         Model spinModel = ResourceUtils.reachableClosure(spinRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+        Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        triplePatternIndex.keySet().forEach(r ->
+        triplePatternIndex.forEach(r ->
             targetRes.addProperty(LSQ.hasTP, r)
         );
     }
@@ -209,10 +212,10 @@ public class SpinUtils {
 
     public static void enrichWithTriplePatternText(Resource queryRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+        Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        triplePatternIndex.forEach((r, t) -> r.inModel(queryRes.getModel())
-                .addProperty(RDFS.label, FmtUtils.stringForTriple(t) + " .")
+        triplePatternIndex.forEach(r -> r.inModel(queryRes.getModel())
+                .addProperty(RDFS.label, FmtUtils.stringForTriple(toJenaTriple(r)) + " .")
                 // .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
                 );
                 //.addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
@@ -221,10 +224,10 @@ public class SpinUtils {
 
     public static void enrichModelWithTriplePatternExtensionSizes(Resource queryRes, Resource queryExecRes, QueryExecutionFactory dataQef) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+        Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
-        triplePatternIndex.forEach((r, t) -> {
-            int tripleCount = fetchTriplePatternExtensionSize(dataQef, t);
+        triplePatternIndex.forEach(r -> {
+            int tripleCount = fetchTriplePatternExtensionSize(dataQef, toJenaTriple(r));
             //double selectivity = tripleCount / (double)totalTripleCount;
 
             spinModel.add(r, LSQ.resultSize, spinModel.createTypedLiteral(tripleCount));
@@ -305,16 +308,15 @@ public class SpinUtils {
      */
     public static BiMap<org.topbraid.spin.model.Triple, Resource> createTriplePatternExecutions(Resource queryRes, Resource queryExecRes) {
         Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+        Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         //Set<Resource> result = new HashSet<>();
         BiMap<org.topbraid.spin.model.Triple, Resource> result = HashBiMap.create();
 
         int i = 0;
         //triplePatternIndex.entrySet().forEach(e -> {
-        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
+        for(org.topbraid.spin.model.Triple r : triplePatternIndex) {
             ++i;
-            Resource r = e.getKey();
 
             Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
 
@@ -335,7 +337,7 @@ public class SpinUtils {
     public static void enrichModelWithTriplePatternSelectivities(Set<Resource> tpExecRess, QueryExecutionFactory qef, long totalTripleCount) {
 
         for(Resource tpExecRes : tpExecRess) {
-            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTP).getObject().as(org.topbraid.spin.model.TriplePattern.class);
+            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTP).getObject().as(TriplePattern.class);
             Triple triple = toJenaTriple(spinTriple);
 
             long count = countTriplePattern(qef, triple);
@@ -361,43 +363,43 @@ public class SpinUtils {
      * @param qef
      * @param totalTripleCount
      */
-    @Deprecated
-    public static void enrichModelWithTriplePatternSelectivities(Resource queryRes, Resource queryExecRes, QueryExecutionFactory qef, long totalTripleCount) {
-
-        Model spinModel = ResourceUtils.reachableClosure(queryRes);
-        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
-
-        int i = 0;
-        //triplePatternIndex.entrySet().forEach(e -> {
-        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
-            ++i;
-            Resource r = e.getKey();
-            Triple t = e.getValue();
-            long count = countTriplePattern(qef, t);
-
-            Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
-
-            queryExecRes
-                .addProperty(LSQ.hasTPExec, queryTpExecRes);
-
-
-            double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
-
-            queryTpExecRes
-                .addProperty(LSQ.hasTP, r)
-                .addLiteral(LSQ.resultSize, count)
-                .addLiteral(LSQ.tpSel, selectivity);
-        }
-
-//        triplePatternIndex.keySet().forEach(r ->
-//            queryRes.addProperty(LSQ.hasTriplePattern, r)
-//        );
-
-
-        //double selectivity = tripleCount / (double)totalTripleCount;
-
-
-    }
+//    @Deprecated
+//    public static void enrichModelWithTriplePatternSelectivities(Resource queryRes, Resource queryExecRes, QueryExecutionFactory qef, long totalTripleCount) {
+//
+//        Model spinModel = ResourceUtils.reachableClosure(queryRes);
+//        Map<Resource, Triple> triplePatternIndex = indexTriplePatterns(spinModel, null);
+//
+//        int i = 0;
+//        //triplePatternIndex.entrySet().forEach(e -> {
+//        for(Entry<Resource, Triple> e : triplePatternIndex.entrySet()) {
+//            ++i;
+//            Resource r = e.getKey();
+//            Triple t = e.getValue();
+//            long count = countTriplePattern(qef, t);
+//
+//            Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
+//
+//            queryExecRes
+//                .addProperty(LSQ.hasTPExec, queryTpExecRes);
+//
+//
+//            double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
+//
+//            queryTpExecRes
+//                .addProperty(LSQ.hasTP, r)
+//                .addLiteral(LSQ.resultSize, count)
+//                .addLiteral(LSQ.tpSel, selectivity);
+//        }
+//
+////        triplePatternIndex.keySet().forEach(r ->
+////            queryRes.addProperty(LSQ.hasTriplePattern, r)
+////        );
+//
+//
+//        //double selectivity = tripleCount / (double)totalTripleCount;
+//
+//
+//    }
 
 //
 //    public static void enrichModelWithJoinRestrictedTPSelectivities(
@@ -430,7 +432,7 @@ public class SpinUtils {
         Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTPExec).toSet().stream()
             .map(o -> o.asResource())
             .collect(Collectors.toMap(
-                    o -> o.getPropertyResourceValue(LSQ.hasTP).as(org.topbraid.spin.model.TriplePattern.class),
+                    o -> o.getPropertyResourceValue(LSQ.hasTP).as(TriplePattern.class),
                     o -> o));
 
         //Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = indexBasicPatterns2(queryRes);
@@ -505,9 +507,8 @@ public class SpinUtils {
         Node result = null;
         if(rdfNode != null && rdfNode.isResource()) {
             Resource r = rdfNode.asResource();
-            RDFNode o = model.listObjectsOfProperty(r, SP.varName).toList().stream().findFirst().orElse(null);
-            if(o != null) {
-                String varName = o.asLiteral().getString();
+            String varName = org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.getLiteralPropertyValue(r, SP.varName, String.class);
+            if(varName != null) {
                 result = Var.alloc(varName);
             }
         }

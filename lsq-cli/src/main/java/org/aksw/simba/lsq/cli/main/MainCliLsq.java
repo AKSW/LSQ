@@ -288,27 +288,30 @@ public class MainCliLsq {
 
         Flowable<Dataset> dsFlow = flow.map(rid -> {
             LsqQuery q = rid.as(LsqQuery.class);
-
-            NestedResource queryRes = NestedResource.from(q);
-            Function<String, NestedResource> queryAspectFn =
-                    aspect -> queryRes.nest("-" + aspect);
-
-            String queryStr = q.getText();
-            if(q.getParseError() == null) {
-                Query query = QueryFactory.create(queryStr);
-                //SparqlQueryParser parser = SparqlQueryParserImpl.create();
-
-                LsqProcessor.rdfizeQueryStructuralFeatures(q, queryAspectFn, query);
-
-                // Post processing: Remove skolem identifiers
-                q.getModel().removeAll(null, Skolemize.skolemId, null);
-            }
-
+            rdfizeStructuralFeatures(q);
             return rid;
         })
         .map(ResourceInDataset::getDataset);
 
         RDFDataMgrRx.writeDatasets(dsFlow, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
+    }
+
+
+    public static void rdfizeStructuralFeatures(LsqQuery q) {
+        NestedResource queryRes = NestedResource.from(q);
+        Function<String, NestedResource> queryAspectFn =
+                aspect -> queryRes.nest("-" + aspect);
+
+        String queryStr = q.getText();
+        if(q.getParseError() == null) {
+            Query query = QueryFactory.create(queryStr);
+            //SparqlQueryParser parser = SparqlQueryParserImpl.create();
+
+            LsqProcessor.rdfizeQueryStructuralFeatures(q, queryAspectFn, query);
+
+            // Post processing: Remove skolem identifiers
+            q.getModel().removeAll(null, Skolemize.skolemId, null);
+        }
     }
 
 
@@ -419,6 +422,10 @@ public class MainCliLsq {
             Flowable<Dataset> dsFlow = flow.map(rid -> {
                 LsqQuery q = rid.as(LsqQuery.class);
                 // processor.applyForQueryOrWebLogRecord(rid, false);
+
+                // Benchmarking of query elements requires a spin model!
+                rdfizeStructuralFeatures(q);
+
                 processor.benchmark(q);
 
                 return rid;

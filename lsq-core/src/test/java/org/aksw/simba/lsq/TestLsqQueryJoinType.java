@@ -2,6 +2,7 @@ package org.aksw.simba.lsq;
 
 import org.aksw.simba.lsq.core.LSQARQ2SPIN;
 import org.aksw.simba.lsq.core.QueryStatistics2;
+import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -21,7 +22,7 @@ public class TestLsqQueryJoinType {
         Resource featureRes = model.createResource();
 
         LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
-        Resource spinRes = arq2spin.createQuery(query, null);
+        SpinQueryEx spinRes = arq2spin.createQuery(query, null).as(SpinQueryEx.class);
 
 
         Resource outputRes = model.createResource();

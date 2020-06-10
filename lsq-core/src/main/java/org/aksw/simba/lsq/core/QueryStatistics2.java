@@ -25,6 +25,8 @@ import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.MapUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -38,7 +40,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.algebra.Algebra;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.op.Op0;
@@ -61,6 +62,7 @@ import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.openrdf.query.MalformedQueryException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -425,8 +427,11 @@ public class QueryStatistics2 {
      *            argument.
      * @param triples
      */
-    public static void enrichModelWithHyperGraphData(Model result, Map<Node, Resource> nodeToResource,
-            Iterable<Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
+    public static void enrichModelWithHyperGraphData(
+            Model result,
+            Map<Node, Resource> nodeToResource,
+            Iterable<Triple> triples) {
+            //Iterable<org.topbraid.spin.model.Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
         // result = result == null ? ModelFactory.createDefaultModel() : result;
 
         for (Triple t : triples) {
@@ -478,6 +483,7 @@ public class QueryStatistics2 {
         // return result;
     }
 
+
     /**
      * Get the benchmark query features ( e.g resultsize, bgps mean join
      * vertices etc)
@@ -487,24 +493,29 @@ public class QueryStatistics2 {
      * @return stats Query Features as string
      * @throws MalformedQueryException
      */
-    public static void getDirectQueryRelatedRDFizedStats(Resource queryRes, Resource targetRes) {
-        // Map<RDFNode, Node> modelToNode = new HashMap<>();
-        Map<RDFNode, Node> rdfNodeToNode = new HashMap<>();
-        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes, rdfNodeToNode);
+    public static void getDirectQueryRelatedRDFizedStats(SpinQueryEx queryRes, Resource featureRes) {
 
+
+
+        // Map<RDFNode, Node> modelToNode = new HashMap<>();
+//        Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes);
+
+        // Get the node objects from the model and map them to the appropriate resources in the model
+        // Especially Vars are represented by Resources having a SP.varName property
         Map<Node, RDFNode> nodeToModel = new IdentityHashMap<>();
-        rdfNodeToNode.forEach((k, v) -> nodeToModel.put(v, k));
+//        Map<RDFNode, Node> rdfNodeToNode = new HashMap<>();
+//        rdfNodeToNode.forEach((k, v) -> nodeToModel.put(v, k));
 
         // Make sure the BGP resources exist in the target model
-        resToBgp = resToBgp.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey().inModel(targetRes.getModel()), Entry::getValue));
+//        resToBgp = resToBgp.entrySet().stream()
+//                .collect(Collectors.toMap(e -> e.getKey().inModel(targetRes.getModel()), Entry::getValue));
 
-        resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
+//        resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
 
-        getDirectQueryRelatedRDFizedStats(targetRes, resToBgp.values());
+        //getDirectQueryRelatedRDFizedStats(targetRes, resToBgp.values());
 
-        List<Integer> degrees = resToBgp.entrySet().stream()
-                .flatMap(e -> getBGPRelatedRDFizedStats(e.getKey(), e.getValue(), nodeToModel).stream()).sorted()
+        List<Integer> degrees = queryRes.getBgps().stream()
+                .flatMap(e -> setUpJoinVertices(e, nodeToModel).stream()).sorted()
                 .collect(Collectors.toList());
 
         int n = degrees.size();
@@ -523,28 +534,57 @@ public class QueryStatistics2 {
         // ???
         // .orElse(0.0);
 
-        targetRes.addLiteral(LSQ.joinVertices, degrees.size()).addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
-                .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
+        // This is on the query level
+        featureRes
+            .addLiteral(LSQ.joinVertices, degrees.size())
+            .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
+            .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
     }
 
-    public static void getDirectQueryRelatedRDFizedStats(Resource targetRes, Collection<BasicPattern> bgps) {
-        // bgps = bgps.stream().limit(1).collect(Collectors.toList());
-        // Model model = queryRes.getModel();
 
-        List<Integer> bgpSizes = bgps.stream().map(BasicPattern::size).collect(Collectors.toList());
+    /**
+     * Min/max triples in bgps
+     *
+     * @param queryRes
+     */
+    public static void enrichSpinQueryWithBgpStats(SpinQueryEx queryRes) {
+
+        List<Integer> bgpSizes = queryRes.getBgps().stream()
+                .map(SpinBgp::toBasicPattern)
+                .map(BasicPattern::size)
+                .collect(Collectors.toList());
 
         // Find out minimum and maximum size of the bgpgs
-        int totalBgpCount = bgps.size();
+        int totalBgpCount = bgpSizes.size();
         int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
         int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
         int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
 
-        targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
-                .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
+        queryRes
+            .setTotalBgpCount(totalBgpCount)
+            .setMinBgpTriples(minBgpTripleCount)
+            .setMaxBgpTriples(maxBgpTripleCount)
+            .setTriplePatternCount(triplePatternCount);
     }
 
-    public static List<Integer> getBGPRelatedRDFizedStats(Resource bgpRes, BasicPattern bgp,
-            Map<Node, RDFNode> nodeToModel) {
+
+
+    /**
+     * join vertex stats
+     *
+     * @param bgpRes
+     * @param bgp
+     * @param nodeToModel
+     * @return
+     */
+    public static List<Integer> setUpJoinVertices(
+            SpinBgp bgpRes,
+            //Resource bgpRes,
+            // BasicPattern bgp,
+            Map<Node, RDFNode> nodeToModel
+            ) {
+
+        BasicPattern bgp = bgpRes.toBasicPattern();
 
         // int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
 
@@ -612,8 +652,10 @@ public class QueryStatistics2 {
                 throw new NullPointerException("Should not happen");
             }
 
-            joinVertexRes.addLiteral(LSQ.joinVertexDegree, degree).addProperty(LSQ.joinVertexType, joinVertexType)
-                    .addProperty(LSQ.proxyFor, proxyRdfNode)
+            joinVertexRes
+                .addLiteral(LSQ.joinVertexDegree, degree)
+                .addProperty(LSQ.joinVertexType, joinVertexType)
+                .addProperty(LSQ.proxyFor, proxyRdfNode)
             // .addProperty(LSQ.proxyFor,
             // v)//v.getPropertyResourceValue(LSQ.proxyFor))
             ;
@@ -701,14 +743,14 @@ public class QueryStatistics2 {
 
     // TODO This method is useless for our use case as it does not establish a
     // relation to the SPIN model
-    public static void getDirectQueryRelatedRDFizedStats(Query query) {
-        Op op = Algebra.compile(query);
-
-        // Get all BGPs from the algebra
-        List<BasicPattern> bgps = linearizePrefix(op, null, QueryStatistics2::getSubOps)
-                .filter(o -> o != null && o instanceof OpBGP).map(o -> ((OpBGP) o).getPattern())
-                .collect(Collectors.toList());
-    }
+//    public static void getDirectQueryRelatedRDFizedStats(Query query) {
+//        Op op = Algebra.compile(query);
+//
+//        // Get all BGPs from the algebra
+//        List<BasicPattern> bgps = linearizePrefix(op, null, QueryStatistics2::getSubOps)
+//                .filter(o -> o != null && o instanceof OpBGP).map(o -> ((OpBGP) o).getPattern())
+//                .collect(Collectors.toList());
+//    }
 
     public static void enrichWithPropertyPaths(Resource queryRes, Query query) {
         Op op = Algebra.compile(query);

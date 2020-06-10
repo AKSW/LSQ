@@ -1,43 +1,49 @@
 package org.aksw.simba.lsq.util;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
-import org.apache.jena.graph.Node;
-import org.apache.jena.query.DatasetFactory;
+import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jena_sparql_api.rx.SparqlRx;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
+import org.apache.jena.sparql.core.Var;
+
+import io.reactivex.rxjava3.core.Flowable;
+
 
 public class ConceptModelUtils {
-    public static List<Resource> listResources(Model model, Concept concept) {
-        List<Resource> result = new ArrayList<>();
-        collectRdfNodes(model, concept, item -> {
-            if(item.isResource()) {
-                result.add(item.asResource());
-            }
-        });
-
-        return result;
+    public static <T extends Resource> Flowable<T> listResources(Model model, Concept concept, Class<? extends T> clazz) {
+        return listRdfNodes(model, concept)
+// Filter disabled here because e.g. spin does not produce ?x a sp:TriplePattern triples, but canAs returns false if the type is not present
+//                .filter(rdfNode -> rdfNode.canAs(clazz))
+//                .filter(rdfNode -> {
+//                    boolean r = rdfNode.canAs(clazz);
+//                    return r;
+//                })
+                .map(rdfNode -> {
+                    T r = rdfNode.as(clazz);
+                    return r;
+                });
     }
 
-    public static void collectRdfNodes(Model model, Concept concept, Consumer<RDFNode> consumer) {
-//        QueryExecutionFactory qef = FluentQueryExecutionFactory
-//            .from(model)
-//            .create();
-    	try(RDFConnection conn = RDFConnectionFactory.connect(DatasetFactory.wrap(model))) {
-	    	
-	        List<Node> nodes = ServiceUtils.fetchList(conn, concept);
-	
-	        nodes.stream()
-	            .map(node -> model.asRDFNode(node))
-	            .forEach(consumer);
-    	}
+//    public static List<Resource> listResources(Model model, Concept concept) {
+//        List<Resource> result = new ArrayList<>();
+//        collectRdfNodes(model, concept, item -> {
+//            if(item.isResource()) {
+//                result.add(item.asResource());
+//            }
+//        });
+//
+//        return result;
+//    }
+
+    public static Flowable<RDFNode> listRdfNodes(Model model, Concept concept) {
+        Var var = concept.getVar();
+        Query query = ConceptUtils.createQueryList(concept);
+
+        return SparqlRx.execConcept(() -> QueryExecutionFactory.create(query, model), var);
     }
 
 }

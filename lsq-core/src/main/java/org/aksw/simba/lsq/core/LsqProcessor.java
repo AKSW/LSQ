@@ -3,11 +3,9 @@ package org.aksw.simba.lsq.core;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -31,6 +29,8 @@ import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.WebLogParser;
+import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -49,7 +49,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
@@ -59,6 +58,9 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.arq.ARQ2SPIN;
+import org.topbraid.spin.model.Triple;
+import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.cache.Cache;
@@ -749,15 +751,16 @@ public class LsqProcessor
 
     // .. generate the spin model ...
         //Model spinModel = queryRes.getModel();
-        Model spinModel = ModelFactory.createDefaultModel();
-        LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(spinModel);
-        org.topbraid.spin.model.Query tmpSpinRes = arq2spin.createQuery(query, null);
+        // Model spinModel = ModelFactory.createDefaultModel();
+        Model spinModel = spinRes.getModel();
+        ARQ2SPIN arq2spin = new ARQ2SPIN(spinModel);
+        org.topbraid.spin.model.Query tmpSpinRes = arq2spin.createQuery(query, spinRes.getURI());
 
         // ... and rename the blank node of the query
-        ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
+        // ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
 
         // ... and skolemize the rest
-        Skolemize.skolemize(spinRes);
+        //Skolemize.skolemize(spinRes);
 
 
         return tmpSpinRes;
@@ -774,6 +777,102 @@ public class LsqProcessor
 
     }
 
+
+//    Map<RDFNode, Node> rdfNodeToNode = new HashMap<>();
+//    Map<Resource, BasicPattern> resToBgp = SpinUtils.indexBasicPatterns(queryRes, rdfNodeToNode);
+//
+//    Map<Node, RDFNode> nodeToModel = new IdentityHashMap<>();
+//    rdfNodeToNode.forEach((k, v) -> nodeToModel.put(v, k));
+//
+//    // Make sure the BGP resources exist in the target model
+//    resToBgp = resToBgp.entrySet().stream()
+//            .collect(Collectors.toMap(e -> e.getKey().inModel(targetRes.getModel()), Entry::getValue));
+//
+//    resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
+//
+
+    /**
+     * Given a spin model, create resources for BGPs (as spin does not natively support BGPS).
+     * The current implementation treats any resource having a rdf:list of triples (ElementList)
+     * as a BGP.
+     *
+     * TODO Join vertices - where to create them?
+     *
+     *
+     * @param spinModel
+     */
+    public static void enrichSpinModelWithBgps(SpinQueryEx spinNode) {
+        Model spinModel = spinNode.getModel();
+
+        // Extend the spin model with BGPs
+        Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel); //queryRes);
+
+        for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+
+
+            // Map each resource to the corresponding jena element
+            Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
+                    .collect(Collectors.toMap(
+                            r -> r,
+                            r -> ElementUtils.createElement(SpinUtils.toJenaTriple(r))));
+
+            Set<Var> bgpVars = resToEl.values().stream()
+                    .flatMap(el -> PatternVars.vars(el).stream())
+                    .collect(Collectors.toSet());
+
+            // Take the skolem ID of the spin element and declare it as a bgp
+            // TODO Better introduce new resources based on the skolemIds of the triple patterns
+            String bgpId = Optional.ofNullable(e.getKey().getProperty(Skolemize.skolemId))
+                    .map(Statement::getString).orElse(null);
+
+//            Resource bgpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp-" + bgpId);
+            //Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp-" + bgpId);
+
+            SpinBgp bgpCtxRes = spinModel.createResource().as(SpinBgp.class);
+            if(bgpId != null) {
+                bgpCtxRes.addProperty(Skolemize.skolemId, "-bgp-" + bgpId);
+            }
+
+            List<TriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
+            for(org.topbraid.spin.model.Triple tp : e.getValue()) {
+                bgpTps.add((TriplePattern)tp);
+            }
+
+
+//            Map<Var, Resource> varToBgpVar = bgpVars.stream()
+//                    .collect(Collectors.toMap(
+//                            v -> v,
+//                            v -> NestedResource.from(bgpCtxRes).nest("-var-").nest(v.getName()).get()));
+
+
+            spinNode.getBgps().add(bgpCtxRes);
+        }
+//      // Add the BGP var statistics
+//      //varToCount.forEach((v, c) -> {
+//      for(Var v : bgpVars) {
+//          Resource queryVarRes = varToQueryVarRes.get(v);
+//          //System.out.println("queryVar: " + queryVar);
+//
+//          Resource bgpVar = varToBgpVar.get(v);
+//
+//          bgpVar.addLiteral(LSQ.resultSize, c);
+//          bgpVar.addProperty(LSQ.proxyFor, queryVarRes);
+//      }
+
+
+//    Collection<org.topbraid.spin.model.Triple> tps = bgpToTps.values();
+    // Note: We assume that each var only originates from a single resource - which is the case for lsq
+    // In general, we would have to use a multimap
+//    Map<Var, Resource> varToQueryVarRes = tps.stream()
+//            .flatMap(tp -> SpinUtils.indexTripleNodes2(tp).entrySet().stream())
+//            .filter(e -> e.getValue().isVariable())
+//            .collect(Collectors.toMap(
+//                    e -> (Var)e.getValue(),
+//                    e -> e.getKey().asResource(),
+//                    (old, now) -> now));
+
+    }
+
     public static void rdfizeQueryStructuralFeatures(
             Resource queryRes,
             Function<String, NestedResource> queryAspectFn,
@@ -782,12 +881,18 @@ public class LsqProcessor
         //Resource execRes = queryAspectFn.apply("exec").nest("-execX").get();
         try {
 
-            Resource spinRes = queryAspectFn.apply("spin").get();
+            SpinQueryEx spinRes = queryAspectFn.apply("spin").get().as(SpinQueryEx.class);
 
             org.topbraid.spin.model.Query spinQuery = createSpinModel(query, spinRes);
 
             Model spinModel = spinQuery.getModel();
-            spinRes.getModel().add(spinModel);
+
+
+
+
+
+            // spinRes.getModel().add(spinModel);
+            queryRes.getModel().add(spinModel);
 
 
             queryRes.addProperty(LSQ.hasSpin, spinRes);
@@ -933,26 +1038,13 @@ public class LsqProcessor
             //long resultSetSize = QueryExecutionUtils.countQuery(query, qef);
 //System.out.println(query);
 
-
-
-
             SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
 
-
             BiMap<org.topbraid.spin.model.Triple, Resource> tpToTpExecRess = SpinUtils.createTriplePatternExecutions(queryRes, queryExecRes);
+
+
             Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(queryRes);
 
-            Collection<org.topbraid.spin.model.Triple> tps = bgpToTps.values();
-
-            // Note: We assume that each var only originates from a single resource - which is the case for lsq
-            // In general, we would have to use a multimap
-            Map<Var, Resource> varToQueryVarRes = tps.stream()
-                    .flatMap(tp -> SpinUtils.indexTripleNodes2(tp).entrySet().stream())
-                    .filter(e -> e.getValue().isVariable())
-                    .collect(Collectors.toMap(
-                            e -> (Var)e.getValue(),
-                            e -> e.getKey().asResource(),
-                            (old, now) -> now));
 
             if(datasetSize != null) {
 
@@ -1024,6 +1116,15 @@ public class LsqProcessor
                 //for(e.getValue())
                 Map<Var, Long> varToCount = QueryStatistics2.fetchCountJoinVarGroup(cachedQef, resToEl.values());
 
+                Collection<org.topbraid.spin.model.Triple> tps = bgpToTps.values();
+//                 Note: We assume that each var only originates from a single resource - which is the case for lsq
+                Map<Var, Resource> varToQueryVarRes = tps.stream()
+                    .flatMap(tp -> SpinUtils.indexTripleNodes2(tp).entrySet().stream())
+                    .filter(x -> x.getValue().isVariable())
+                    .collect(Collectors.toMap(
+                            x -> (Var)x.getValue(),
+                            x -> x.getKey().asResource(),
+                            (old, now) -> now));
 
                 // Add the BGP var statistics
                 varToCount.forEach((v, c) -> {
@@ -1046,7 +1147,7 @@ public class LsqProcessor
 
                     Resource execTp = tpToTpExecRess.get(t);
 
-                    String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
+//                    String tpId = e.getKey().getProperty(Skolemize.skolemId).getString();
 
                     //String tpResBase = queryExecRes.getURI() + "-tp-" + tpId;
                     String tpResBase = execTp.getURI();
