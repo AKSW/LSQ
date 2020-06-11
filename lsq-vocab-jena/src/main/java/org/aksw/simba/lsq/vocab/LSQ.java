@@ -45,8 +45,10 @@ public class LSQ {
         public static final String count = ns + "count";
 
 
-        public static final String Vertex = ns + ns + "Vertex";
-        public static final String Edge = ns + ns + "Edge";
+        public static final String Vertex = ns + "Vertex";
+        public static final String Edge = ns + "Edge";
+
+        public static final String hasEdge = ns + "hasEdge";
 
         public static final String in = ns + "in";
         public static final String out = ns + "out";
@@ -75,6 +77,8 @@ public class LSQ {
         //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
         public static final String meanJoinVertexDegree = ns + "meanJoinVertexDegree";
         public static final String medianJoinVertexsDegree = ns + "medianJoinVertexDegree";
+
+        public static final String hasBGPNode = ns + "hasBGPNode";
 
         public static final String mentionsSubject = ns + "mentionsSubject";
         public static final String mentionsPredicate = ns + "mentionsPredicate";
@@ -168,6 +172,9 @@ public class LSQ {
     public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
     public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
     public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBGP);
+
+    public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBGPNode);
+
     //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
     public static final Property execError = ResourceFactory.createProperty(Strs.execError);

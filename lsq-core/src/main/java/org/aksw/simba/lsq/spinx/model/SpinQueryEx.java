@@ -19,11 +19,11 @@ public interface SpinQueryEx
     Integer getTotalBgpCount();
     SpinQueryEx setTotalBgpCount(Integer cnt);
 
-    @Iri(LSQ.Strs.bgps)
+    @Iri(LSQ.Strs.minBGPTriples)
     Integer getMinBgpTriples();
     SpinQueryEx setMinBgpTriples(Integer cnt);
 
-    @Iri(LSQ.Strs.bgps)
+    @Iri(LSQ.Strs.maxBGPTriples)
     Integer getMaxBgpTriples();
     SpinQueryEx setMaxBgpTriples(Integer cnt);
 

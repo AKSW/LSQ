@@ -1,5 +1,7 @@
 package org.aksw.simba.lsq.core;
 
+import java.util.Collection;
+
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.apache.jena.query.Query;
@@ -20,20 +22,22 @@ public class TestExtendedSpinModel {
 
         LsqProcessor.createSpinModel(query, spinRes);
         LsqProcessor.enrichSpinModelWithBgps(spinRes);
+        LsqProcessor.enrichSpinBgpsWithNodes(spinRes);
 
 
-        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+//        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
 
         for(SpinBgp bgp : spinRes.getBgps()) {
             System.out.println(bgp);
-            for(TriplePattern tp : bgp.getTriplePatterns()) {
+            Collection<TriplePattern> tps = bgp.getTriplePatterns();
+
+            for(TriplePattern tp : tps) {
                 System.out.println(tp);
             }
         }
 
         QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
         // QueryStatistics2.setUpJoinVertices(spinRes);
-
         QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
 
 

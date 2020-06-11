@@ -30,6 +30,7 @@ import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -790,6 +791,29 @@ public class LsqProcessor
 //
 //    resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
 //
+
+    public static void enrichSpinBgpsWithNodes(SpinQueryEx spinNode) {
+        Model spinModel = spinNode.getModel();
+
+        for(SpinBgp bgp : spinNode.getBgps()) {
+            Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+
+            for(TriplePattern tp : bgp.getTriplePatterns()) {
+                Set<RDFNode> rdfNodes = SpinUtils.listRDFNodes(tp);
+                for(RDFNode rdfNode : rdfNodes) {
+                    Node node = SpinUtils.readNode(rdfNode);
+
+                    SpinBgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
+                            n -> SpinUtils.writeNode(spinModel, n).as(SpinBgpNode.class));
+
+                    // Redundant inserts into a set
+                    bgp.getBgpNodes().add(bgpNode);
+
+                    bgpNode.getProxyFor().add(rdfNode);
+                }
+            }
+        }
+    }
 
     /**
      * Given a spin model, create resources for BGPs (as spin does not natively support BGPS).

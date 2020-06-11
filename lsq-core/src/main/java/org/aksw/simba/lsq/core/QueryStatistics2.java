@@ -3,7 +3,6 @@ package org.aksw.simba.lsq.core;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -25,7 +24,9 @@ import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.MapUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
@@ -35,7 +36,6 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -360,7 +360,11 @@ public class QueryStatistics2 {
     }
 
     public static int propertyDegree(Resource r, Property... ps) {
-        int result = Arrays.asList(ps).stream().distinct().mapToInt(p -> r.listProperties(p).toList().size()).sum();
+        int result = Arrays.asList(ps)
+                .stream()
+                .distinct()
+                .mapToInt(p -> r.listProperties(p)
+                .toList().size()).sum();
 
         return result;
     }
@@ -397,6 +401,7 @@ public class QueryStatistics2 {
         return result;
     }
 
+
     public static String getLabel(Node node) {
         String result;
         if (node.isURI()) {
@@ -414,6 +419,7 @@ public class QueryStatistics2 {
         return result;
     }
 
+
     /**
      * Creates a hypergraph model.
      *
@@ -427,14 +433,20 @@ public class QueryStatistics2 {
      *            argument.
      * @param triples
      */
-    public static void enrichModelWithHyperGraphData(
-            Model result,
-            Map<Node, Resource> nodeToResource,
-            Iterable<Triple> triples) {
-            //Iterable<org.topbraid.spin.model.Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
+    public static void enrichModelWithHyperGraphData(SpinBgp spinBgp) {
+        //Iterable<org.topbraid.spin.model.Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
         // result = result == null ? ModelFactory.createDefaultModel() : result;
 
-        for (Triple t : triples) {
+        //Map<Node, Resource> nodeToResource,
+
+        Model result = spinBgp.getModel();
+        Map<Node, SpinBgpNode> bgpNodes = spinBgp.indexBgpNodes();
+
+
+        Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
+
+        for (org.topbraid.spin.model.Triple st : spinTriples) {
+            Triple t = SpinUtils.toJenaTriple(st);
             // Get the triple's nodes
             Node s = t.getSubject();
             Node p = t.getPredicate();
@@ -443,42 +455,61 @@ public class QueryStatistics2 {
             // Create anonymous resources as proxies for the original
             // triple and nodes - needed because RDF literals cannot appear in
             // subject position
-            // TODO We treat each triple different from the other even if they
-            // happen to be equal - is this desired?
-            Resource tx = result.createResource();
+
+            // Note: Here we treat each triple different from the other even if they
+            // happen to be equal - apply prior normalization of the query if this undesired.
+
+            DirectedHyperEdge tx = result.createResource().as(DirectedHyperEdge.class);
+
+
+
             // Resource sx = nodeToResource.merge(s, result.createResource(),
             // (x, y) -> x);
             // Resource px = nodeToResource.merge(p, result.createResource(),
             // (x, y) -> x);
             // Resource ox = nodeToResource.merge(o, result.createResource(),
             // (x, y) -> x);
-            Resource sx = nodeToResource.computeIfAbsent(s, (x) -> result.createResource());
-            Resource px = nodeToResource.computeIfAbsent(p, (x) -> result.createResource());
-            Resource ox = nodeToResource.computeIfAbsent(o, (x) -> result.createResource());
+//            Resource sx = nodeToResource.computeIfAbsent(s, (x) -> result.createResource());
+//            Resource px = nodeToResource.computeIfAbsent(p, (x) -> result.createResource());
+//            Resource ox = nodeToResource.computeIfAbsent(o, (x) -> result.createResource());
 
-            // Add the orginal nodes as annotations
-            Resource ss = result.wrapAsResource(t.getSubject());
-            Resource pp = result.wrapAsResource(t.getPredicate());
-            RDFNode oo = result.asRDFNode(t.getObject());
+              Resource sx = bgpNodes.get(s);
+              Resource px = bgpNodes.get(p);
+              Resource ox = bgpNodes.get(o);
+
+//            // Add the orginal nodes as annotations
+//            Resource ss = result.wrapAsResource(t.getSubject());
+//            Resource pp = result.wrapAsResource(t.getPredicate());
+//            RDFNode oo = result.asRDFNode(t.getObject());
 
             //hyperGraphResourceToNode.put(sx, t.getSubject());
 
 
-            sx.addProperty(RDF.type, LSQ.Vertex).addProperty(RDF.subject, ss).addProperty(LSQ.proxyFor, ss)
-                    .addLiteral(RDFS.label, getLabel(s));
+            sx
+                .addProperty(RDF.type, LSQ.Vertex)
+                .addProperty(RDF.subject, sx)
+                .addLiteral(RDFS.label, getLabel(s));
 
-            px.addProperty(RDF.type, LSQ.Vertex).addProperty(RDF.predicate, pp).addProperty(LSQ.proxyFor, pp)
-                    .addLiteral(RDFS.label, getLabel(p));
+            px
+                .addProperty(RDF.type, LSQ.Vertex)
+                .addProperty(RDF.predicate, px)
+                .addLiteral(RDFS.label, getLabel(p));
 
-            ox.addProperty(RDF.type, LSQ.Vertex).addProperty(RDF.object, oo).addProperty(LSQ.proxyFor, oo)
-                    .addLiteral(RDFS.label, getLabel(o));
+            ox
+                .addProperty(RDF.type, LSQ.Vertex)
+                .addProperty(RDF.object, ox)
+                .addLiteral(RDFS.label, getLabel(o));
 
             String tripleStr = FmtUtils.stringForTriple(t) + " .";
-            tx.addProperty(RDF.type, LSQ.Edge).addLiteral(RDFS.label, "" + tripleStr);
+            tx
+                .addProperty(RDF.type, LSQ.Edge)
+                .addLiteral(RDFS.label, "" + tripleStr);
 
             result.add(sx, LSQ.out, tx);
             result.add(px, LSQ.in, tx);
             result.add(ox, LSQ.in, tx);
+
+            spinBgp.getEdges().add(tx);
         }
         // return result;
     }
@@ -543,7 +574,9 @@ public class QueryStatistics2 {
 
 
     /**
-     * Min/max triples in bgps
+     * Requires BGP information to be present in the SPIN model.
+     *
+     * Extends the spin with min/max/total triples in bgps
      *
      * @param queryRes
      */
@@ -584,28 +617,32 @@ public class QueryStatistics2 {
             Map<Node, RDFNode> nodeToModel
             ) {
 
-        BasicPattern bgp = bgpRes.toBasicPattern();
-
+//        BasicPattern bgp = bgpRes.toBasicPattern();
         // int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
 
         // Create the hypergraph model over all bgps
         // (Could be changed if individual stats are desired)
-        Model hyperGraph = ModelFactory.createDefaultModel();
-        Map<Node, Resource> nodeToResource = new HashMap<Node, Resource>();
+        //Model hyperGraph = ModelFactory.createDefaultModel();
+        Model hyperGraph = bgpRes.getModel();
+
         // for(BasicPattern bgp : bgps) {
-        enrichModelWithHyperGraphData(hyperGraph, nodeToResource, bgp);
-        // }
+        enrichModelWithHyperGraphData(bgpRes);
 
         // System.out.println("HYPER");
         // hyperGraph.write(System.out, "TURTLE");
 
-        Set<Resource> rawJoinVertices = hyperGraph.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
+        Set<Resource> rawJoinVertices = bgpRes.getBgpNodes().stream()
+            .filter(x -> x.hasProperty(RDF.type, LSQ.Vertex))
+            .collect(Collectors.toSet());
+
+//        Set<Resource> rawJoinVertices = hyperGraph.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
 
         Map<Resource, Integer> joinVertexToDegree = rawJoinVertices.stream()
                 .collect(Collectors.toMap(r -> r, r -> propertyDegree(r, LSQ.out, LSQ.in)));
 
         // .filter(x -> x != 1) // Remove vertices that do not join
-        joinVertexToDegree = joinVertexToDegree.entrySet().stream().filter(e -> e.getValue() != 1)
+        joinVertexToDegree = joinVertexToDegree.entrySet().stream()
+                .filter(e -> e.getValue() != 1)
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         Set<Resource> joinVertices = joinVertexToDegree.keySet();
@@ -636,26 +673,27 @@ public class QueryStatistics2 {
             String name = "" + toPrettyString(o);
 
             // System.out.println(name);
-            Resource joinVertexRes = joinVertexNres.nest("-jv-" + name).get();// lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
+//            Resource joinVertexRes = joinVertexNres.nest("-jv-" + name).get();// lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
+            Resource joinVertexRes = v;
 
-            bgpRes.addProperty(LSQ.joinVertex, joinVertexRes);
+//            bgpRes.addProperty(LSQ.joinVertex, joinVertexRes);
 
             Resource joinVertexType = getJoinVertexType(v);
             int degree = joinVertexToDegree.get(v);
 
             //rdfNodeToNode = v.getProperty(LSQ.proxyFor).getObject();
 
-            Node proxyNode = v.getProperty(LSQ.proxyFor).getObject().asNode();
-            RDFNode proxyRdfNode = nodeToModel.get(proxyNode);
+//            Node proxyNode = v.getProperty(LSQ.proxyFor).getObject().asNode();
+//            RDFNode proxyRdfNode = nodeToModel.get(proxyNode);
 
-            if(proxyRdfNode == null) {
-                throw new NullPointerException("Should not happen");
-            }
+//            if(proxyRdfNode == null) {
+//                throw new NullPointerException("Should not happen");
+//            }
 
             joinVertexRes
                 .addLiteral(LSQ.joinVertexDegree, degree)
                 .addProperty(LSQ.joinVertexType, joinVertexType)
-                .addProperty(LSQ.proxyFor, proxyRdfNode)
+//                .addProperty(LSQ.proxyFor, proxyRdfNode)
             // .addProperty(LSQ.proxyFor,
             // v)//v.getPropertyResourceValue(LSQ.proxyFor))
             ;

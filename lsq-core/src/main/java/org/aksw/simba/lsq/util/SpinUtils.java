@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.util;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -100,7 +101,7 @@ public class SpinUtils {
 
     public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
         Set<Resource> ress = ConceptModelUtils
-                .listResources(spinModel, basicPatterns, Resource.class)
+                .listResourcesUnchecked(spinModel, basicPatterns, Resource.class)
                 .collect(Collectors.toSet()).blockingGet();
 
         Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
@@ -122,7 +123,7 @@ public class SpinUtils {
     public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
 //        spinModel.write(System.out, "NTRIPLES");
 
-        List<Resource> ress = ConceptModelUtils.listResources(spinModel, basicPatterns, Resource.class)
+        List<Resource> ress = ConceptModelUtils.listResourcesUnchecked(spinModel, basicPatterns, Resource.class)
                 .toList().blockingGet();
 
 //        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
@@ -164,7 +165,7 @@ public class SpinUtils {
     }
 
     public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns(Model spinModel) {
-        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResources(
+        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResourcesUnchecked(
                     spinModel, triplePatterns, org.topbraid.spin.model.Triple.class)
                 .collect(Collectors.toSet())
                 .blockingGet();
@@ -194,7 +195,7 @@ public class SpinUtils {
         return result;
     }
     public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
-        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.<org.topbraid.spin.model.Triple>listResources(spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
+        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.<org.topbraid.spin.model.Triple>listResourcesUnchecked(spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
                 .collect(Collectors.toSet())
                 .blockingGet();
         return result;
@@ -501,9 +502,33 @@ public class SpinUtils {
         return result;
     }
 
-    public static Node readNode(RDFNode rdfNode) {
-        Model model = rdfNode.getModel();
+    public static Set<RDFNode> listRDFNodes(org.topbraid.spin.model.Triple triple) {
+        Set<RDFNode> result = new LinkedHashSet<>();
+        result.add(triple.getSubject());
+        result.add(triple.getPredicate());
+        result.add(triple.getObject());
+        return result;
+    }
 
+
+    public static RDFNode writeNode(Model tgtModel, Node node) {
+        RDFNode result = null;
+        if(node != null) {
+            if(node.isVariable()) {
+                String varName = node.getName();
+                Resource tmp = tgtModel.createResource();
+                org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.setLiteralProperty(
+                        tmp, SP.varName, varName);
+                result = tmp;
+            } else {
+                result = tgtModel.wrapAsResource(node);
+            }
+        }
+
+        return result;
+    }
+
+    public static Node readNode(RDFNode rdfNode) {
         Node result = null;
         if(rdfNode != null && rdfNode.isResource()) {
             Resource r = rdfNode.asResource();

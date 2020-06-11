@@ -2,6 +2,7 @@ package org.aksw.simba.lsq.util;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
+import org.aksw.jena_sparql_api.concepts.UnaryRelation;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -16,12 +17,35 @@ import io.reactivex.rxjava3.core.Flowable;
 public class ConceptModelUtils {
     public static <T extends Resource> Flowable<T> listResources(Model model, Concept concept, Class<? extends T> clazz) {
         return listRdfNodes(model, concept)
-// Filter disabled here because e.g. spin does not produce ?x a sp:TriplePattern triples, but canAs returns false if the type is not present
 //                .filter(rdfNode -> rdfNode.canAs(clazz))
-//                .filter(rdfNode -> {
-//                    boolean r = rdfNode.canAs(clazz);
-//                    return r;
-//                })
+                .filter(rdfNode -> {
+                    boolean r = rdfNode.canAs(clazz);
+                    return r;
+                })
+                .map(rdfNode -> {
+                    T r = rdfNode.as(clazz);
+                    return r;
+                });
+    }
+
+    /**
+     * Obtain the set of RDFNodes from a concept over a model.
+     *
+     * For example, SPIN2ARQ does not produce ?x a sp:TriplePattern triples, but canAs
+     * on the Spin Resource Implementations returns false if the type is not present.
+     *
+     *
+     * @param <T>
+     * @param model
+     * @param concept
+     * @param clazz
+     * @return
+     */
+    public static <T extends Resource> Flowable<T> listResourcesUnchecked(
+            Model model,
+            UnaryRelation concept,
+            Class<? extends T> clazz) {
+        return listRdfNodes(model, concept)
                 .map(rdfNode -> {
                     T r = rdfNode.as(clazz);
                     return r;
@@ -39,7 +63,7 @@ public class ConceptModelUtils {
 //        return result;
 //    }
 
-    public static Flowable<RDFNode> listRdfNodes(Model model, Concept concept) {
+    public static Flowable<RDFNode> listRdfNodes(Model model, UnaryRelation concept) {
         Var var = concept.getVar();
         Query query = ConceptUtils.createQueryList(concept);
 
