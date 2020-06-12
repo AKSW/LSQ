@@ -817,7 +817,7 @@ public class LsqUtils {
             if(stmt != null && stmt.isQuery()) {
                 if(stmt.isParsed()) {
                     SparqlStmtUtils.optimizePrefixes(stmt);
-                    SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
+//                    SparqlStmtQuery queryStmt = stmt.getAsQueryStmt();
 
                     //result = queryStmt.getQuery();
                     //String queryStr = Objects.toString(query);
