@@ -373,22 +373,22 @@ public class LsqUtils {
 
 
     public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
-        Long itemLimit = config.getItemLimit();
+//        Long itemLimit = config.getItemLimit();
         String logFormat = config.getInQueryLogFormat();
         String baseIri = config.outBaseIri;
         //String datasetUrl = config.iri;
         String hostHashSalt = "";
         String serviceUrl = null;
 
-        Function<String, SparqlStmt> sparqlParser = SparqlStmtParserImpl.create(new PrefixMappingImpl());
+        Function<String, SparqlStmt> sparqlParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, new PrefixMappingImpl(), true);
 
         Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
         Flowable<ResourceInDataset> result = createReader(
                 inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri, hostHashSalt, serviceUrl);
 
-        if(itemLimit != null) {
-            result = result.take(itemLimit);
-        }
+//        if(itemLimit != null) {
+//            result = result.take(itemLimit);
+//        }
 
 
         return result;

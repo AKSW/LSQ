@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
+import org.aksw.simba.lsq.util.SpinUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -39,6 +40,17 @@ public class TestExtendedSpinModel {
         QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
         // QueryStatistics2.setUpJoinVertices(spinRes);
         QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
+
+        // TODO Make skolemize reuse skolem ID resources
+        Skolemize.skolemize(spinRes);
+
+
+//        QueryStatistics2.fetchCountJoinVarElement(qef, itemToElement)
+
+        // Now to create the evaluation results...
+        // LsqProcessor.rdfizeQueryExecutionStats
+//        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
+
 
 
         //Skolemize.skolemize(spinRes);

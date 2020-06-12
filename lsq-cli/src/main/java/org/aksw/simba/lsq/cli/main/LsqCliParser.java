@@ -45,7 +45,7 @@ public class LsqCliParser {
     protected OptionSpec<String> benchmarkEndpointUrlOs;
     protected OptionSpec<String> graphUriOs;
     protected OptionSpec<String> datasetLabelOs;
-    protected OptionSpec<Long> headOs;
+//    protected OptionSpec<Long> headOs;
     protected OptionSpec<Long> datasetSizeOs;
     protected OptionSpec<Long> timeoutInMsOs;
     protected OptionSpec<String> baseUriOs;
@@ -55,14 +55,14 @@ public class LsqCliParser {
     protected OptionSpec<String> expBaseUriOs;
     protected OptionSpec<String> fedEndpointsOs;
     protected OptionSpec<File> fedEndpointsFileOs;
-    
+
     protected OptionSpec<Long> queryDelayInMsOs;
     protected OptionSpec<String> httpUserAgentOs;
-    
+
     protected OptionSpec<String> prefixSourcesOs;
 
-    
-    
+
+
     public OptionParser getOptionParser() {
         return parser;
     }
@@ -82,7 +82,7 @@ public class LsqCliParser {
     public void initOptionSpecs() {
 
         inputOs = parser
-        		.nonOptions("File(s) containing input data")
+                .nonOptions("File(s) containing input data")
                 //.acceptsAll(Arrays.asList("f", "file"), "File containing input data")
                 //.withRequiredArg()
                 //.ofType(File.class)
@@ -130,11 +130,11 @@ public class LsqCliParser {
                 .defaultsTo("mydata")
                 ;
 
-        headOs = parser
-                .acceptsAll(Arrays.asList("h", "head"), "Only process n entries starting from the top")
-                .withRequiredArg()
-                .ofType(Long.class)
-                ;
+//        headOs = parser
+//                .acceptsAll(Arrays.asList("h", "head"), "Only process n entries starting from the top")
+//                .withRequiredArg()
+//                .ofType(Long.class)
+//                ;
 
         datasetSizeOs = parser
                 .acceptsAll(Arrays.asList("d", "dsize"), "Dataset size. Used in some computations. If not given, it will be queried (which might fail). Negative values disable dependent computations.")
@@ -192,7 +192,7 @@ public class LsqCliParser {
                 //.withRequiredArg()
                 .defaultsTo("q-([^->]+)");
 
-        
+
         queryDelayInMsOs = parser
                 .acceptsAll(Arrays.asList("y", "delay"), "Delay in milliseconds")
                 .withRequiredArg()
@@ -230,7 +230,7 @@ public class LsqCliParser {
 
         String datasetLabel = datasetLabelOs.value(options);
         String baseUri = baseUriOs.value(options);
-        Long head = headOs.value(options);
+//        Long head = headOs.value(options);
         String rdfizer = rdfizerOs.value(options);
 
         boolean fetchDatasetSize = !options.has(datasetSizeOs);
@@ -293,7 +293,7 @@ public class LsqCliParser {
 
         List<String> inputs = inputOs.values(options);
         config.setInQueryLogFiles(inputs);
-        
+
         String inLogFormat = logFormatOs.value(options);
         config.setInQueryLogFormat(inLogFormat);
 
@@ -306,10 +306,10 @@ public class LsqCliParser {
         queryIdPatternStr = queryIdPatternStr == null ? null : queryIdPatternStr.trim();
         Pattern queryIdPattern = Strings.isNullOrEmpty(queryIdPatternStr) ? null : Pattern.compile(queryIdPatternStr);
 
-        
+
         Iterable<String> prefixSources = prefixSourcesOs.values(options);
         prefixSources = LsqUtils.prependDefaultPrefixSources(prefixSources);
-        
+
         config.setReuseLogIri(reuseLogIris);
         config.setQueryIdPattern(queryIdPattern);
 
@@ -323,9 +323,9 @@ public class LsqCliParser {
 
         config.setBenchmarkEndpoint(benchmarkEndpointUrl);
         config.addBenchmarkDefaultGraphs(benchmarkDatasetDescription.getDefaultGraphURIs());
-        
+
         config.setBenchmarkQueryExecutionTimeoutInMs(timeoutInMsOs.value(options));
-        config.setItemLimit(head);
+//        config.setItemLimit(head);
 
         config.setFederationEndpoints(fedEndpoints);
 
@@ -337,14 +337,14 @@ public class LsqCliParser {
         config.setOutFile(outputOs.value(options));
         config.setOutRdfFormat(outFormatStr);
 
-        
+
         Long delayInMs = queryDelayInMsOs.value(options);
         config.setDelayInMs(delayInMs);
         String userAgent = httpUserAgentOs.value(options);
         config.setHttpUserAgent(userAgent);
-        
+
         config.setPrefixSources(prefixSources);
-        
+
         return config;
     }
 

@@ -761,7 +761,7 @@ public class LsqProcessor
         // ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
 
         // ... and skolemize the rest
-        //Skolemize.skolemize(spinRes);
+        Skolemize.skolemize(spinRes);
 
 
         return tmpSpinRes;
