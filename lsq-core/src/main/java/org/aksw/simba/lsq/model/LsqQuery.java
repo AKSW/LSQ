@@ -1,10 +1,13 @@
 package org.aksw.simba.lsq.model;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.jena.ext.com.google.common.hash.Hashing;
+import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
 
 
@@ -37,8 +40,9 @@ public interface LsqQuery
     String getParseError();
     LsqQuery setParseError(String text);
 
+    // Note: org.topbraid.spin.model.Query has no registered implementation
     @Iri(LSQ.Strs.hasSpin)
-    org.topbraid.spin.model.Query getSpinQuery();
+    Resource getSpinQuery();
     LsqQuery setSpinQuery(Resource resource);
 
     @Iri(LSQ.Strs.hash)
@@ -63,6 +67,22 @@ public interface LsqQuery
     @Iri(LSQ.Strs.hasRemoteExec)
     <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
 
+
+    default LsqQuery setQueryAndHash(String str) {
+        String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+
+        setText(str);
+        setHash(hash);
+
+        return this;
+    }
+
+    default LsqQuery setQueryAndHash(Query query) {
+        String str = query.toString();
+        setQueryAndHash(str);
+
+        return this;
+    }
 //    @ToString
 //    default String asString() {
 //        return toString() + " " + getText();

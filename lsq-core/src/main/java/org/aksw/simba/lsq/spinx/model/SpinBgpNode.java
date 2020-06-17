@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
@@ -34,6 +35,26 @@ public interface SpinBgpNode
 
     @Iri(LSQ.Strs.out)
     Set<DirectedHyperEdge> getOutEdges();
+
+    /**
+     * A resource for the subset of bgp's triple patterns in which the the BGPNode occurs.
+     * The identity should be allocated based on the set of the involved triple patterns' identities.
+     *
+     * @return
+     */
+    @Iri(LSQ.Strs.hasSubBGP)
+    SpinBgp getSubBgp();
+    SpinBgpNode setSubBgp(Resource subBgp);
+
+    /**
+     * The resource that corresponds to the query
+     * SELECT COUNT(DISTINCT joinVar) WHERE subBGP
+     *
+     * @return
+     */
+    @Iri(LSQ.Strs.joinExtensionQuery)
+    LsqQuery getJoinExtensionQuery();
+    SpinBgpNode setJoinExtensionQuery(Resource joinExtensionQuery);
 
     public default Node toJenaNode() {
         Set<RDFNode> set = getProxyFor();

@@ -27,8 +27,10 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
+import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.parser.WebLogParser;
+import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
 import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
@@ -54,6 +56,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.http.QueryExceptionHTTP;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
@@ -748,9 +751,8 @@ public class LsqProcessor
         query = query.cloneQuery();
         query.getGraphURIs().clear();
 
-//      queryNo++;
-
-    // .. generate the spin model ...
+        // queryNo++;
+        // .. generate the spin model ...
         //Model spinModel = queryRes.getModel();
         // Model spinModel = ModelFactory.createDefaultModel();
         Model spinModel = spinRes.getModel();
@@ -761,11 +763,9 @@ public class LsqProcessor
         // ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());
 
         // ... and skolemize the rest
-        Skolemize.skolemize(spinRes);
-
+        //Skolemize.skolemize(spinRes);
 
         return tmpSpinRes;
-
 
 //      System.out.println("TEST {");
 //      SpinUtils.indexTriplePatterns2(tmpSpinRes.getModel()).forEach(System.out::println);
@@ -791,6 +791,125 @@ public class LsqProcessor
 //
 //    resToBgp.keySet().forEach(r -> targetRes.addProperty(LSQ.hasBGP, r));
 //
+
+//    public static void enrichSpinElementsWithQueries(SpinQueryEx spinNode) {
+//        for(SpinBgp bgp : spinNode.getBgps()) {
+//            LsqQuery extensionQuery = bgp.getExtensionQuery();
+//            if(extensionQuery == null) {
+//                extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
+//
+//                Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
+//                extensionQuery.setQueryAndHash(query);
+//            }
+//
+//            Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+//
+//            for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
+//                SpinBgp subBgp = bgpNode.getSubBgp();
+//
+//                if(subBgp == null) {
+//                    subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
+//                    bgpNode.setSubBgp(subBgp);
+//                }
+//                Node jenaNode = bgpNode.toJenaNode();
+//
+//                List<TriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
+//                    .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
+//                    .collect(Collectors.toList());
+//
+//                Collection<TriplePattern> dest = subBgp.getTriplePatterns();
+//                for(TriplePattern tp : subBgpTps) {
+//                    dest.add(tp);
+//                }
+//            }
+//        }
+//    }
+
+    public static void enrichSpinBgpNodesWithSubBgpsAndQueries(SpinQueryEx spinNode) {
+
+        boolean createQueryResources = true;
+        for(SpinBgp bgp : spinNode.getBgps()) {
+            if(createQueryResources) {
+                LsqQuery extensionQuery = bgp.getExtensionQuery();
+                if(extensionQuery == null) {
+                    extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
+
+                    Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
+                    extensionQuery.setQueryAndHash(query);
+                    bgp.setExtensionQuery(extensionQuery);
+                }
+            }
+
+            Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+
+            for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
+                Node jenaNode = bgpNode.toJenaNode();
+
+                if(createQueryResources && jenaNode.isVariable()) {
+                    LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
+                    if(extensionQuery == null) {
+                        extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
+
+                        Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
+                        query.setQueryResultStar(false);
+                        query.setDistinct(true);
+                        query.addResultVar((Var)jenaNode);
+                        extensionQuery.setQueryAndHash(query);
+
+                        bgpNode.setJoinExtensionQuery(extensionQuery);
+                    }
+                }
+
+
+                SpinBgp subBgp = bgpNode.getSubBgp();
+
+                if(subBgp == null) {
+                    subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
+                    bgpNode.setSubBgp(subBgp);
+                }
+
+
+                if(createQueryResources && jenaNode.isVariable()) {
+                    LsqQuery extensionQuery = subBgp.getExtensionQuery();
+                    if(extensionQuery == null) {
+                        extensionQuery = subBgp.getModel().createResource().as(LsqQuery.class);
+
+                        Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(subBgp.toBasicPattern()));
+                        extensionQuery.setQueryAndHash(query);
+                        subBgp.setExtensionQuery(extensionQuery);
+                    }
+                }
+
+
+                // Create triple pattern extension queries
+                if(createQueryResources) {
+                    for(TriplePattern tp : bgp.getTriplePatterns()) {
+                        LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
+
+                        LsqQuery extensionQuery = ltp.getExtensionQuery();
+                        if(extensionQuery == null) {
+                            extensionQuery = ltp.getModel().createResource().as(LsqQuery.class);
+
+                            Query query = QueryUtils.elementToQuery(ElementUtils.createElementTriple(ltp.toJenaTriple()));
+                            extensionQuery.setQueryAndHash(query);
+                            ltp.setExtensionQuery(extensionQuery);
+                        }
+                    }
+                }
+
+
+                List<TriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
+                    .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
+                    .collect(Collectors.toList());
+
+                Collection<TriplePattern> dest = subBgp.getTriplePatterns();
+                for(TriplePattern tp : subBgpTps) {
+                    dest.add(tp);
+                }
+            }
+        }
+    }
+
 
     public static void enrichSpinBgpsWithNodes(SpinQueryEx spinNode) {
         Model spinModel = spinNode.getModel();
@@ -1089,6 +1208,7 @@ public class LsqProcessor
             // For these selectivities we need to introduce _observation_ resources for
             // (1) each (join) var in the bgp
             // (2) each (join) var in a tp
+            // a variable is a join var (of a bgp) if it is mentioned in more than 1 triple pattern
             // - [[join-bgp-var]] / [[tp-var]]
 
             // Note, that there are resources for structural information on (join) bgp-vars

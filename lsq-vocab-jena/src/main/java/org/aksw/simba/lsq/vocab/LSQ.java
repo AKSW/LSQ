@@ -3,7 +3,6 @@ package org.aksw.simba.lsq.vocab;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.vocabulary.DCTerms;
 
 /**
  * LSQ vocabulary
@@ -21,16 +20,25 @@ public class LSQ {
         public static final String text = ns + "text";
         public static final String hash = ns + "hash";
         public static final String resultSize = ns + "resultSize";
+        public static final String isDistinct = ns + "isDistinct";
+//        public static final String distinctResultSize = ns + "distinctResultSize";
+
         public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
         public static final String hasSpin = ns + "hasSpin";
         public static final String hasTP = ns + "hasTP";
         public static final String hasBGP = ns + "hasBGP";
+        public static final String hasSubBGP = ns + "hasSubBGP";
+        public static final String extensionQuery = ns + "extensionQuery";
+        public static final String joinExtensionQuery = ns + "joinExtensionQuery";
+
         //public static final String tpText = ns + "tpText";
         //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
         public static final String execError = ns + "execError";
         public static final String processingError = ns + "processingError";
         public static final String parseError = ns + "parseError";
         public static final String runTimeMs = ns + "runTimeMs";
+
+        public static final String benchmarkRun = ns + "benchmarkRun";
 
         public static final String hasExec = ns + "hasExec";
         public static final String hasLocalExec =  ns + "hasLocalExec";

@@ -19,7 +19,7 @@ import org.topbraid.spin.model.TriplePattern;
 
 @ResourceView
 public interface SpinBgp
-    extends Resource
+    extends LsqElement
 {
     @Iri(LSQ.Strs.hasTP)
     List<TriplePattern> getTriplePatterns();
@@ -27,8 +27,8 @@ public interface SpinBgp
     @Iri(LSQ.Strs.joinVertex)
     Set<JoinVertex> getJoinVertices();
 
-    @Iri(LSQ.Strs.hasBGPExec)
-    Set<SpinBgpExec> getSpinBgpExecs();
+//    @Iri(LSQ.Strs.hasBGPExec)
+//    Set<SpinBgpExec> getSpinBgpExecs();
 
 
     @Iri(LSQ.Strs.joinVertices)

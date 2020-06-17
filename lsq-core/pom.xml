@@ -14,6 +14,17 @@
 	</parent>
 
 	<dependencies>
+
+		<dependency>
+			<groupId>org.hobbit</groupId>
+			<artifactId>facete3-impl</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb2</artifactId>
+		</dependency>
+
 		<!-- FIXME Get rid of this dependency; right now we use some ngs code which 
 			should go into a common module -->
 		<dependency>

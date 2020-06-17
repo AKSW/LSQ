@@ -30,6 +30,7 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.util.FmtUtils;
+import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
@@ -521,7 +522,7 @@ public class SpinUtils {
                         tmp, SP.varName, varName);
                 result = tmp;
             } else {
-                result = tgtModel.wrapAsResource(node);
+                result = tgtModel.asRDFNode(node);
             }
         }
 
