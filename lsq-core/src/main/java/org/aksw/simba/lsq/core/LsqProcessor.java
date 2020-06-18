@@ -63,7 +63,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.arq.ARQ2SPIN;
-import org.topbraid.spin.model.Triple;
 import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -948,7 +947,7 @@ public class LsqProcessor
         Model spinModel = spinNode.getModel();
 
         // Extend the spin model with BGPs
-        Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel); //queryRes);
+        Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel); //queryRes);
 
         for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 

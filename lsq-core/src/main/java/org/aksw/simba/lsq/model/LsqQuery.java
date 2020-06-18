@@ -68,12 +68,27 @@ public interface LsqQuery
     <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
 
 
+    public static String createHash(String str) {
+//        System.out.println("Hashing " + str.replace('\n', ' '));
+        String result = str == null ? null : Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+
+//        System.out.println("Hashing result: " + result);
+        return result;
+    }
+
     default LsqQuery setQueryAndHash(String str) {
-        String hash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+        String hash = createHash(str);
 
         setText(str);
         setHash(hash);
 
+        return this;
+    }
+
+    default LsqQuery updateHash() {
+        String str = getText();
+        String hash = createHash(str);
+        setHash(hash);
         return this;
     }
 

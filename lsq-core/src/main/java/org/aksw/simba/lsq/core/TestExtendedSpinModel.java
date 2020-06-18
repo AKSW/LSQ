@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ import com.google.common.hash.Hashing;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
 import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.disposables.Disposable;
 
 
 interface PathHasher
@@ -368,75 +370,99 @@ public class TestExtendedSpinModel {
 //                .map(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
                 .flatMapMaybe(lsqQuery -> enrichFull(lsqQuery), false, 128)
                 .flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
+                .doOnNext(lsqQuery -> lsqQuery.updateHash())
                 .lift(OperatorObserveThroughput.create("throughput", 100))
                 .buffer(30)
                 ;
 
         Iterable<List<LsqQuery>> batches = flow.blockingIterable();
-
-
+        Iterator<List<LsqQuery>> itBatches = batches.iterator();
 
         // Create a database to ensure uniqueness of evaluation tasks
         Dataset dataset = TDB2Factory.connectDataset("/tmp/lsq-benchmark-index");
         try(RDFConnection indexConn = RDFConnectionFactory.connect(dataset)) {
 
-            for(List<LsqQuery> batch : batches) {
+            while(itBatches.hasNext()) {
+                List<LsqQuery> batch = itBatches.next();
+
                 // LookupServiceUtils.createLookupService(indexConn, );
-                Triple t = new Triple(Vars.s, LSQ.text.asNode(), Vars.o);
+                Triple t = new Triple(Vars.s, LSQ.execStatus.asNode(), Vars.o);
                 BasicPattern bgp = new BasicPattern();
                 bgp.add(t);
+
                 DataQuery<RDFNode> dq = new DataQueryImpl<>(
                         indexConn,
                         ElementUtils.createElement(t),
-                        Vars.o,
+                        Vars.s,
                         new Template(bgp),
                         RDFNode.class
                 );
 
-                List<Node> nodes = batch.stream()
-                        .map(q -> q.getText())
-                        .map(NodeFactory::createLiteral)
-                        .collect(Collectors.toList());
+                Set<Node> lookupHashNodes = batch.stream()
+                        .map(q -> q.getHash())
+                        .map(h -> "urn://" + h)
+                        .map(NodeFactory::createURI)
+                        .collect(Collectors.toSet());
 
-                Expr filter = ExprUtils.oneOf(Vars.o, nodes);
+//                for(Node n : lookupHashNodes) {
+//                    System.out.println("Lookup with: " + n.getURI());
+//                }
+                Expr filter = ExprUtils.oneOf(Vars.s, lookupHashNodes);
                 dq.filterDirect(new ElementFilter(filter));
 
+//                System.out.println(hashNodes);
                 // Obtain the set of query strings already in the store
-                Set<String> alreadyIndexed = Txn.calculate(indexConn, () ->
+                Set<String> alreadyIndexedHashUrns = Txn.calculate(indexConn, () ->
                       dq
                         .exec()
-                        .map(x -> x.asLiteral().getString())
+                        .map(x -> x.asNode().getURI())
                         .blockingStream()
                         .collect(Collectors.toSet()));
                         ;
 
+//                for(String str : alreadyIndexedHashUrns) {
+//                    System.out.println("Already indexed: " + str);
+//                }
+                Set<LsqQuery> nonIndexed = batch.stream()
+                    .filter(item -> !alreadyIndexedHashUrns.contains("urn://" + item.getHash()))
+                    .collect(Collectors.toSet());
+
+//                System.out.println(nonIndexed);
+
                 List<Quad> inserts = new ArrayList<Quad>();
 
-                for(LsqQuery item : batch) {
-
+                boolean stop = false;
+//                System.err.println("Batch: " + nonIndexed.size() + "/" + lookupHashNodes.size() + " (" + batch.size() + ") need processing");
+                for(LsqQuery item : nonIndexed) {
+//                    stop = true;
                     String queryStr = item.getText();
+                    Node s = NodeFactory.createURI("urn://" + item.getHash());
+                    System.out.println("Processing: " + s);
+                    System.out.println(item.getText());
 
-                    boolean isInIndex = alreadyIndexed.contains(queryStr);
-                    if(!isInIndex) {
-                        LocalExecution le = item.getModel().createResource().as(LocalExecution.class);
+                    LocalExecution le = item.getModel().createResource().as(LocalExecution.class);
 
-                        rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, le);
-                        item.getLocalExecutions(LocalExecution.class).add(le);
+                    rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, le);
+                    item.getLocalExecutions(LocalExecution.class).add(le);
 
-                        inserts.add(new Quad(Quad.defaultGraphNodeGenerated, NodeFactory.createBlankNode(), t.getPredicate(), t.getObject()));
-    //                    RDFDataMgr.write(new FileOutputStream(FileDescriptor.out), item.getModel(), RDFFormat.TURTLE_PRETTY);
-                    } else {
-                        // System.out.println("Skipping");
-                    }
+                    inserts.add(new Quad(Quad.defaultGraphIRI, s, t.getPredicate(), NodeFactory.createLiteral("processed")));
+//                    RDFDataMgr.write(new FileOutputStream(FileDescriptor.out), item.getModel(), RDFFormat.TURTLE_PRETTY);
 
-                    UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
-                    Txn.execute(indexConn, () -> indexConn.update(ur));
+//                    System.out.println(s.getURI().equals("urn://33c4205f90fdeb7d1db68426806a816e3ffbfa3980461b556b32fded407568c9"));
+                }
+
+                UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
+                Txn.executeWrite(indexConn, () -> indexConn.update(ur));
+
+//                Txn.executeRead(indexConn, () -> System.out.println(ResultSetFormatter.asText(indexConn.query("SELECT ?s { ?s ?p ?o }").execSelect())));
+                if(stop) {
+                    ((Disposable)itBatches).dispose();
+                    break;
                 }
             }
-
-
         } finally {
             dataset.close();
+
         }
 
 

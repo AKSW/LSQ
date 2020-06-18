@@ -10,7 +10,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.concepts.BinaryRelation;
+import org.aksw.jena_sparql_api.concepts.BinaryRelationImpl;
 import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jena_sparql_api.concepts.UnaryRelation;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
@@ -23,6 +26,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.BasicPattern;
@@ -30,7 +34,6 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.expr.Expr;
 import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.util.FmtUtils;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
@@ -51,7 +54,41 @@ import com.google.common.collect.Multimap;
 public class SpinUtils {
 
     public static final Concept triplePatterns = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "x", "?x sp:subject ?s ; sp:predicate ?p ; sp:object ?o");
-    public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?foo !rdf:rest ?x . ?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
+
+//    public static final Concept basicPatterns = Concept.create("PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX sp: <http://spinrdf.org/sp#>", "x", "?foo !rdf:rest ?x . ?x (rdf:rest)*/rdf:first [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ]");
+
+//  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+    // Not yet used
+    public static final BinaryRelation rootedlistStarts = BinaryRelationImpl.create(
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+            "?root (<urn:p>|!<urn:p>)* ?listStart . "
+            + "?listStart rdf:first ?item "
+            + "FILTER(NOT EXISTS { ?foo rdf:rest ?listStart} ) ",
+            "root",
+            "listStart"
+            );
+
+    // Not yet used
+    public static final BinaryRelation tpRootedListStarts = BinaryRelationImpl.create(
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+            + "PREFIX sp: <http://spinrdf.org/sp#>",
+            "?root (<urn:p>|!<urn:p>)* ?listStart . "
+            + "?listStart rdf:first [] "
+            + "FILTER(NOT EXISTS { [] rdf:rest ?listStart }) "
+            + "?listStart (rdf:rest*/rdf:first) [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ] ",
+            "root",
+            "listStart"
+            );
+
+    public static final UnaryRelation tpListStarts = Concept.create(
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+            + "PREFIX sp: <http://spinrdf.org/sp#>",
+            "listStart",
+            "?root (<urn:p>|!<urn:p>)* ?listStart . "
+            + "?listStart rdf:first [] "
+            + "FILTER(NOT EXISTS { [] rdf:rest ?listStart }) "
+            + "?listStart (rdf:rest*/rdf:first) [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ] "
+     );
 
     public static final Concept subjects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:subject ?y");
     public static final Concept predicates = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:predicate ?y");
@@ -100,16 +137,31 @@ public class SpinUtils {
         return result;
     }
 
+    public static boolean isSpinTriple(RDFNode rdfNode) {
+        boolean result = false;
+        if(rdfNode.isResource()) {
+            Resource r = rdfNode.asResource();
+            result = r.hasProperty(SP.subject) && r.hasProperty(SP.predicate) && r.hasProperty(SP.object);
+        }
+        return result;
+    }
+
     public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
         Set<Resource> ress = ConceptModelUtils
-                .listResourcesUnchecked(spinModel, basicPatterns, Resource.class)
+                .listResourcesUnchecked(spinModel, tpListStarts, Resource.class)
                 .collect(Collectors.toSet()).blockingGet();
 
         Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
 
         for(Resource r : ress) {
-            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(r);
-            result.putAll(r, tmp);
+            RDFList list = r.as(RDFList.class);
+            for(RDFNode item : list.asJavaList()) {
+                boolean isSpinTriple = isSpinTriple(item);
+                if(isSpinTriple) {
+                    result.put(r, item.as(TriplePattern.class));
+                }
+            }
+//            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(r);
         }
 
         return result;
@@ -124,7 +176,7 @@ public class SpinUtils {
     public static Map<Resource, BasicPattern> indexBasicPatterns(Model spinModel) {
 //        spinModel.write(System.out, "NTRIPLES");
 
-        List<Resource> ress = ConceptModelUtils.listResourcesUnchecked(spinModel, basicPatterns, Resource.class)
+        List<Resource> ress = ConceptModelUtils.listResourcesUnchecked(spinModel, tpListStarts, Resource.class)
                 .toList().blockingGet();
 
 //        ress.stream().forEach(x -> System.out.println("GOT RES: " + x));
@@ -190,17 +242,17 @@ public class SpinUtils {
         return result;
     }
 
-    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Resource res) {
-        Model spinModel = ResourceUtils.reachableClosure(res);
-        Set<org.topbraid.spin.model.Triple> result = indexTriplePatterns2(spinModel);
-        return result;
-    }
-    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
-        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.<org.topbraid.spin.model.Triple>listResourcesUnchecked(spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
-                .collect(Collectors.toSet())
-                .blockingGet();
-        return result;
-    }
+//    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Resource res) {
+//        Model spinModel = ResourceUtils.reachableClosure(res);
+//        Set<org.topbraid.spin.model.Triple> result = indexTriplePatterns2(spinModel);
+//        return result;
+//    }
+//    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Model spinModel) {
+//        Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.<org.topbraid.spin.model.Triple>listResourcesUnchecked(spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
+//                .collect(Collectors.toSet())
+//                .blockingGet();
+//        return result;
+//    }
 
     public static void enrichWithHasTriplePattern(Resource targetRes, Resource spinRes) {
         Model spinModel = ResourceUtils.reachableClosure(spinRes);

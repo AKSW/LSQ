@@ -33,6 +33,10 @@ public class LSQ {
 
         //public static final String tpText = ns + "tpText";
         //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
+
+        // Used in benchmark run - align with other error msgs
+        public static final String execStatus = ns + "execStatus";
+
         public static final String execError = ns + "execError";
         public static final String processingError = ns + "processingError";
         public static final String parseError = ns + "parseError";
@@ -263,6 +267,8 @@ public class LSQ {
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
     public static final Property statusCode = property("statusCode");
+    public static final Property execStatus = ResourceFactory.createProperty(Strs.execStatus);
+
     public static final Property numResponseBytes = property("numResponseBytes");
 
 

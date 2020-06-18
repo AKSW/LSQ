@@ -103,9 +103,9 @@ public class TestLsqSelectivity {
 
         QueryExecutionFactory qef = FluentQueryExecutionFactory.from(dataModel).create();
 
-        Multimap<Resource, Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel);
+        Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel);
 
-        for(Entry<Resource, Collection<Triple>> e : bgpToTps.asMap().entrySet()) {
+        for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
             Map<Triple, Long> sel = QueryStatistics2.fetchRestrictedResultSetRowCount(qef, e.getValue());
             System.out.println("TP/BGP compatibility counts: " + sel);
 

@@ -11,7 +11,6 @@ import org.aksw.simba.lsq.model.JoinVertex;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.topbraid.spin.model.Triple;
 import org.topbraid.spin.model.TriplePattern;

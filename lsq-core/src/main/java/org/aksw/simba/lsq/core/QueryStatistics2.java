@@ -145,7 +145,7 @@ public class QueryStatistics2 {
      * @param triples
      * @return
      */
-    public static Map<org.topbraid.spin.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
+    public static Map<org.topbraid.spin.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<? extends org.topbraid.spin.model.Triple> triples) {
         Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)));
 
         Map<org.topbraid.spin.model.Triple, Long> result = fetchRestrictedResultSetRowCount(qef, map);
