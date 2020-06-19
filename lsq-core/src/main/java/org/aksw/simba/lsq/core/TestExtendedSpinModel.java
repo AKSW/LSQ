@@ -59,6 +59,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.apache.jena.sparql.core.Quad;
@@ -262,14 +263,21 @@ public class TestExtendedSpinModel {
 
 
 //        SpinQueryEx spinRes = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
-        SpinQueryEx spinRes = lsqQuery.getModel().createResource().as(SpinQueryEx.class);
+
+        org.topbraid.spin.model.Query spinQuery = LsqProcessor.createSpinModel(query, lsqQuery.getModel());
+
+        SpinQueryEx spinRes = spinQuery.as(SpinQueryEx.class);
         lsqQuery.setSpinQuery(spinRes);
 
-        LsqProcessor.createSpinModel(query, spinRes);
         LsqProcessor.enrichSpinModelWithBgps(spinRes);
         LsqProcessor.enrichSpinBgpsWithNodes(spinRes);
         LsqProcessor.enrichSpinBgpNodesWithSubBgpsAndQueries(spinRes);
 
+        Skolemize.skolemizeTree(spinRes, true, (r, hash) -> "http://lsq.aksw.org/spin-" + hash);
+
+        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_BLOCKS);
+
+        System.exit(0);
         return Maybe.just(lsqQuery);
     }
 

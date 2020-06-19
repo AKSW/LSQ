@@ -2,19 +2,24 @@ package org.aksw.simba.lsq.core;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.apache.jena.ext.com.google.common.hash.HashCode;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.graph.NodeTransform;
@@ -23,6 +28,7 @@ import org.apache.jena.sparql.util.Closure;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.sparql.util.graph.GraphUtils;
 import org.apache.jena.util.ResourceUtils;
+
 
 //class ConciseBoundedDescription {
 //    public Set<RDFNode> resolveCbd(RDFNode root) {
@@ -179,5 +185,28 @@ public class Skolemize {
 //            }
 //        }
 //    }
+
+
+    /**
+     * Perform a depth first post order traversal.
+     *
+     * @param r
+     */
+    public static void skolemizeTree(RDFNode start, boolean useInnerIris, BiFunction<Resource, String, String> getIRI) {
+        Map<RDFNode, HashCode> map = ResourceTreeUtils.createGenericHashMap(start, useInnerIris);
+
+        for(Entry<RDFNode, HashCode> e : map.entrySet()) {
+            RDFNode rdfNode = e.getKey();
+            if(rdfNode.isAnon()) {
+                Resource r = rdfNode.asResource();
+                String hash = e.getValue().toString();
+                // rdfNode.asResource().addLiteral(skolemId, hash);
+                String newIri = getIRI.apply(r, hash);
+                if(newIri != null) {
+                    ResourceUtils.renameResource(r, newIri);
+                }
+            }
+        }
+    }
 
 }
