@@ -746,12 +746,16 @@ public class LsqProcessor
 
     public static org.topbraid.spin.model.Query createSpinModel(
             Query query,
-            Model tgtModel) {
+            Model tgtModel
+            ) {
+
         return createSpinModel(query, tgtModel.createResource());
     }
     public static org.topbraid.spin.model.Query createSpinModel(
             Query query,
-            Resource spinRes) {
+            Resource spinRes
+//            BiFunction<? super Resource, String, String> lsqResToIri
+            ) {
         query = query.cloneQuery();
         query.getGraphURIs().clear();
 
@@ -771,7 +775,6 @@ public class LsqProcessor
 
         // ... and skolemize the rest
         //Skolemize.skolemize(spinRes);
-        Skolemize.skolemizeTree(tmpSpinRes, false, (r, hash) -> "http://lsq.aksw.org/spin-" + hash);
 
         return tmpSpinRes;
 

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
@@ -55,6 +56,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -69,6 +71,7 @@ import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.system.Txn;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.TriplePattern;
@@ -249,7 +252,51 @@ public class TestExtendedSpinModel {
     }
 
 
-    public static Maybe<LsqQuery> enrichFull(LsqQuery lsqQuery) {
+    public static LsqQuery updateLsqQueryIris(
+            LsqQuery start,
+            Function<? super LsqQuery, String> genIri)
+    {
+        LsqQuery result = renameResources(
+                start,
+                LsqQuery.class,
+                r -> r.getModel().listResourcesWithProperty(LSQ.text),
+                r -> genIri.apply(r)
+                );
+        return result;
+    }
+
+    /**
+     * Update all matching resources in a model
+     *
+     * @param start
+     * @param resAndHashToIri
+     * @return
+     */
+    public static <T extends Resource> T renameResources(
+            T start,
+            Class<T> clazz,
+            Function<? super Resource, ? extends Iterator<? extends RDFNode>> listReosurces,
+            Function<? super T, String> resAndHashToIri) {
+        // Rename the query resources - Done outside of this method
+        T result = start;
+        //Set<Resource> qs = model.listResourcesWithProperty(LSQ.text).toSet();
+
+        Iterator<? extends RDFNode> it = listReosurces.apply(start);
+        while(it.hasNext()) {
+            RDFNode tmpQ = it.next();
+            T q = tmpQ.as(clazz);
+            String iri = resAndHashToIri.apply(q);
+
+            Resource newRes = ResourceUtils.renameResource(q, iri);
+            if(q.equals(start)) {
+                result = newRes.as(clazz);
+            }
+        }
+
+        return result;
+    }
+
+    public static Maybe<LsqQuery> enrichWithFullSpinModel(LsqQuery lsqQuery) {
 //        Maybe<LsqQuery> result;
 
         // Query query = QueryFactory.create("SELECT * {  { ?s a ?x ; ?p ?o } UNION { ?s ?j ?k } }");
@@ -266,6 +313,13 @@ public class TestExtendedSpinModel {
 
         org.topbraid.spin.model.Query spinQuery = LsqProcessor.createSpinModel(query, lsqQuery.getModel());
 
+        // Immediately skolemize the spin model - before attachment of
+        // additional properties changes the hashes
+        Skolemize.skolemizeTree(spinQuery, false,
+                (r, hash) -> "http://lsq.aksw.org/spin-" + hash,
+                (r, d) -> true);
+
+
         SpinQueryEx spinRes = spinQuery.as(SpinQueryEx.class);
         lsqQuery.setSpinQuery(spinRes);
 
@@ -273,11 +327,15 @@ public class TestExtendedSpinModel {
         LsqProcessor.enrichSpinBgpsWithNodes(spinRes);
         LsqProcessor.enrichSpinBgpNodesWithSubBgpsAndQueries(spinRes);
 
-        Skolemize.skolemizeTree(spinRes, true, (r, hash) -> "http://lsq.aksw.org/spin-" + hash);
+        // Skolemize the remaining model
+        Skolemize.skolemizeTree(spinRes, true,
+                (r, hash) -> "http://lsq.aksw.org/spin-" + hash,
+                (n, d) -> !(n.isResource() && n.asResource().hasProperty(LSQ.text)));
 
-        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_BLOCKS);
 
-        System.exit(0);
+//        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_BLOCKS);
+//
+//        System.exit(0);
         return Maybe.just(lsqQuery);
     }
 
@@ -375,10 +433,15 @@ public class TestExtendedSpinModel {
 
         Flowable<List<LsqQuery>> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
                 .map(r -> r.as(LsqQuery.class))
-//                .map(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
-                .flatMapMaybe(lsqQuery -> enrichFull(lsqQuery), false, 128)
+                .flatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery), false, 128)
+                .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> "http://lsq.aksw.org/q-" + q.getHash()))
+                .doOnNext(x -> {
+                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_BLOCKS);
+                    System.exit(1);
+                })
                 .flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
                 .doOnNext(lsqQuery -> lsqQuery.updateHash())
+//                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
                 .lift(OperatorObserveThroughput.create("throughput", 100))
                 .buffer(30)
                 ;

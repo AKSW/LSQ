@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -192,8 +193,12 @@ public class Skolemize {
      *
      * @param r
      */
-    public static void skolemizeTree(RDFNode start, boolean useInnerIris, BiFunction<Resource, String, String> getIRI) {
-        Map<RDFNode, HashCode> map = ResourceTreeUtils.createGenericHashMap(start, useInnerIris);
+    public static void skolemizeTree(
+            RDFNode start,
+            boolean useInnerIris,
+            BiFunction<Resource, String, String> getIRI,
+            BiPredicate<? super RDFNode, ? super Integer> filterKeep) {
+        Map<RDFNode, HashCode> map = ResourceTreeUtils.createGenericHashMap(start, useInnerIris, filterKeep);
 
         for(Entry<RDFNode, HashCode> e : map.entrySet()) {
             RDFNode rdfNode = e.getKey();
