@@ -1,7 +1,9 @@
 package org.aksw.simba.lsq.model;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -13,6 +15,10 @@ import org.apache.jena.rdf.model.Resource;
 
 /**
  * This class is main entry point for accessing information about a query in LSQ.
+ *
+ * A practical difference between an lsq:Query and a spin:Query is that the ID (a hashed value) of lsq:Query
+ * is computed from the query string, whereas for spin:Query is is obtained via skolemization of the tree structure
+ * of the SPIN representation.
  *
  * An LsqQuery is a *record* about a sparql query, encompassing the query string,
  * a spin representation, structural features, mentions in query logs
@@ -55,10 +61,11 @@ public interface LsqQuery
 
     @Iri(LSQ.Strs.hasStructuralFeatures)
     LsqStructuralFeatures getStructuralFeatures();
-    LsqQuery setStructuralFeatures(LsqStructuralFeatures r);
+    LsqQuery setStructuralFeatures(Resource r);
 
     @Iri(LSQ.Strs.hasLocalExec)
     <T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
+
 
     // Set<LocalExecution> getLocalExecutions();
 
@@ -66,6 +73,27 @@ public interface LsqQuery
 
     @Iri(LSQ.Strs.hasRemoteExec)
     <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
+
+
+    /**
+     * Index of remote executions by the experiment config resource
+     * @return
+     */
+    default Map<Resource, LocalExecution> getLocalExecutionMap() {
+        Set<LocalExecution> res = getLocalExecutions(LocalExecution.class);
+        Map<Resource, LocalExecution> result = res.stream()
+                .collect(Collectors.toMap(r -> r.getBenchmarkRun(), r -> r));
+        return result;
+    }
+
+//  default Map<Resource, LocalExecution> indexLocalExecs() {
+//  Set<LocalExecution> les = getLocalExecutions(LocalExecution.class);
+//
+//  Map<Resource, LocalExecution> result = les.stream()
+//          .collect(Collectors.toMap(le -> le.getBenchmarkRun(), le -> le));
+//
+//  return result;
+//}
 
 
     public static String createHash(String str) {

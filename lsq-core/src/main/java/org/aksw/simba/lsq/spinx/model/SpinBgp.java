@@ -4,16 +4,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.simba.lsq.model.JoinVertex;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.topbraid.spin.model.Triple;
-import org.topbraid.spin.model.TriplePattern;
 
 
 @ResourceView
@@ -21,10 +20,20 @@ public interface SpinBgp
     extends LsqElement
 {
     @Iri(LSQ.Strs.hasTP)
-    List<TriplePattern> getTriplePatterns();
+    List<LsqTriplePattern> getTriplePatterns();
 
-    @Iri(LSQ.Strs.joinVertex)
-    Set<JoinVertex> getJoinVertices();
+//    default List<LsqTriplePattern> getTriplePatterns() {
+//        List<TpInBgp> list = getTpInBgp();
+//        List<LsqTriplePattern> result = list.stream().map(item -> item.getTriplePattern()).collect(Collectors.toList());
+//        return result;
+//    }
+
+    @Iri(LSQ.Strs.hasTpInBgp)
+    Set<TpInBgp> getTpInBgp();
+
+
+//    @Iri(LSQ.Strs.joinVertex)
+//    Set<JoinVertex> getJoinVertices();
 
 //    @Iri(LSQ.Strs.hasBGPExec)
 //    Set<SpinBgpExec> getSpinBgpExecs();
@@ -72,7 +81,7 @@ public interface SpinBgp
     default BasicPattern toBasicPattern() {
         BasicPattern result = new BasicPattern();
 
-        List<TriplePattern> tps = getTriplePatterns();
+        List<LsqTriplePattern> tps = getTriplePatterns();
         for(Triple tp : tps) {
             org.apache.jena.graph.Triple t = SpinUtils.toJenaTriple(tp);
             result.add(t);

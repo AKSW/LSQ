@@ -190,15 +190,19 @@ public class Skolemize {
 
     /**
      * Perform a depth first post order traversal.
+     * Renames all encountered blank nodes that qualify for renaming.
+     * Returns the (possibly renamed) start node
      *
      * @param r
      */
-    public static void skolemizeTree(
+    public static RDFNode skolemizeTree(
             RDFNode start,
             boolean useInnerIris,
             BiFunction<Resource, String, String> getIRI,
             BiPredicate<? super RDFNode, ? super Integer> filterKeep) {
         Map<RDFNode, HashCode> map = ResourceTreeUtils.createGenericHashMap(start, useInnerIris, filterKeep);
+
+        RDFNode result = start;
 
         for(Entry<RDFNode, HashCode> e : map.entrySet()) {
             RDFNode rdfNode = e.getKey();
@@ -208,10 +212,15 @@ public class Skolemize {
                 // rdfNode.asResource().addLiteral(skolemId, hash);
                 String newIri = getIRI.apply(r, hash);
                 if(newIri != null) {
-                    ResourceUtils.renameResource(r, newIri);
+                    Resource tmp = ResourceUtils.renameResource(r, newIri);
+                    if(r.equals(start)) {
+                        result = tmp;
+                    }
                 }
             }
         }
+
+        return result;
     }
 
 }

@@ -885,12 +885,12 @@ public class LsqProcessor
                     bgpNode.setSubBgp(subBgp);
                 }
 
-                List<TriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
+                List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
                         .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
                         .collect(Collectors.toList());
 
-                Collection<TriplePattern> dest = subBgp.getTriplePatterns();
-                for(TriplePattern tp : subBgpTps) {
+                Collection<LsqTriplePattern> dest = subBgp.getTriplePatterns();
+                for(LsqTriplePattern tp : subBgpTps) {
                     dest.add(tp);
                 }
 
@@ -990,9 +990,9 @@ public class LsqProcessor
 //                bgpCtxRes.addProperty(Skolemize.skolemId, "-bgp-" + bgpId);
 //            }
 
-            List<TriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
+            List<LsqTriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
             for(org.topbraid.spin.model.Triple tp : e.getValue()) {
-                bgpTps.add((TriplePattern)tp);
+                bgpTps.add(tp.as(LsqTriplePattern.class));
             }
 
 

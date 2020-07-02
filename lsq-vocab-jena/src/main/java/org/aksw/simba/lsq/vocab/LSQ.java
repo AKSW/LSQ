@@ -26,6 +26,7 @@ public class LSQ {
         public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
         public static final String hasSpin = ns + "hasSpin";
         public static final String hasTP = ns + "hasTP";
+        public static final String hasTpInBgp = ns + "hasTpInBgp";
         public static final String hasBGP = ns + "hasBGP";
         public static final String hasSubBGP = ns + "hasSubBGP";
         public static final String extensionQuery = ns + "extensionQuery";
@@ -46,11 +47,13 @@ public class LSQ {
 
         public static final String hasExec = ns + "hasExec";
         public static final String hasLocalExec =  ns + "hasLocalExec";
+        public static final String hasQueryExec =  ns + "hasQueryExec";
         public static final String hasRemoteExec = ns + "hasRemoteExec";
 
         public static final String hasBGPExec = ns + "hasBGPExec";
         public static final String hasTPExec = ns + "hasTPExec";
         public static final String hasJoinVarExec = ns + "hasJoinVarExec";
+        public static final String hasTpInBgpExec = ns + "hasTpInBgpExec";
 
         public static final String usesFeature = "usesFeature";
         public static final String feature = "feature";
@@ -113,6 +116,16 @@ public class LSQ {
         public static final String datasetSize = ns + "datasetSize";
         public static final String datasetLabel = ns + "datasetLabel";
         public static final String datasetIri = ns + "datasetIri";
+
+
+        public static final String tpSel = ns + "tpSel";
+
+        // Selectivity of a triple pattern in regard to the BGP in which it occurrs
+        public static final String tpSelBGPRestricted = ns +"tpSelBGPRestricted";
+
+        // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
+        public static final String tpSelJoinVarRestricted = ns + "tpSelJoinVarRestricted";
+
     }
 
 
@@ -205,13 +218,13 @@ public class LSQ {
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
     // TODO Rename to tpSelectivity(GraphRestricted)
-    public static final Property tpSel = property("tpSel");
+    public static final Property tpSel = ResourceFactory.createProperty(Strs.tpSel);
 
     // Selectivity of a triple pattern in regard to the BGP in which it occurrs
-    public static final Property tpSelBGPRestricted = property("tpSelBGPRestricted");
+    public static final Property tpSelBGPRestricted = ResourceFactory.createProperty(Strs.tpSelBGPRestricted);
 
     // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
-    public static final Property tpSelJoinVarRestricted = property("tpSelJoinVarRestricted");
+    public static final Property tpSelJoinVarRestricted = ResourceFactory.createProperty(Strs.tpSelJoinVarRestricted);
 
     // Similar to tpSelectivity, but considering immediate filters present on it
     // (maybe only those filters for which indexes can be used)

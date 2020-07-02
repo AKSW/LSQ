@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.spinx.model;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -36,6 +37,13 @@ public interface SpinBgpNode
     @Iri(LSQ.Strs.out)
     Set<DirectedHyperEdge> getOutEdges();
 
+
+    @Iri(LSQ.Strs.hasJoinVarExec)
+    Set<JoinVertexExec> getJoinRestrictedSelectivities();
+
+
+
+
     /**
      * A resource for the subset of bgp's triple patterns in which the the BGPNode occurs.
      * The identity should be allocated based on the set of the involved triple patterns' identities.
@@ -59,7 +67,7 @@ public interface SpinBgpNode
     public default Node toJenaNode() {
         Set<RDFNode> set = getProxyFor();
         if(set.isEmpty()) {
-            throw new RuntimeException("toJenaNode() requires non-empty set of refernced RDF terms");
+            throw new RuntimeException("toJenaNode() requires non-empty set of referenced RDF terms");
         }
 
         RDFNode node = set.iterator().next();

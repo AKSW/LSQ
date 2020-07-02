@@ -90,6 +90,15 @@ public class SpinUtils {
             + "?listStart (rdf:rest*/rdf:first) [ sp:subject ?s ; sp:predicate ?p ; sp:object ?o ] "
      );
 
+    public static final UnaryRelation tpNoList = Concept.create(
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+            + "PREFIX sp: <http://spinrdf.org/sp#>",
+            "listStart",
+            "?root (<urn:p>|!<urn:p>)* ?listStart . "
+            + "FILTER(NOT EXISTS { [] rdf:first ?listStart }) "
+            + "?listStart sp:subject ?s ; sp:predicate ?p ; sp:object ?o "
+     );
+
     public static final Concept subjects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:subject ?y");
     public static final Concept predicates = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:predicate ?y");
     public static final Concept objects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:object ?y");
@@ -147,21 +156,34 @@ public class SpinUtils {
     }
 
     public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
-        Set<Resource> ress = ConceptModelUtils
-                .listResourcesUnchecked(spinModel, tpListStarts, Resource.class)
-                .collect(Collectors.toSet()).blockingGet();
-
         Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
 
-        for(Resource r : ress) {
-            RDFList list = r.as(RDFList.class);
-            for(RDFNode item : list.asJavaList()) {
-                boolean isSpinTriple = isSpinTriple(item);
-                if(isSpinTriple) {
-                    result.put(r, item.as(TriplePattern.class));
+        {
+            Set<Resource> ress = ConceptModelUtils
+                    .listResourcesUnchecked(spinModel, tpListStarts, Resource.class)
+                    .collect(Collectors.toSet()).blockingGet();
+
+
+            for(Resource r : ress) {
+                RDFList list = r.as(RDFList.class);
+                for(RDFNode item : list.asJavaList()) {
+                    boolean isSpinTriple = isSpinTriple(item);
+                    if(isSpinTriple) {
+                        TriplePattern tp = item.as(TriplePattern.class);
+                        result.put(r, tp);
+                    }
                 }
             }
-//            Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns2(r);
+        }
+
+        {
+            Set<TriplePattern> ress = ConceptModelUtils
+                    .listResourcesUnchecked(spinModel, tpNoList, TriplePattern.class)
+                    .collect(Collectors.toSet()).blockingGet();
+
+            for(TriplePattern item : ress) {
+                result.put(item, item);
+            }
         }
 
         return result;
