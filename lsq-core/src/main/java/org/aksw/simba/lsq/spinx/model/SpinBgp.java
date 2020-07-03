@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -35,9 +34,8 @@ public interface SpinBgp
 //    @Iri(LSQ.Strs.joinVertex)
 //    Set<JoinVertex> getJoinVertices();
 
-//    @Iri(LSQ.Strs.hasBGPExec)
-//    Set<SpinBgpExec> getSpinBgpExecs();
-
+    @Iri(LSQ.Strs.hasExec)
+    Set<SpinBgpExec> getSpinBgpExecs();
 
     @Iri(LSQ.Strs.joinVertices)
     Integer getJoinVertexCount();

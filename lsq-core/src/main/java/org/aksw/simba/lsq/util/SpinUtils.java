@@ -396,7 +396,7 @@ public class SpinUtils {
 
             Resource queryTpExecRes = queryRes.getModel().createResource(queryExecRes.getURI() + "-tp-" + i);
 
-            queryExecRes.addProperty(LSQ.hasTPExec, queryTpExecRes);
+            queryExecRes.addProperty(LSQ.hasTpExec, queryTpExecRes);
 
             queryTpExecRes
                 //.addProperty(RDF.type, LSQ.tpExec)
@@ -505,7 +505,7 @@ public class SpinUtils {
             Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps) {
 
         // Map each triple pattern to the resource which will carry the observed metrics
-        Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTPExec).toSet().stream()
+        Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTpExec).toSet().stream()
             .map(o -> o.asResource())
             .collect(Collectors.toMap(
                     o -> o.getPropertyResourceValue(LSQ.hasTP).as(TriplePattern.class),

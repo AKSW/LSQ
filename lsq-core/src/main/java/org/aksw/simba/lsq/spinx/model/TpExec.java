@@ -12,11 +12,16 @@ import org.aksw.simba.lsq.vocab.LSQ;
 public interface TpExec
     extends ElementExec
 {
-    @Iri(LSQ.Strs.hasTPExec)
+    @Iri(LSQ.Strs.hasExec)
     @Inverse
     LsqTriplePattern getTp();
     TpExec setTp(LsqTriplePattern tp);
 
+
+    @Iri(LSQ.Strs.hasTpExec)
+    @Inverse
+    TpInBgpExec getTpInBgpExec();
+    TpExec setTpInBgpExec(TpInBgpExec tpInBgpExec);
 
     /**
      * Ratio of resultSetSize(tp) / resultSetSize(dataset)

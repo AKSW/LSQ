@@ -9,7 +9,6 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.apache.jena.rdf.model.Resource;
 import org.topbraid.spin.model.impl.TriplePatternImpl;
 
 @ResourceView
@@ -26,10 +25,25 @@ public abstract class LsqTriplePattern
         return result;
     }
 
-    @Iri(LSQ.Strs.hasTPExec)
+    @Iri(LSQ.Strs.hasExec)
     public abstract Set<TpExec> getTpExecs();
 
-    public TpExec findTpExec(Resource expRun) {
-        return null;
-    }
+//    public TpExec findTpExec(Resource expRun) {
+//        return null;
+//    }
+//    default JoinVertexExec findTpExec(Resource expRun) {
+//        Resource expRun = getBenchmarkRun();
+//        Objects.requireNonNull(expRun);
+//
+//        Set<JoinVertexExec> cands = getBgpNodeExecs();
+//        JoinVertexExec result = null;
+//        for(JoinVertexExec cand : cands) {
+//            if(Objects.equals(cand.getBgpNode(), bgp) && Objects.equals(cand.getQueryExec().getBenchmarkRun(), expRun)) {
+//                result = cand;
+//                break;
+//            }
+//        }
+//
+//        return result;
+//    }
 }

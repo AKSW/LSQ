@@ -26,7 +26,8 @@ public interface JoinVertexExec
     JoinVertexExec setBgpRestrictedSelectivitiy(BigDecimal selectivity);
 
 
-    @Iri(LSQ.Strs.hasBGPExec)
+    @Iri(LSQ.Strs.hasJoinVarExec)
+    @Inverse
     SpinBgpExec getBgpExec();
     JoinVertexExec setBgpExec(SpinBgpExec exec);
 //

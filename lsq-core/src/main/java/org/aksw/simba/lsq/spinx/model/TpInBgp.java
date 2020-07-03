@@ -28,15 +28,15 @@ public interface TpInBgp
     LsqTriplePattern getTriplePattern();
     TpInBgp setTriplePattern(Resource tp);
 
-    @Iri(LSQ.Strs.hasTPExec)
+    @Iri(LSQ.Strs.hasTpExec)
     Set<TpInBgpExec> getExecs();
 
-    default Map<Resource, TpInBgpExec> indexExecs() {
-        Set<TpInBgpExec> res = getExecs();
-        Map<Resource, TpInBgpExec> result = res.stream()
-                .collect(Collectors.toMap(r -> r.getBenchmarkRun(), r -> r));
-        return result;
-    }
+//    default Map<Resource, TpInBgpExec> indexExecs() {
+//        Set<TpInBgpExec> res = getExecs();
+//        Map<Resource, TpInBgpExec> result = res.stream()
+//                .collect(Collectors.toMap(r -> r.getBenchmarkRun(), r -> r));
+//        return result;
+//    }
 
     // @SortedBy(TIME.atTime)
     //Map<String, TpMentionedInBgpExec> getExecutions();

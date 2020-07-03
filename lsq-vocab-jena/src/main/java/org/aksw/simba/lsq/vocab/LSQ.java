@@ -50,8 +50,8 @@ public class LSQ {
         public static final String hasQueryExec =  ns + "hasQueryExec";
         public static final String hasRemoteExec = ns + "hasRemoteExec";
 
-        public static final String hasBGPExec = ns + "hasBGPExec";
-        public static final String hasTPExec = ns + "hasTPExec";
+        public static final String hasBgpExec = ns + "hasBgpExec";
+        public static final String hasTpExec = ns + "hasTpExec";
         public static final String hasJoinVarExec = ns + "hasJoinVarExec";
         public static final String hasTpInBgpExec = ns + "hasTpInBgpExec";
 
@@ -84,8 +84,8 @@ public class LSQ {
 
         public static final String bgps = ns + "bgps";
         public static final String tps = ns + "tps";
-        public static final String minBGPTriples = ns + "minBGPTriples";
-        public static final String maxBGPTriples = ns + "maxBGPTriples";
+        public static final String minBgpTriples = ns + "minBGPTriples";
+        public static final String maxBgpTriples = ns + "maxBGPTriples";
         public static final String joinVertices = ns + "joinVertices";
         public static final String projectVars = ns + "projectVars";
 
@@ -156,8 +156,8 @@ public class LSQ {
 
     public static final Property bgps = ResourceFactory.createProperty(Strs.bgps);
     public static final Property tps = ResourceFactory.createProperty(Strs.tps);
-    public static final Property minBGPTriples = ResourceFactory.createProperty(Strs.minBGPTriples);
-    public static final Property maxBGPTriples = ResourceFactory.createProperty(Strs.maxBGPTriples);
+    public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.minBgpTriples);
+    public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.maxBgpTriples);
     public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertices);
     public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVars);
 
@@ -211,8 +211,8 @@ public class LSQ {
     public static final Property hasLocalExec = ResourceFactory.createProperty(Strs.hasLocalExec);
     public static final Property hasRemoteExec = ResourceFactory.createProperty(Strs.hasRemoteExec);
 
-    public static final Property hasBGPExec = ResourceFactory.createProperty(Strs.hasBGPExec);
-    public static final Property hasTPExec = ResourceFactory.createProperty(Strs.hasTPExec);
+    public static final Property hasBgpExec = ResourceFactory.createProperty(Strs.hasBgpExec);
+    public static final Property hasTpExec = ResourceFactory.createProperty(Strs.hasTpExec);
     public static final Property hasJoinVarExec = ResourceFactory.createProperty(Strs.hasJoinVarExec);
 
     // Execution

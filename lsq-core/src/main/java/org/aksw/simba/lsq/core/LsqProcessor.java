@@ -1268,7 +1268,7 @@ public class LsqProcessor
                 // Link the var occurrence
                 varToBgpVar.values().forEach(vr -> bgpCtxRes.addProperty(LSQ.hasVarExec, vr));
 
-                queryExecRes.addProperty(LSQ.hasBGPExec, bgpCtxRes);
+                queryExecRes.addProperty(LSQ.hasBgpExec, bgpCtxRes);
 
                 // Obtain the selectivity for the variable in that tp
                 //for(e.getValue())

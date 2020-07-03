@@ -75,6 +75,7 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
@@ -759,6 +760,10 @@ public class TestExtendedSpinModel {
 //                    expRoot.setBenchmarkRun(expRun);
                     Long datasetSize = config.getDatasetSize();
 
+                    if(datasetSize == null) {
+                        datasetSize = 0l;
+                    }
+
 
                     /*
                      * BgpExecs, TpInBgpExecs and TpExec
@@ -781,12 +786,13 @@ public class TestExtendedSpinModel {
 
                             // Link the bgp with the corresponding query execution
                             bgpExec
-                                .setBgp(xbgp)
+                                .setLocalExecution(expRoot) /* inverse link */
+                                .setBgp(xbgp) /* inverse link */
 //                                .setBenchmarkRun(expRun)
                                 .setQueryExec(qe)
                                 ;
 
-                            expRoot.getBgpExecs().add(bgpExec);
+//                            expRoot.getBgpExecs().add(bgpExec);
                         }
                     }
 
@@ -795,7 +801,20 @@ public class TestExtendedSpinModel {
                     for(SpinBgpExec bgpExec : expRoot.getBgpExecs()) {
                         for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
                             LsqTriplePattern tp = tpInBgp.getTriplePattern();
-                            TpExec tpExec = tp.findTpExec(expRun);
+                            //TpExec tpExec = tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
+                            //TpExec tpExec = tp.getExtensionQuery()
+                            TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
+
+                            if(tpInBgpExec == null) {
+                                tpInBgpExec = model.createResource().as(TpInBgpExec.class);
+                                // LsqQuery extensionQuery = tp.getExtensionQuery();
+
+                                // Link the bgp with the corresponding query execution
+                                tpInBgpExec
+                                    .setBgpExec(bgpExec);
+                            }
+
+                            TpExec tpExec = tpInBgpExec.getTpExec();
                             if(tpExec == null) {
                                 tpExec = model.createResource().as(TpExec.class);
                                 LsqQuery extensionQuery = tp.getExtensionQuery();
@@ -804,27 +823,18 @@ public class TestExtendedSpinModel {
                                 QueryExec qe = le.getQueryExec();
 
                                 tpExec
+                                    .setTpInBgpExec(tpInBgpExec) /* inverse link */
                                     .setTp(tp)
                                     .setQueryExec(qe)
                                     ;
                             }
 
-                            BigDecimal tpSel = safeDivide(tpExec.getQueryExec().getResultSetSize(), datasetSize);
+                            Long tpResultSetSize = tpExec.getQueryExec().getResultSetSize();
+                            BigDecimal tpSel = safeDivide(tpResultSetSize, datasetSize);
                             tpExec
                                 .setSelectivity(tpSel);
 
-                            TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
-                            if(tpInBgpExec == null) {
-                                tpInBgpExec = model.createResource().as(TpInBgpExec.class);
-                                // LsqQuery extensionQuery = tp.getExtensionQuery();
-
-                                // Link the bgp with the corresponding query execution
-                                tpInBgpExec
-                                    .setTpExec(tpExec)
-                                    .setBgpExec(bgpExec);
-                            }
-
-                            Long bgpSize = bgpExec.getBgpQueryExec().getQueryExec().getResultSetSize();
+                            Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
                             Long tpSize = tpExec.getQueryExec().getResultSetSize();
                             BigDecimal value = safeDivide(tpSize, bgpSize);
                             tpInBgpExec.setSelectivity(value);
@@ -835,7 +845,7 @@ public class TestExtendedSpinModel {
 
                         for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
                             JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
-                            if(bgpNodeExec != null) {
+                            if(bgpNodeExec == null) {
                                 bgpNodeExec = model.createResource().as(JoinVertexExec.class);
 
                                 LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
@@ -860,6 +870,8 @@ public class TestExtendedSpinModel {
                     }
 
 
+
+                    RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TRIG_PRETTY);
 
                     /*
                      * TpInBgp
@@ -1048,7 +1060,7 @@ public class TestExtendedSpinModel {
 
 
     public static BigDecimal safeDivide(Long counter, Long denominator) {
-        BigDecimal result = denominator == 0
+        BigDecimal result = denominator.longValue() == 0
                 ? new BigDecimal(0)
                 : new BigDecimal(counter).divide(new BigDecimal(denominator));
         return result;

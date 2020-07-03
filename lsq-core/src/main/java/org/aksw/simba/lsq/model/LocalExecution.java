@@ -6,9 +6,7 @@ import java.util.Set;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.simba.lsq.spinx.model.JoinVertexExec;
 import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
-import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -47,7 +45,7 @@ public interface LocalExecution
         return result;
     }
 
-    @Iri(LSQ.Strs.hasBGPExec)
+    @Iri(LSQ.Strs.hasBgpExec)
     Set<SpinBgpExec> getBgpExecs();
 
 //    default Map<Resource, SpinBgpExec> indexBgpExecs() {
@@ -56,29 +54,29 @@ public interface LocalExecution
 //    }
 
     //Set<S> getTpExecs();
-    @Iri(LSQ.Strs.hasJoinVarExec)
-    Set<JoinVertexExec> getBgpNodeExecs();
+//    @Iri(LSQ.Strs.hasJoinVarExec)
+//    Set<JoinVertexExec> getBgpNodeExecs();
 
 
-    @Iri(LSQ.Strs.hasTpInBgpExec)
-    Set<TpInBgpExec> getTpInBgpExec();
+//    @Iri(LSQ.Strs.hasTpInBgpExec)
+//    Set<TpInBgpExec> getTpInBgpExec();
 
 
     // TODO Maybe return a list of (bgp, exec) pairs - where setValue updates the exec?
-    default JoinVertexExec findBgpNodeExec(Resource bgp) {
-        Resource expRun = getBenchmarkRun();
-        Objects.requireNonNull(expRun);
-
-        Set<JoinVertexExec> cands = getBgpNodeExecs();
-        JoinVertexExec result = null;
-        for(JoinVertexExec cand : cands) {
-            if(Objects.equals(cand.getBgpNode(), bgp) && Objects.equals(cand.getQueryExec().getBenchmarkRun(), expRun)) {
-                result = cand;
-                break;
-            }
-        }
-
-        return result;
-    }
+//    default JoinVertexExec findBgpNodeExec(Resource bgp) {
+//        Resource expRun = getBenchmarkRun();
+//        Objects.requireNonNull(expRun);
+//
+//        Set<JoinVertexExec> cands = getBgpNodeExecs();
+//        JoinVertexExec result = null;
+//        for(JoinVertexExec cand : cands) {
+//            if(Objects.equals(cand.getBgpNode(), bgp) && Objects.equals(cand.getQueryExec().getBenchmarkRun(), expRun)) {
+//                result = cand;
+//                break;
+//            }
+//        }
+//
+//        return result;
+//    }
 
 }

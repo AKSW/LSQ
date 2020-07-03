@@ -22,21 +22,23 @@ import org.apache.jena.rdf.model.Resource;
 public interface SpinBgpExec
     extends ElementExec
 {
-    @Iri(LSQ.Strs.hasBGPExec)
+    @Iri(LSQ.Strs.hasBgpExec)
+    @Inverse
     LocalExecution getLocalExecution();
     SpinBgpExec setLocalExecution(LocalExecution le);
 
 
     // Link from the BGP to this exec
-    @Iri(LSQ.Strs.hasBGPExec)
+    @Iri(LSQ.Strs.hasExec)
     @Inverse
     SpinBgp getBgp();
     SpinBgpExec setBgp(SpinBgp bgp);
 
     // Link from this exec to the benchmark result of the BGP's extension query
-    @Iri(LSQ.Strs.hasExec)
-    LocalExecution getBgpQueryExec();
-    SpinBgpExec setBgpQueryExec(LocalExecution exec);
+//    @Iri(LSQ.Strs.hasExec)
+//    @Inverse
+//    LocalExecution getBgpQueryExec();
+//    SpinBgpExec setBgpQueryExec(LocalExecution exec);
 
 
     @Iri(LSQ.Strs.hasTpInBgpExec)
@@ -78,6 +80,23 @@ public interface SpinBgpExec
 
         return result;
     }
+
+
+//    default TpExec findTpExec(LsqTriplePattern tp) {
+//        Resource expRun = getLocalExecution().getBenchmarkRun();
+//        Objects.requireNonNull(expRun);
+//
+//        Set<TpExec> cands = getT();
+//        JoinVertexExec result = null;
+//        for(JoinVertexExec cand : cands) {
+//            if(Objects.equals(cand.getBgpNode(), bpgNode) && Objects.equals(cand.getBgpExec().getQueryExec().getBenchmarkRun(), expRun)) {
+//                result = cand;
+//                break;
+//            }
+//        }
+//
+//        return result;
+//    }
 
     // TODO Add reverse link to SpinBGP
 }
