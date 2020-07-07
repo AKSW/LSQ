@@ -46,6 +46,7 @@ public class LSQ {
         public static final String benchmarkRun = ns + "benchmarkRun";
 
         public static final String hasExec = ns + "hasExec";
+        public static final String hasElementExec =  ns + "hasElementExec";
         public static final String hasLocalExec =  ns + "hasLocalExec";
         public static final String hasQueryExec =  ns + "hasQueryExec";
         public static final String hasRemoteExec = ns + "hasRemoteExec";

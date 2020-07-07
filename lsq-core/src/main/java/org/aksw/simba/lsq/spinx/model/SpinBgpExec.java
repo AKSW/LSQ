@@ -55,7 +55,7 @@ public interface SpinBgpExec
         Set<TpInBgpExec> cands = getTpInBgpExecs();
         TpInBgpExec result = null;
         for(TpInBgpExec cand : cands) {
-            if(Objects.equals(cand.getTpInBgp(), tpInBgp) && Objects.equals(cand.getBgpExec().getQueryExec().getBenchmarkRun(), expRun)) {
+            if(Objects.equals(cand.getTpInBgp(), tpInBgp) && Objects.equals(cand.getBgpExec().getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
                 result = cand;
                 break;
             }
@@ -72,7 +72,7 @@ public interface SpinBgpExec
         Set<JoinVertexExec> cands = getBgpNodeExecs();
         JoinVertexExec result = null;
         for(JoinVertexExec cand : cands) {
-            if(Objects.equals(cand.getBgpNode(), bpgNode) && Objects.equals(cand.getBgpExec().getQueryExec().getBenchmarkRun(), expRun)) {
+            if(Objects.equals(cand.getBgpNode(), bpgNode) && Objects.equals(cand.getBgpExec().getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
                 result = cand;
                 break;
             }

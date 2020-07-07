@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.model;
 import java.util.Objects;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -14,11 +15,12 @@ import org.apache.jena.rdf.model.Resource;
 public interface LocalExecution
     extends Resource
 {
+    @HashId
     @Iri(LSQ.Strs.benchmarkRun)
     ExperimentRun getBenchmarkRun();
     ElementExec setBenchmarkRun(Resource benchmarkRun);
 
-
+    @HashId
     @Iri(LSQ.Strs.hasLocalExec)
     @Inverse
     LsqQuery getLsqQuery();
@@ -36,7 +38,7 @@ public interface LocalExecution
         Set<SpinBgpExec> cands = getBgpExecs();
         SpinBgpExec result = null;
         for(SpinBgpExec cand : cands) {
-            if(Objects.equals(cand.getBgp(), bgp) && Objects.equals(cand.getQueryExec().getBenchmarkRun(), expRun)) {
+            if(Objects.equals(cand.getBgp(), bgp) && Objects.equals(cand.getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
                 result = cand;
                 break;
             }

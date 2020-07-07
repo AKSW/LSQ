@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.util.SpinUtils;
@@ -18,6 +19,7 @@ import org.topbraid.spin.model.Triple;
 public interface SpinBgp
     extends LsqElement
 {
+    @HashId
     @Iri(LSQ.Strs.hasTP)
     List<LsqTriplePattern> getTriplePatterns();
 

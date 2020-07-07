@@ -1,9 +1,8 @@
 package org.aksw.simba.lsq.spinx.model;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -20,10 +19,12 @@ import org.apache.jena.rdf.model.Resource;
 public interface TpInBgp
     extends Resource
 {
+    @HashId
     @Iri(LSQ.Strs.hasBGP)
     SpinBgp getBgp();
     TpInBgp setBgp(Resource bgp);
 
+    @HashId
     @Iri(LSQ.Strs.hasTP)
     LsqTriplePattern getTriplePattern();
     TpInBgp setTriplePattern(Resource tp);

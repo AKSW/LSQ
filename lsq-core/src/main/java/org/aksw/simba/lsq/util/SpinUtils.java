@@ -241,7 +241,8 @@ public class SpinUtils {
 
     public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns(Model spinModel) {
         Set<org.topbraid.spin.model.Triple> result = ConceptModelUtils.listResourcesUnchecked(
-                    spinModel, triplePatterns, org.topbraid.spin.model.Triple.class)
+                    spinModel, triplePatterns, org.topbraid.spin.model.TriplePattern.class)
+                .map(x -> (org.topbraid.spin.model.Triple)x)
                 .collect(Collectors.toSet())
                 .blockingGet();
 //        Map<Resource, Triple> result = ConceptModelUtils.listResources(spinModel, triplePatterns, )

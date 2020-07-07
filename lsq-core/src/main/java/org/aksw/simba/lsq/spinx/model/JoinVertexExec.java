@@ -30,6 +30,7 @@ public interface JoinVertexExec
     @Inverse
     SpinBgpExec getBgpExec();
     JoinVertexExec setBgpExec(SpinBgpExec exec);
+
 //
 //    SpinBgpExec getBgpNodeExec();
 //    JoinVertexExec setBgpNodeExec(SpinBgp exec);

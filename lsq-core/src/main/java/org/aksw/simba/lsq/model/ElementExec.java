@@ -1,7 +1,7 @@
 package org.aksw.simba.lsq.model;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.simba.lsq.spinx.model.LsqElement;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -19,7 +19,8 @@ public interface ElementExec
 //    ExperimentRun getBenchmarkRun();
 //    ElementExec setBenchmarkRun(Resource benchmarkRun);
 
-    @Iri(LSQ.Strs.hasQueryExec)
+    @HashId
+    @Iri(LSQ.Strs.hasElementExec)
     QueryExec getQueryExec();
     ElementExec setQueryExec(QueryExec queryExec);
     // We should use seconds (standard SI units)

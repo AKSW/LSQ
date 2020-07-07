@@ -1,6 +1,5 @@
 package org.aksw.simba.lsq.spinx.model;
 
-import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -23,6 +22,16 @@ public interface SpinBgpNode
 
     /**
      * The set of RDFNodes mentioned in a BGP of a SPIN model that denote the same RDF term.
+     *
+     * Although all referenced nodes and resources must denote the same RDF term, references
+     * my refer to different IRIs or blank nodes in the case of variables.
+     *
+     *
+     * Possible solutions:
+     * (1) Mark an arbitrary member of the set as the 'primary' one: Bad because on which basis to assert that?
+     * (2) Ensure that for each RDF term there is a canonical resource in the RDF model that can be refered to.
+     *     This would add another layer of indirection.
+     *
      *
      * @return
      */

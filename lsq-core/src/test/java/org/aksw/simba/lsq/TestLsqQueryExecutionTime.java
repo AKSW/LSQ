@@ -54,7 +54,7 @@ public class TestLsqQueryExecutionTime {
      * @throws IOException
      *
      */
-    @Test
+    // @Test
     public void testLsqQueryExecutionTime() throws IOException {
 
         // TODO Make cache backend work on classpath resources...
