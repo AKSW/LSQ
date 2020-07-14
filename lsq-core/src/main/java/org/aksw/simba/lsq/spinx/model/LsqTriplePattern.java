@@ -1,18 +1,21 @@
 package org.aksw.simba.lsq.spinx.model;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.Set;
 
-import org.aksw.commons.collections.trees.TreeUtils;
-import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.topbraid.spin.model.impl.TriplePatternImpl;
+
+import com.google.common.hash.HashCode;
 
 @ResourceView
 public abstract class LsqTriplePattern
@@ -30,9 +33,10 @@ public abstract class LsqTriplePattern
 
 
     @HashId
-    public String getHashId()  {
+    public HashCode getHashId(HashIdCxt cxt)  {
         Triple t = SpinUtils.toJenaTriple(this);
-        return "" + t;
+        HashCode result = cxt.getHashFunction().hashString(Objects.toString(t), StandardCharsets.UTF_8);
+        return result;
     }
 
 

@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.spinx.model;
 import java.math.BigDecimal;
 
 import org.aksw.facete.v3.bgp.api.BgpNode;
+import org.aksw.jena_sparql_api.mapper.annotation.IdPrefix;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -12,6 +13,7 @@ import org.apache.jena.rdf.model.Resource;
 
 
 @ResourceView
+@IdPrefix("bgpnodeexec-")
 public interface JoinVertexExec
     extends ElementExec
 {

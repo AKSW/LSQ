@@ -33,7 +33,6 @@ public interface QueryExec extends Resource {
 
     @Iri(LSQ.Strs.resultSize)
     Long getResultSetSize();
-
     QueryExec setResultSetSize(Long resultSetSize);
 
     @Iri(LSQ.Strs.atTime)

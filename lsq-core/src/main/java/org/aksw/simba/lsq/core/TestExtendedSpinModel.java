@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.http.repository.api.HttpRepository;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
@@ -96,6 +98,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -330,8 +333,9 @@ public class TestExtendedSpinModel {
 
         // Immediately skolemize the spin model - before attachment of
         // additional properties changes the hashes
+//        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
         spinQuery = Skolemize.skolemizeTree(spinQuery, false,
-                (r, hash) -> "http://lsq.aksw.org/spin-" + hash,
+                (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                 (r, d) -> true).asResource();
 
         SpinQueryEx spinRes = spinQuery.as(SpinQueryEx.class);
@@ -353,7 +357,7 @@ public class TestExtendedSpinModel {
 
         // Skolemize the remaining model
         Skolemize.skolemizeTree(spinRes, true,
-                (r, hash) -> "http://lsq.aksw.org/spin-" + hash,
+                (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                 (n, d) -> !(n.isResource() && n.asResource().hasProperty(LSQ.text)));
 
 
@@ -371,7 +375,7 @@ public class TestExtendedSpinModel {
             }
 
             Skolemize.skolemizeTree(bgp, true,
-                    (r, hash) -> "http://lsq.aksw.org/spin-" + hash,
+                    (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                     (n, d) -> true);
 
             // Clear the bgp attribute that was only required for computing the hash id
@@ -868,6 +872,35 @@ public class TestExtendedSpinModel {
                         }
 
                     }
+
+                    HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
+                    //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
+                    Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
+
+//                    Map<Resource, String> renames = new LinkedHashMap<>();
+//                    for(SpinBgp bgp : spinRoot.getBgps()) {
+//                        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(bgp);//.getHash(bgp);
+//
+//                        for(Entry<RDFNode, HashCode> e : hashIdCxt.getMapping().entrySet()) {
+//                            if(e.getKey().isResource()) {
+//                                renames.put(e.getKey().asResource(), e.getValue().toString());
+//                            }
+//                        }
+//                    }
+
+//                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
+                    for(Entry<RDFNode, String> e : renames.entrySet()) {
+//                        HashCode hashCode = e.getValue();
+//                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+                        String part = e.getValue();
+
+                        String iri = lsqBaseIri + part;
+                        RDFNode n = e.getKey();
+                        if(n.isResource()) {
+                            ResourceUtils.renameResource(n.asResource(), iri);
+                        }
+                    }
+
 
 
 

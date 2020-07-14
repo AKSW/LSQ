@@ -198,7 +198,7 @@ public class Skolemize {
     public static RDFNode skolemizeTree(
             RDFNode start,
             boolean useInnerIris,
-            BiFunction<Resource, String, String> getIRI,
+            BiFunction<Resource, HashCode, String> getIRI,
             BiPredicate<? super RDFNode, ? super Integer> filterKeep) {
         Map<RDFNode, HashCode> map = ResourceTreeUtils.createGenericHashMap(start, useInnerIris, filterKeep);
 
@@ -208,9 +208,10 @@ public class Skolemize {
             RDFNode rdfNode = e.getKey();
             if(rdfNode.isAnon()) {
                 Resource r = rdfNode.asResource();
-                String hash = e.getValue().toString();
+                HashCode hashCode = e.getValue();
+                //String hash = e.getValue().toString();
                 // rdfNode.asResource().addLiteral(skolemId, hash);
-                String newIri = getIRI.apply(r, hash);
+                String newIri = getIRI.apply(r, hashCode);
                 if(newIri != null) {
                     Resource tmp = ResourceUtils.renameResource(r, newIri);
                     if(r.equals(start)) {

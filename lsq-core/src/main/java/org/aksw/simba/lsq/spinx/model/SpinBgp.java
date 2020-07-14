@@ -16,6 +16,7 @@ import org.topbraid.spin.model.Triple;
 
 
 @ResourceView
+//@IdPrefix("bgp-")
 public interface SpinBgp
     extends LsqElement
 {
