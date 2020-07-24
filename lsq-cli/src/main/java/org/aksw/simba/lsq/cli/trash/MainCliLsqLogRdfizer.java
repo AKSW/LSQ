@@ -1,6 +1,6 @@
 package org.aksw.simba.lsq.cli.trash;
 
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkRun;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +10,7 @@ public class MainCliLsqLogRdfizer {
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsqLogRdfizer.class);
 
     public static void main(String[] args) throws Exception {
-        CmdLsqBenchmarkRun cm = new CmdLsqBenchmarkRun();
+        CmdLsqBenchmarkPrepare cm = new CmdLsqBenchmarkPrepare();
 
         JCommander jc = new JCommander.Builder()
               .addObject(cm)

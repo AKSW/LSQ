@@ -77,6 +77,18 @@ rdfize -e "http://dbpedia.org/sparql" access.2020-01-01.log
 
 
 ### Benchmarking queries
+Conceptually, setting up a benchmark requires the following three simple steps:
+
+* Create a benchmark configuration
+* Create a benchmark run
+* Start or continue a benchmark run
+
+
+Benchmark configurations and runs are small RDF documents. The LSQ tool provides intuitive commands that make it particularly easy to set them up.
+The benchmark configuration contains the URL of the endpoint used for benchmarking and static information, such as the number of triples in the endpoint. A configuration also includes a timestamp for when it was created. If the number of triples changed it is recommended to create a new configuration.
+
+
+
 An LSQ benchmark run is an experiment that yields observations.
 The identity of an experiment is defined by three attributes
 * an Id of the agent that launches it
@@ -96,6 +108,18 @@ Notably, there are two modes for observation resources:
 lsq benchmark run --config config.ttl logs*
 ```
 
+
+
+Preparing a benchmark run
+```
+lsq benchmark prepare-run --config config.ttl > benchmark-run.ttl
+```
+
+Continuing a benchmark run
+
+```
+lsq benchmark run --config benchmark-run.ttl logs* > benchmark-run.ttl
+```
 
 
 

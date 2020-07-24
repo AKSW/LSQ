@@ -29,14 +29,20 @@
 		<!-- <artifactId>spring-boot</artifactId> -->
 		<!-- </dependency> -->
 
-		<dependency>
-			<groupId>com.beust</groupId>
-			<artifactId>jcommander</artifactId>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.beust</groupId> -->
+<!-- 			<artifactId>jcommander</artifactId> -->
+<!-- 		</dependency> -->
+
+<!-- 		<dependency> -->
+<!-- 			<groupId>net.sf.jopt-simple</groupId> -->
+<!-- 			<artifactId>jopt-simple</artifactId> -->
+<!-- 		</dependency> -->
 
 		<dependency>
-			<groupId>net.sf.jopt-simple</groupId>
-			<artifactId>jopt-simple</artifactId>
+		  <groupId>info.picocli</groupId>
+		  <artifactId>picocli</artifactId>
+		  <version>4.4.0</version>
 		</dependency>
 
 		<dependency>

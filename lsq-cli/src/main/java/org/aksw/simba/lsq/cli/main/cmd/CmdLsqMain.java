@@ -1,10 +1,19 @@
 package org.aksw.simba.lsq.cli.main.cmd;
 
-import com.beust.jcommander.Parameter;
-import com.beust.jcommander.Parameters;
 
-@Parameters(separators = "=", commandDescription = "LSQ Subcommands")
+
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Option;
+
+
+@Command(name="main", description = "LSQ Subcommands", subcommands = {
+        CmdLsqAnalyze.class,
+        CmdLsqRdfize.class,
+        CmdLsqBenchmarkMain.class,
+        CmdLsqProbe.class
+})
 public class CmdLsqMain {
-	@Parameter(names={"-h", "--help"}, help=true, description="Show general help")
-	public boolean help = false;
+    @Option(names={"-h", "--help"}, help=true, description="Show general help")
+    public boolean help = false;
+
 }

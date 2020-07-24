@@ -27,8 +27,9 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkCreate;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkExecute;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkMain;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkRun;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
@@ -68,6 +69,7 @@ import com.beust.jcommander.JCommander;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
+import picocli.CommandLine;
 
 
 
@@ -82,7 +84,13 @@ public class MainCliLsq {
 
     // public static void displayUsageIf()
 
-    public static void main(String[] args) throws Exception {
+
+    public static void main(String[] args) {
+        int exitCode = new CommandLine(new CmdLsqMain()).execute(args);
+        System.exit(exitCode);
+    }
+
+    public static void mainOld(String[] args) throws Exception {
 
 //		Flowable.fromIterable(LongStream.iterate(0, i -> i + 1)::iterator)
 //		.forEach(x -> {
@@ -110,7 +118,7 @@ public class MainCliLsq {
         JCommander benchmarkSubCmds = jc.getCommands().get("benchmark");
         CmdLsqBenchmarkCreate benchmarkCreateCmd = new CmdLsqBenchmarkCreate();
         benchmarkSubCmds.addCommand("create", benchmarkCreateCmd);
-        CmdLsqBenchmarkRun benchmarkRunCmd = new CmdLsqBenchmarkRun();
+        CmdLsqBenchmarkPrepare benchmarkRunCmd = new CmdLsqBenchmarkPrepare();
         benchmarkSubCmds.addCommand("run", benchmarkRunCmd);
 
 
@@ -147,7 +155,7 @@ public class MainCliLsq {
                 benchmarkCreate(benchmarkCreateCmd);
                 break;
             case "run":
-                benchmarkRun(benchmarkRunCmd);
+                benchmarkPrepare(benchmarkRunCmd);
                 break;
             default:
                 throw new RuntimeException("Unsupported command: " + cmd);
@@ -397,7 +405,12 @@ public class MainCliLsq {
         RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
     }
 
-    public static void benchmarkRun(CmdLsqBenchmarkRun benchmarkCmd) throws Exception {
+
+    public static void benchmarkExecute(CmdLsqBenchmarkExecute benchmarkCreateCmd) throws Exception {
+
+    }
+
+    public static void benchmarkPrepare(CmdLsqBenchmarkPrepare benchmarkCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = benchmarkCmd.logSources;
         rdfizeCmd.noMerge = true;
