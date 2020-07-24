@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriType;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -15,6 +16,7 @@ public interface ExperimentConfig
     extends Resource
 {
     @Iri("dct:identifier")
+    @HashId
     String getIdentifier();
     ExperimentConfig setIdentifier(String id);
 

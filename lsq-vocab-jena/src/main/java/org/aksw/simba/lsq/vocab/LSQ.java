@@ -208,6 +208,8 @@ public class LSQ {
     public static final Property parseError = ResourceFactory.createProperty(Strs.parseError);
     public static final Property runTimeMs = ResourceFactory.createProperty(Strs.runTimeMs);
 
+    public static final Property benchmarkRun = ResourceFactory.createProperty(Strs.benchmarkRun);
+
     public static final Property hasExec = ResourceFactory.createProperty(Strs.hasExec);
     public static final Property hasLocalExec = ResourceFactory.createProperty(Strs.hasLocalExec);
     public static final Property hasRemoteExec = ResourceFactory.createProperty(Strs.hasRemoteExec);

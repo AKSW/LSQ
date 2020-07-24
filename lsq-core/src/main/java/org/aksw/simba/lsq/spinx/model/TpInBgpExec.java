@@ -19,7 +19,7 @@ public interface TpInBgpExec
 
     // TODO The following attributes should be mapped as they refer to computations from which the selectivity was derived
     @HashId
-    @Iri(LSQ.Strs.hasBgpExec)
+    @Iri(LSQ.Strs.hasTpInBgpExec)
     @Inverse
     SpinBgpExec getBgpExec();
     TpInBgpExec setBgpExec(Resource bgpExec);

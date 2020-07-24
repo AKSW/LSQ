@@ -10,9 +10,15 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -60,6 +66,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
 import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
+import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.primitives.Ints;
 import org.apache.jena.graph.Node;
@@ -587,11 +594,37 @@ public class TestExtendedSpinModel {
 
         Model configModel = ModelFactory.createDefaultModel();
 
-        ExperimentConfig config = configModel.createResource("http://someconfig.at/now").as(ExperimentConfig.class);
-        ExperimentRun expRun = configModel.createResource("http://someconfig.at/now-at-foo").as(ExperimentRun.class);
-
-        String expSuffix = "_run-that-started-at-foo";
+        String expId = "testrun";
+        String expSuffix = "_" + expId;
         String lsqBaseIri = "http://lsq.aksw.org/";
+
+        Instant benchmarkRunStartTimestamp = Instant.ofEpochMilli(0);
+
+        //Instant now = Instant.now();
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(benchmarkRunStartTimestamp, ZoneId.systemDefault());
+        Calendar cal = GregorianCalendar.from(zdt);
+        XSDDateTime xsddt = new XSDDateTime(cal);
+        //String timestamp = now.toString();
+        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+
+
+        ExperimentConfig config = configModel
+                .createResource("http://someconfig.at/now")
+                .as(ExperimentConfig.class)
+                .setIdentifier(expId);
+
+        ExperimentRun expRun = configModel
+                .createResource()
+                .as(ExperimentRun.class)
+                .setConfig(config)
+                .setTimestamp(xsddt);
+
+
+        HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
+        String expRunIri = lsqBaseIri + tmp.getString(expRun);
+        expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
+
+
 
         Function<String, String> lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
 
@@ -701,6 +734,7 @@ public class TestExtendedSpinModel {
 
                     Dataset newDataset = DatasetFactory.create();
                     Model newModel = newDataset.getNamedModel(queryExecIri);
+
                     item = item.inModel(newModel).as(LsqQuery.class);
 
                     // Create fresh local execution and query exec resources
@@ -759,7 +793,8 @@ public class TestExtendedSpinModel {
                     // Update triple pattern selectivities
                     Model model = rootQuery.getModel();
 //                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
-                    LocalExecution expRoot = rootQuery.getLocalExecutionMap().get(expRun);
+                    Map<Resource, LocalExecution> rleMap = rootQuery.getLocalExecutionMap();
+                    LocalExecution expRoot = rleMap.get(expRun);
 
 //                    expRoot.setBenchmarkRun(expRun);
                     Long datasetSize = config.getDatasetSize();
@@ -873,6 +908,10 @@ public class TestExtendedSpinModel {
 
                     }
 
+                    // We need to add the config model in order to include the benchmark run id
+                    // TODO We should ensure that only the minimal necessary config model is added
+                    expRoot.getModel().add(configModel);
+
                     HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
                     //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
                     Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
@@ -897,6 +936,11 @@ public class TestExtendedSpinModel {
                         String iri = lsqBaseIri + part;
                         RDFNode n = e.getKey();
                         if(n.isResource()) {
+//                            System.out.println("--- RENAME: ");
+//                            System.out.println(iri);
+//                            System.out.println(n);
+//                            System.out.println("------------------------");
+//
                             ResourceUtils.renameResource(n.asResource(), iri);
                         }
                     }
@@ -904,7 +948,7 @@ public class TestExtendedSpinModel {
 
 
 
-                    RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TRIG_PRETTY);
+                    RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_PRETTY);
 
                     /*
                      * TpInBgp

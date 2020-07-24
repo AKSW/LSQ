@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.spinx.model;
 import java.util.Objects;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -32,6 +33,7 @@ public interface SpinBgpExec
 
     // Link from the BGP to this exec
     @Iri(LSQ.Strs.hasExec)
+    @HashId
     @Inverse
     SpinBgp getBgp();
     SpinBgpExec setBgp(SpinBgp bgp);
@@ -41,7 +43,11 @@ public interface SpinBgpExec
     // because there is a method Resource.setId which has incompatible types
     @StringId
     default String getStringId(HashIdCxt cxt) {
-        return cxt.getHashAsString(this.getBgp()) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
+        SpinBgp bgp = getBgp();
+        // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
+//        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
+        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getString(getLocalExecution().getBenchmarkRun());
+        return result;
     }
 
 

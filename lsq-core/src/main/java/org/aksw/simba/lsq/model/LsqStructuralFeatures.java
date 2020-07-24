@@ -2,8 +2,12 @@ package org.aksw.simba.lsq.model;
 
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
+import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jena_sparql_api.mapper.annotation.StringId;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -16,11 +20,23 @@ import org.apache.jena.rdf.model.Resource;
  *
  */
 @ResourceView
+@HashId
 public interface LsqStructuralFeatures
     extends Resource
 {
-//	@Iri
-//	LsqQuery query();
+    @Iri(LSQ.Strs.hasStructuralFeatures)
+    @Inverse
+    @HashId
+    LsqQuery getQuery();
+
+
+    @StringId
+    default String getStringId(HashIdCxt cxt) {
+        LsqQuery query = getQuery();
+        String queryId = cxt.getString(query) + "-sf"; // cxt.getHashAsString(query);
+        return "sf-" + queryId;
+    }
+
 
     // numProjectVars
     @Iri(LSQ.Strs.projectVars)

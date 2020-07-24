@@ -7,6 +7,8 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.jena_sparql_api.mapper.annotation.StringId;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
@@ -33,7 +35,7 @@ public interface LocalExecution
     // TODO Maybe return a list of (bgp, exec) pairs - where setValue updates the exec?
     default SpinBgpExec findBgpExec(Resource bgp) {
         Resource expRun = getBenchmarkRun();
-        Objects.requireNonNull(expRun);
+        Objects.requireNonNull(expRun, "benchmark run resource not set");
 
         Set<SpinBgpExec> cands = getBgpExecs();
         SpinBgpExec result = null;
@@ -49,6 +51,14 @@ public interface LocalExecution
 
     @Iri(LSQ.Strs.hasBgpExec)
     Set<SpinBgpExec> getBgpExecs();
+
+
+    @StringId
+    default String getStringId(HashIdCxt cxt) {
+        ExperimentRun bmr = getBenchmarkRun();
+        String result = "localExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
+        return result;
+    }
 
 //    default Map<Resource, SpinBgpExec> indexBgpExecs() {
 //        // TODO benchmark run to exec
