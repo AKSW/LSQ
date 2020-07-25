@@ -23,6 +23,14 @@ public interface ExperimentRun
     ExperimentRun setConfig(ExperimentConfig dataRef);
     ExperimentConfig getConfig();
 
+
+    // The id should be based on getConfig.getIdentifier() and getTimestamp()
+    @Iri("dct:identifier")
+    @HashId
+    String getIdentifier();
+    ExperimentRun setIdentifier(String id);
+
+
     @HashId
     @Iri(LSQ.Strs.atTime)
     XSDDateTime getTimestamp();

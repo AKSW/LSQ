@@ -1,0 +1,18 @@
+@prefix lsq:   <http://lsq.aksw.org/vocab#> .
+
+<http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
+        lsq:datasetIri    <http://dbpedia.org/somedata> ;
+        lsq:datasetLabel  "dbpedia.org-somedata" ;
+        lsq:datasetSize   "2005615"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        lsq:endpoint      [ a       <http://w3id.org/rpif/vocab#DataRefSparqlEndpoint> ;
+                            <http://w3id.org/rpif/vocab#serviceUrl>
+                                    <http://localhost:8890/sparql>
+                          ] ;
+        lsq:userAgent     "Linked SPARQL Queries (LSQ) Client" ;
+        <http://purl.org/dc/terms/identifier>
+                "xc-dbpedia.org-somedata_2020-07-25" .
+
+<http://www.example.org/exprun-2020-07-25T12:55:55.410Z>
+        lsq:config  <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25> ;
+        <http://www.w3.org/ns/prov#atTime>
+                "2020-07-25T12:55:55.41Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .

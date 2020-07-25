@@ -134,6 +134,8 @@ public class LSQ {
     public static Resource resource(String local) { return ResourceFactory.createResource(ns + local); }
     public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
 
+    public static final Property config = ResourceFactory.createProperty(Strs.config);
+
     // Used internally for the hypergraph representation - not part of the public vocab
     public static final Resource Vertex = ResourceFactory.createResource(Strs.Vertex);
     public static final Resource Edge = ResourceFactory.createResource(Strs.Edge);
@@ -364,6 +366,7 @@ public class LSQ {
 
     public static final Property tpId = property("tpId");
     public static final Property tpVarId = property("tpVarId");
+
 
     //public static final Property
 
