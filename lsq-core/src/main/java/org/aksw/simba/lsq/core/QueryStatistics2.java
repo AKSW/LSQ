@@ -28,7 +28,6 @@ import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
 import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
-import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -293,26 +292,6 @@ public class QueryStatistics2 {
     //
     // return result;
     // }
-
-    /**
-     * Analyze the query for a set of structural features (e.g. use of optional,
-     * union, exists, etc...) and attach them to the given resource
-     *
-     * @param resource
-     *            The resource on which to attach the features
-     * @param query
-     *            The query object from which to extract the features
-     */
-    public static void enrichResourceWithQueryFeatures(Resource resource, Query query) {
-        Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-        for (Resource feature : features) {
-            resource.addProperty(LSQ.usesFeature, feature);
-        }
-
-        if (features.isEmpty()) {
-            resource.addProperty(LSQ.usesFeature, LSQ.None);
-        }
-    }
 
     /**
      * linearize any structure into a flat list

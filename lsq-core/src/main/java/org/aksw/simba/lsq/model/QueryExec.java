@@ -37,9 +37,13 @@ public interface QueryExec extends Resource {
     Long getResultSetSize();
     QueryExec setResultSetSize(Long resultSetSize);
 
+    @Iri(LSQ.Strs.processingError)
+    String getProcessingError();
+    QueryExec setProcessingError(String error);
+
     @Iri(LSQ.Strs.atTime)
     XSDDateTime getTimestamp();
-    RemoteExecution setTimestamp(XSDDateTime calendar);
+    QueryExec setTimestamp(XSDDateTime calendar);
 
     @StringId
     default String getStringId(HashIdCxt cxt) {

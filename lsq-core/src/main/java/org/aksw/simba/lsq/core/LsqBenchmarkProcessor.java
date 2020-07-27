@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.core;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -27,7 +28,6 @@ import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.rx.op.OperatorObserveThroughput;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
@@ -37,7 +37,6 @@ import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
-import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.JoinVertexExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
@@ -48,7 +47,6 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
-import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
@@ -58,12 +56,10 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -82,13 +78,9 @@ import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.TriplePattern;
-import org.topbraid.spin.vocabulary.SP;
-
-import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
-import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.disposables.Disposable;
 
 
@@ -101,100 +93,6 @@ import io.reactivex.rxjava3.disposables.Disposable;
 public class LsqBenchmarkProcessor {
     static final Logger logger = LoggerFactory.getLogger(LsqBenchmarkProcessor.class);
 
-
-    /**
-     * Enrich an LSQ Query resource with a spin model.
-     * Returns an empty maybe if an error occurs, such as parse error
-     *
-     * @param lsqQuery
-     * @return
-     */
-    public static Maybe<LsqQuery> enrichWithFullSpinModel(LsqQuery lsqQuery) {
-        Maybe<LsqQuery> result;
-        try {
-            LsqQuery q = enrichWithFullSpinModelCore(lsqQuery);
-            result = Maybe.just(q);
-        } catch(Exception e) {
-            logger.error("Error processing query", e);
-            result = Maybe.empty();
-        }
-        return result;
-    }
-
-    public static LsqQuery enrichWithFullSpinModelCore(LsqQuery lsqQuery) {
-    //        Maybe<LsqQuery> result;
-
-            // Query query = QueryFactory.create("SELECT * {  { ?s a ?x ; ?p ?o } UNION { ?s ?j ?k } }");
-            String queryStr = lsqQuery.getText();
-            Query query = QueryFactory.create(queryStr);
-
-
-    //        SpinQueryEx spinRes = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
-
-            Resource spinQuery = LsqProcessor.createSpinModel(query, lsqQuery.getModel());
-
-            // Immediately skolemize the spin model - before attachment of
-            // additional properties changes the hashes
-    //        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
-            spinQuery = Skolemize.skolemizeTree(spinQuery, false,
-                    (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
-                    (r, d) -> true).asResource();
-
-            SpinQueryEx spinRes = spinQuery.as(SpinQueryEx.class);
-
-            lsqQuery.setSpinQuery(spinRes);
-
-            LsqProcessor.enrichSpinModelWithBgps(spinRes);
-            LsqProcessor.enrichSpinBgpsWithNodes(spinRes);
-            LsqProcessor.enrichSpinBgpNodesWithSubBgpsAndQueries(spinRes);
-
-
-            // Add tpInBgp resources
-            // for bgp restricted triple pattern selectivity
-    //        for(SpinBgp bgp : spinRes) {
-    //            for(TriplePattern tp : bgp.getTriplePatterns()) {
-    //
-    //            }
-    //        }
-
-            // Skolemize the remaining model
-            Skolemize.skolemizeTree(spinRes, true,
-                    (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
-                    (n, d) -> !(n.isResource() && n.asResource().hasProperty(LSQ.text)));
-
-
-            // Now that the bgps and tps are skolemized, create the tpInBgp nodes
-            for(SpinBgp bgp : spinRes.getBgps()) {
-    //            System.err.println("BGP: " + bgp);
-                Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
-                for(TriplePattern tp : bgp.getTriplePatterns()) {
-    //            	System.err.println("BGP: " + bgp);
-    //                System.err.println("  TP: " + tp);
-                    TpInBgp tpInBgp = spinRes.getModel().createResource().as(TpInBgp.class);
-                    tpInBgp.setBgp(bgp);
-                    tpInBgp.setTriplePattern(tp);
-                    tpInBgps.add(tpInBgp);
-                }
-
-                Skolemize.skolemizeTree(bgp, true,
-                        (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
-                        (n, d) -> true);
-
-                // Clear the bgp attribute that was only required for computing the hash id
-                for(TpInBgp tpInBgp : tpInBgps) {
-                    tpInBgp.setBgp(null);
-                }
-            }
-
-    //        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_FLAT);
-    //        System.exit(1);
-
-
-    //        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_BLOCKS);
-    //
-    //        System.exit(0);
-            return lsqQuery;
-        }
 
     public static FlowableTransformer<LsqQuery, LsqQuery> createProcessor() {
         return null;
@@ -270,12 +168,12 @@ public class LsqBenchmarkProcessor {
 
         Flowable<List<Set<LsqQuery>>> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
                 .map(r -> r.as(LsqQuery.class))
-                .skip(1)
-                .take(1)
-                .flatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery), false, 1)
+//                .skip(1)
+//                .take(1)
+                .flatMapMaybe(lsqQuery -> LsqEnrichments.enrichWithFullSpinModel(lsqQuery), false, 1)
 //                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
                 .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
-                .map(lsqQuery -> staticAnalysis(lsqQuery))
+                .map(lsqQuery -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery))
 //                .doAfterNext(x -> {
 //                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
 //                    System.exit(1);
@@ -285,7 +183,7 @@ public class LsqBenchmarkProcessor {
 //                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
 //                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
 //                .lift(OperatorObserveThroughput.create("throughput", 100))
-                .buffer(30)
+                .buffer(1)
 //                .lift(OperatorObserveThroughput.create("buffered", 100))
                 ;
 
@@ -367,7 +265,7 @@ public class LsqBenchmarkProcessor {
                     String queryStr = item.getText();
                     String queryExecIri = lsqQueryExecFn.apply(item); //"urn://" + item.getHash();
                     Node s = NodeFactory.createURI(queryExecIri);
-                    System.out.println("Processing: " + s);
+                    System.out.println("Benchmarking: " + s);
                     System.out.println(item.getText());
 
                     Dataset newDataset = DatasetFactory.create();
@@ -381,7 +279,13 @@ public class LsqBenchmarkProcessor {
 
                     // TODO Skolemize these executions!
 
-                    rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
+                    try {
+                        rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
+                    } catch(Exception e) {
+                        String errorMsg = e.toString();
+                        qe.setProcessingError(errorMsg);
+                        logger.warn("Failed to benchmark " + s);
+                    }
 
                     item.getLocalExecutions(LocalExecution.class).add(le);
                     le.setBenchmarkRun(expRun);
@@ -416,6 +320,15 @@ public class LsqBenchmarkProcessor {
 
 
                     Model model = ModelFactory.createDefaultModel();
+
+
+                    // We need to add the config model in order to include the benchmark run id
+                    // TODO We should ensure that only the minimal necessary config model is added
+                    Model configModel = config.getModel();
+//                    expRoot.getModel().add(configModel);
+                    model.add(configModel);
+
+
                     //Model model = rootQuery.getModel();
 
                     // Extend the rootQuery's model with all related query executions
@@ -509,6 +422,7 @@ public class LsqBenchmarkProcessor {
                             if(tpExec == null) {
                                 tpExec = model.createResource().as(TpExec.class);
                                 LsqQuery extensionQuery = tp.getExtensionQuery();
+                                RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
                                 Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
                                 Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
                                 LocalExecution le = leMap.get(expRun);
@@ -538,33 +452,36 @@ public class LsqBenchmarkProcessor {
                         for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
                             JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
                             if(bgpNodeExec == null) {
-                                bgpNodeExec = model.createResource().as(JoinVertexExec.class);
 
                                 LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
-                                QueryExec queryExec = extensionQuery.getLocalExecutionMap().get(expRun).getQueryExec();
-                                // LsqQuery extensionQuery = tp.getExtensionQuery();
+                                LocalExecution qle = extensionQuery.getLocalExecutionMap().get(expRun);
 
-                                // Link the bgp with the corresponding query execution
-                                bgpNodeExec
-                                    .setBgpNode(bgpNode)
-                                    .setBgpExec(bgpExec) /* inverse link */
-                                    .setQueryExec(queryExec)
-                                    ;
+                                if(qle != null) {
+
+                                    bgpNodeExec = model.createResource().as(JoinVertexExec.class);
+                                    QueryExec queryExec = qle.getQueryExec();
+                                    // LsqQuery extensionQuery = tp.getExtensionQuery();
+
+                                    // Link the bgp with the corresponding query execution
+                                    bgpNodeExec
+                                        .setBgpNode(bgpNode)
+                                        .setBgpExec(bgpExec) /* inverse link */
+                                        .setQueryExec(queryExec)
+                                        ;
+                                }
                             }
 
-                            Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
-                            Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
-                            BigDecimal value = safeDivide(bgpNodeSize, bgpSize);
+                            if(bgpNodeExec != null) {
+                                Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
+                                Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
+                                BigDecimal value = safeDivide(bgpNodeSize, bgpSize);
 
-                            bgpNodeExec.setBgpRestrictedSelectivitiy(value);
+                                bgpNodeExec.setBgpRestrictedSelectivitiy(value);
+                            }
                         }
 
                     }
 
-                    // We need to add the config model in order to include the benchmark run id
-                    // TODO We should ensure that only the minimal necessary config model is added
-                    Model configModel = config.getModel();
-                    expRoot.getModel().add(configModel);
 
                     HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
                     //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
@@ -666,68 +583,6 @@ public class LsqBenchmarkProcessor {
 //        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
     }
 
-    public static LsqQuery staticAnalysis(LsqQuery queryRes) {
-           String queryStr = queryRes.getText();
-           // TODO Avoid repeated parse
-           Query query = QueryFactory.create(queryStr);
-    //       LsqProcessor.rdfizeQueryStructuralFeatures(lsqQuery, x -> NestedResource.from(lsqQuery).nest(x), query);
-
-           Function<String, NestedResource> queryAspectFn = x -> NestedResource.from(queryRes).nest(x);
-           //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-           LsqStructuralFeatures featureRes = queryAspectFn.apply("-sf").get().as(LsqStructuralFeatures.class); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
-
-           queryRes.setStructuralFeatures(featureRes);
-           //queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
-
-
-           // Add used features
-           QueryStatistics2.enrichResourceWithQueryFeatures(featureRes, query);
-
-           if(query.isSelectType()) {
-               featureRes.addLiteral(LSQ.projectVars, query.getProjectVars().size());
-           }
-
-    //       Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-    //       features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
-
-           // TODO These methods have to be ported
-           //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-           //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
-
-    //       SpinUtils.enrichWithHasTriplePattern(featureRes, spinRes);
-    //       SpinUtils.enrichWithTriplePatternText(spinRes);
-           //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
-
-           //
-    //       QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
-
-           QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
-
-           Model spinModel = queryRes.getModel();
-
-           // TODO Move to a util function
-           Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
-                   .mapWith(stmt -> stmt.getObject().asResource()).toSet();
-
-           for(Resource serviceUri : serviceUris) {
-               featureRes.addProperty(LSQ.usesService, serviceUri);
-           }
-
-
-
-
-           //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
-
-
-    //   } catch (Exception ex) {
-    //       String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
-    //       queryRes.addLiteral(LSQ.processingError, msg);
-    //       logger.warn("Failed to process query " + query, ex);
-    //   }
-    //
-            return queryRes;
-        }
-
     public static LsqQuery updateLsqQueryIris(
             LsqQuery start,
             Function<? super LsqQuery, String> genIri)
@@ -824,8 +679,6 @@ public class LsqBenchmarkProcessor {
                    .setRuntimeInMs(durationInMillis)
                ;
 
-           } catch(Exception e) {
-               logger.warn("Failed to benchmark query", e);
            }
 
            return result;
@@ -849,7 +702,7 @@ public class LsqBenchmarkProcessor {
     public static BigDecimal safeDivide(Long counter, Long denominator) {
         BigDecimal result = denominator.longValue() == 0
                 ? new BigDecimal(0)
-                : new BigDecimal(counter).divide(new BigDecimal(denominator));
+                : new BigDecimal(counter).divide(new BigDecimal(denominator), 10, RoundingMode.CEILING);
         return result;
     }
 
