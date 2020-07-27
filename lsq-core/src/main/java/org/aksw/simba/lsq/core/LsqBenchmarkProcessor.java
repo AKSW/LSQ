@@ -270,7 +270,8 @@ public class LsqBenchmarkProcessor {
 
         Flowable<List<Set<LsqQuery>>> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
                 .map(r -> r.as(LsqQuery.class))
-                //.take(1)
+                .skip(1)
+                .take(1)
                 .flatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery), false, 1)
 //                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
                 .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
