@@ -19,5 +19,5 @@ public interface LsqElement
 {
     @Iri(LSQ.Strs.extensionQuery)
     LsqQuery getExtensionQuery();
-    SpinBgpNode setExtensionQuery(Resource r);
+    LsqElement setExtensionQuery(LsqQuery r);
 }

@@ -164,31 +164,31 @@ public class TestExtendedSpinModel {
         // Create a hash from head, tail
     }
 
-    public static void createIndexBgps(Flowable<LsqQuery> flow) {
-        // TODO How to get the shape triples??
-
-        //SorterFactory sf = new SorterFactoryFromSysCall();
-        CmdNgsSort sortCmd = new CmdNgsSort();
-        SparqlQueryParser sparqlParser = SparqlQueryParserImpl.create();
-        OutputStream out = new FileOutputStream(FileDescriptor.out);
-
-        try {
-            flow
-                .flatMap(x -> Flowable.fromIterable(x.getSpinQuery().as(SpinQueryEx.class).getBgps()))
-                .flatMap(bgp -> Flowable.fromIterable(bgp.getTriplePatterns()))
-                .map(tp -> ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tp))
-                .compose(ResourceInDatasetFlowOps.createTransformerFromGroupedTransform(
-                        ResourceInDatasetFlowOps.createSystemSorter(sortCmd, sparqlParser)))
-                .map(rid -> rid.getDataset())
-                .compose(RDFDataMgrRx.createDatasetWriter(out, RDFFormat.TRIG_PRETTY))
-                .singleElement()
-                .blockingGet()
-                ;
-
-        } catch (Exception e) {
-            ExceptionUtils.rethrowIfNotBrokenPipe(e);
-        }
-    }
+//    public static void createIndexBgps(Flowable<LsqQuery> flow) {
+//        // TODO How to get the shape triples??
+//
+//        //SorterFactory sf = new SorterFactoryFromSysCall();
+//        CmdNgsSort sortCmd = new CmdNgsSort();
+//        SparqlQueryParser sparqlParser = SparqlQueryParserImpl.create();
+//        OutputStream out = new FileOutputStream(FileDescriptor.out);
+//
+//        try {
+//            flow
+//                .flatMap(x -> Flowable.fromIterable(x.getSpinQuery().as(SpinQueryEx.class).getBgps()))
+//                .flatMap(bgp -> Flowable.fromIterable(bgp.getTriplePatterns()))
+//                .map(tp -> ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tp))
+//                .compose(ResourceInDatasetFlowOps.createTransformerFromGroupedTransform(
+//                        ResourceInDatasetFlowOps.createSystemSorter(sortCmd, sparqlParser)))
+//                .map(rid -> rid.getDataset())
+//                .compose(RDFDataMgrRx.createDatasetWriter(out, RDFFormat.TRIG_PRETTY))
+//                .singleElement()
+//                .blockingGet()
+//                ;
+//
+//        } catch (Exception e) {
+//            ExceptionUtils.rethrowIfNotBrokenPipe(e);
+//        }
+//    }
 
     public static void createIndexTriplePatterns(Flowable<LsqQuery> flow) {
 

@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -43,6 +44,7 @@ import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -904,7 +906,13 @@ public class LsqProcessor
                 // Create triple pattern extension queries
                 if(createQueryResources) {
                     for(TriplePattern tp : bgp.getTriplePatterns()) {
+
                         LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
+
+//                        Triple jenaTriple = ltp.toJenaTriple();
+//                        if(jenaTriple.isConcrete()) {
+//                            System.out.println("Concrete triple: " + jenaTriple);
+//                        }
 
                         LsqQuery extensionQuery = ltp.getExtensionQuery();
                         if(extensionQuery == null) {
@@ -913,6 +921,11 @@ public class LsqProcessor
                             Query query = QueryUtils.elementToQuery(ElementUtils.createElementTriple(ltp.toJenaTriple()));
                             extensionQuery.setQueryAndHash(query);
                             ltp.setExtensionQuery(extensionQuery);
+
+                            // TODO The validation should not be necessary
+//                            LsqQuery test = ltp.getExtensionQuery();
+//                            Objects.requireNonNull(test);
+//                            System.out.println("Set: " + test);
                         }
                     }
                 }

@@ -442,7 +442,7 @@ public class MainCliLsq {
 
 
                 // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
-                cfg.setDataRef(null);
+                // cfg.setDataRef(null);
 
                 LsqBenchmarkProcessor.process(lsqBaseIri, cfg, run, benchmarkConn);
             }

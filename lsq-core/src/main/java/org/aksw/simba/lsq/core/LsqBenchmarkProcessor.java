@@ -63,6 +63,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
@@ -101,17 +102,31 @@ public class LsqBenchmarkProcessor {
     static final Logger logger = LoggerFactory.getLogger(LsqBenchmarkProcessor.class);
 
 
+    /**
+     * Enrich an LSQ Query resource with a spin model.
+     * Returns an empty maybe if an error occurs, such as parse error
+     *
+     * @param lsqQuery
+     * @return
+     */
     public static Maybe<LsqQuery> enrichWithFullSpinModel(LsqQuery lsqQuery) {
+        Maybe<LsqQuery> result;
+        try {
+            LsqQuery q = enrichWithFullSpinModelCore(lsqQuery);
+            result = Maybe.just(q);
+        } catch(Exception e) {
+            logger.error("Error processing query", e);
+            result = Maybe.empty();
+        }
+        return result;
+    }
+
+    public static LsqQuery enrichWithFullSpinModelCore(LsqQuery lsqQuery) {
     //        Maybe<LsqQuery> result;
 
             // Query query = QueryFactory.create("SELECT * {  { ?s a ?x ; ?p ?o } UNION { ?s ?j ?k } }");
             String queryStr = lsqQuery.getText();
-            Query query;
-            try {
-                query = QueryFactory.create(queryStr);
-            } catch(Exception e) {
-                return Maybe.empty();
-            }
+            Query query = QueryFactory.create(queryStr);
 
 
     //        SpinQueryEx spinRes = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
@@ -178,7 +193,7 @@ public class LsqBenchmarkProcessor {
     //        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_BLOCKS);
     //
     //        System.exit(0);
-            return Maybe.just(lsqQuery);
+            return lsqQuery;
         }
 
     public static FlowableTransformer<LsqQuery, LsqQuery> createProcessor() {
@@ -256,7 +271,8 @@ public class LsqBenchmarkProcessor {
         Flowable<List<Set<LsqQuery>>> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
                 .map(r -> r.as(LsqQuery.class))
                 //.take(1)
-                .flatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery), false, 128)
+                .flatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery), false, 1)
+//                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
                 .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
                 .map(lsqQuery -> staticAnalysis(lsqQuery))
 //                .doAfterNext(x -> {
@@ -267,8 +283,9 @@ public class LsqBenchmarkProcessor {
                 .map(lsqQuery -> extractAllQueries(lsqQuery))
 //                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
 //                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
-                .lift(OperatorObserveThroughput.create("throughput", 100))
+//                .lift(OperatorObserveThroughput.create("throughput", 100))
                 .buffer(30)
+//                .lift(OperatorObserveThroughput.create("buffered", 100))
                 ;
 
         Iterable<List<Set<LsqQuery>>> batches = flow.blockingIterable();
@@ -393,9 +410,11 @@ public class LsqBenchmarkProcessor {
 
                     logger.info("Processing pack of size: " + pack.size());
                     // The root query is always the first element of a pack
-                    // packs are assumed to must be LinkedHashSets
+                    // packs are thus assumed to act like LinkedHashSets
                     LsqQuery rootQuery = pack.iterator().next();
 
+
+                    Model model = rootQuery.getModel();
 
                     // Extend the rootQuery's model with all related query executions
                     for(LsqQuery item : pack) {
@@ -405,13 +424,21 @@ public class LsqBenchmarkProcessor {
                         Model m = ds.getNamedModel(key);
                         Objects.requireNonNull(m, "Should not happen: No query execution model for " + key);
 
-                        rootQuery.getModel().add(m);
+//                        System.err.println("BEGIN***********************************************");
+//                        if(item.getModel().contains(ResourceFactory.createResource("http://www.bigdata.com/rdf#serviceParam"), null, (RDFNode)null)) {
+//                            System.out.println("here");
+//                        }
+//                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
+//                        System.err.println("END***********************************************");
+
+                        // Adding the root query's model to itself should be harmless
+                        model.add(m);
                     }
+
 
                     SpinQueryEx spinRoot = rootQuery.getSpinQuery().as(SpinQueryEx.class);
 
                     // Update triple pattern selectivities
-                    Model model = rootQuery.getModel();
 //                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
                     Map<Resource, LocalExecution> rleMap = rootQuery.getLocalExecutionMap();
                     LocalExecution expRoot = rleMap.get(expRun);
@@ -477,6 +504,7 @@ public class LsqBenchmarkProcessor {
                             if(tpExec == null) {
                                 tpExec = model.createResource().as(TpExec.class);
                                 LsqQuery extensionQuery = tp.getExtensionQuery();
+                                Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
                                 Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
                                 LocalExecution le = leMap.get(expRun);
                                 QueryExec qe = le.getQueryExec();
@@ -755,7 +783,10 @@ public class LsqBenchmarkProcessor {
                     LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
 
                     extensionQuery = ltp.getExtensionQuery();
-                    if(extensionQuery == null) {
+//                    if(extensionQuery == null) {
+//                        System.out.println("Got NO extension: " + extensionQuery);
+//                    }
+                    if(extensionQuery != null) {
                         result.add(extensionQuery);
                     }
                 }
