@@ -434,6 +434,7 @@ public class LsqBenchmarkProcessor {
 
                         // Adding the root query's model to itself should be harmless
                         model.add(m);
+                        model.add(item.getModel());
                     }
 
 
