@@ -414,7 +414,8 @@ public class LsqBenchmarkProcessor {
                     LsqQuery rootQuery = pack.iterator().next();
 
 
-                    Model model = rootQuery.getModel();
+                    Model model = ModelFactory.createDefaultModel();
+                    //Model model = rootQuery.getModel();
 
                     // Extend the rootQuery's model with all related query executions
                     for(LsqQuery item : pack) {
@@ -435,6 +436,8 @@ public class LsqBenchmarkProcessor {
                         model.add(m);
                     }
 
+
+                    rootQuery = rootQuery.inModel(model).as(LsqQuery.class);
 
                     SpinQueryEx spinRoot = rootQuery.getSpinQuery().as(SpinQueryEx.class);
 
