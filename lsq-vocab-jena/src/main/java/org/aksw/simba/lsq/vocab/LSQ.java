@@ -117,6 +117,7 @@ public class LSQ {
         public static final String datasetSize = ns + "datasetSize";
         public static final String datasetLabel = ns + "datasetLabel";
         public static final String datasetIri = ns + "datasetIri";
+        public static final String baseIri = ns + "baseIri";
 
 
         public static final String tpSel = ns + "tpSel";

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -266,6 +267,7 @@ public class LsqEnrichments {
 
             // Query query = QueryFactory.create("SELECT * {  { ?s a ?x ; ?p ?o } UNION { ?s ?j ?k } }");
             String queryStr = lsqQuery.getText();
+            Objects.requireNonNull(queryStr, "Query string must not be null");
             Query query = QueryFactory.create(queryStr);
 
 

@@ -4,13 +4,13 @@ import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +39,6 @@ import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
-import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
@@ -55,6 +54,7 @@ import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
+import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -91,90 +91,25 @@ import picocli.CommandLine;
 public class MainCliLsq {
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
 
+    // File output stream that raises exceptions in contrast to System.out
+    protected static final OutputStream STDOUT = new CloseShieldOutputStream(new FileOutputStream(FileDescriptor.out));
+
     // public static void displayUsageIf()
 
 
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new CmdLsqMain()).execute(args);
+        int exitCode;
+        try {
+            exitCode = new CommandLine(new CmdLsqMain()).execute(args);
+        } catch(Exception e) {
+            ExceptionUtils.rethrowIfNotBrokenPipe(e);
+
+            // If not rethrown we terminate normally
+            exitCode = 0;
+        }
+
         System.exit(exitCode);
     }
-
-//    public static void mainOld(String[] args) throws Exception {
-//
-////		Flowable.fromIterable(LongStream.iterate(0, i -> i + 1)::iterator)
-////		.forEach(x -> {
-////			System.out.println(x);
-////			throw new IOException("x");
-////		});
-//
-//        CmdLsqMain cmdMain = new CmdLsqMain();
-//
-//        CmdLsqProbe probeCmd = new  CmdLsqProbe();
-//        CmdLsqRdfize rdfizeCmd = new  CmdLsqRdfize();
-////		CmdLsqInvert invertCmd = new  CmdLsqInvert();
-//        CmdLsqBenchmarkMain benchmarkCmd = new  CmdLsqBenchmarkMain();
-//        CmdLsqAnalyze analyzeCmd = new  CmdLsqAnalyze();
-//
-//        JCommander jc = JCommander.newBuilder()
-//                .addObject(cmdMain)
-//                .addCommand("probe", probeCmd)
-//                .addCommand("rdfize", rdfizeCmd)
-////				.addCommand("invert", invertCmd)
-//                .addCommand("analyze", analyzeCmd)
-//                .addCommand("benchmark", benchmarkCmd)
-//                .build();
-//
-//        JCommander benchmarkSubCmds = jc.getCommands().get("benchmark");
-//        CmdLsqBenchmarkCreate benchmarkCreateCmd = new CmdLsqBenchmarkCreate();
-//        benchmarkSubCmds.addCommand("create", benchmarkCreateCmd);
-//        CmdLsqBenchmarkPrepare benchmarkRunCmd = new CmdLsqBenchmarkPrepare();
-//        benchmarkSubCmds.addCommand("run", benchmarkRunCmd);
-//
-//
-//        jc.parse(args);
-//
-//        if (cmdMain.help || jc.getParsedCommand() == null) {
-//            jc.usage();
-//            return;
-//        }
-//
-//        // TODO Change this to a plugin system - for now I hack this in statically
-//        String cmd = jc.getParsedCommand();
-//        switch (cmd) {
-//        case "probe": {
-//            probe(probeCmd);
-//            break;
-//        }
-//        case "rdfize": {
-//            rdfize(rdfizeCmd);
-//            break;
-//        }
-////		case "invert": {
-////			invert(invertCmd);
-////			break;
-////		}
-//        case "analyze": {
-//            analyze(analyzeCmd);
-//            break;
-//        }
-//        case "benchmark": {
-//            String benchmarkSubCmd = benchmarkSubCmds.getParsedCommand();
-//            switch(benchmarkSubCmd) {
-//            case "create":
-//                benchmarkCreate(benchmarkCreateCmd);
-//                break;
-//            case "run":
-//                benchmarkPrepare(benchmarkRunCmd);
-//                break;
-//            default:
-//                throw new RuntimeException("Unsupported command: " + cmd);
-//            }
-//            break;
-//        }
-//        default:
-//            throw new RuntimeException("Unsupported command: " + cmd);
-//        }
-//    }
 
 
     public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfize rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
@@ -260,7 +195,7 @@ public class MainCliLsq {
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
-            RDFDataMgrRx.writeResources(logRdfEvents, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
+            RDFDataMgrRx.writeResources(logRdfEvents, STDOUT, RDFFormat.TRIG_PRETTY);
         } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
         }
@@ -269,8 +204,8 @@ public class MainCliLsq {
     public static void probe(CmdLsqProbe cmdProbe) {
         List<String> nonOptionArgs = cmdProbe.nonOptionArgs;
         if(nonOptionArgs.size() == 0) {
-            System.out.println("No arguments provided.");
-            System.out.println("Argument must be one or more log files which will be probed against all registered LSQ log formats");
+            System.err.println("No arguments provided.");
+            System.err.println("Argument must be one or more log files which will be probed against all registered LSQ log formats");
         }
 
         for(int i = 0; i < nonOptionArgs.size(); ++i) {
@@ -290,7 +225,7 @@ public class MainCliLsq {
         cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         JenaSystem.init();
-        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, new FileOutputStream(FileDescriptor.out));
+        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, STDOUT);
     }
 
     // FIXME hasRemoteExec needs to be skolemized - this
@@ -310,7 +245,7 @@ public class MainCliLsq {
         })
         .map(ResourceInDataset::getDataset);
 
-        RDFDataMgrRx.writeDatasets(dsFlow, new FileOutputStream(FileDescriptor.out), RDFFormat.TRIG_PRETTY);
+        RDFDataMgrRx.writeDatasets(dsFlow, STDOUT, RDFFormat.TRIG_PRETTY);
     }
 
 
@@ -409,9 +344,10 @@ public class MainCliLsq {
             .setDatasetSize(datasetSize)
             .setDatasetLabel(datasetLabel)
             .setDatasetIri(datasetIri)
+            .setBaseIri(baseIri)
             ;
 
-        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+        RDFDataMgr.write(STDOUT, model, RDFFormat.TURTLE_PRETTY);
     }
 
 
@@ -420,6 +356,14 @@ public class MainCliLsq {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = benchmarkExecuteCmd.logSources;
         rdfizeCmd.noMerge = true;
+
+        Flowable<LsqQuery> queryFlow = createLsqRdfFlow(rdfizeCmd)
+//        		.map(r -> {
+//        			Resource x = ModelFactory.createDefaultModel().createResource();
+//        			 x.getModel().add(r.getModel());
+//        			 return x;
+//        		})
+                .map(r -> r.as(LsqQuery.class));
 
 
         String configSrc = benchmarkExecuteCmd.config;
@@ -433,7 +377,7 @@ public class MainCliLsq {
 
         ExperimentConfig cfg = run.getConfig();
 
-        String lsqBaseIri = "http://lsq.aksw.org/";
+        String lsqBaseIri = Objects.requireNonNull(cfg.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         //LsqBenchmarkProcessor.createProcessor()
 
         DataRefSparqlEndpoint dataRef = cfg.getDataRef();
@@ -442,9 +386,9 @@ public class MainCliLsq {
 
 
                 // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
-                // cfg.setDataRef(null);
+                cfg.setDataRef(null);
 
-                LsqBenchmarkProcessor.process(lsqBaseIri, cfg, run, benchmarkConn);
+                LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn);
             }
         }
 
@@ -506,58 +450,152 @@ public class MainCliLsq {
                 .setIdentifier(runId);
 
 
-        ResourceUtils.renameResource(expRun, "http://www.example.org/");
+        String runIri = config.getBaseIri() + runId;
+        ResourceUtils.renameResource(expRun, runIri);
 
 
-        RDFDataMgr.write(System.out, configModel, RDFFormat.TURTLE_PRETTY);
-
-
-//
-//        String endpoint = benchmarkCmd.endpoint;
-//
-//        LsqProcessor processor = createLsqProcessor(benchmarkCmd);
-//
-//        String datasetIri = benchmarkCmd.dataset;
-//        String serviceUrl = benchmarkCmd.endpoint;
-//
-    }
-
-
-    @Deprecated
-    public static LsqProcessor createLsqProcessor(ExperimentConfig cfg) throws FileNotFoundException, IOException, ParseException {
-
-        // The experiment IRI is distributionLabel + current timestamp
-        // Note, that distribution + timestamp nails down the hardware resources used to run the experiment
-//        String distributionIri = benchmarkCmd.dataset;
-//        String distributionId = UriToPathUtils.resolvePath(distributionIri).toString()
-//                .replace('/', '-');
-//
-//        String timestamp = Instant.now().toString();
-//
-//        String defaultExperimentId = "x-" + distributionId + "_" + timestamp;
-//        String defaultExperimentIri = benchmarkCmd.baseIri + defaultExperimentId;
-
-        DataRefSparqlEndpoint se = Objects.requireNonNull(cfg.getDataRef());
-
-
-
-        LsqConfigImpl config = new LsqConfigImpl();
-        config
-            .setPrefixSources(Collections.emptyList())
-            .setHttpUserAgent(cfg.getUserAgent())
-            .setDatasetSize(cfg.getDatasetSize())
-            .setBenchmarkEndpoint(se.getServiceUrl())
-            .addBenchmarkDefaultGraphs(se.getDefaultGraphs())
-            .setBenchmarkQueryExecutionTimeoutInMs(cfg.getQueryTimeout() == null ? null : cfg.getQueryTimeout().multiply(new BigDecimal(1000)).longValue())
-            .setRdfizerQueryExecutionEnabled(true)
-            .setDelayInMs(cfg.getRequestDelay() == null ? null : cfg.getRequestDelay().multiply(new BigDecimal(1000)).longValue())
-            .setExperimentId(cfg.getIdentifier())
-            .setExperimentIri(cfg.getURI())
-            .setDatasetLabel(cfg.getDatasetLabel())
-            ;
-
-        LsqProcessor result = LsqUtils.createProcessor(config);
-        return result;
+        RDFDataMgr.write(STDOUT, configModel, RDFFormat.TURTLE_PRETTY);
     }
 
 }
+
+
+//for(LsqQuery item : queryFlow.blockingIterable()) {
+//Set<LocalExecution> test = item.getLocalExecutions(LocalExecution.class);
+//LocalExecution r = item.getModel().createResource().as(LocalExecution.class);
+//test.add(r);
+//Model m = item.getModel();
+////System.out.println(m.getClass());
+////System.out.println(m.getGraph().getClass());
+//System.out.println(test.size());
+//r.inModel(m);
+//test.clear();
+//System.out.println(test.size());
+//System.exit(0);
+//}
+
+
+//
+//String endpoint = benchmarkCmd.endpoint;
+//
+//LsqProcessor processor = createLsqProcessor(benchmarkCmd);
+//
+//String datasetIri = benchmarkCmd.dataset;
+//String serviceUrl = benchmarkCmd.endpoint;
+//
+
+//@Deprecated
+//public static LsqProcessor createLsqProcessor(ExperimentConfig cfg) throws FileNotFoundException, IOException, ParseException {
+//
+    // The experiment IRI is distributionLabel + current timestamp
+    // Note, that distribution + timestamp nails down the hardware resources used to run the experiment
+//    String distributionIri = benchmarkCmd.dataset;
+//    String distributionId = UriToPathUtils.resolvePath(distributionIri).toString()
+//            .replace('/', '-');
+//
+//    String timestamp = Instant.now().toString();
+//
+//    String defaultExperimentId = "x-" + distributionId + "_" + timestamp;
+//    String defaultExperimentIri = benchmarkCmd.baseIri + defaultExperimentId;
+//
+//    DataRefSparqlEndpoint se = Objects.requireNonNull(cfg.getDataRef());
+//
+//
+//
+//    LsqConfigImpl config = new LsqConfigImpl();
+//    config
+//        .setPrefixSources(Collections.emptyList())
+//        .setHttpUserAgent(cfg.getUserAgent())
+//        .setDatasetSize(cfg.getDatasetSize())
+//        .setBenchmarkEndpoint(se.getServiceUrl())
+//        .addBenchmarkDefaultGraphs(se.getDefaultGraphs())
+//        .setBenchmarkQueryExecutionTimeoutInMs(cfg.getQueryTimeout() == null ? null : cfg.getQueryTimeout().multiply(new BigDecimal(1000)).longValue())
+//        .setRdfizerQueryExecutionEnabled(true)
+//        .setDelayInMs(cfg.getRequestDelay() == null ? null : cfg.getRequestDelay().multiply(new BigDecimal(1000)).longValue())
+//        .setExperimentId(cfg.getIdentifier())
+//        .setExperimentIri(cfg.getURI())
+//        .setDatasetLabel(cfg.getDatasetLabel())
+//        ;
+//
+//    LsqProcessor result = LsqUtils.createProcessor(config);
+//    return result;
+//}
+
+
+
+//public static void mainOld(String[] args) throws Exception {
+//
+////	Flowable.fromIterable(LongStream.iterate(0, i -> i + 1)::iterator)
+////	.forEach(x -> {
+////		System.out.println(x);
+////		throw new IOException("x");
+////	});
+//
+//  CmdLsqMain cmdMain = new CmdLsqMain();
+//
+//  CmdLsqProbe probeCmd = new  CmdLsqProbe();
+//  CmdLsqRdfize rdfizeCmd = new  CmdLsqRdfize();
+////	CmdLsqInvert invertCmd = new  CmdLsqInvert();
+//  CmdLsqBenchmarkMain benchmarkCmd = new  CmdLsqBenchmarkMain();
+//  CmdLsqAnalyze analyzeCmd = new  CmdLsqAnalyze();
+//
+//  JCommander jc = JCommander.newBuilder()
+//          .addObject(cmdMain)
+//          .addCommand("probe", probeCmd)
+//          .addCommand("rdfize", rdfizeCmd)
+////			.addCommand("invert", invertCmd)
+//          .addCommand("analyze", analyzeCmd)
+//          .addCommand("benchmark", benchmarkCmd)
+//          .build();
+//
+//  JCommander benchmarkSubCmds = jc.getCommands().get("benchmark");
+//  CmdLsqBenchmarkCreate benchmarkCreateCmd = new CmdLsqBenchmarkCreate();
+//  benchmarkSubCmds.addCommand("create", benchmarkCreateCmd);
+//  CmdLsqBenchmarkPrepare benchmarkRunCmd = new CmdLsqBenchmarkPrepare();
+//  benchmarkSubCmds.addCommand("run", benchmarkRunCmd);
+//
+//
+//  jc.parse(args);
+//
+//  if (cmdMain.help || jc.getParsedCommand() == null) {
+//      jc.usage();
+//      return;
+//  }
+//
+//  // TODO Change this to a plugin system - for now I hack this in statically
+//  String cmd = jc.getParsedCommand();
+//  switch (cmd) {
+//  case "probe": {
+//      probe(probeCmd);
+//      break;
+//  }
+//  case "rdfize": {
+//      rdfize(rdfizeCmd);
+//      break;
+//  }
+////	case "invert": {
+////		invert(invertCmd);
+////		break;
+////	}
+//  case "analyze": {
+//      analyze(analyzeCmd);
+//      break;
+//  }
+//  case "benchmark": {
+//      String benchmarkSubCmd = benchmarkSubCmds.getParsedCommand();
+//      switch(benchmarkSubCmd) {
+//      case "create":
+//          benchmarkCreate(benchmarkCreateCmd);
+//          break;
+//      case "run":
+//          benchmarkPrepare(benchmarkRunCmd);
+//          break;
+//      default:
+//          throw new RuntimeException("Unsupported command: " + cmd);
+//      }
+//      break;
+//  }
+//  default:
+//      throw new RuntimeException("Unsupported command: " + cmd);
+//  }
+//}

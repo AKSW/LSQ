@@ -61,4 +61,10 @@ public interface ExperimentConfig
     @IriType
     String getDatasetIri();
     ExperimentConfig setDatasetIri(String datasetIri);
+
+    @Iri(LSQ.Strs.baseIri)
+    @IriType
+    String getBaseIri();
+    ExperimentConfig setBaseIri(String baseIri);
+
 }

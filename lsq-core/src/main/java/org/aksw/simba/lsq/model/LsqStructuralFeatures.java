@@ -2,6 +2,7 @@ package org.aksw.simba.lsq.model;
 
 import java.util.Set;
 
+import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -43,6 +44,7 @@ public interface LsqStructuralFeatures
     Integer getNumProjectVars();
     LsqStructuralFeatures setNumProjectVars(Integer number);
 
+    // TODO Add the attributes here
     // Bgp summary
 //    targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
 //    .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
@@ -50,6 +52,14 @@ public interface LsqStructuralFeatures
 
     //LSQ.usesFeature
     Set<Resource> getQueryFeatures();
+
+
+//    Set<BgpNode> getBgpNodes()
+//    .addLiteral(LSQ.joinVertices, degrees.size())
+
+
+//    .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
+//    .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
 
 
     //Set<QualifiedFeatureUsage> getQualifiedFeatures();

@@ -27,7 +27,7 @@ public interface JoinVertexExec
     JoinVertexExec setBgpNode(Resource bpgNode);
 
 
-    @Iri(LSQ.Strs.tpSelBGPRestricted)
+    @Iri(LSQ.Strs.tpSelJoinVarRestricted)
     BigDecimal getBgpRestrictedSelectivitiy();
     JoinVertexExec setBgpRestrictedSelectivitiy(BigDecimal selectivity);
 

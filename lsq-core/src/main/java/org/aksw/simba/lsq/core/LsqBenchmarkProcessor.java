@@ -128,7 +128,10 @@ public class LsqBenchmarkProcessor {
         String expRunIri = lsqBaseIri + tmp.getString(expRun);
         expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
 
-        process(lsqBaseIri, config, expRun, benchmarkConn);
+        Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
+                .map(r -> r.as(LsqQuery.class));
+
+        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn);
     }
 
     /**
@@ -140,6 +143,7 @@ public class LsqBenchmarkProcessor {
      * @param benchmarkConn The connection on which to perform benchmarking
      */
     public static void process(
+            Flowable<LsqQuery> rawQueryFlow,
             String lsqBaseIri,
             ExperimentConfig config,
             ExperimentRun expRun,
@@ -166,8 +170,10 @@ public class LsqBenchmarkProcessor {
 //        Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> "urn://" + lsqQuery.getHash() + expSuffix;
         Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
 
-        Flowable<List<Set<LsqQuery>>> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-                .map(r -> r.as(LsqQuery.class))
+//        Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
+//                Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/saleem.trig", Lang.TRIG, null)
+        Flowable<List<Set<LsqQuery>>> queryFlow = rawQueryFlow
+//                .map(r -> r.as(LsqQuery.class))
 //                .skip(1)
 //                .take(1)
                 .flatMapMaybe(lsqQuery -> LsqEnrichments.enrichWithFullSpinModel(lsqQuery), false, 1)
@@ -187,7 +193,7 @@ public class LsqBenchmarkProcessor {
 //                .lift(OperatorObserveThroughput.create("buffered", 100))
                 ;
 
-        Iterable<List<Set<LsqQuery>>> batches = flow.blockingIterable();
+        Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
         Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
 
         // Create a database to ensure uniqueness of evaluation tasks
@@ -196,331 +202,14 @@ public class LsqBenchmarkProcessor {
 
             while(itBatches.hasNext()) {
                 List<Set<LsqQuery>> batch = itBatches.next();
-//
-//                // LookupServiceUtils.createLookupService(indexConn, );
-//                // Triple t = new Triple(Vars.s, LSQ.execStatus.asNode(), Vars.o);
-//                Triple t = new Triple(Vars.s, Vars.p, Vars.o);
-//                Quad quad = new Quad(Vars.g, t);
-//                BasicPattern basicPatteren = new BasicPattern();
-//                basicPatteren.add(t);
-////                QuadPattern quadPattern = new QuadPattern();
-////                quadPattern.add(quad);
-//
-//                DataQuery<RDFNode> dq = new DataQueryImpl<>(
-//                        indexConn,
-//                        ElementUtils.createElement(quad),
-//                        Vars.s,
-//                        new Template(basicPatteren),
-//                        RDFNode.class
-//                );
-//
-//
-//                System.out.println("Generated: " + dq.toConstructQuery());
-
-                Set<Node> lookupHashNodes = batch.stream()
-                        .flatMap(item -> item.stream())
-                        .map(lsqQueryExecFn)
-                        .map(NodeFactory::createURI)
-                        .collect(Collectors.toSet());
-
-//                for(Node n : lookupHashNodes) {
-//                    System.out.println("Lookup with: " + n.getURI());
-//                }
-//                Expr filter = ExprUtils.oneOf(Vars.g, lookupHashNodes);
-//                dq.filterDirect(new ElementFilter(filter));
-
-                Map<String, Dataset> nodeToDataset = Txn.calculate(indexConn, () ->
-                    fetchDatasets(indexConn, lookupHashNodes)
-                    .toMap(Entry::getKey, Entry::getValue)
-                    .blockingGet());
-
-//                System.out.println(hashNodes);
-                // Obtain the set of query strings already in the store
-
-                Set<String> alreadyIndexedHashUrns = nodeToDataset.keySet();
-//                Set<String> alreadyIndexedHashUrns = Txn.calculate(indexConn, () ->
-//                      dq
-//                        .exec()
-//                        .map(x -> x.asNode().getURI())
-//                        .blockingStream()
-//                        .collect(Collectors.toSet()));
-//                        ;
-
-//                for(String str : alreadyIndexedHashUrns) {
-//                    System.out.println("Already indexed: " + str);
-//                }
-                Set<LsqQuery> nonIndexed = batch.stream()
-                    .flatMap(item -> item.stream())
-                    .filter(item -> !alreadyIndexedHashUrns.contains(lsqQueryExecFn.apply(item)))
-                    .collect(Collectors.toSet());
-
-//                System.out.println(nonIndexed);
-
-                List<Quad> inserts = new ArrayList<Quad>();
-
-                boolean stop = false;
-//                System.err.println("Batch: " + nonIndexed.size() + "/" + lookupHashNodes.size() + " (" + batch.size() + ") need processing");
-                for(LsqQuery item : nonIndexed) {
-//                    stop = true;
-                    String queryStr = item.getText();
-                    String queryExecIri = lsqQueryExecFn.apply(item); //"urn://" + item.getHash();
-                    Node s = NodeFactory.createURI(queryExecIri);
-                    System.out.println("Benchmarking: " + s);
-                    System.out.println(item.getText());
-
-                    Dataset newDataset = DatasetFactory.create();
-                    Model newModel = newDataset.getNamedModel(queryExecIri);
-
-                    item = item.inModel(newModel).as(LsqQuery.class);
-
-                    // Create fresh local execution and query exec resources
-                    LocalExecution le = newModel.createResource().as(LocalExecution.class);
-                    QueryExec qe = newModel.createResource().as(QueryExec.class);
-
-                    // TODO Skolemize these executions!
-
-                    try {
-                        rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
-                    } catch(Exception e) {
-                        String errorMsg = e.toString();
-                        qe.setProcessingError(errorMsg);
-                        logger.warn("Failed to benchmark " + s);
-                    }
-
-                    item.getLocalExecutions(LocalExecution.class).add(le);
-                    le.setBenchmarkRun(expRun);
-                    le.setQueryExec(qe);
-
-                    newDataset.asDatasetGraph().find().forEachRemaining(inserts::add);
-
-
-                    inserts.add(new Quad(s, s, LSQ.execStatus.asNode(), NodeFactory.createLiteral("processed")));
-//                    RDFDataMgr.write(new FileOutputStream(FileDescriptor.out), item.getModel(), RDFFormat.TURTLE_PRETTY);
-
-//                    System.out.println(s.getURI().equals("urn://33c4205f90fdeb7d1db68426806a816e3ffbfa3980461b556b32fded407568c9"));
-
-                    nodeToDataset.put(queryExecIri, newDataset);
-                }
-
-                UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
-                Txn.executeWrite(indexConn, () -> indexConn.update(ur));
-
-//                Txn.executeRead(indexConn, () -> System.out.println(ResultSetFormatter.asText(indexConn.query("SELECT ?s { ?s ?p ?o }").execSelect())));
-                if(stop) {
-                    ((Disposable)itBatches).dispose();
-                    break;
-                }
-
-                for(Set<LsqQuery> pack : batch) {
-
-                    logger.info("Processing pack of size: " + pack.size());
-                    // The root query is always the first element of a pack
-                    // packs are thus assumed to act like LinkedHashSets
-                    LsqQuery rootQuery = pack.iterator().next();
-
-
-                    Model model = ModelFactory.createDefaultModel();
-
-
-                    // We need to add the config model in order to include the benchmark run id
-                    // TODO We should ensure that only the minimal necessary config model is added
-                    Model configModel = config.getModel();
-//                    expRoot.getModel().add(configModel);
-                    model.add(configModel);
-
-
-                    //Model model = rootQuery.getModel();
-
-                    // Extend the rootQuery's model with all related query executions
-                    for(LsqQuery item : pack) {
-                        String key = lsqQueryExecFn.apply(item);
-                        Dataset ds = nodeToDataset.get(key);
-                        Objects.requireNonNull(ds, "Expected dataset for key "  + key);
-                        Model m = ds.getNamedModel(key);
-                        Objects.requireNonNull(m, "Should not happen: No query execution model for " + key);
-
-//                        System.err.println("BEGIN***********************************************");
-//                        if(item.getModel().contains(ResourceFactory.createResource("http://www.bigdata.com/rdf#serviceParam"), null, (RDFNode)null)) {
-//                            System.out.println("here");
-//                        }
-//                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
-//                        System.err.println("END***********************************************");
-
-                        // Adding the root query's model to itself should be harmless
-                        model.add(m);
-                        model.add(item.getModel());
-                    }
-
-
-                    rootQuery = rootQuery.inModel(model).as(LsqQuery.class);
-
-                    SpinQueryEx spinRoot = rootQuery.getSpinQuery().as(SpinQueryEx.class);
-
-                    // Update triple pattern selectivities
-//                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
-                    Map<Resource, LocalExecution> rleMap = rootQuery.getLocalExecutionMap();
-                    LocalExecution expRoot = rleMap.get(expRun);
-
-//                    expRoot.setBenchmarkRun(expRun);
-                    Long datasetSize = config.getDatasetSize();
-
-                    if(datasetSize == null) {
-                        datasetSize = 0l;
-                    }
-
-
-                    /*
-                     * BgpExecs, TpInBgpExecs and TpExec
-                     *
-                     *
-                     */
-                    // Iterate the query's. bgps. For each bgp:
-                    // 1.) get-or-create the execution
-                    // 2.) then descend into the tp-in-bgp and the tps and update their stats
-                    for(SpinBgp xbgp : spinRoot.getBgps()) {
-                        // Get the bgp's execution in this experiment
-                        SpinBgpExec bgpExec = expRoot.findBgpExec(xbgp);
-
-                        if(bgpExec == null) {
-                            bgpExec = model.createResource().as(SpinBgpExec.class);
-                            LsqQuery extensionQuery = xbgp.getExtensionQuery();
-                            Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
-                            LocalExecution le = leMap.get(expRun);
-                            QueryExec qe = le.getQueryExec();
-
-                            // Link the bgp with the corresponding query execution
-                            bgpExec
-                                .setLocalExecution(expRoot) /* inverse link */
-                                .setBgp(xbgp) /* inverse link */
-//                                .setBenchmarkRun(expRun)
-                                .setQueryExec(qe)
-                                ;
-
-//                            expRoot.getBgpExecs().add(bgpExec);
-                        }
-                    }
-
-                    // Now that all BgpExecs are set up
-                    // set up tpExecs
-                    for(SpinBgpExec bgpExec : expRoot.getBgpExecs()) {
-                        for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
-                            LsqTriplePattern tp = tpInBgp.getTriplePattern();
-                            //TpExec tpExec = tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
-                            //TpExec tpExec = tp.getExtensionQuery()
-                            TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
-
-                            if(tpInBgpExec == null) {
-                                tpInBgpExec = model.createResource().as(TpInBgpExec.class);
-                                // LsqQuery extensionQuery = tp.getExtensionQuery();
-
-                                // Link the bgp with the corresponding query execution
-                                tpInBgpExec
-                                    .setBgpExec(bgpExec);
-                            }
-
-                            TpExec tpExec = tpInBgpExec.getTpExec();
-                            if(tpExec == null) {
-                                tpExec = model.createResource().as(TpExec.class);
-                                LsqQuery extensionQuery = tp.getExtensionQuery();
-                                RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-                                Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
-                                Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
-                                LocalExecution le = leMap.get(expRun);
-                                QueryExec qe = le.getQueryExec();
-
-                                tpExec
-                                    .setTpInBgpExec(tpInBgpExec) /* inverse link */
-                                    .setTp(tp)
-                                    .setQueryExec(qe)
-                                    ;
-                            }
-
-                            Long tpResultSetSize = tpExec.getQueryExec().getResultSetSize();
-                            BigDecimal tpSel = safeDivide(tpResultSetSize, datasetSize);
-                            tpExec
-                                .setSelectivity(tpSel);
-
-                            Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
-                            Long tpSize = tpExec.getQueryExec().getResultSetSize();
-                            BigDecimal value = safeDivide(tpSize, bgpSize);
-                            tpInBgpExec.setSelectivity(value);
-                            // BigDecimal value = new BigDecimal(rsSize).divide(new BigDecimal(datasetSize));
-                            // tpInBgpExec.setSelectivity(value);
-                        }
-
-
-                        for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
-                            JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
-                            if(bgpNodeExec == null) {
-
-                                LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
-                                LocalExecution qle = extensionQuery.getLocalExecutionMap().get(expRun);
-
-                                if(qle != null) {
-
-                                    bgpNodeExec = model.createResource().as(JoinVertexExec.class);
-                                    QueryExec queryExec = qle.getQueryExec();
-                                    // LsqQuery extensionQuery = tp.getExtensionQuery();
-
-                                    // Link the bgp with the corresponding query execution
-                                    bgpNodeExec
-                                        .setBgpNode(bgpNode)
-                                        .setBgpExec(bgpExec) /* inverse link */
-                                        .setQueryExec(queryExec)
-                                        ;
-                                }
-                            }
-
-                            if(bgpNodeExec != null) {
-                                Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
-                                Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
-                                BigDecimal value = safeDivide(bgpNodeSize, bgpSize);
-
-                                bgpNodeExec.setBgpRestrictedSelectivitiy(value);
-                            }
-                        }
-
-                    }
-
-
-                    HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
-                    //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
-                    Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
-
-//                    Map<Resource, String> renames = new LinkedHashMap<>();
-//                    for(SpinBgp bgp : spinRoot.getBgps()) {
-//                        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(bgp);//.getHash(bgp);
-//
-//                        for(Entry<RDFNode, HashCode> e : hashIdCxt.getMapping().entrySet()) {
-//                            if(e.getKey().isResource()) {
-//                                renames.put(e.getKey().asResource(), e.getValue().toString());
-//                            }
-//                        }
-//                    }
-
-//                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
-                    for(Entry<RDFNode, String> e : renames.entrySet()) {
-//                        HashCode hashCode = e.getValue();
-//                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
-                        String part = e.getValue();
-
-                        String iri = lsqBaseIri + part;
-                        RDFNode n = e.getKey();
-                        if(n.isResource()) {
-//                            System.out.println("--- RENAME: ");
-//                            System.out.println(iri);
-//                            System.out.println(n);
-//                            System.out.println("------------------------");
-//
-                            ResourceUtils.renameResource(n.asResource(), iri);
-                        }
-                    }
-
-
-
-
-                    RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
-                }
+                processBatchOfQueries(
+                        batch,
+                        lsqBaseIri,
+                        config,
+                        expRun,
+                        benchmarkConn,
+                        lsqQueryExecFn,
+                        indexConn);
             }
         } finally {
             dataset.close();
@@ -581,6 +270,316 @@ public class LsqBenchmarkProcessor {
 //        //Skolemize.skolemize(spinRes);
 //
 //        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+    }
+
+
+    public static void processBatchOfQueries(
+            List<Set<LsqQuery>> batch,
+            String lsqBaseIri,
+            ExperimentConfig config,
+            ExperimentRun expRun,
+            SparqlQueryConnection benchmarkConn,
+            Function<LsqQuery, String> lsqQueryExecFn,
+            RDFConnection indexConn) {
+
+        Set<Node> lookupHashNodes = batch.stream()
+                .flatMap(item -> item.stream())
+                .map(lsqQueryExecFn)
+                .map(NodeFactory::createURI)
+                .collect(Collectors.toSet());
+
+//                for(Node n : lookupHashNodes) {
+//                    System.out.println("Lookup with: " + n.getURI());
+//                }
+//                Expr filter = ExprUtils.oneOf(Vars.g, lookupHashNodes);
+//                dq.filterDirect(new ElementFilter(filter));
+
+        Map<String, Dataset> nodeToDataset = Txn.calculate(indexConn, () ->
+            fetchDatasets(indexConn, lookupHashNodes)
+            .toMap(Entry::getKey, Entry::getValue)
+            .blockingGet());
+
+//                System.out.println(hashNodes);
+        // Obtain the set of query strings already in the store
+
+        Set<String> alreadyIndexedHashUrns = nodeToDataset.keySet();
+//                Set<String> alreadyIndexedHashUrns = Txn.calculate(indexConn, () ->
+//                      dq
+//                        .exec()
+//                        .map(x -> x.asNode().getURI())
+//                        .blockingStream()
+//                        .collect(Collectors.toSet()));
+//                        ;
+
+//                for(String str : alreadyIndexedHashUrns) {
+//                    System.out.println("Already indexed: " + str);
+//                }
+        Set<LsqQuery> nonIndexed = batch.stream()
+            .flatMap(item -> item.stream())
+            .filter(item -> !alreadyIndexedHashUrns.contains(lsqQueryExecFn.apply(item)))
+            .collect(Collectors.toSet());
+
+//                System.out.println(nonIndexed);
+
+        List<Quad> inserts = new ArrayList<Quad>();
+
+//                System.err.println("Batch: " + nonIndexed.size() + "/" + lookupHashNodes.size() + " (" + batch.size() + ") need processing");
+        for(LsqQuery item : nonIndexed) {
+            String queryStr = item.getText();
+            String queryExecIri = lsqQueryExecFn.apply(item); //"urn://" + item.getHash();
+            Node s = NodeFactory.createURI(queryExecIri);
+//                    System.out.println("Benchmarking: " + s);
+//                    System.out.println(item.getText());
+
+            Dataset newDataset = DatasetFactory.create();
+            Model newModel = newDataset.getNamedModel(queryExecIri);
+
+            item = item.inModel(newModel).as(LsqQuery.class);
+
+            // Create fresh local execution and query exec resources
+            LocalExecution le = newModel.createResource().as(LocalExecution.class);
+            QueryExec qe = newModel.createResource().as(QueryExec.class);
+
+            // TODO Skolemize these executions!
+
+            try {
+                rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
+            } catch(Exception e) {
+                String errorMsg = e.toString();
+                qe.setProcessingError(errorMsg);
+                logger.warn("Failed to benchmark " + s);
+            }
+
+            item.getLocalExecutions(LocalExecution.class).add(le);
+            le.setBenchmarkRun(expRun);
+            le.setQueryExec(qe);
+
+            newDataset.asDatasetGraph().find().forEachRemaining(inserts::add);
+
+
+            inserts.add(new Quad(s, s, LSQ.execStatus.asNode(), NodeFactory.createLiteral("processed")));
+//                    RDFDataMgr.write(new FileOutputStream(FileDescriptor.out), item.getModel(), RDFFormat.TURTLE_PRETTY);
+
+//                    System.out.println(s.getURI().equals("urn://33c4205f90fdeb7d1db68426806a816e3ffbfa3980461b556b32fded407568c9"));
+
+            nodeToDataset.put(queryExecIri, newDataset);
+        }
+
+        UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
+        Txn.executeWrite(indexConn, () -> indexConn.update(ur));
+
+//                Txn.executeRead(indexConn, () -> System.out.println(ResultSetFormatter.asText(indexConn.query("SELECT ?s { ?s ?p ?o }").execSelect())));
+
+        for(Set<LsqQuery> pack : batch) {
+
+            logger.info("Processing pack of size: " + pack.size());
+            // The root query is always the first element of a pack
+            // packs are thus assumed to act like LinkedHashSets
+            LsqQuery rootQuery = pack.iterator().next();
+
+
+            Model model = ModelFactory.createDefaultModel();
+
+
+            // We need to add the config model in order to include the benchmark run id
+            // TODO We should ensure that only the minimal necessary config model is added
+            Model configModel = config.getModel();
+//                    expRoot.getModel().add(configModel);
+            model.add(configModel);
+
+
+            //Model model = rootQuery.getModel();
+
+            // Extend the rootQuery's model with all related query executions
+            for(LsqQuery item : pack) {
+                String key = lsqQueryExecFn.apply(item);
+                Dataset ds = nodeToDataset.get(key);
+                Objects.requireNonNull(ds, "Expected dataset for key "  + key);
+                Model m = ds.getNamedModel(key);
+                Objects.requireNonNull(m, "Should not happen: No query execution model for " + key);
+
+//                        System.err.println("BEGIN***********************************************");
+//                        if(item.getModel().contains(ResourceFactory.createResource("http://www.bigdata.com/rdf#serviceParam"), null, (RDFNode)null)) {
+//                            System.out.println("here");
+//                        }
+//                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
+//                        System.err.println("END***********************************************");
+
+                // Adding the root query's model to itself should be harmless
+                model.add(m);
+                model.add(item.getModel());
+            }
+
+
+            rootQuery = rootQuery.inModel(model).as(LsqQuery.class);
+
+            SpinQueryEx spinRoot = rootQuery.getSpinQuery().as(SpinQueryEx.class);
+
+            // Update triple pattern selectivities
+//                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
+            Map<Resource, LocalExecution> rleMap = rootQuery.getLocalExecutionMap();
+            LocalExecution expRoot = rleMap.get(expRun);
+
+//                    expRoot.setBenchmarkRun(expRun);
+            Long datasetSize = config.getDatasetSize();
+
+            if(datasetSize == null) {
+                datasetSize = 0l;
+            }
+
+
+            /*
+             * BgpExecs, TpInBgpExecs and TpExec
+             *
+             *
+             */
+            // Iterate the query's. bgps. For each bgp:
+            // 1.) get-or-create the execution
+            // 2.) then descend into the tp-in-bgp and the tps and update their stats
+            for(SpinBgp xbgp : spinRoot.getBgps()) {
+                // Get the bgp's execution in this experiment
+                SpinBgpExec bgpExec = expRoot.findBgpExec(xbgp);
+
+                if(bgpExec == null) {
+                    bgpExec = model.createResource().as(SpinBgpExec.class);
+                    LsqQuery extensionQuery = xbgp.getExtensionQuery();
+                    Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
+                    LocalExecution le = leMap.get(expRun);
+                    QueryExec qe = le.getQueryExec();
+
+                    // Link the bgp with the corresponding query execution
+                    bgpExec
+                        .setLocalExecution(expRoot) /* inverse link */
+                        .setBgp(xbgp) /* inverse link */
+//                                .setBenchmarkRun(expRun)
+                        .setQueryExec(qe)
+                        ;
+
+//                            expRoot.getBgpExecs().add(bgpExec);
+                }
+            }
+
+            // Now that all BgpExecs are set up
+            // set up tpExecs
+            for(SpinBgpExec bgpExec : expRoot.getBgpExecs()) {
+                for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
+                    LsqTriplePattern tp = tpInBgp.getTriplePattern();
+                    //TpExec tpExec = tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
+                    //TpExec tpExec = tp.getExtensionQuery()
+                    TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
+
+                    if(tpInBgpExec == null) {
+                        tpInBgpExec = model.createResource().as(TpInBgpExec.class);
+                        // LsqQuery extensionQuery = tp.getExtensionQuery();
+
+                        // Link the bgp with the corresponding query execution
+                        tpInBgpExec
+                            .setBgpExec(bgpExec);
+                    }
+
+                    TpExec tpExec = tpInBgpExec.getTpExec();
+                    if(tpExec == null) {
+                        tpExec = model.createResource().as(TpExec.class);
+                        LsqQuery extensionQuery = tp.getExtensionQuery();
+//                                RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+                        Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
+                        Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
+                        LocalExecution le = leMap.get(expRun);
+                        QueryExec qe = le.getQueryExec();
+
+                        tpExec
+                            .setTpInBgpExec(tpInBgpExec) /* inverse link */
+                            .setTp(tp)
+                            .setQueryExec(qe)
+                            ;
+                    }
+
+                    Long tpResultSetSize = tpExec.getQueryExec().getResultSetSize();
+                    BigDecimal tpSel = safeDivide(tpResultSetSize, datasetSize);
+                    tpExec
+                        .setSelectivity(tpSel);
+
+                    Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
+                    Long tpSize = tpExec.getQueryExec().getResultSetSize();
+                    BigDecimal value = safeDivide(bgpSize, tpSize);
+                    tpInBgpExec.setSelectivity(value);
+                    // BigDecimal value = new BigDecimal(rsSize).divide(new BigDecimal(datasetSize));
+                    // tpInBgpExec.setSelectivity(value);
+                }
+
+
+                for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
+                    JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
+                    if(bgpNodeExec == null) {
+
+                        LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
+                        LocalExecution qle = extensionQuery.getLocalExecutionMap().get(expRun);
+
+                        if(qle != null) {
+
+                            bgpNodeExec = model.createResource().as(JoinVertexExec.class);
+                            QueryExec queryExec = qle.getQueryExec();
+                            // LsqQuery extensionQuery = tp.getExtensionQuery();
+
+                            // Link the bgp with the corresponding query execution
+                            bgpNodeExec
+                                .setBgpNode(bgpNode)
+                                .setBgpExec(bgpExec) /* inverse link */
+                                .setQueryExec(queryExec)
+                                ;
+                        }
+                    }
+
+                    if(bgpNodeExec != null) {
+                        Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
+                        Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
+                        BigDecimal value = safeDivide(bgpNodeSize, bgpSize);
+
+                        bgpNodeExec.setBgpRestrictedSelectivitiy(value);
+                    }
+                }
+
+            }
+
+
+            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
+            //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
+            Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
+
+//                    Map<Resource, String> renames = new LinkedHashMap<>();
+//                    for(SpinBgp bgp : spinRoot.getBgps()) {
+//                        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(bgp);//.getHash(bgp);
+//
+//                        for(Entry<RDFNode, HashCode> e : hashIdCxt.getMapping().entrySet()) {
+//                            if(e.getKey().isResource()) {
+//                                renames.put(e.getKey().asResource(), e.getValue().toString());
+//                            }
+//                        }
+//                    }
+
+//                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
+            for(Entry<RDFNode, String> e : renames.entrySet()) {
+//                        HashCode hashCode = e.getValue();
+//                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+                String part = e.getValue();
+
+                String iri = lsqBaseIri + part;
+                RDFNode n = e.getKey();
+                if(n.isResource()) {
+//                            System.out.println("--- RENAME: ");
+//                            System.out.println(iri);
+//                            System.out.println(n);
+//                            System.out.println("------------------------");
+//
+                    ResourceUtils.renameResource(n.asResource(), iri);
+                }
+            }
+
+
+
+
+            RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
+        }
     }
 
     public static LsqQuery updateLsqQueryIris(
@@ -666,6 +665,7 @@ public class LsqBenchmarkProcessor {
        public static QueryExec rdfizeQueryExecutionBenchmark(SparqlQueryConnection conn, String queryStr, QueryExec result) {
 
            Stopwatch sw = Stopwatch.createStarted();
+           System.err.println("Benchmarking " + queryStr);
            try(QueryExecution qe = conn.query(queryStr)) {
                long resultSetSize = QueryExecutionUtils.consume(qe);
                BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
@@ -885,4 +885,27 @@ public class LsqBenchmarkProcessor {
 //        }
 //    }
 //}
+
+
+
+//
+//// LookupServiceUtils.createLookupService(indexConn, );
+//// Triple t = new Triple(Vars.s, LSQ.execStatus.asNode(), Vars.o);
+//Triple t = new Triple(Vars.s, Vars.p, Vars.o);
+//Quad quad = new Quad(Vars.g, t);
+//BasicPattern basicPatteren = new BasicPattern();
+//basicPatteren.add(t);
+////QuadPattern quadPattern = new QuadPattern();
+////quadPattern.add(quad);
+//
+//DataQuery<RDFNode> dq = new DataQueryImpl<>(
+//      indexConn,
+//      ElementUtils.createElement(quad),
+//      Vars.s,
+//      new Template(basicPatteren),
+//      RDFNode.class
+//);
+//
+//
+//System.out.println("Generated: " + dq.toConstructQuery());
 
