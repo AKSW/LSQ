@@ -24,6 +24,7 @@ public interface SpinBgp
     @Iri(LSQ.Strs.hasTP)
     List<LsqTriplePattern> getTriplePatterns();
 
+
 //    default List<LsqTriplePattern> getTriplePatterns() {
 //        List<TpInBgp> list = getTpInBgp();
 //        List<LsqTriplePattern> result = list.stream().map(item -> item.getTriplePattern()).collect(Collectors.toList());

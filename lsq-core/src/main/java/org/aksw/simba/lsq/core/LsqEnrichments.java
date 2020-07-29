@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
@@ -24,12 +26,15 @@ import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.vocabulary.SP;
@@ -41,10 +46,24 @@ import io.reactivex.rxjava3.core.Maybe;
 
 public class LsqEnrichments {
 
+    public static void enrichSpinBgpWithTpInBgp(SpinBgp bgp) {
+        Collection<TpInBgp> tpsInSubBgp = bgp.getTpInBgp();
+        for(LsqTriplePattern tp : bgp.getTriplePatterns()) {
+            TpInBgp tpInBgp = bgp.getModel().createResource().as(TpInBgp.class)
+                    .setBgp(bgp)
+                    .setTriplePattern(tp);
+
+            tpsInSubBgp.add(tpInBgp);
+        }
+    }
+
     public static void enrichSpinBgpNodesWithSubBgpsAndQueries(SpinQueryEx spinNode) {
 
             boolean createQueryResources = true;
             for(SpinBgp bgp : spinNode.getBgps()) {
+
+                LsqEnrichments.enrichSpinBgpWithTpInBgp(bgp);
+
                 if(createQueryResources) {
                     LsqEnrichments.enrichSpinBgpWithQuery(bgp);
                 }
@@ -55,7 +74,8 @@ public class LsqEnrichments {
 
                         LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
 
-//                        Triple jenaTriple = ltp.toJenaTriple();
+                        Triple jenaTriple = ltp.toJenaTriple();
+                        ltp.setLabel(NodeFmtLib.str(jenaTriple));
 //                        if(jenaTriple.isConcrete()) {
 //                            System.out.println("Concrete triple: " + jenaTriple);
 //                        }
@@ -80,6 +100,7 @@ public class LsqEnrichments {
 
                 for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
                     Node jenaNode = bgpNode.toJenaNode();
+                    bgpNode.setLabel(NodeFmtLib.str(jenaNode));
 
                     if(createQueryResources && jenaNode.isVariable()) {
                         LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
@@ -98,29 +119,33 @@ public class LsqEnrichments {
                     }
 
 
-                    SpinBgp subBgp = bgpNode.getSubBgp();
-
-                    if(subBgp == null) {
-                        subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
-                        bgpNode.setSubBgp(subBgp);
-                    }
-
                     List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
                             .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
                             .collect(Collectors.toList());
+                    // Do not generate empty subBgps
+//                    if(!subBgpTps.isEmpty()) {
 
-                    Collection<LsqTriplePattern> dest = subBgp.getTriplePatterns();
-                    for(LsqTriplePattern tp : subBgpTps) {
-                        dest.add(tp);
-                    }
+                        SpinBgp subBgp = bgpNode.getSubBgp();
 
-                    if(createQueryResources && jenaNode.isVariable()) {
-                        if(createQueryResources) {
-                            LsqEnrichments.enrichSpinBgpWithQuery(subBgp);
+                        if(subBgp == null) {
+                            subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
+                            bgpNode.setSubBgp(subBgp);
+                        }
+
+                        Collection<LsqTriplePattern> dest = subBgp.getTriplePatterns();
+                        for(LsqTriplePattern tp : subBgpTps) {
+                            dest.add(tp);
+                        }
+
+                        LsqEnrichments.enrichSpinBgpWithTpInBgp(bgp);
+
+                        if(createQueryResources && jenaNode.isVariable()) {
+                            if(createQueryResources) {
+                                LsqEnrichments.enrichSpinBgpWithQuery(subBgp);
+                            }
                         }
                     }
-
-                }
+//                }
             }
         }
 
@@ -237,7 +262,10 @@ public class LsqEnrichments {
         if(extensionQuery == null) {
             extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
 
-            Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
+            Element elt = new ElementTriplesBlock(bgp.toBasicPattern());
+            // TODO Use a prefixed form
+            bgp.setLabel(elt.toString());
+            Query query = QueryUtils.elementToQuery(elt);
             extensionQuery.setQueryAndHash(query);
             bgp.setExtensionQuery(extensionQuery);
         }
@@ -300,33 +328,43 @@ public class LsqEnrichments {
     //        }
 
             // Skolemize the remaining model
+            if(false) {
             Skolemize.skolemizeTree(spinRes, true,
                     (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                     (n, d) -> !(n.isResource() && n.asResource().hasProperty(LSQ.text)));
-
+            }
 
             // Now that the bgps and tps are skolemized, create the tpInBgp nodes
-            for(SpinBgp bgp : spinRes.getBgps()) {
-    //            System.err.println("BGP: " + bgp);
-                Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
-                for(TriplePattern tp : bgp.getTriplePatterns()) {
-    //            	System.err.println("BGP: " + bgp);
-    //                System.err.println("  TP: " + tp);
-                    TpInBgp tpInBgp = spinRes.getModel().createResource().as(TpInBgp.class);
-                    tpInBgp.setBgp(bgp);
-                    tpInBgp.setTriplePattern(tp);
-                    tpInBgps.add(tpInBgp);
-                }
+//            for(SpinBgp bgp : spinRes.getBgps()) {
+//    //            System.err.println("BGP: " + bgp);
+//                Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
+//                for(TriplePattern tp : bgp.getTriplePatterns()) {
+//    //            	System.err.println("BGP: " + bgp);
+//    //                System.err.println("  TP: " + tp);
+//                    TpInBgp tpInBgp = spinRes.getModel().createResource().as(TpInBgp.class);
+//                    tpInBgp.setBgp(bgp);
+//                    tpInBgp.setTriplePattern(tp);
+//                    tpInBgps.add(tpInBgp);
+//                }
+//
+//                if(false) {
+//                Skolemize.skolemizeTree(bgp, true,
+//                        (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
+//                        (n, d) -> true);
+//                }
+//
+//                // Clear the bgp attribute that was only required for computing the hash id
+//                for(TpInBgp tpInBgp : tpInBgps) {
+//                    tpInBgp.setBgp(null);
+//                }
+//            }
 
-                Skolemize.skolemizeTree(bgp, true,
-                        (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
-                        (n, d) -> true);
+            String lsqBaseIri = "http://lsq.aksw.org/spin-";
+            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(spinRes);//.getHash(bgp);
+            Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
+            LsqBenchmarkProcessor.renameResources(lsqBaseIri, renames);
 
-                // Clear the bgp attribute that was only required for computing the hash id
-                for(TpInBgp tpInBgp : tpInBgps) {
-                    tpInBgp.setBgp(null);
-                }
-            }
+
 
     //        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_FLAT);
     //        System.exit(1);

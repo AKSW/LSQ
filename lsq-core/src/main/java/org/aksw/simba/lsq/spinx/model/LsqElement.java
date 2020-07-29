@@ -15,7 +15,7 @@ import org.apache.jena.rdf.model.Resource;
  *
  */
 public interface LsqElement
-    extends Resource
+    extends Resource, Labeled
 {
     @Iri(LSQ.Strs.extensionQuery)
     LsqQuery getExtensionQuery();

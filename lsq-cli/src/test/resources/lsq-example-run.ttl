@@ -1,6 +1,7 @@
 @prefix lsq:   <http://lsq.aksw.org/vocab#> .
 
 <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
+        lsq:baseIri       <http://lsq.aksw.org/> ;
         lsq:datasetIri    <http://dbpedia.org/somedata> ;
         lsq:datasetLabel  "dbpedia.org-somedata" ;
         lsq:datasetSize   "2005615"^^<http://www.w3.org/2001/XMLSchema#long> ;

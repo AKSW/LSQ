@@ -558,27 +558,32 @@ public class LsqBenchmarkProcessor {
 //                    }
 
 //                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
-            for(Entry<RDFNode, String> e : renames.entrySet()) {
-//                        HashCode hashCode = e.getValue();
-//                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
-                String part = e.getValue();
-
-                String iri = lsqBaseIri + part;
-                RDFNode n = e.getKey();
-                if(n.isResource()) {
-//                            System.out.println("--- RENAME: ");
-//                            System.out.println(iri);
-//                            System.out.println(n);
-//                            System.out.println("------------------------");
-//
-                    ResourceUtils.renameResource(n.asResource(), iri);
-                }
-            }
+            renameResources(lsqBaseIri, renames);
 
 
 
 
             RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
+        }
+    }
+
+
+    public static void renameResources(String lsqBaseIri, Map<RDFNode, String> renames) {
+        for(Entry<RDFNode, String> e : renames.entrySet()) {
+//                        HashCode hashCode = e.getValue();
+//                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+            String part = e.getValue();
+
+            String iri = lsqBaseIri + part;
+            RDFNode n = e.getKey();
+            if(n.isResource()) {
+//                            System.out.println("--- RENAME: ");
+//                            System.out.println(iri);
+//                            System.out.println(n);
+//                            System.out.println("------------------------");
+//
+                ResourceUtils.renameResource(n.asResource(), iri);
+            }
         }
     }
 

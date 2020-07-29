@@ -7,7 +7,6 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.jena_sparql_api.mapper.annotation.StringId;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
@@ -26,7 +25,7 @@ import com.google.common.hash.Hashing;
 
 @ResourceView
 public interface SpinBgpNode
-    extends Resource
+    extends Resource, Labeled
 {
     @Iri(LSQ.Strs.hasBGPNode)
     @Inverse
