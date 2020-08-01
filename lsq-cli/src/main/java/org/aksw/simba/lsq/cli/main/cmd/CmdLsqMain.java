@@ -6,7 +6,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 
-@Command(name="main", description = "LSQ Subcommands", subcommands = {
+@Command(name="lsq", description = "LSQ Subcommands", subcommands = {
         CmdLsqAnalyze.class,
         CmdLsqRdfize.class,
         CmdLsqBenchmarkMain.class,

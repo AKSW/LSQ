@@ -98,15 +98,12 @@ public class MainCliLsq {
 
 
     public static void main(String[] args) {
-        int exitCode;
-        try {
-            exitCode = new CommandLine(new CmdLsqMain()).execute(args);
-        } catch(Exception e) {
-            ExceptionUtils.rethrowIfNotBrokenPipe(e);
-
-            // If not rethrown we terminate normally
-            exitCode = 0;
-        }
+        int exitCode = new CommandLine(new CmdLsqMain())
+            .setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
+                ExceptionUtils.rethrowIfNotBrokenPipe(ex);
+                return 0;
+            })
+            .execute(args);
 
         System.exit(exitCode);
     }
@@ -120,7 +117,8 @@ public class MainCliLsq {
         String tmpHostHashSalt = rdfizeCmd.hostSalt;
         if(tmpHostHashSalt == null) {
             tmpHostHashSalt = UUID.randomUUID().toString();
-            logger.info("Auto generated host hash salt: " + tmpHostHashSalt);
+            // TODO Make host hashing a post processing step for the log rdfization
+            logger.info("Auto generated host hash salt (only used for non-rdf log input): " + tmpHostHashSalt);
         }
 
         String hostHashSalt = tmpHostHashSalt;
@@ -378,7 +376,7 @@ public class MainCliLsq {
         ExperimentConfig cfg = run.getConfig();
 
         String lsqBaseIri = Objects.requireNonNull(cfg.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
-        //LsqBenchmarkProcessor.createProcessor()
+        //LsqBenchmeclipse-javadoc:%E2%98%82=jena-sparql-api-conjure/src%5C/main%5C/java%3Corg.aksw.jena_sparql_apiarkProcessor.createProcessor()
 
         DataRefSparqlEndpoint dataRef = cfg.getDataRef();
         try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
@@ -599,3 +597,14 @@ public class MainCliLsq {
 //      throw new RuntimeException("Unsupported command: " + cmd);
 //  }
 //}
+
+
+//QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://dbpedia.org/sparql")
+//.config()
+//  .withPagination(10000)
+//.end()
+//.create();
+//try(QueryExecution qe = qef.createQueryExecution("SELECT * { ?s ?p ?o } LIMIT 10001")) {
+//System.out.println("#items seen: " + ResultSetFormatter.consume(qe.execSelect()));
+//}
+//System.exit(0);

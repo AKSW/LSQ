@@ -37,6 +37,13 @@ public interface JoinVertexExec
     SpinBgpExec getBgpExec();
     JoinVertexExec setBgpExec(SpinBgpExec exec);
 
+
+    @Iri(LSQ.Strs.hasSubBgpExec)
+    @Inverse
+    SpinBgpExec getSubBgpExec();
+    JoinVertexExec setSubBgpExec(SpinBgpExec exec);
+
+
     @StringId
     default String getStringId(HashIdCxt cxt) {
 
@@ -44,8 +51,8 @@ public interface JoinVertexExec
 //        BgpNode bgpNode = getBgpNode();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
-        SpinBgpExec exec = getBgpExec();
-        LocalExecution le = exec.getLocalExecution();
+        SpinBgpExec bgpExec = getBgpExec();
+        LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
         String result = "bgpNodeExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
         return result;

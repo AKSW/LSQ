@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.spinx.model;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
@@ -11,6 +12,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.BasicPattern;
 import org.topbraid.spin.model.Triple;
 
@@ -79,6 +81,25 @@ public interface SpinBgp
 //
 //        return null;
     }
+
+
+    default SpinBgpExec findBgpExec(RDFNode expRun) {
+//        Resource expRun = getBenchmarkRun();
+        Objects.requireNonNull(expRun, "benchmark run resource not set");
+
+        Set<SpinBgpExec> cands = getSpinBgpExecs();
+        SpinBgpExec result = null;
+        for(SpinBgpExec cand : cands) {
+            //if(Objects.equals(cand.getBgp(), bgp) && Objects.equals(cand.getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
+            if(cand.getQueryExec().getLocalExecution().getBenchmarkRun().equals(expRun)) {
+                result = cand;
+                break;
+            }
+        }
+
+        return result;
+    }
+
 
     default BasicPattern toBasicPattern() {
         BasicPattern result = new BasicPattern();

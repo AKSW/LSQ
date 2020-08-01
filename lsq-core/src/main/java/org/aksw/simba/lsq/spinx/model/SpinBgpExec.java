@@ -26,10 +26,10 @@ import org.apache.jena.rdf.model.Resource;
 public interface SpinBgpExec
     extends ElementExec
 {
-    @Iri(LSQ.Strs.hasBgpExec)
-    @Inverse
-    LocalExecution getLocalExecution();
-    SpinBgpExec setLocalExecution(LocalExecution le);
+//    @Iri(LSQ.Strs.hasBgpExec)
+//    @Inverse
+//    LocalExecution getLocalExecution();
+//    SpinBgpExec setLocalExecution(LocalExecution le);
 
     // Link from the BGP to this exec
     @Iri(LSQ.Strs.hasExec)
@@ -46,7 +46,7 @@ public interface SpinBgpExec
         SpinBgp bgp = getBgp();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
-        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getString(getLocalExecution().getBenchmarkRun());
+        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getString(getQueryExec().getLocalExecution().getBenchmarkRun());
         return result;
     }
 
@@ -66,7 +66,7 @@ public interface SpinBgpExec
 
 
     default TpInBgpExec findTpInBgpExec(Resource tpInBgp) {
-        Resource expRun = getLocalExecution().getBenchmarkRun();
+        Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();
         Objects.requireNonNull(expRun);
 
         Set<TpInBgpExec> cands = getTpInBgpExecs();
@@ -83,7 +83,7 @@ public interface SpinBgpExec
 
 
     default JoinVertexExec findBgpNodeExec(Resource bpgNode) {
-        Resource expRun = getLocalExecution().getBenchmarkRun();
+        Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();
         Objects.requireNonNull(expRun);
 
         Set<JoinVertexExec> cands = getBgpNodeExecs();

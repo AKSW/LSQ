@@ -55,6 +55,7 @@ public class LSQ {
         public static final String hasTpExec = ns + "hasTpExec";
         public static final String hasJoinVarExec = ns + "hasJoinVarExec";
         public static final String hasTpInBgpExec = ns + "hasTpInBgpExec";
+        public static final String hasSubBgpExec = ns + "hasSubBgpExec";
 
         public static final String usesFeature = "usesFeature";
         public static final String feature = "feature";

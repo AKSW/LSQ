@@ -47,6 +47,7 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
+import org.aksw.simba.lsq.spinx.model.TpInSubBgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
@@ -342,13 +343,7 @@ public class LsqBenchmarkProcessor {
 
             // TODO Skolemize these executions!
 
-            try {
-                rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
-            } catch(Exception e) {
-                String errorMsg = e.toString();
-                qe.setProcessingError(errorMsg);
-                logger.warn("Failed to benchmark " + s);
-            }
+            rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
 
             item.getLocalExecutions(LocalExecution.class).add(le);
             le.setBenchmarkRun(expRun);
@@ -428,118 +423,6 @@ public class LsqBenchmarkProcessor {
             }
 
 
-            /*
-             * BgpExecs, TpInBgpExecs and TpExec
-             *
-             *
-             */
-            // Iterate the query's. bgps. For each bgp:
-            // 1.) get-or-create the execution
-            // 2.) then descend into the tp-in-bgp and the tps and update their stats
-            for(SpinBgp xbgp : spinRoot.getBgps()) {
-                // Get the bgp's execution in this experiment
-                SpinBgpExec bgpExec = expRoot.findBgpExec(xbgp);
-
-                if(bgpExec == null) {
-                    bgpExec = model.createResource().as(SpinBgpExec.class);
-                    LsqQuery extensionQuery = xbgp.getExtensionQuery();
-                    Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
-                    LocalExecution le = leMap.get(expRun);
-                    QueryExec qe = le.getQueryExec();
-
-                    // Link the bgp with the corresponding query execution
-                    bgpExec
-                        .setLocalExecution(expRoot) /* inverse link */
-                        .setBgp(xbgp) /* inverse link */
-//                                .setBenchmarkRun(expRun)
-                        .setQueryExec(qe)
-                        ;
-
-//                            expRoot.getBgpExecs().add(bgpExec);
-                }
-            }
-
-            // Now that all BgpExecs are set up
-            // set up tpExecs
-            for(SpinBgpExec bgpExec : expRoot.getBgpExecs()) {
-                for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
-                    LsqTriplePattern tp = tpInBgp.getTriplePattern();
-                    //TpExec tpExec = tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
-                    //TpExec tpExec = tp.getExtensionQuery()
-                    TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
-
-                    if(tpInBgpExec == null) {
-                        tpInBgpExec = model.createResource().as(TpInBgpExec.class);
-                        // LsqQuery extensionQuery = tp.getExtensionQuery();
-
-                        // Link the bgp with the corresponding query execution
-                        tpInBgpExec
-                            .setBgpExec(bgpExec);
-                    }
-
-                    TpExec tpExec = tpInBgpExec.getTpExec();
-                    if(tpExec == null) {
-                        tpExec = model.createResource().as(TpExec.class);
-                        LsqQuery extensionQuery = tp.getExtensionQuery();
-//                                RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-                        Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
-                        Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
-                        LocalExecution le = leMap.get(expRun);
-                        QueryExec qe = le.getQueryExec();
-
-                        tpExec
-                            .setTpInBgpExec(tpInBgpExec) /* inverse link */
-                            .setTp(tp)
-                            .setQueryExec(qe)
-                            ;
-                    }
-
-                    Long tpResultSetSize = tpExec.getQueryExec().getResultSetSize();
-                    BigDecimal tpSel = safeDivide(tpResultSetSize, datasetSize);
-                    tpExec
-                        .setSelectivity(tpSel);
-
-                    Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
-                    Long tpSize = tpExec.getQueryExec().getResultSetSize();
-                    BigDecimal value = safeDivide(bgpSize, tpSize);
-                    tpInBgpExec.setSelectivity(value);
-                    // BigDecimal value = new BigDecimal(rsSize).divide(new BigDecimal(datasetSize));
-                    // tpInBgpExec.setSelectivity(value);
-                }
-
-
-                for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
-                    JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
-                    if(bgpNodeExec == null) {
-
-                        LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
-                        LocalExecution qle = extensionQuery.getLocalExecutionMap().get(expRun);
-
-                        if(qle != null) {
-
-                            bgpNodeExec = model.createResource().as(JoinVertexExec.class);
-                            QueryExec queryExec = qle.getQueryExec();
-                            // LsqQuery extensionQuery = tp.getExtensionQuery();
-
-                            // Link the bgp with the corresponding query execution
-                            bgpNodeExec
-                                .setBgpNode(bgpNode)
-                                .setBgpExec(bgpExec) /* inverse link */
-                                .setQueryExec(queryExec)
-                                ;
-                        }
-                    }
-
-                    if(bgpNodeExec != null) {
-                        Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
-                        Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
-                        BigDecimal value = safeDivide(bgpNodeSize, bgpSize);
-
-                        bgpNodeExec.setBgpRestrictedSelectivitiy(value);
-                    }
-                }
-
-            }
 
 
             HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
@@ -566,6 +449,10 @@ public class LsqBenchmarkProcessor {
             RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
         }
     }
+
+
+
+
 
 
     public static void renameResources(String lsqBaseIri, Map<RDFNode, String> renames) {
@@ -670,7 +557,7 @@ public class LsqBenchmarkProcessor {
        public static QueryExec rdfizeQueryExecutionBenchmark(SparqlQueryConnection conn, String queryStr, QueryExec result) {
 
            Stopwatch sw = Stopwatch.createStarted();
-           System.err.println("Benchmarking " + queryStr);
+           logger.info("Benchmarking " + queryStr);
            try(QueryExecution qe = conn.query(queryStr)) {
                long resultSetSize = QueryExecutionUtils.consume(qe);
                BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
@@ -684,6 +571,11 @@ public class LsqBenchmarkProcessor {
                    .setRuntimeInMs(durationInMillis)
                ;
 
+               logger.info("Benchmark result: " + resultSetSize + " results in " + durationInMillis + " ms");
+           } catch(Exception e) {
+               String errorMsg = e.toString();
+               result.setProcessingError(errorMsg);
+               logger.warn("Benchmark failure: ", e);
            }
 
            return result;
@@ -702,13 +594,6 @@ public class LsqBenchmarkProcessor {
             .concatMap(QueryFlowOps.createMapperQuads(template)::apply)
             .compose(DatasetGraphOpsRx.groupConsecutiveQuadsRaw(Quad::getGraph, DatasetGraphFactory::create))
             .map(e -> new SimpleEntry<>(e.getKey().getURI(), DatasetFactory.wrap(e.getValue())));
-    }
-
-    public static BigDecimal safeDivide(Long counter, Long denominator) {
-        BigDecimal result = denominator.longValue() == 0
-                ? new BigDecimal(0)
-                : new BigDecimal(counter).divide(new BigDecimal(denominator), 10, RoundingMode.CEILING);
-        return result;
     }
 
     /**
