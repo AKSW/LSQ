@@ -1,11 +1,15 @@
 package org.aksw.simba.lsq.core;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -32,13 +36,17 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.vocabulary.SP;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.io.BaseEncoding;
 
@@ -398,66 +406,308 @@ public class LsqEnrichments {
         }
     }
 
-    public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
-           String queryStr = queryRes.getText();
-           // TODO Avoid repeated parse
-           Query query = QueryFactory.create(queryStr);
-    //       LsqProcessor.rdfizeQueryStructuralFeatures(lsqQuery, x -> NestedResource.from(lsqQuery).nest(x), query);
+    public static <T, R> Optional<R> median(
+            List<T> sortedItems,
+            Function<? super T, ? extends R> caster,
+            BiFunction<? super T, ? super T, ? extends R> averager) {
+        R result;
 
-           Function<String, NestedResource> queryAspectFn = x -> NestedResource.from(queryRes).nest(x);
-           //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-           LsqStructuralFeatures featureRes = queryAspectFn.apply("-sf").get().as(LsqStructuralFeatures.class); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
-
-           queryRes.setStructuralFeatures(featureRes);
-           //queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
-
-
-           // Add used features
-           enrichResourceWithQueryFeatures(featureRes, query);
-
-           if(query.isSelectType()) {
-               featureRes.addLiteral(LSQ.projectVars, query.getProjectVars().size());
-           }
-
-    //       Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-    //       features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
-
-           // TODO These methods have to be ported
-           //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-           //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
-
-    //       SpinUtils.enrichWithHasTriplePattern(featureRes, spinRes);
-    //       SpinUtils.enrichWithTriplePatternText(spinRes);
-           //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
-
-           //
-    //       QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
-
-           QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
-
-           Model spinModel = queryRes.getModel();
-
-           // TODO Move to a util function
-           Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
-                   .mapWith(stmt -> stmt.getObject().asResource()).toSet();
-
-           for(Resource serviceUri : serviceUris) {
-               featureRes.addProperty(LSQ.usesService, serviceUri);
-           }
-
-
-
-
-           //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
-
-
-    //   } catch (Exception ex) {
-    //       String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
-    //       queryRes.addLiteral(LSQ.processingError, msg);
-    //       logger.warn("Failed to process query " + query, ex);
-    //   }
-    //
-            return queryRes;
+        int size = sortedItems.size();
+        if(size == 0) {
+            result = null;
+        } else {
+            boolean isEvenSized = size % 2 == 0;
+            if(isEvenSized) {
+                int idx = size >> 1;
+                T lo = sortedItems.get(idx - 1);
+                T hi = sortedItems.get(idx);
+                result = averager.apply(lo, hi);
+            } else {
+                int idx = (size - 1) >> 1;
+                T item = sortedItems.get(idx);
+                result = caster.apply(item);
+            }
         }
+
+        return Optional.ofNullable(result);
+    }
+
+//    public static Optional<Number> min(Iterable<? extends Number> numbers) {
+//        Number result = null;
+//        for(Number number : numbers) {
+//            result = result == null
+//                    ? number
+//                    : number.doubleValue() < result.doubleValue()
+//                        ? number
+//                        : result;
+//        }
+//
+//        return Optional.ofNullable(result);
+//    }
+//
+//    public static Optional<Number> max(Iterable<? extends Number> numbers) {
+//        Number result = null;
+//        for(Number number : numbers) {
+//            result = result == null
+//                    ? number
+//                    : number.doubleValue() > result.doubleValue()
+//                        ? number
+//                        : result;
+//        }
+//
+//        return Optional.ofNullable(result);
+//    }
+
+
+    public static int intSum(Iterable<? extends Number> numbers) {
+        int result = 0;
+        for(Number number : numbers) {
+            result += (number == null ? 0 : number.intValue());
+        }
+
+        return result;
+    }
+
+
+//    public static BigDecimal mean(Iterable<? extends Number> numbers) {
+//        BigDecimal result = null;
+//        int n = 0;
+//        for(Number number : numbers) {
+//        	++n;
+//        	result = result == null
+//        			? number
+//        			: result.add
+//        }
+//
+//        return result;
+//    }
+
+
+    public static BigDecimal fromNumber(Number n) {
+        BigDecimal result;
+        if(n == null) {
+            result = null;
+        } else if(n instanceof Byte) {
+            byte val = n.byteValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Short) {
+            short val = n.shortValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Integer) {
+            int val = n.intValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Long) {
+            long val = n.longValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Float) {
+            float val = n.floatValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Double) {
+            double val = n.doubleValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof BigDecimal) {
+            result = (BigDecimal)n;
+        }
+        else {
+            throw new IllegalArgumentException("Unknow number type: " + n.getClass());
+        }
+
+        return result;
+    }
+
+
+    public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
+       String queryStr = queryRes.getText();
+       // TODO Avoid repeated parse
+       Query query = QueryFactory.create(queryStr);
+//       LsqProcessor.rdfizeQueryStructuralFeatures(lsqQuery, x -> NestedResource.from(lsqQuery).nest(x), query);
+
+       Function<String, NestedResource> queryAspectFn = x -> NestedResource.from(queryRes).nest(x);
+       //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
+       LsqStructuralFeatures featureRes = queryAspectFn.apply("-sf").get().as(LsqStructuralFeatures.class); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
+
+       queryRes.setStructuralFeatures(featureRes);
+       //queryRes.addProperty(LSQ.hasStructuralFeatures, featureRes);
+
+
+       // Add used features
+       enrichResourceWithQueryFeatures(featureRes, query);
+
+       if(query.isSelectType()) {
+           featureRes.setProjectVarCount(query.getProjectVars().size());
+       }
+
+       SpinQueryEx spinEx = queryRes.getSpinQuery().as(SpinQueryEx.class);
+       Set<SpinBgp> bgps = spinEx.getBgps();
+
+       int bgpCount = bgps.size();
+       //int tpCount = 0;
+
+       List<Integer> tpInBgpTotalCounts = new ArrayList<>(bgpCount);
+
+       featureRes.setBgpCount(bgpCount);
+
+       for(SpinBgp bgp : spinEx.getBgps()) {
+           Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
+           int tpCount = tpInBgps.size();
+
+           tpInBgpTotalCounts.add(tpCount);
+       }
+
+       List<Integer> sortedTpCounts = tpInBgpTotalCounts.stream().sorted().collect(Collectors.toList());
+       int tpCount = intSum(tpInBgpTotalCounts);
+       int tpInBgpCountMin = Iterables.getFirst(sortedTpCounts, 0);
+       int tpInBgpCountMax = Iterables.getLast(sortedTpCounts, 0);
+       BigDecimal tpInBgpCountMean = LsqExec.safeDivide(tpCount, bgpCount);
+       BigDecimal tpInBgpCountMedian = median(sortedTpCounts, x -> new BigDecimal(x), LsqExec::safeDivide).orElse(new BigDecimal(0));
+
+       featureRes
+               .setTpInBgpCountMin(tpInBgpCountMin)
+               .setTpInBgpCountMax(tpInBgpCountMax)
+               .setTpInBgpCountMean(tpInBgpCountMean)
+               .setTpInBgpCountMedian(tpInBgpCountMedian);
+
+
+       /*
+        * join vertex computation
+        */
+       for(SpinBgp bgp : spinEx.getBgps()) {
+           for(SpinBgpNode bgpNode : bgp.getBgpNodes()) {
+
+           }
+       }
+
+
+//       Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
+//       features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
+
+       // TODO These methods have to be ported
+       //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
+       //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
+
+//       SpinUtils.enrichWithHasTriplePattern(featureRes, spinRes);
+//       SpinUtils.enrichWithTriplePatternText(spinRes);
+       //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
+
+       //
+//       QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
+
+       QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
+
+       Model spinModel = queryRes.getModel();
+
+       // TODO Move to a util function
+       Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
+               .mapWith(stmt -> stmt.getObject().asResource()).toSet();
+
+       for(Resource serviceUri : serviceUris) {
+           featureRes.addProperty(LSQ.usesService, serviceUri);
+       }
+
+
+
+
+       //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
+
+
+//   } catch (Exception ex) {
+//       String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
+//       queryRes.addLiteral(LSQ.processingError, msg);
+//       logger.warn("Failed to process query " + query, ex);
+//   }
+//
+        return queryRes;
+    }
+
+
+//    public static List<Integer> setUpJoinVertices(
+//            ) {
+//
+////        BasicPattern bgp = bgpRes.toBasicPattern();
+//        // int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
+//
+//        // Create the hypergraph model over all bgps
+//        // (Could be changed if individual stats are desired)
+//        //Model hyperGraph = ModelFactory.createDefaultModel();
+//        Model hyperGraph = bgpRes.getModel();
+//
+//        // for(BasicPattern bgp : bgps) {
+//        enrichModelWithHyperGraphData(bgpRes);
+//
+//        // System.out.println("HYPER");
+//        // hyperGraph.write(System.out, "TURTLE");
+//
+//        Set<Resource> rawJoinVertices = bgpRes.getBgpNodes().stream()
+//            .filter(x -> x.hasProperty(RDF.type, LSQ.Vertex))
+//            .collect(Collectors.toSet());
+//
+////        Set<Resource> rawJoinVertices = hyperGraph.listResourcesWithProperty(RDF.type, LSQ.Vertex).toSet();
+//
+//        Map<Resource, Integer> joinVertexToDegree = rawJoinVertices.stream()
+//                .collect(Collectors.toMap(r -> r, r -> propertyDegree(r, LSQ.out, LSQ.in)));
+//
+//        // .filter(x -> x != 1) // Remove vertices that do not join
+//        joinVertexToDegree = joinVertexToDegree.entrySet().stream()
+//                .filter(e -> e.getValue() != 1)
+//                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+//
+//        Set<Resource> joinVertices = joinVertexToDegree.keySet();
+//
+//        List<Integer> degrees = joinVertexToDegree.values().stream().sorted().collect(Collectors.toList());
+//
+//        // list.add(value);
+//        // stats = stats + " lsqv:triplePatterns "+totalTriplePatterns +" ; ";
+//        // stats = stats + " lsqv:joinVertices "+joinVertices.size() +" ; ";
+//        // stats = stats + " lsqv:meanJoinVerticesDegree 0 . ";
+//
+//        // stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+"
+//        // lsqv:mentionsObject ";
+//        // stats = stats + "\nlsqr:sf-q"+(LogRDFizer.queryHash)+"
+//        // lsqv:mentionsSubject ";
+//        // stats = stats+ "\nlsqr:sf-q"+(LogRDFizer.queryHash)+"
+//        // lsqv:mentionsPredicate ";
+//        // stats = stats + getMentionsTuple(predicates); // subjects and objects
+//        // ModelUtils.
+//        // ResourceUtils.
+//        NestedResource joinVertexNres = new NestedResource(bgpRes);
+//
+//        for (Resource v : joinVertices) {
+//            // TODO Allocate a resource for the join vertex
+//            // Resource queryRes = null;
+//            Statement t = v.getProperty(RDFS.label);
+//            RDFNode o = t.getObject();
+//            String name = "" + toPrettyString(o);
+//
+//            // System.out.println(name);
+////            Resource joinVertexRes = joinVertexNres.nest("-jv-" + name).get();// lsqr:sf-q"+(LogRDFizer.queryHash)+"-"+joinVertex
+//            Resource joinVertexRes = v;
+//
+////            bgpRes.addProperty(LSQ.joinVertex, joinVertexRes);
+//
+//            Resource joinVertexType = getJoinVertexType(v);
+//            int degree = joinVertexToDegree.get(v);
+//
+//            //rdfNodeToNode = v.getProperty(LSQ.proxyFor).getObject();
+//
+////            Node proxyNode = v.getProperty(LSQ.proxyFor).getObject().asNode();
+////            RDFNode proxyRdfNode = nodeToModel.get(proxyNode);
+//
+////            if(proxyRdfNode == null) {
+////                throw new NullPointerException("Should not happen");
+////            }
+//
+//            joinVertexRes
+//                .addLiteral(LSQ.joinVertexDegree, degree)
+//                .addProperty(LSQ.joinVertexType, joinVertexType)
+////                .addProperty(LSQ.proxyFor, proxyRdfNode)
+//            // .addProperty(LSQ.proxyFor,
+//            // v)//v.getPropertyResourceValue(LSQ.proxyFor))
+//            ;
+//
+//        }
+//
+//        return degrees;
+//    }
+
 
 }

@@ -321,4 +321,12 @@ public class LsqExec {
         return result;
     }
 
+    public static BigDecimal safeDivide(Integer counter, Integer denominator) {
+        BigDecimal result = counter == null || denominator == null ? null :
+            denominator.longValue() == 0
+                ? new BigDecimal(0)
+                : new BigDecimal(counter).divide(new BigDecimal(denominator), 10, RoundingMode.CEILING);
+        return result;
+    }
+
 }

@@ -85,16 +85,16 @@ public class LSQ {
         public static final String joinVertexType = ns + "joinVertexType";
         public static final String joinVertexDegree = ns + "joinVertexDegree";
 
-        public static final String bgpCountTotal = ns + "bgpCountTotal";
-        public static final String tpCountTotal = ns + "tpCountTotal";
+        public static final String bgpCount = ns + "bgpCount";
+        public static final String tpCount = ns + "tpCount";
 
-        public static final String tpInBgpCountMin = ns + "tpInBgpMinCount";
-        public static final String tpInBgpCountMax = ns + "tpInBgpMaxCount";
-        public static final String tpInBgpCountMean = ns + "tpInBgpMeanCount";
-        public static final String tpInBgpCountMedian = ns + "tpInBgpMedianCount";
+        public static final String tpInBgpCountMin = ns + "tpInBgpCountMin";
+        public static final String tpInBgpCountMax = ns + "tpInBgpCountMax";
+        public static final String tpInBgpCountMean = ns + "tpInBgpCountMean";
+        public static final String tpInBgpCountMedian = ns + "tpInBgpCountMedian";
 
-        public static final String joinVertexCountTotal = ns + "joinVertexCount";
-        public static final String projectVarCount = ns + "numProjectVars";
+        public static final String joinVertexCountTotal = ns + "joinVertexCountTotal";
+        public static final String projectVarCount = ns + "projectVarCount";
 
         //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
         public static final String joinVertexDegreeMean = ns + "joinVertexDegreeMean";
@@ -166,8 +166,8 @@ public class LSQ {
     public static final Property joinVertexType = ResourceFactory.createProperty(Strs.joinVertexType);
     public static final Property joinVertexDegree = ResourceFactory.createProperty(Strs.joinVertexDegree);
 
-    public static final Property bgps = ResourceFactory.createProperty(Strs.bgpCountTotal);
-    public static final Property tps = ResourceFactory.createProperty(Strs.tpCountTotal);
+    public static final Property bgps = ResourceFactory.createProperty(Strs.bgpCount);
+    public static final Property tps = ResourceFactory.createProperty(Strs.tpCount);
     public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMin);
     public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMax);
     public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertexCountTotal);

@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.model;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
@@ -53,30 +54,30 @@ public interface LsqStructuralFeatures
 //    targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
 //    .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
 
-    @Iri(LSQ.Strs.bgpCountTotal)
+    @Iri(LSQ.Strs.bgpCount)
     Integer getBgpCount();
     LsqStructuralFeatures setBgpCount(Integer bgpCount);
 
-    @Iri(LSQ.Strs.tpCountTotal)
+    @Iri(LSQ.Strs.tpCount)
     Integer getTpsCount();
     LsqStructuralFeatures setTpCount(Integer tpCount);
 
 
     @Iri(LSQ.Strs.tpInBgpCountMin)
-    Integer getTpInBgpMinCount();
-    LsqStructuralFeatures setTpInBgpMinCount(Integer tpInBgpMinCount);
+    Integer getTpInBgpCountMin();
+    LsqStructuralFeatures setTpInBgpCountMin(Integer tpInBgpCountMin);
 
     @Iri(LSQ.Strs.tpInBgpCountMax)
-    Integer getTpInBgpMaxCount();
-    LsqStructuralFeatures setTpInBgpMaxCount(Integer tpInBgpMaxCount);
+    Integer getTpInBgpCountMax();
+    LsqStructuralFeatures setTpInBgpCountMax(Integer tpInBgpCountMax);
 
     @Iri(LSQ.Strs.tpInBgpCountMean)
-    Integer getTpInBgpMeanCount();
-    LsqStructuralFeatures setTpInBgpMeanCount(Integer tpInBgpAvgCount);
+    BigDecimal getTpInBgpCountMean();
+    LsqStructuralFeatures setTpInBgpCountMean(BigDecimal tpInBgpCountMean);
 
     @Iri(LSQ.Strs.tpInBgpCountMedian)
-    Integer getTpInBgpMedianCount();
-    LsqStructuralFeatures setTpInBgpMedianCount(Integer tpInBgpMedianCount);
+    BigDecimal getTpInBgpCountMedian();
+    LsqStructuralFeatures setTpInBgpCountMedian(BigDecimal tpInBgpCountMedian);
 
 
     /*
@@ -88,12 +89,12 @@ public interface LsqStructuralFeatures
     LsqStructuralFeatures setJoinVertexCount(Integer bgpCount);
 
     @Iri(LSQ.Strs.joinVertexDegreeMean)
-    Integer getJoinVertexDegreeMean();
-    LsqStructuralFeatures setJoinVertexDegreeMean(Integer bgpCount);
+    BigDecimal getJoinVertexDegreeMean();
+    LsqStructuralFeatures setJoinVertexDegreeMean(BigDecimal bgpCount);
 
     @Iri(LSQ.Strs.joinVertexDegreeMedian)
-    Integer getJoinVertexDegreeMedian();
-    LsqStructuralFeatures setJoinVertexDegreeMedian(Integer bgpCount);
+    BigDecimal getJoinVertexDegreeMedian();
+    LsqStructuralFeatures setJoinVertexDegreeMedian(BigDecimal bgpCount);
 
 //    @Iri(LSQ.Strs.joinVertexDegreeMin)
 //    Integer getJoinVertexDegreeMin();

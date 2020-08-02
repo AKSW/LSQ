@@ -15,7 +15,7 @@ public interface SpinQueryEx
     @Iri(LSQ.Strs.hasBGP)
     Set<SpinBgp> getBgps();
 
-    @Iri(LSQ.Strs.bgpCountTotal)
+    @Iri(LSQ.Strs.bgpCount)
     Integer getTotalBgpCount();
     SpinQueryEx setTotalBgpCount(Integer cnt);
 
@@ -27,7 +27,7 @@ public interface SpinQueryEx
     Integer getMaxBgpTriples();
     SpinQueryEx setMaxBgpTriples(Integer cnt);
 
-    @Iri(LSQ.Strs.tpCountTotal)
+    @Iri(LSQ.Strs.tpCount)
     Integer getTriplePatternCount();
     SpinQueryEx setTriplePatternCount(Integer cnt);
 }
