@@ -25,13 +25,13 @@ public class TestLsqResourceViews {
 			.setSequenceId(0l)
 		);
 		LsqStructuralFeatures summary = m.createResource().as(LsqStructuralFeatures.class);
-		summary.setNumProjectVars(2);
+		summary.setProjectVarCount(2);
 		
 		q.setStructuralFeatures(summary);
 		
 		
 		Assert.assertEquals(q.getText(), queryStr);
-		Assert.assertEquals((long)q.getStructuralFeatures().getNumProjectVars(), 2l);
+		Assert.assertEquals((long)q.getStructuralFeatures().getProjectVarCount(), 2l);
 		Assert.assertEquals(q.getRemoteExecutions(RemoteExecution.class).iterator().next().getHost(), "host");
 	}
 }

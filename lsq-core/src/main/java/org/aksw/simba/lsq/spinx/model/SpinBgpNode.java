@@ -27,7 +27,7 @@ import com.google.common.hash.Hashing;
 public interface SpinBgpNode
     extends Resource, Labeled
 {
-    @Iri(LSQ.Strs.hasBGPNode)
+    @Iri(LSQ.Strs.hasBgpNode)
     @Inverse
     @HashId
     SpinBgp getBgp();

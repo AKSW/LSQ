@@ -74,28 +74,33 @@ public class LSQ {
 
 
 
-        public static final String Star = ns + "Star";
-        public static final String Sink = ns + "Sink";
-        public static final String Path = ns + "Path";
-        public static final String Hybrid = ns + "Hybrid";
+        // Join vertex type (used as an attribute, hence lower camel case spelling)
+        public static final String star = ns + "star";
+        public static final String sink = ns + "sink";
+        public static final String path = ns + "path";
+        public static final String hybrid = ns + "hybrid";
 
 
         public static final String joinVertex = ns + "joinVertex";
         public static final String joinVertexType = ns + "joinVertexType";
         public static final String joinVertexDegree = ns + "joinVertexDegree";
 
-        public static final String bgps = ns + "bgps";
-        public static final String tps = ns + "tps";
-        public static final String minBgpTriples = ns + "minBGPTriples";
-        public static final String maxBgpTriples = ns + "maxBGPTriples";
-        public static final String joinVertices = ns + "joinVertices";
-        public static final String projectVars = ns + "projectVars";
+        public static final String bgpCountTotal = ns + "bgpCountTotal";
+        public static final String tpCountTotal = ns + "tpCountTotal";
+
+        public static final String tpInBgpCountMin = ns + "tpInBgpMinCount";
+        public static final String tpInBgpCountMax = ns + "tpInBgpMaxCount";
+        public static final String tpInBgpCountMean = ns + "tpInBgpMeanCount";
+        public static final String tpInBgpCountMedian = ns + "tpInBgpMedianCount";
+
+        public static final String joinVertexCountTotal = ns + "joinVertexCount";
+        public static final String projectVarCount = ns + "numProjectVars";
 
         //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
-        public static final String meanJoinVertexDegree = ns + "meanJoinVertexDegree";
-        public static final String medianJoinVertexsDegree = ns + "medianJoinVertexDegree";
+        public static final String joinVertexDegreeMean = ns + "joinVertexDegreeMean";
+        public static final String joinVertexDegreeMedian = ns + "joinVertexDegreeMedian";
 
-        public static final String hasBGPNode = ns + "hasBGPNode";
+        public static final String hasBgpNode = ns + "hasBgpNode";
 
         public static final String mentionsSubject = ns + "mentionsSubject";
         public static final String mentionsPredicate = ns + "mentionsPredicate";
@@ -126,6 +131,8 @@ public class LSQ {
         // Selectivity of a triple pattern in regard to the BGP in which it occurrs
         public static final String tpSelBGPRestricted = ns +"tpSelBGPRestricted";
 
+        public static final String tpToBgpRatio = ns +"tpToBgpRatio";
+
         // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
         public static final String tpSelJoinVarRestricted = ns + "tpSelJoinVarRestricted";
 
@@ -149,22 +156,22 @@ public class LSQ {
 
 
 
-    public static final Resource Star = ResourceFactory.createResource(Strs.Star);
-    public static final Resource Sink = ResourceFactory.createResource(Strs.Sink);
-    public static final Resource Path = ResourceFactory.createResource(Strs.Path);
-    public static final Resource Hybrid = ResourceFactory.createResource(Strs.Hybrid);
+    public static final Resource star = ResourceFactory.createResource(Strs.star);
+    public static final Resource sink = ResourceFactory.createResource(Strs.sink);
+    public static final Resource path = ResourceFactory.createResource(Strs.path);
+    public static final Resource hybrid = ResourceFactory.createResource(Strs.hybrid);
 
 
     public static final Property joinVertex = ResourceFactory.createProperty(Strs.joinVertex);
     public static final Property joinVertexType = ResourceFactory.createProperty(Strs.joinVertexType);
     public static final Property joinVertexDegree = ResourceFactory.createProperty(Strs.joinVertexDegree);
 
-    public static final Property bgps = ResourceFactory.createProperty(Strs.bgps);
-    public static final Property tps = ResourceFactory.createProperty(Strs.tps);
-    public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.minBgpTriples);
-    public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.maxBgpTriples);
-    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertices);
-    public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVars);
+    public static final Property bgps = ResourceFactory.createProperty(Strs.bgpCountTotal);
+    public static final Property tps = ResourceFactory.createProperty(Strs.tpCountTotal);
+    public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMin);
+    public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMax);
+    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertexCountTotal);
+    public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVarCount);
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
@@ -203,7 +210,7 @@ public class LSQ {
     public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
     public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBGP);
 
-    public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBGPNode);
+    public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBgpNode);
 
     //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
@@ -279,7 +286,7 @@ public class LSQ {
     public static final Property user = property("user");
     public static final Property request = property("request");
     public static final Property query = property("query");
-    public static final Property path = property("uri");
+    public static final Property requestPath = property("uri");
     public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
     public static final Property headers = property("headers");

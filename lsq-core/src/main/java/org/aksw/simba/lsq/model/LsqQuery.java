@@ -65,9 +65,10 @@ public interface LsqQuery
     LsqStructuralFeatures getStructuralFeatures();
     LsqQuery setStructuralFeatures(Resource r);
 
+//    @Iri(LSQ.Strs.hasLocalExec)
+//    <T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
     @Iri(LSQ.Strs.hasLocalExec)
-    <T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
-
+    Set<LocalExecution> getLocalExecutions();
 
     // Set<LocalExecution> getLocalExecutions();
 
@@ -82,7 +83,7 @@ public interface LsqQuery
      * @return
      */
     default Map<Resource, LocalExecution> getLocalExecutionMap() {
-        Set<LocalExecution> res = getLocalExecutions(LocalExecution.class);
+        Set<LocalExecution> res = getLocalExecutions(); //LocalExecution.class);
         Map<Resource, LocalExecution> result = res.stream()
                 .collect(Collectors.toMap(r -> r.getBenchmarkRun(), r -> r));
         return result;

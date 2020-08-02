@@ -6,14 +6,14 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
-public interface QualifiedFeatureUsage
+public interface QualifiedFeature
     extends Resource
 {
     @Iri(LSQ.Strs.feature)
     String getFeature();
-    QualifiedFeatureUsage setFeature(String host);
+    QualifiedFeature setFeature(String host);
 
     @Iri(LSQ.Strs.count)
     Integer getCount();
-    QualifiedFeatureUsage setCount(Integer count);
+    QualifiedFeature setCount(Integer count);
 }

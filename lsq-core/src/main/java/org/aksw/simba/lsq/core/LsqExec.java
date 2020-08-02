@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.Map;
 import java.util.Objects;
 
+import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.QueryExec;
@@ -17,7 +18,6 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
-import org.aksw.simba.lsq.spinx.model.TpInSubBgpExec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -39,15 +39,14 @@ import org.apache.jena.rdf.model.Resource;
  */
 public class LsqExec {
 
-    public static void createAllExecs(LsqQuery masterQuery, Resource expRun) {
+    public static void createAllExecs(LsqQuery masterQuery, ExperimentRun expRun) {
         Model model = masterQuery.getModel();
-        SpinQueryEx spinRoot = null;
+        SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
 
         Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
         LocalExecution expRoot = rleMap.get(expRun);
 
-        // TODO Read from config
-        Long datasetSize = null;
+        Long datasetSize = expRun.getConfig().getDatasetSize();
 
         /*
          * BgpExecs, TpInBgpExecs and TpExec
@@ -99,13 +98,24 @@ public class LsqExec {
                 SpinBgp subBgp = bgpNode.getSubBgp();
                 SpinBgpExec subBgpExec = getOrCreateSubBgpExec(expRun, subBgp);
 
+                QueryExec subBgpQueryExec = subBgpExec.getQueryExec();
+                Long subBgpSize = subBgpQueryExec.getResultSetSize();
+
+                // For each tpInSubBgp compute its
                 for(TpInBgp tpInSubBgp : subBgp.getTpInBgp()) {
                     TpInBgpExec tpInSubBgpExec = getOrCreateTpInBgpExec(subBgpExec, tpInSubBgp);
                     TpExec tpExec = tpInSubBgpExec.getTpExec();
 
-                    LsqTriplePattern tp = tpExec.getTp();
+                    // LsqTriplePattern tp = tpExec.getTp();
+                    QueryExec tpQueryExec = tpExec.getQueryExec();
+                    Long tpSize = tpQueryExec.getResultSetSize();
 
-                    // Compute the ratios and selectivites between each tpInSubBgp and the subBgp
+                    BigDecimal subBgpToTpRatio = safeDivide(subBgpSize, tpSize);
+
+                    tpInSubBgpExec.setTpToBgpRatio(subBgpToTpRatio);
+
+                    // Compute the ratios and selectivities between each tpInSubBgp and the subBgp
+
 
 //                    LsqQuery extensionQuery = tp.getExtensionQuery();
 ////                                RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);

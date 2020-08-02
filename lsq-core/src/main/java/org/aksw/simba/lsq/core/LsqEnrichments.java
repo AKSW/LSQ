@@ -47,6 +47,8 @@ import io.reactivex.rxjava3.core.Maybe;
 public class LsqEnrichments {
 
     public static void enrichSpinBgpWithTpInBgp(SpinBgp bgp) {
+        // FIXME Check that there is no tpInBgp with the same bgp and tp value
+
         Collection<TpInBgp> tpsInSubBgp = bgp.getTpInBgp();
         for(LsqTriplePattern tp : bgp.getTriplePatterns()) {
             TpInBgp tpInBgp = bgp.getModel().createResource().as(TpInBgp.class)
@@ -137,7 +139,7 @@ public class LsqEnrichments {
                             dest.add(tp);
                         }
 
-                        LsqEnrichments.enrichSpinBgpWithTpInBgp(bgp);
+                        LsqEnrichments.enrichSpinBgpWithTpInBgp(subBgp);
 
                         if(createQueryResources && jenaNode.isVariable()) {
                             if(createQueryResources) {

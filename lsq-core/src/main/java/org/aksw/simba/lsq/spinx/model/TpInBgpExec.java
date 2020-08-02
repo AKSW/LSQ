@@ -38,6 +38,10 @@ public interface TpInBgpExec
     BigDecimal getSelectivity();
     TpInBgpExec setSelectivity(BigDecimal value);
 
+    @Iri(LSQ.Strs.tpToBgpRatio)
+    BigDecimal getTpToBgpRatio();
+    TpInBgpExec setTpToBgpRatio(BigDecimal value);
+
     @Iri(LSQ.Strs.hasJoinVarExec)
     JoinVertexExec getJoinVarExec();
     TpInBgpExec setJoinVarExec(Resource joinVar);

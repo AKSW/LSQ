@@ -424,10 +424,11 @@ public class LsqProcessor
 
             // TODO Switch between local / remote execution
             if(query != null) {
-                queryRes
-                    .getLocalExecutions(Resource.class).add(queryExecRes);
+                throw new RuntimeException("old code and incompatible model - should not be used anymore");
+//                queryRes
+//                    .getLocalExecutions(Resource.class).add(queryExecRes);
 
-                rdfizeQueryExecution(queryRes, query, queryExecRes, delayer, benchmarkQef, dataQef, datasetSize);
+//                rdfizeQueryExecution(queryRes, query, queryExecRes, delayer, benchmarkQef, dataQef, datasetSize);
             }
         }
     }
@@ -672,10 +673,12 @@ public class LsqProcessor
 
             // TODO Switch between local / remote execution
             if(query != null) {
-                queryRes
-                    .getLocalExecutions(Resource.class).add(queryExecRes);
+                throw new RuntimeException("old code and incompatible model - should not be used anymore");
 
-                rdfizeQueryExecution(queryRes, query, queryExecRes, delayer, benchmarkQef, dataQef, datasetSize);
+//                queryRes
+//                    .getLocalExecutions(Resource.class).add(queryExecRes);
+//
+//                rdfizeQueryExecution(queryRes, query, queryExecRes, delayer, benchmarkQef, dataQef, datasetSize);
             }
         }
     }

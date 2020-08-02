@@ -22,6 +22,14 @@ import org.topbraid.spin.model.Triple;
 public interface SpinBgp
     extends LsqElement
 {
+    /**
+     * The ID of a bgp is defined by the <b>list</b> of triple patterns.
+     * Note, that the ID of a TpInBgp depends on the IDs of a bgp and the tp.
+     * So even a tp's are eventually made accessible via getTpInBgp,
+     * the direct link to triple patterns is necessary for ID assignment.
+     *
+     * @return
+     */
     @HashId
     @Iri(LSQ.Strs.hasTP)
     List<LsqTriplePattern> getTriplePatterns();
@@ -43,19 +51,19 @@ public interface SpinBgp
     @Iri(LSQ.Strs.hasExec)
     Set<SpinBgpExec> getSpinBgpExecs();
 
-    @Iri(LSQ.Strs.joinVertices)
+    @Iri(LSQ.Strs.joinVertexCountTotal)
     Integer getJoinVertexCount();
     SpinQueryEx setJoinVertexCount(Integer cnt);
 
-    @Iri(LSQ.Strs.meanJoinVertexDegree)
+    @Iri(LSQ.Strs.joinVertexDegreeMean)
     Integer getAvgJoinVertexDegree();
     SpinQueryEx setAvgJoinVertexDegree(Integer cnt);
 
-    @Iri(LSQ.Strs.medianJoinVertexsDegree)
+    @Iri(LSQ.Strs.joinVertexDegreeMedian)
     Integer getMedianJoinVertexDegree();
     SpinQueryEx setMedianJoinVertexDegree(Integer cnt);
 
-    @Iri(LSQ.Strs.hasBGPNode)
+    @Iri(LSQ.Strs.hasBgpNode)
     Set<SpinBgpNode> getBgpNodes();
 
     @Iri(LSQ.Strs.hasEdge)

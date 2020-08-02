@@ -354,13 +354,13 @@ public class QueryStatistics2 {
 
         Resource result;
         if (indeg == 0) { // && outdeg > 0
-            result = LSQ.Star;
+            result = LSQ.star;
         } else if (outdeg == 0) {
-            result = LSQ.Sink;
+            result = LSQ.sink;
         } else if (indeg == 1 && outdeg == 1) {
-            result = LSQ.Path;
+            result = LSQ.path;
         } else {
-            result = LSQ.Hybrid;
+            result = LSQ.hybrid;
         }
 
         return result;

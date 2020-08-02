@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
@@ -345,7 +346,7 @@ public class LsqBenchmarkProcessor {
 
             rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
 
-            item.getLocalExecutions(LocalExecution.class).add(le);
+            item.getLocalExecutions().add(le);
             le.setBenchmarkRun(expRun);
             le.setQueryExec(qe);
 
@@ -368,9 +369,9 @@ public class LsqBenchmarkProcessor {
         for(Set<LsqQuery> pack : batch) {
 
             logger.info("Processing pack of size: " + pack.size());
-            // The root query is always the first element of a pack
-            // packs are thus assumed to act like LinkedHashSets
-            LsqQuery rootQuery = pack.iterator().next();
+
+            // The master query is assumed to always be the first element of a pack
+            LsqQuery masterQuery = pack.iterator().next();
 
 
             Model model = ModelFactory.createDefaultModel();
@@ -400,28 +401,24 @@ public class LsqBenchmarkProcessor {
 //                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
 //                        System.err.println("END***********************************************");
 
-                // Adding the root query's model to itself should be harmless
+                // Adding the master query's model to itself should be harmless
                 model.add(m);
                 model.add(item.getModel());
             }
 
 
-            rootQuery = rootQuery.inModel(model).as(LsqQuery.class);
+            masterQuery = masterQuery.inModel(model).as(LsqQuery.class);
 
-            SpinQueryEx spinRoot = rootQuery.getSpinQuery().as(SpinQueryEx.class);
+            SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
 
             // Update triple pattern selectivities
 //                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
-            Map<Resource, LocalExecution> rleMap = rootQuery.getLocalExecutionMap();
+            Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
             LocalExecution expRoot = rleMap.get(expRun);
 
 //                    expRoot.setBenchmarkRun(expRun);
-            Long datasetSize = config.getDatasetSize();
 
-            if(datasetSize == null) {
-                datasetSize = 0l;
-            }
-
+            LsqExec.createAllExecs(masterQuery, expRun);
 
 
 
@@ -490,61 +487,70 @@ public class LsqBenchmarkProcessor {
     /**
      * Extract all queries associated with elements of the lsq query's spin representation
      *
-     * @param lsqQuery
+     * @param masterQuery
      * @return
      */
-    public static Set<LsqQuery> extractAllQueries(LsqQuery lsqQuery) {
+    public static Set<LsqQuery> extractAllQueries(LsqQuery masterQuery) {
         Set<LsqQuery> result = new LinkedHashSet<>();
 
         // Add self by default
-        result.add(lsqQuery);
+        result.add(masterQuery);
 
-        SpinQueryEx spinNode = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
+        SpinQueryEx spinNode = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+
 
         for(SpinBgp bgp : spinNode.getBgps()) {
-            LsqQuery extensionQuery = bgp.getExtensionQuery();
+            extractAllQueriesFromBgp(result, bgp);
+        }
+
+        return result;
+    }
+
+
+    public static void extractAllQueriesFromBgp(Set<LsqQuery> result, SpinBgp bgp) {
+        LsqQuery extensionQuery = bgp.getExtensionQuery();
+        if(extensionQuery != null) {
+            result.add(extensionQuery);
+        }
+
+        Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+
+        for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
+            extensionQuery = bgpNode.getJoinExtensionQuery();
             if(extensionQuery != null) {
                 result.add(extensionQuery);
             }
 
-            Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+            SpinBgp subBgp = bgpNode.getSubBgp();
 
-            for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
-                extensionQuery = bgpNode.getJoinExtensionQuery();
-                if(extensionQuery != null) {
-                    result.add(extensionQuery);
-                }
-
-                SpinBgp subBgp = bgpNode.getSubBgp();
-
-                if(subBgp == null) {
-                    subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
-                    bgpNode.setSubBgp(subBgp);
-                }
-
-
+            if(subBgp != null) {
                 extensionQuery = subBgp.getExtensionQuery();
                 if(extensionQuery != null) {
                     result.add(extensionQuery);
                 }
+            }
 
+            // Get extension queries from triple patterns
+            for(TriplePattern tp : bgp.getTriplePatterns()) {
+                LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
 
-                // Create triple pattern extension queries
-                for(TriplePattern tp : bgp.getTriplePatterns()) {
-                    LsqTriplePattern ltp = tp.as(LsqTriplePattern.class);
-
-                    extensionQuery = ltp.getExtensionQuery();
-//                    if(extensionQuery == null) {
-//                        System.out.println("Got NO extension: " + extensionQuery);
-//                    }
-                    if(extensionQuery != null) {
-                        result.add(extensionQuery);
-                    }
+                extensionQuery = ltp.getExtensionQuery();
+                if(extensionQuery != null) {
+                    result.add(extensionQuery);
                 }
             }
         }
 
-        return result;
+        // Extract queries from subBgp
+        for(SpinBgpNode bgpNode : bgp.getBgpNodes()) {
+            SpinBgp subBgp = bgpNode.getSubBgp();
+
+            // The sub-bgp of a variable in a bgp with a single triple pattern is the original bgp;
+            // prevent infinite recursion
+            if(!subBgp.equals(bgp)) {
+                extractAllQueriesFromBgp(result, subBgp);
+            }
+        }
     }
 
     /*
@@ -559,6 +565,10 @@ public class LsqBenchmarkProcessor {
            Stopwatch sw = Stopwatch.createStarted();
            logger.info("Benchmarking " + queryStr);
            try(QueryExecution qe = conn.query(queryStr)) {
+
+               // TODO retrieve result sets up to a certain threshold size
+               // When exceeded, only perform counting
+
                long resultSetSize = QueryExecutionUtils.consume(qe);
                BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
                        .divide(new BigDecimal(1000000));

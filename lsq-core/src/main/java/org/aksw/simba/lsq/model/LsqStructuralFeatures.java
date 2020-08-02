@@ -2,7 +2,6 @@ package org.aksw.simba.lsq.model;
 
 import java.util.Set;
 
-import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -39,15 +38,70 @@ public interface LsqStructuralFeatures
     }
 
 
-    // numProjectVars
-    @Iri(LSQ.Strs.projectVars)
-    Integer getNumProjectVars();
-    LsqStructuralFeatures setNumProjectVars(Integer number);
+    /**
+     * Only applies to the SELECT query form.
+     * Number of variables of the query's result set. Hence should also be set for 'SELECT *' queries.
+     *
+     * @return
+     */
+    @Iri(LSQ.Strs.projectVarCount)
+    Integer getProjectVarCount();
+    LsqStructuralFeatures setProjectVarCount(Integer number);
 
     // TODO Add the attributes here
     // Bgp summary
 //    targetRes.addLiteral(LSQ.bgps, totalBgpCount).addLiteral(LSQ.minBGPTriples, minBgpTripleCount)
 //    .addLiteral(LSQ.maxBGPTriples, maxBgpTripleCount).addLiteral(LSQ.tps, triplePatternCount);
+
+    @Iri(LSQ.Strs.bgpCountTotal)
+    Integer getBgpCount();
+    LsqStructuralFeatures setBgpCount(Integer bgpCount);
+
+    @Iri(LSQ.Strs.tpCountTotal)
+    Integer getTpsCount();
+    LsqStructuralFeatures setTpCount(Integer tpCount);
+
+
+    @Iri(LSQ.Strs.tpInBgpCountMin)
+    Integer getTpInBgpMinCount();
+    LsqStructuralFeatures setTpInBgpMinCount(Integer tpInBgpMinCount);
+
+    @Iri(LSQ.Strs.tpInBgpCountMax)
+    Integer getTpInBgpMaxCount();
+    LsqStructuralFeatures setTpInBgpMaxCount(Integer tpInBgpMaxCount);
+
+    @Iri(LSQ.Strs.tpInBgpCountMean)
+    Integer getTpInBgpMeanCount();
+    LsqStructuralFeatures setTpInBgpMeanCount(Integer tpInBgpAvgCount);
+
+    @Iri(LSQ.Strs.tpInBgpCountMedian)
+    Integer getTpInBgpMedianCount();
+    LsqStructuralFeatures setTpInBgpMedianCount(Integer tpInBgpMedianCount);
+
+
+    /*
+     * join vertex information
+     */
+
+    @Iri(LSQ.Strs.joinVertexCountTotal)
+    Integer getJoinVertexCount();
+    LsqStructuralFeatures setJoinVertexCount(Integer bgpCount);
+
+    @Iri(LSQ.Strs.joinVertexDegreeMean)
+    Integer getJoinVertexDegreeMean();
+    LsqStructuralFeatures setJoinVertexDegreeMean(Integer bgpCount);
+
+    @Iri(LSQ.Strs.joinVertexDegreeMedian)
+    Integer getJoinVertexDegreeMedian();
+    LsqStructuralFeatures setJoinVertexDegreeMedian(Integer bgpCount);
+
+//    @Iri(LSQ.Strs.joinVertexDegreeMin)
+//    Integer getJoinVertexDegreeMin();
+//    LsqStructuralFeatures setJoinVertexDegreeMin(Integer bgpCount);
+//
+//    @Iri(LSQ.Strs.joinVertexDegreeMax)
+//    Integer getJoinVertexDegreeMax();
+//    LsqStructuralFeatures setJoinVertexDegreeMax(Integer bgpCount);
 
 
     //LSQ.usesFeature

@@ -130,7 +130,7 @@ public class WebLogParser {
         result.put("r", (m, x) -> {
             m.addField(LSQ.verb, "[^\\s\"]*", String.class);
             m.skipPattern("\\s*", " ");
-            m.addField(LSQ.path, "[^\\s\"]*", String.class);
+            m.addField(LSQ.requestPath, "[^\\s\"]*", String.class);
             m.skipPattern("\\s*", " ");
             m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
@@ -147,7 +147,7 @@ public class WebLogParser {
         //result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
 
         result.put("U", (m, x) -> {
-            m.addField(LSQ.path, "[^\\s\"?]*", String.class);
+            m.addField(LSQ.requestPath, "[^\\s\"?]*", String.class);
         });
 //
         result.put("q", (m, x) -> {
@@ -345,7 +345,7 @@ public class WebLogParser {
             String pathStr = Objects.toString(m.get("path"));
 
             Optional.ofNullable(m.get("protocol")).ifPresent(o -> inout.addLiteral(LSQ.protocol, o));
-            Optional.ofNullable(m.get(pathStr)).ifPresent(o -> inout.addLiteral(LSQ.path, o));
+            Optional.ofNullable(m.get(pathStr)).ifPresent(o -> inout.addLiteral(LSQ.requestPath, o));
             Optional.ofNullable(m.get("verb")).ifPresent(o -> inout.addLiteral(LSQ.verb, o));
 
             if(pathStr != null) {
@@ -395,7 +395,7 @@ public class WebLogParser {
 
     public static void extractRawQueryString(Resource r) {
         List<Function<Resource, String>> extractors = Arrays.asList(
-                x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
+                x -> x.hasProperty(LSQ.requestPath) ? extractQueryString(x.getProperty(LSQ.requestPath).getString()) : null,
                 x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null
         );
 
