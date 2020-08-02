@@ -381,117 +381,7 @@ public class QueryStatistics2 {
     }
 
 
-    public static String getLabel(Node node) {
-        String result;
-        if (node.isURI()) {
-            result = StringUtils.urlEncode(node.getURI()).replaceAll("\\%..", "-").replaceAll("\\-+", "-");
-        } else if (node.isVariable()) {
-            result = ((Var) node).getName();
-        } else if(node.isBlank()) {
-            // result = NodeFmtLib.displayStr(node);
-            // FmtUtils is older, but is decodes bnode labels correctly
-            // Avoid another colon in the URL - may get encoded into an ugly "%3A"
-            result = "__" + node.getBlankNodeLabel(); // FmtUtils.stringForNode(node);
-        } else {
-            result = "" + node;
-        }
-        return result;
-    }
 
-
-    /**
-     * Creates a hypergraph model.
-     *
-     *
-     *
-     * @param result
-     * @param nodeToResource
-     *            Mapping from nodes to resources. Can be used to control
-     *            whether e.g. nodes of different graph patters should map to
-     *            the same or to different resources. This is an in/out
-     *            argument.
-     * @param triples
-     */
-    public static void enrichModelWithHyperGraphData(SpinBgp spinBgp) {
-        //Iterable<org.topbraid.spin.model.Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
-        // result = result == null ? ModelFactory.createDefaultModel() : result;
-
-        //Map<Node, Resource> nodeToResource,
-
-        Model result = spinBgp.getModel();
-        Map<Node, SpinBgpNode> bgpNodes = spinBgp.indexBgpNodes();
-
-
-        Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
-
-        for (org.topbraid.spin.model.Triple st : spinTriples) {
-            Triple t = SpinUtils.toJenaTriple(st);
-            // Get the triple's nodes
-            Node s = t.getSubject();
-            Node p = t.getPredicate();
-            Node o = t.getObject();
-
-            // Create anonymous resources as proxies for the original
-            // triple and nodes - needed because RDF literals cannot appear in
-            // subject position
-
-            // Note: Here we treat each triple different from the other even if they
-            // happen to be equal - apply prior normalization of the query if this undesired.
-
-            DirectedHyperEdge tx = result.createResource().as(DirectedHyperEdge.class);
-
-
-
-            // Resource sx = nodeToResource.merge(s, result.createResource(),
-            // (x, y) -> x);
-            // Resource px = nodeToResource.merge(p, result.createResource(),
-            // (x, y) -> x);
-            // Resource ox = nodeToResource.merge(o, result.createResource(),
-            // (x, y) -> x);
-//            Resource sx = nodeToResource.computeIfAbsent(s, (x) -> result.createResource());
-//            Resource px = nodeToResource.computeIfAbsent(p, (x) -> result.createResource());
-//            Resource ox = nodeToResource.computeIfAbsent(o, (x) -> result.createResource());
-
-              Resource sx = bgpNodes.get(s);
-              Resource px = bgpNodes.get(p);
-              Resource ox = bgpNodes.get(o);
-
-//            // Add the orginal nodes as annotations
-//            Resource ss = result.wrapAsResource(t.getSubject());
-//            Resource pp = result.wrapAsResource(t.getPredicate());
-//            RDFNode oo = result.asRDFNode(t.getObject());
-
-            //hyperGraphResourceToNode.put(sx, t.getSubject());
-
-
-            sx
-                .addProperty(RDF.type, LSQ.Vertex)
-                .addProperty(RDF.subject, sx)
-                .addLiteral(RDFS.label, getLabel(s));
-
-            px
-                .addProperty(RDF.type, LSQ.Vertex)
-                .addProperty(RDF.predicate, px)
-                .addLiteral(RDFS.label, getLabel(p));
-
-            ox
-                .addProperty(RDF.type, LSQ.Vertex)
-                .addProperty(RDF.object, ox)
-                .addLiteral(RDFS.label, getLabel(o));
-
-            String tripleStr = FmtUtils.stringForTriple(t) + " .";
-            tx
-                .addProperty(RDF.type, LSQ.Edge)
-                .addLiteral(RDFS.label, "" + tripleStr);
-
-            result.add(sx, LSQ.out, tx);
-            result.add(px, LSQ.in, tx);
-            result.add(ox, LSQ.in, tx);
-
-            spinBgp.getEdges().add(tx);
-        }
-        // return result;
-    }
 
 
     /**
@@ -605,7 +495,7 @@ public class QueryStatistics2 {
         Model hyperGraph = bgpRes.getModel();
 
         // for(BasicPattern bgp : bgps) {
-        enrichModelWithHyperGraphData(bgpRes);
+        LsqEnrichments.enrichModelWithHyperGraphData(bgpRes);
 
         // System.out.println("HYPER");
         // hyperGraph.write(System.out, "TURTLE");

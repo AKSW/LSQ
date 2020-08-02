@@ -18,6 +18,7 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
+import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -82,6 +83,12 @@ public class LsqExec {
 
 
             for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
+                Node jenaNode = bgpNode.toJenaNode();
+
+                if(!jenaNode.isVariable()) {
+                    continue;
+                }
+
                 JoinVertexExec bgpNodeExec = LsqExec.getOrCreateBgpNodeExec(bgpExec, bgpNode);
 
                 Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
@@ -174,6 +181,7 @@ public class LsqExec {
     // TODO Consolidate common parts with createBgpExec
     public static SpinBgpExec getOrCreateSubBgpExec(RDFNode expRun, SpinBgp bgp) {
         LsqQuery bgpEq = bgp.getExtensionQuery();
+        Objects.requireNonNull(bgpEq, "Missing extension query on bgp OR an execution for a sub-bgp of a non-variable bgp-node was requested " + bgp);
         Map<Resource, LocalExecution> bgpEqLeMap = bgpEq.getLocalExecutionMap();
         SpinBgpExec bgpExec = bgp.findBgpExec(expRun);
 
@@ -320,6 +328,11 @@ public class LsqExec {
                 : new BigDecimal(counter).divide(new BigDecimal(denominator), 10, RoundingMode.CEILING);
         return result;
     }
+
+    public static BigDecimal avg(Integer a, Integer b) {
+        return LsqExec.safeDivide(a + b, 2);
+    }
+
 
     public static BigDecimal safeDivide(Integer counter, Integer denominator) {
         BigDecimal result = counter == null || denominator == null ? null :

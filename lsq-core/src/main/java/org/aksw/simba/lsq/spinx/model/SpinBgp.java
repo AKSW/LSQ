@@ -69,6 +69,26 @@ public interface SpinBgp
     @Iri(LSQ.Strs.hasEdge)
     Set<DirectedHyperEdge> getEdges();
 
+
+    /**
+     * Creates a mapping from tp (triple pattern) to tpInBgp.
+     * Most useful for checking whether for a given tp the corresponding tpInBgp resource
+     * has already been created.
+     *
+     *
+     * @return
+     */
+    default Map<LsqTriplePattern, TpInBgp> indexTps() {
+        Map<LsqTriplePattern, TpInBgp> result = new LinkedHashMap<>();
+        Set<TpInBgp> tpInBgps = getTpInBgp();
+        for(TpInBgp tpInBgp : tpInBgps) {
+            LsqTriplePattern tp = tpInBgp.getTriplePattern();
+            result.put(tp, tpInBgp);
+        }
+        return result;
+
+    }
+
     // TODO Eventually replace with a proper map view
     default Map<Node, SpinBgpNode> indexBgpNodes() {
         Map<Node, SpinBgpNode> result = new LinkedHashMap<>();
