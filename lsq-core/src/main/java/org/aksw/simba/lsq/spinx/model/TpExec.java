@@ -32,7 +32,7 @@ public interface TpExec
      *
      * @return
      */
-    @Iri(LSQ.Strs.tpSel)
+    @Iri(LSQ.Strs.tpToGraphRatio)
     BigDecimal getSelectivity();
     TpInBgpExec setSelectivity(BigDecimal value);
 

@@ -33,9 +33,29 @@ public interface QueryExec extends Resource {
     BigDecimal getRuntimeInMs();
     QueryExec setRuntimeInMs(BigDecimal runtimeInMs);
 
-    @Iri(LSQ.Strs.resultSize)
+    @Iri(LSQ.Strs.itemCount)
     Long getResultSetSize();
     QueryExec setResultSetSize(Long resultSetSize);
+
+    @Iri(LSQ.Strs.exceededMaxByteSizeForCounting)
+    Boolean getExceededMaxSizeForCounting();
+    QueryExec setExceededMaxByteSizeForCounting(Boolean offOrOn);
+
+    @Iri(LSQ.Strs.exceededMaxItemCountForCounting)
+    Boolean getExceededMaxItemCountForCounting();
+    QueryExec setExceededMaxItemCountForCounting(Boolean offOrOn);
+
+    @Iri(LSQ.Strs.exceededMaxByteSizeForSerialization)
+    Boolean getExceededMaxSizeForSerialization();
+    QueryExec setExceededMaxByteSizeForSerialization(Boolean offOrOn);
+
+    @Iri(LSQ.Strs.exceededMaxItemCountForSerialization)
+    Boolean getExceededMaxItemCountForSerialization();
+    QueryExec setExceededMaxItemCountForSerialization(Boolean offOrOn);
+
+    @Iri(LSQ.Strs.serializedResult)
+    String getSerializedResult();
+    QueryExec setSerializedResult(String serializedResult);
 
     @Iri(LSQ.Strs.processingError)
     String getProcessingError();

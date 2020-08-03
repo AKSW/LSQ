@@ -80,8 +80,6 @@ public class LsqExec {
                 tpInBgpExec.setSelectivity(value);
             }
 
-
-
             for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
                 Node jenaNode = bgpNode.toJenaNode();
 

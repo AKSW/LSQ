@@ -1,7 +1,7 @@
 package org.aksw.simba.lsq.core;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -16,13 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.facete.v3.bgp.api.BgpNode;
-import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
@@ -33,22 +32,17 @@ import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Quads;
+import org.aksw.jena_sparql_api.utils.ResultSetUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.QueryExec;
-import org.aksw.simba.lsq.spinx.model.JoinVertexExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
-import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
 import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
-import org.aksw.simba.lsq.spinx.model.TpExec;
-import org.aksw.simba.lsq.spinx.model.TpInBgp;
-import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
-import org.aksw.simba.lsq.spinx.model.TpInSubBgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
@@ -58,6 +52,8 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -70,6 +66,7 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.Template;
@@ -83,7 +80,6 @@ import org.topbraid.spin.model.TriplePattern;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
-import io.reactivex.rxjava3.disposables.Disposable;
 
 
 /**
@@ -344,7 +340,16 @@ public class LsqBenchmarkProcessor {
 
             // TODO Skolemize these executions!
 
-            rdfizeQueryExecutionBenchmark(benchmarkConn, queryStr, qe);
+            rdfizeQueryExecutionBenchmark(
+                    benchmarkConn,
+                    queryStr,
+                    qe,
+                    config.getQueryConnectionTimeout(),
+                    config.getQueryExecutionTimeout(),
+                    config.getMaxItemCountForCounting(),
+                    config.getMaxByteSizeForCounting(),
+                    config.getMaxItemCountForSerialization(),
+                    config.getMaxByteSizeForSerialization());
 
             item.getLocalExecutions().add(le);
             le.setBenchmarkRun(expRun);
@@ -553,6 +558,23 @@ public class LsqBenchmarkProcessor {
         }
     }
 
+//    public SparqlQueryConnection configureConnection(SparqlQueryConnection rawConn, ExperimentConfig config) {
+//        ExperimentConfig config;
+//        BigDecimal connectionTimeout = config.getConnectionTimeout();
+//        BigDecimal queryExecutionTimeout = config.getQueryTimeout();
+//        Long effectiveConnectionTimeout = connectionTimeout == null
+//                ? -1l
+//                : connectionTimeout.divide(new BigDecimal(1000)).longValue();
+//
+//        Long effectiveQueryExecutionTimeout = queryExecutionTimeout == null
+//                ? -1l
+//                : queryExecutionTimeout.divide(new BigDecimal(1000)).longValue();
+//
+//        qe.setTimeout(effectiveConnectionTimeout, effectiveQueryExecutionTimeout);
+//
+//        return null;
+//    }
+
     /*
         * Benchmark the combined execution and retrieval time of a given query
         *
@@ -560,33 +582,133 @@ public class LsqBenchmarkProcessor {
         * @param queryExecRes
         * @param qef
         */
-       public static QueryExec rdfizeQueryExecutionBenchmark(SparqlQueryConnection conn, String queryStr, QueryExec result) {
+       public static QueryExec rdfizeQueryExecutionBenchmark(
+               SparqlQueryConnection conn,
+               String queryStr,
+               QueryExec result,
+               BigDecimal rawConnectionTimeout,
+               BigDecimal rawExecutionTimeout,
+               Long rawMaxItemCountForCounting,
+               Long rawMaxByteSizeForCounting,
+               Long rawMaxItemCountForSerialization,
+               Long rawMaxByteSizeForSerialization) {
+
+
+
+           long connectionTimeout = Optional.ofNullable(rawConnectionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+           long executionTimeout = Optional.ofNullable(rawExecutionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+
+           long maxItemCountForCounting = Optional.ofNullable(rawMaxItemCountForCounting).orElse(-1l);
+           long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
+
+           long maxItemCountForSerialization = Optional.ofNullable(rawMaxItemCountForSerialization).orElse(-1l);
+           long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
+
+           boolean exceededMaxItemCountForSerialization = false;
+           boolean exceededMaxByteSizeForSerialization = false;
+
+           boolean exceededMaxItemCountForCounting = false;
+           boolean exceededMaxByteSizeForCounting = false;
+
 
            Stopwatch sw = Stopwatch.createStarted();
            logger.info("Benchmarking " + queryStr);
+
+           List<String> varNames = new ArrayList<>();
            try(QueryExecution qe = conn.query(queryStr)) {
+               qe.setTimeout(connectionTimeout, executionTimeout);
 
-               // TODO retrieve result sets up to a certain threshold size
-               // When exceeded, only perform counting
+               ResultSet rs = qe.execSelect();
+               varNames.addAll(rs.getResultVars());
 
-               long resultSetSize = QueryExecutionUtils.consume(qe);
-               BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
-                       .divide(new BigDecimal(1000000));
+               long estimatedByteSize = 0;
+               List<Binding> cache = new ArrayList<>();
+
+               long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
+               while(rs.hasNext()) {
+                   ++itemCount;
+
+                   Binding binding = rs.nextBinding();
+
+                   if(cache != null) {
+                       // Estimate the size of the binding (e.g. I once had polygons in literals of size 50MB)
+                       long bindingSizeContrib = binding.toString().length();
+                       estimatedByteSize += bindingSizeContrib;
+
+                       exceededMaxItemCountForSerialization = maxItemCountForSerialization >= 0
+                               && itemCount > maxItemCountForSerialization;
+
+                       if(exceededMaxItemCountForSerialization) {
+                           // Disable serialization but keep on counting
+                           cache = null;
+                       }
+
+                       exceededMaxByteSizeForSerialization = maxByteSizeForSerialization >= 0
+                               && estimatedByteSize > maxByteSizeForSerialization;
+                       if(exceededMaxByteSizeForSerialization) {
+                           // Disable serialization but keep on counting
+                           cache = null;
+                       }
 
 
-               //double durationInSeconds = duration.toNanos() / 1000000.0;
-               result
-               //result
-                   .setResultSetSize(resultSetSize)
-                   .setRuntimeInMs(durationInMillis)
-               ;
+                       if(cache != null) {
+                           cache.add(binding);
+                       }
+                   }
 
-               logger.info("Benchmark result: " + resultSetSize + " results in " + durationInMillis + " ms");
+                   exceededMaxItemCountForCounting = maxItemCountForCounting >= 0
+                           && itemCount > maxItemCountForCounting;
+                   if(exceededMaxByteSizeForSerialization) {
+                       break;
+                   }
+
+                   exceededMaxByteSizeForCounting = maxByteSizeForCounting >= 0
+                           && estimatedByteSize > maxByteSizeForCounting;
+                   if(exceededMaxByteSizeForSerialization) {
+                       break;
+                   }
+               }
+
+               if(exceededMaxItemCountForSerialization) {
+                   result.setExceededMaxItemCountForSerialization(exceededMaxItemCountForSerialization);
+               }
+
+               if(exceededMaxByteSizeForSerialization) {
+                   result.setExceededMaxByteSizeForSerialization(exceededMaxByteSizeForSerialization);
+               }
+
+
+               if(exceededMaxItemCountForCounting) {
+                   result.setExceededMaxItemCountForCounting(exceededMaxItemCountForCounting);
+               }
+
+               if(exceededMaxByteSizeForCounting) {
+                   result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
+               }
+
+               if(!exceededMaxItemCountForCounting && !exceededMaxByteSizeForCounting) {
+                   result.setResultSetSize(itemCount);
+               }
+
+               ByteArrayOutputStream baos = new ByteArrayOutputStream();
+               ResultSet replay = ResultSetUtils.create(varNames, cache.iterator());
+               ResultSetFormatter.outputAsJSON(baos, replay);
+               result.setSerializedResult(baos.toString());
+
            } catch(Exception e) {
                String errorMsg = e.toString();
                result.setProcessingError(errorMsg);
                logger.warn("Benchmark failure: ", e);
            }
+
+           BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
+                   .divide(new BigDecimal(1000000));
+
+           result
+               .setRuntimeInMs(durationInMillis)
+           ;
+
+           logger.info("Benchmark result after " + durationInMillis + " ms: " + result.getResultSetSize() + " " + result.getProcessingError());
 
            return result;
            //Calendar end = Calendar.getInstance();

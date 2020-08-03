@@ -73,6 +73,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -326,7 +327,10 @@ public class MainCliLsq {
 
         Model model = ModelFactory.createDefaultModel();
 
-        model.setNsPrefix("lsq", LSQ.ns);
+        model
+            .setNsPrefix("lsq", LSQ.ns)
+            .setNsPrefix("xsd", XSD.NS);
+
 
         ExperimentConfig cfg = model.createResource(expIri).as(ExperimentConfig.class);
         cfg
@@ -336,8 +340,12 @@ public class MainCliLsq {
                     .setServiceUrl(endpointUrl)
                     .mutateDefaultGraphs(dgs -> dgs.addAll(benchmarkCreateCmd.defaultGraphs))
                     )
-            .setQueryTimeout(qt == null ? null : new BigDecimal(qt).multiply(new BigDecimal(0.001)))
-            .setConnectionTimeout(ct == null ? null : new BigDecimal(ct).multiply(new BigDecimal(0.001)))
+            .setQueryExecutionTimeout(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
+            .setQueryConnectionTimeout(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
+            .setMaxItemCountForCounting(1000000l) // 1M
+            .setMaxByteSizeForCounting(-1l) // limit only by count
+            .setMaxItemCountForSerialization(-1l) // limit by byte size
+            .setMaxByteSizeForSerialization(1000000l) // 1MB
             .setUserAgent(benchmarkCreateCmd.userAgent)
             .setDatasetSize(datasetSize)
             .setDatasetLabel(datasetLabel)
@@ -381,7 +389,6 @@ public class MainCliLsq {
         DataRefSparqlEndpoint dataRef = cfg.getDataRef();
         try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
             try(SparqlQueryConnection benchmarkConn = dataPod.openConnection()) {
-
 
                 // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
                 cfg.setDataRef(null);

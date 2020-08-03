@@ -307,7 +307,7 @@ public class SpinUtils {
             int tripleCount = fetchTriplePatternExtensionSize(dataQef, toJenaTriple(r));
             //double selectivity = tripleCount / (double)totalTripleCount;
 
-            spinModel.add(r, LSQ.resultSize, spinModel.createTypedLiteral(tripleCount));
+            spinModel.add(r, LSQ.itemCount, spinModel.createTypedLiteral(tripleCount));
         });
     }
 
@@ -422,7 +422,7 @@ public class SpinUtils {
             double selectivity = totalTripleCount == 0 ? 0 : count / (double)totalTripleCount;
 
             tpExecRes
-                .addLiteral(LSQ.resultSize, count)
+                .addLiteral(LSQ.itemCount, count)
                 .addLiteral(LSQ.tpSel, selectivity);
         }
     }
@@ -524,7 +524,7 @@ public class SpinUtils {
             Resource observation = tpToObservation.get(e.getKey());
             Long count = e.getValue();
 
-            long tpResultSetSize = observation.getProperty(LSQ.resultSize).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
+            long tpResultSetSize = observation.getProperty(LSQ.itemCount).getLong(); //e.getKey().getProperty(LSQ.triplePatternResultSize).getLong();
             double tpSelectivity = tpResultSetSize == 0 ? 0d : count / (double)tpResultSetSize;
 
             observation

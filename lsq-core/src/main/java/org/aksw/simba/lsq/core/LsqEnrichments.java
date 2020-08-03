@@ -39,6 +39,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
@@ -73,7 +74,7 @@ public class LsqEnrichments {
         }
     }
 
-    public static void enrichSpinBgpNodesWithSubBgpsAndQueries(SpinQueryEx spinNode) {
+    public static void enrichSpinBgpNodesWithSubBgpsAndQueries(SpinQueryEx spinNode, PrefixMapping prefixMapping) {
 
             boolean createQueryResources = true;
             for(SpinBgp bgp : spinNode.getBgps()) {
@@ -81,7 +82,7 @@ public class LsqEnrichments {
                 LsqEnrichments.enrichSpinBgpWithTpInBgp(bgp);
 
                 if(createQueryResources) {
-                    LsqEnrichments.enrichSpinBgpWithQuery(bgp);
+                    LsqEnrichments.enrichSpinBgpWithQuery(bgp, prefixMapping);
                 }
 
                 // Enrich the bpg's triple patterns with extension queries
@@ -101,6 +102,10 @@ public class LsqEnrichments {
                             extensionQuery = ltp.getModel().createResource().as(LsqQuery.class);
 
                             Query query = QueryUtils.elementToQuery(ElementUtils.createElementTriple(ltp.toJenaTriple()));
+                            if(prefixMapping != null) {
+                                query.setPrefixMapping(prefixMapping);
+                                QueryUtils.optimizePrefixes(query);
+                            }
                             extensionQuery.setQueryAndHash(query);
                             ltp.setExtensionQuery(extensionQuery);
 
@@ -128,6 +133,13 @@ public class LsqEnrichments {
                             query.setDistinct(true);
                             query.getProject().clear();
                             query.getProject().add((Var)jenaNode);
+
+                            if(prefixMapping != null) {
+                                query.setPrefixMapping(prefixMapping);
+                                QueryUtils.optimizePrefixes(query);
+                            }
+
+
                             extensionQuery.setQueryAndHash(query);
 
                             bgpNode.setJoinExtensionQuery(extensionQuery);
@@ -156,7 +168,7 @@ public class LsqEnrichments {
                         LsqEnrichments.enrichSpinBgpWithTpInBgp(subBgp);
 
                         if(createQueryResources && jenaNode.isVariable()) {
-                            LsqEnrichments.enrichSpinBgpWithQuery(subBgp);
+                            LsqEnrichments.enrichSpinBgpWithQuery(subBgp, prefixMapping);
                         }
                     }
 //                }
@@ -273,7 +285,7 @@ public class LsqEnrichments {
 
         }
 
-    public static void enrichSpinBgpWithQuery(SpinBgp bgp) {
+    public static void enrichSpinBgpWithQuery(SpinBgp bgp, PrefixMapping prefixMapping) {
         LsqQuery extensionQuery = bgp.getExtensionQuery();
         if(extensionQuery == null) {
             extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
@@ -282,6 +294,11 @@ public class LsqEnrichments {
             // TODO Use a prefixed form
             bgp.setLabel(elt.toString());
             Query query = QueryUtils.elementToQuery(elt);
+            if(prefixMapping != null) {
+                query.setPrefixMapping(prefixMapping);
+                QueryUtils.optimizePrefixes(query);
+            }
+
             extensionQuery.setQueryAndHash(query);
             bgp.setExtensionQuery(extensionQuery);
         }
@@ -314,6 +331,7 @@ public class LsqEnrichments {
             Objects.requireNonNull(queryStr, "Query string must not be null");
             Query query = QueryFactory.create(queryStr);
 
+            PrefixMapping prefixMapping = query.getPrefixMapping();
 
     //        SpinQueryEx spinRes = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
 
@@ -332,7 +350,7 @@ public class LsqEnrichments {
 
             enrichSpinModelWithBgps(spinRes);
             enrichSpinBgpsWithNodes(spinRes);
-            enrichSpinBgpNodesWithSubBgpsAndQueries(spinRes);
+            enrichSpinBgpNodesWithSubBgpsAndQueries(spinRes, prefixMapping);
 
 
             // Add tpInBgp resources
@@ -489,50 +507,10 @@ public class LsqEnrichments {
 //        return result;
 //    }
 
-
-    // Probably not needed
-    public static BigDecimal fromNumber(Number n) {
-        BigDecimal result;
-        if(n == null) {
-            result = null;
-        } else if(n instanceof Byte) {
-            byte val = n.byteValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof Short) {
-            short val = n.shortValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof Integer) {
-            int val = n.intValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof Long) {
-            long val = n.longValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof Float) {
-            float val = n.floatValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof Double) {
-            double val = n.doubleValue();
-            result = new BigDecimal(val);
-        } else if(n instanceof BigDecimal) {
-            result = (BigDecimal)n;
-        }
-        else {
-            throw new IllegalArgumentException("Unknow number type: " + n.getClass());
-        }
-
-        return result;
-    }
-
-
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
        String queryStr = queryRes.getText();
        // TODO Avoid repeated parse
        Query query = QueryFactory.create(queryStr);
-//       LsqProcessor.rdfizeQueryStructuralFeatures(lsqQuery, x -> NestedResource.from(lsqQuery).nest(x), query);
-
-//       Function<String, NestedResource> queryAspectFn = x -> NestedResource.from(queryRes).nest(x);
-//       //queryStats = queryStats+" lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash ;
-//       LsqStructuralFeatures featureRes = queryAspectFn.apply("-sf").get().as(LsqStructuralFeatures.class); // model.createResource(LSQ.defaultLsqrNs + "sf-q" + "TODO");//lsqv:structuralFeatures lsqr:sf-q"+queryHash+" . \n lsqr:sf-q"+queryHash
 
        LsqStructuralFeatures featureRes = queryRes.getModel().createResource().as(LsqStructuralFeatures.class);
 
@@ -551,7 +529,6 @@ public class LsqEnrichments {
        Set<SpinBgp> bgps = spinEx.getBgps();
 
        int bgpCount = bgps.size();
-       //int tpCount = 0;
 
        List<Integer> tpInBgpTotalCounts = new ArrayList<>(bgpCount);
 
@@ -592,21 +569,6 @@ public class LsqEnrichments {
        int joinVertexDegreeSum = intSum(sortedJoinVertexDegrees);
        BigDecimal joinVertexDegreeMean = LsqExec.safeDivide(joinVertexDegreeSum, n);
        BigDecimal joinVertexDegreeMedian = median(sortedJoinVertexDegrees, x -> new BigDecimal(x), LsqExec::avg).orElse(new BigDecimal(0));
-//
-//       int nhalf = n / 2;
-//
-//       double avgJoinVertexDegree =  sortedJoinVertexDegrees.stream().mapToInt(x -> x).average().orElse(0.0);
-//
-//       // 1 2 3 4
-//       double medianJoinVertexDegree = n == 0 ? 0
-//               : (n % 2 == 0 ? (sortedJoinVertexDegrees.get(nhalf - 1) + sortedJoinVertexDegrees.get(nhalf)) / 2 : sortedJoinVertexDegrees.get(nhalf));
-
-       // LSQ.me
-       // queryRes.addProperty(LSQ.joinVert, o)
-       // double meanJoinVertexDegree = joinVertexToDegree.values().stream()
-       // .mapToInt(x -> x)
-       // ???
-       // .orElse(0.0);
 
        // This is on the query level
        featureRes
@@ -614,25 +576,6 @@ public class LsqEnrichments {
                .setJoinVertexDegreeMean(joinVertexDegreeMean)
                .setJoinVertexDegreeMedian(joinVertexDegreeMedian)
                ;
-//       featureRes
-//           .addLiteral(LSQ.joinVertices, degrees.size())
-//           .addLiteral(LSQ.meanJoinVertexDegree, avgJoinVertexDegree)
-//           .addLiteral(LSQ.medianJoinVertexsDegree, medianJoinVertexDegree);
-
-
-//       Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
-//       features.forEach(f -> featureRes.addProperty(LSQ.usesFeature, f));
-
-       // TODO These methods have to be ported
-       //queryStats = queryStats+ QueryStatistics.getDirectQueryRelatedRDFizedStats(query.toString()); // Query type, total triple patterns, join vertices, mean join vertices degree
-       //queryStats = queryStats+QueryStatistics.rdfizeTuples_JoinVertices(query.toString());
-
-//       SpinUtils.enrichWithHasTriplePattern(featureRes, spinRes);
-//       SpinUtils.enrichWithTriplePatternText(spinRes);
-       //Selectivity2.enrichModelWithTriplePatternExtensionSizes(model, dataQef);
-
-       //
-//       QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, featureRes);
 
        QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
 
@@ -868,5 +811,37 @@ public class LsqEnrichments {
 //        }
 //        return result;
 //    }
+    // Probably not needed
+    public static BigDecimal fromNumber(Number n) {
+        BigDecimal result;
+        if(n == null) {
+            result = null;
+        } else if(n instanceof Byte) {
+            byte val = n.byteValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Short) {
+            short val = n.shortValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Integer) {
+            int val = n.intValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Long) {
+            long val = n.longValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Float) {
+            float val = n.floatValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof Double) {
+            double val = n.doubleValue();
+            result = new BigDecimal(val);
+        } else if(n instanceof BigDecimal) {
+            result = (BigDecimal)n;
+        }
+        else {
+            throw new IllegalArgumentException("Unknow number type: " + n.getClass());
+        }
+
+        return result;
+    }
 
 }

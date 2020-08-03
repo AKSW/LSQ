@@ -37,13 +37,10 @@ public interface ExperimentConfig
     BigDecimal getRequestDelay();
     ExperimentConfig setRequestDelay(BigDecimal requestDelay);
 
-    @Iri(LSQ.Strs.connectionTimeout)
-    BigDecimal getConnectionTimeout();
-    ExperimentConfig setConnectionTimeout(BigDecimal requestDelay);
 
-    @Iri(LSQ.Strs.queryTimeout)
-    BigDecimal getQueryTimeout();
-    ExperimentConfig setQueryTimeout(BigDecimal requestDelay);
+//    @Iri(LSQ.Strs.resultSetSizeThreshold)
+//    Long getResultSetSizeThreshold();
+//    ExperimentConfig setResultSetSizeThreshold(Long resultSetSizeThreshold);
 
     @Iri(LSQ.Strs.userAgent)
     String getUserAgent();
@@ -66,5 +63,33 @@ public interface ExperimentConfig
     @IriType
     String getBaseIri();
     ExperimentConfig setBaseIri(String baseIri);
+
+    /*
+     * Benchmark options
+     */
+
+    @Iri(LSQ.Strs.connectionTimeout)
+    BigDecimal getQueryConnectionTimeout();
+    ExperimentConfig setQueryConnectionTimeout(BigDecimal requestDelay);
+
+    @Iri(LSQ.Strs.executionTimeout)
+    BigDecimal getQueryExecutionTimeout();
+    ExperimentConfig setQueryExecutionTimeout(BigDecimal requestDelay);
+
+    @Iri(LSQ.Strs.maxItemCountForCounting)
+    Long getMaxItemCountForCounting();
+    ExperimentConfig setMaxItemCountForCounting(Long maxItemCountForCounting);
+
+    @Iri(LSQ.Strs.maxByteSizeForCounting)
+    Long getMaxByteSizeForCounting();
+    ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
+
+    @Iri(LSQ.Strs.maxItemCountForSerialization)
+    Long getMaxItemCountForSerialization();
+    ExperimentConfig setMaxItemCountForSerialization(Long maxItemCountForSerialization);
+
+    @Iri(LSQ.Strs.maxByteSizeForSerialization)
+    Long getMaxByteSizeForSerialization();
+    ExperimentConfig setMaxByteSizeForSerialization(Long maxByteSizeForSerialization);
 
 }

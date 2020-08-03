@@ -19,8 +19,22 @@ public class LSQ {
 
         public static final String text = ns + "text";
         public static final String hash = ns + "hash";
-        public static final String resultSize = ns + "resultSize";
+        public static final String itemCount = ns + "itemCount";
         public static final String isDistinct = ns + "isDistinct";
+
+        public static final String exceededMaxByteSizeForCounting = ns + "exceededMaxByteSizeForCounting";
+        public static final String exceededMaxItemCountForCounting = ns + "exceededMaxItemCountForCounting";
+        public static final String exceededMaxByteSizeForSerialization = ns + "exceededMaxByteSizeForSerialization";
+        public static final String exceededMaxItemCountForSerialization = ns + "exceededMaxItemCountForSerialization";
+
+        public static final String serializedResult = ns + "serializedResult";
+
+        public static final String maxItemCountForCounting = ns + "maxItemCountForCounting";
+        public static final String maxByteSizeForCounting = ns + "maxByteSizeForCounting";
+        public static final String maxItemCountForSerialization = ns + "maxItemCountForSerialization";
+        public static final String maxByteSizeForSerialization = ns + "maxByteSizeForSerialization";
+
+
 //        public static final String distinctResultSize = ns + "distinctResultSize";
 
         public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
@@ -119,14 +133,14 @@ public class LSQ {
         public static final String config = ns + "config";
         public static final String requestDelay = ns + "requestDelay";
         public static final String connectionTimeout = ns + "connectionTimeout";
-        public static final String queryTimeout = ns + "queryTimeout";
+        public static final String executionTimeout = ns + "executionTimeout";
+//        public static final String resultSetSizeThreshold = ns + "resultSetSizeThreshold";
         public static final String datasetSize = ns + "datasetSize";
         public static final String datasetLabel = ns + "datasetLabel";
         public static final String datasetIri = ns + "datasetIri";
         public static final String baseIri = ns + "baseIri";
 
-
-        public static final String tpSel = ns + "tpSel";
+        public static final String tpToGraphRatio = ns + "tpToGraphRatio";
 
         // Selectivity of a triple pattern in regard to the BGP in which it occurrs
         public static final String tpSelBGPRestricted = ns +"tpSelBGPRestricted";
@@ -204,7 +218,7 @@ public class LSQ {
 
 
     public static final Property text = ResourceFactory.createProperty(Strs.text);
-    public static final Property resultSize = ResourceFactory.createProperty(Strs.resultSize);
+    public static final Property itemCount = ResourceFactory.createProperty(Strs.itemCount);
     public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
     public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
     public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
@@ -232,7 +246,7 @@ public class LSQ {
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
     // TODO Rename to tpSelectivity(GraphRestricted)
-    public static final Property tpSel = ResourceFactory.createProperty(Strs.tpSel);
+    public static final Property tpSel = ResourceFactory.createProperty(Strs.tpToGraphRatio);
 
     // Selectivity of a triple pattern in regard to the BGP in which it occurrs
     public static final Property tpSelBGPRestricted = ResourceFactory.createProperty(Strs.tpSelBGPRestricted);
