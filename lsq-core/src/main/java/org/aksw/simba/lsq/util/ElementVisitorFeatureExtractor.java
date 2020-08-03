@@ -126,7 +126,7 @@ public class ElementVisitorFeatureExtractor
 
                 if(fnName != null) {
                     fnName = StringUtils.urlEncode(fnName);
-                    Resource fnRes = ResourceFactory.createResource(LSQ.ns + "fn-" + fnName);
+                    Resource fnRes = ResourceFactory.createResource(LSQ.NS + "fn-" + fnName);
                     features.add(fnRes);
                 } else {
                     logger.warn("Could not obtain any of {label/symbol/iri} for "+ expr);
@@ -264,7 +264,7 @@ public class ElementVisitorFeatureExtractor
 
             List<ExprAggregator> aggs = query.getAggregators();
             for(ExprAggregator agg : aggs) {
-                Resource fnRes = ResourceFactory.createResource(LSQ.ns + "agg-" + agg.getAggregator().getName().toLowerCase());
+                Resource fnRes = ResourceFactory.createResource(LSQ.NS + "agg-" + agg.getAggregator().getName().toLowerCase());
                 result.add(fnRes);
             }
 

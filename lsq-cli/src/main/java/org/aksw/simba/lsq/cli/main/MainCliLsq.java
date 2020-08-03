@@ -73,6 +73,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.util.ResourceUtils;
+import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -328,7 +329,8 @@ public class MainCliLsq {
         Model model = ModelFactory.createDefaultModel();
 
         model
-            .setNsPrefix("lsq", LSQ.ns)
+            .setNsPrefix("lsq", LSQ.NS)
+            .setNsPrefix("dct", DCTerms.NS)
             .setNsPrefix("xsd", XSD.NS);
 
 

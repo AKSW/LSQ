@@ -11,151 +11,151 @@ import org.apache.jena.rdf.model.ResourceFactory;
  *
  */
 public class LSQ {
-    public static final String ns = "http://lsq.aksw.org/vocab#";
+    public static final String NS = "http://lsq.aksw.org/vocab#";
 
 
     public static class Strs {
-        public static final String Query = ns + "Query";
+        public static final String Query = NS + "Query";
 
-        public static final String text = ns + "text";
-        public static final String hash = ns + "hash";
-        public static final String itemCount = ns + "itemCount";
-        public static final String isDistinct = ns + "isDistinct";
+        public static final String text = NS + "text";
+        public static final String hash = NS + "hash";
+        public static final String itemCount = NS + "itemCount";
+        public static final String isDistinct = NS + "isDistinct";
 
-        public static final String exceededMaxByteSizeForCounting = ns + "exceededMaxByteSizeForCounting";
-        public static final String exceededMaxItemCountForCounting = ns + "exceededMaxItemCountForCounting";
-        public static final String exceededMaxByteSizeForSerialization = ns + "exceededMaxByteSizeForSerialization";
-        public static final String exceededMaxItemCountForSerialization = ns + "exceededMaxItemCountForSerialization";
+        public static final String exceededMaxByteSizeForCounting = NS + "exceededMaxByteSizeForCounting";
+        public static final String exceededMaxItemCountForCounting = NS + "exceededMaxItemCountForCounting";
+        public static final String exceededMaxByteSizeForSerialization = NS + "exceededMaxByteSizeForSerialization";
+        public static final String exceededMaxItemCountForSerialization = NS + "exceededMaxItemCountForSerialization";
 
-        public static final String serializedResult = ns + "serializedResult";
+        public static final String serializedResult = NS + "serializedResult";
 
-        public static final String maxItemCountForCounting = ns + "maxItemCountForCounting";
-        public static final String maxByteSizeForCounting = ns + "maxByteSizeForCounting";
-        public static final String maxItemCountForSerialization = ns + "maxItemCountForSerialization";
-        public static final String maxByteSizeForSerialization = ns + "maxByteSizeForSerialization";
+        public static final String maxItemCountForCounting = NS + "maxItemCountForCounting";
+        public static final String maxByteSizeForCounting = NS + "maxByteSizeForCounting";
+        public static final String maxItemCountForSerialization = NS + "maxItemCountForSerialization";
+        public static final String maxByteSizeForSerialization = NS + "maxByteSizeForSerialization";
 
 
 //        public static final String distinctResultSize = ns + "distinctResultSize";
 
-        public static final String hasStructuralFeatures = ns + "hasStructuralFeatures";
-        public static final String hasSpin = ns + "hasSpin";
-        public static final String hasTP = ns + "hasTP";
-        public static final String hasTpInBgp = ns + "hasTpInBgp";
-        public static final String hasBGP = ns + "hasBGP";
-        public static final String hasSubBGP = ns + "hasSubBGP";
-        public static final String extensionQuery = ns + "extensionQuery";
-        public static final String joinExtensionQuery = ns + "joinExtensionQuery";
+        public static final String hasStructuralFeatures = NS + "hasStructuralFeatures";
+        public static final String hasSpin = NS + "hasSpin";
+        public static final String hasTP = NS + "hasTP";
+        public static final String hasTpInBgp = NS + "hasTpInBgp";
+        public static final String hasBGP = NS + "hasBGP";
+        public static final String hasSubBGP = NS + "hasSubBGP";
+        public static final String extensionQuery = NS + "extensionQuery";
+        public static final String joinExtensionQuery = NS + "joinExtensionQuery";
 
         //public static final String tpText = ns + "tpText";
         //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
 
         // Used in benchmark run - align with other error msgs
-        public static final String execStatus = ns + "execStatus";
+        public static final String execStatus = NS + "execStatus";
 
-        public static final String execError = ns + "execError";
-        public static final String processingError = ns + "processingError";
-        public static final String parseError = ns + "parseError";
-        public static final String runTimeMs = ns + "runTimeMs";
+        public static final String execError = NS + "execError";
+        public static final String processingError = NS + "processingError";
+        public static final String parseError = NS + "parseError";
+        public static final String runTimeMs = NS + "runTimeMs";
 
-        public static final String benchmarkRun = ns + "benchmarkRun";
+        public static final String benchmarkRun = NS + "benchmarkRun";
 
-        public static final String hasExec = ns + "hasExec";
-        public static final String hasElementExec =  ns + "hasElementExec";
-        public static final String hasLocalExec =  ns + "hasLocalExec";
-        public static final String hasQueryExec =  ns + "hasQueryExec";
-        public static final String hasRemoteExec = ns + "hasRemoteExec";
+        public static final String hasExec = NS + "hasExec";
+        public static final String hasElementExec =  NS + "hasElementExec";
+        public static final String hasLocalExec =  NS + "hasLocalExec";
+        public static final String hasQueryExec =  NS + "hasQueryExec";
+        public static final String hasRemoteExec = NS + "hasRemoteExec";
 
-        public static final String hasBgpExec = ns + "hasBgpExec";
-        public static final String hasTpExec = ns + "hasTpExec";
-        public static final String hasJoinVarExec = ns + "hasJoinVarExec";
-        public static final String hasTpInBgpExec = ns + "hasTpInBgpExec";
-        public static final String hasSubBgpExec = ns + "hasSubBgpExec";
+        public static final String hasBgpExec = NS + "hasBgpExec";
+        public static final String hasTpExec = NS + "hasTpExec";
+        public static final String hasJoinVarExec = NS + "hasJoinVarExec";
+        public static final String hasTpInBgpExec = NS + "hasTpInBgpExec";
+        public static final String hasSubBgpExec = NS + "hasSubBgpExec";
 
         public static final String usesFeature = "usesFeature";
         public static final String feature = "feature";
-        public static final String count = ns + "count";
+        public static final String count = NS + "count";
 
 
-        public static final String Vertex = ns + "Vertex";
-        public static final String Edge = ns + "Edge";
+        public static final String Vertex = NS + "Vertex";
+        public static final String Edge = NS + "Edge";
 
-        public static final String hasEdge = ns + "hasEdge";
+        public static final String hasEdge = NS + "hasEdge";
 
-        public static final String in = ns + "in";
-        public static final String out = ns + "out";
+        public static final String in = NS + "in";
+        public static final String out = NS + "out";
         // Internal use. Indicates that one resource represents another one
-        public static final String proxyFor = ns + "proxyFor";
+        public static final String proxyFor = NS + "proxyFor";
 
 
 
         // Join vertex type (used as an attribute, hence lower camel case spelling)
-        public static final String star = ns + "star";
-        public static final String sink = ns + "sink";
-        public static final String path = ns + "path";
-        public static final String hybrid = ns + "hybrid";
+        public static final String star = NS + "star";
+        public static final String sink = NS + "sink";
+        public static final String path = NS + "path";
+        public static final String hybrid = NS + "hybrid";
 
 
-        public static final String joinVertex = ns + "joinVertex";
-        public static final String joinVertexType = ns + "joinVertexType";
-        public static final String joinVertexDegree = ns + "joinVertexDegree";
+        public static final String joinVertex = NS + "joinVertex";
+        public static final String joinVertexType = NS + "joinVertexType";
+        public static final String joinVertexDegree = NS + "joinVertexDegree";
 
-        public static final String bgpCount = ns + "bgpCount";
-        public static final String tpCount = ns + "tpCount";
+        public static final String bgpCount = NS + "bgpCount";
+        public static final String tpCount = NS + "tpCount";
 
-        public static final String tpInBgpCountMin = ns + "tpInBgpCountMin";
-        public static final String tpInBgpCountMax = ns + "tpInBgpCountMax";
-        public static final String tpInBgpCountMean = ns + "tpInBgpCountMean";
-        public static final String tpInBgpCountMedian = ns + "tpInBgpCountMedian";
+        public static final String tpInBgpCountMin = NS + "tpInBgpCountMin";
+        public static final String tpInBgpCountMax = NS + "tpInBgpCountMax";
+        public static final String tpInBgpCountMean = NS + "tpInBgpCountMean";
+        public static final String tpInBgpCountMedian = NS + "tpInBgpCountMedian";
 
-        public static final String joinVertexCountTotal = ns + "joinVertexCountTotal";
-        public static final String projectVarCount = ns + "projectVarCount";
+        public static final String joinVertexCountTotal = NS + "joinVertexCountTotal";
+        public static final String projectVarCount = NS + "projectVarCount";
 
         //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
-        public static final String joinVertexDegreeMean = ns + "joinVertexDegreeMean";
-        public static final String joinVertexDegreeMedian = ns + "joinVertexDegreeMedian";
+        public static final String joinVertexDegreeMean = NS + "joinVertexDegreeMean";
+        public static final String joinVertexDegreeMedian = NS + "joinVertexDegreeMedian";
 
-        public static final String hasBgpNode = ns + "hasBgpNode";
+        public static final String hasBgpNode = NS + "hasBgpNode";
 
-        public static final String mentionsSubject = ns + "mentionsSubject";
-        public static final String mentionsPredicate = ns + "mentionsPredicate";
-        public static final String mentionsObject = ns + "mentionsObject";
+        public static final String mentionsSubject = NS + "mentionsSubject";
+        public static final String mentionsPredicate = NS + "mentionsPredicate";
+        public static final String mentionsObject = NS + "mentionsObject";
 
-        public static final String mentionsTuple = ns + "mentionsTuple";
+        public static final String mentionsTuple = NS + "mentionsTuple";
 
-        public static final String sequenceId = ns + "sequenceId";
+        public static final String sequenceId = NS + "sequenceId";
 
-        public static final String host = ns + "host";
-        public static final String hostHash = ns + "hostHash";
+        public static final String host = NS + "host";
+        public static final String hostHash = NS + "hostHash";
         public static final String atTime = PROV.ns + "atTime";
-        public static final String endpoint = ns + "endpoint";
-        public static final String userAgent = ns + "userAgent";
+        public static final String endpoint = NS + "endpoint";
+        public static final String userAgent = NS + "userAgent";
 
-        public static final String config = ns + "config";
-        public static final String requestDelay = ns + "requestDelay";
-        public static final String connectionTimeout = ns + "connectionTimeout";
-        public static final String executionTimeout = ns + "executionTimeout";
+        public static final String config = NS + "config";
+        public static final String requestDelay = NS + "requestDelay";
+        public static final String connectionTimeout = NS + "connectionTimeout";
+        public static final String executionTimeout = NS + "executionTimeout";
 //        public static final String resultSetSizeThreshold = ns + "resultSetSizeThreshold";
-        public static final String datasetSize = ns + "datasetSize";
-        public static final String datasetLabel = ns + "datasetLabel";
-        public static final String datasetIri = ns + "datasetIri";
-        public static final String baseIri = ns + "baseIri";
+        public static final String datasetSize = NS + "datasetSize";
+        public static final String datasetLabel = NS + "datasetLabel";
+        public static final String datasetIri = NS + "datasetIri";
+        public static final String baseIri = NS + "baseIri";
 
-        public static final String tpToGraphRatio = ns + "tpToGraphRatio";
+        public static final String tpToGraphRatio = NS + "tpToGraphRatio";
 
         // Selectivity of a triple pattern in regard to the BGP in which it occurrs
-        public static final String tpSelBGPRestricted = ns +"tpSelBGPRestricted";
+        public static final String tpSelBGPRestricted = NS +"tpSelBGPRestricted";
 
-        public static final String tpToBgpRatio = ns +"tpToBgpRatio";
+        public static final String tpToBgpRatio = NS +"tpToBgpRatio";
 
         // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
-        public static final String tpSelJoinVarRestricted = ns + "tpSelJoinVarRestricted";
+        public static final String tpSelJoinVarRestricted = NS + "tpSelJoinVarRestricted";
 
     }
 
 
 
-    public static Resource resource(String local) { return ResourceFactory.createResource(ns + local); }
-    public static Property property(String local) { return ResourceFactory.createProperty(ns + local); }
+    public static Resource resource(String local) { return ResourceFactory.createResource(NS + local); }
+    public static Property property(String local) { return ResourceFactory.createProperty(NS + local); }
 
     public static final Property config = ResourceFactory.createProperty(Strs.config);
 

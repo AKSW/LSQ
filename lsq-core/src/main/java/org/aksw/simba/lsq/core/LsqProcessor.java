@@ -1219,7 +1219,7 @@ public class LsqProcessor
         Model m = ResourceUtils.reachableClosure(r);
         m.setNsPrefixes(PrefixMapping.Extended);
         m.setNsPrefix("ex", "http://example.org/");
-        m.setNsPrefix("lsq", LSQ.ns);
+        m.setNsPrefix("lsq", LSQ.NS);
         m.setNsPrefix("prov", PROV.ns);
         String result = ModelUtils.toString(m, "TTL");
         return result;
