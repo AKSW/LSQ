@@ -1,6 +1,17 @@
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix lsq:   <http://lsq.aksw.org/vocab#> .
 
+
 <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
+        lsq:connectionTimeout        "60"^^xsd:decimal ;
+        lsq:executionTimeout         "300"^^xsd:decimal ;
+        lsq:maxByteSizeForCounting   "-1"^^xsd:long ;
+        lsq:maxByteSizeForSerialization
+                "1000000"^^xsd:long ;
+        lsq:maxItemCountForCounting  "1000000"^^xsd:long ;
+        lsq:maxItemCountForSerialization
+                "-1"^^xsd:long ;
         lsq:baseIri       <http://lsq.aksw.org/> ;
         lsq:datasetIri    <http://dbpedia.org/somedata> ;
         lsq:datasetLabel  "dbpedia.org-somedata" ;

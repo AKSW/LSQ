@@ -25,6 +25,7 @@ public class TableMgr {
     public static Table parseTableFromString(String str, Lang lang) {
         Objects.requireNonNull(str);
         Table result = null;
+        System.err.println("Parsing result set from string of length " + str.length());
         try(InputStream in = new ByteArrayInputStream(str.getBytes(StandardCharsets.UTF_8))) {
             ResultSet rs = ResultSetMgr.read(in, lang);
             result = TableFactory.create(new QueryIteratorResultSet(rs));

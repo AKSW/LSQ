@@ -142,19 +142,23 @@ public class LsqExec {
 
                     LsqTriplePattern tp = tpExec.getTp();
                     Triple triple = tp.toJenaTriple();
-                    List<Var> tpVars = VarUtils.getVars(triple).stream().sorted().collect(Collectors.toList());
+                    List<Var> tpVars = VarUtils.getVars(triple).stream()
+                            .distinct()
+                            .sorted((a, b) -> a.getName().compareTo(b.getName()))
+                            .collect(Collectors.toList());
 
-                    ExecutionContext execCxt = null;
-                    Multiset<Binding> tpBindings = EvaluatorDispatchWithCaching.evalToMultiset(opTpRs, execCxt);
-                    Multiset<Binding> bgpBindings = EvaluatorDispatchWithCaching.evalToMultiset(new OpProject(opSubBgpRs, tpVars), execCxt);
-                    //Multiset<Binding> bgpBindings = indexResultSet(subBgpRs, tpVars);new OpProject(tpVars);
+                    if(opTpRs != null && opSubBgpRs != null) {
+                        ExecutionContext execCxt = null;
+                        Multiset<Binding> tpBindings = EvaluatorDispatchWithCaching.evalToMultiset(opTpRs, execCxt);
+                        Multiset<Binding> bgpBindings = EvaluatorDispatchWithCaching.evalToMultiset(new OpProject(opSubBgpRs, tpVars), execCxt);
+                        //Multiset<Binding> bgpBindings = indexResultSet(subBgpRs, tpVars);new OpProject(tpVars);
 
-                    int compatibleBindingCount = Multisets.intersection(bgpBindings, tpBindings).size();
-                    int tpBindingCount = tpBindings.size();
+                        int compatibleBindingCount = Multisets.intersection(bgpBindings, tpBindings).size();
+                        int tpBindingCount = tpBindings.size();
 
-                    BigDecimal bgpRestrictedTpSel = safeDivide(compatibleBindingCount, tpBindingCount);
-                    tpExec.setBgpRestrictedTpSel(bgpRestrictedTpSel);
-
+                        BigDecimal bgpRestrictedTpSel = safeDivide(compatibleBindingCount, tpBindingCount);
+                        tpExec.setBgpRestrictedTpSel(bgpRestrictedTpSel);
+                    }
 
 
                     // Compute the ratios and selectivities between each tpInSubBgp and the subBgp

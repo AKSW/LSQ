@@ -69,8 +69,8 @@ public class EvaluatorDispatchWithCaching
 //        return createForKeyedResult(null);
 //    }
 
-    public static EvaluatorDispatch createForKeyedResult(ExecutionContext execCxt, Cache<Op, Table> cache) {
-        Predicate<Op> cacheWriteAllowed = op -> !(op instanceof OpExtKeyAndTableSupplier);
+    public static EvaluatorDispatchWithCaching createForKeyedResult(ExecutionContext execCxt, Cache<Op, Table> cache) {
+        Predicate<Op> cacheWriteAllowed = op -> true; // op -> !(op instanceof OpExtKeyAndTableSupplier);
         Evaluator delegate = EvaluatorFactory.create(execCxt);
 //        Evaluator delegate = new EvaluatorSimple(execCxt) {
 //
@@ -95,7 +95,8 @@ public class EvaluatorDispatchWithCaching
                     push(table);
                 } else if (opExt instanceof OpExtTableToMultiset) {
                     OpExtTableToMultiset o = (OpExtTableToMultiset)opExt;
-                    Table table = eval(o.getSubOp()) ;
+                    Op subOp = o.getSubOp();
+                    Table table = eval(subOp) ;
                     List<Var> vars = table.getVars();
                     QueryIterator it = table.iterator(execCxt);
                     try {
@@ -126,8 +127,8 @@ public class EvaluatorDispatchWithCaching
     protected static final Cache<Op, Table> DEFAULT_CACHE = CacheBuilder.newBuilder().maximumSize(1000).build();
 
     public static Table eval(Op op, ExecutionContext execCxt) {
-        Evaluator evaluator = new EvaluatorSimple(execCxt);
-        EvaluatorDispatchWithCaching ev = new EvaluatorDispatchWithCaching(evaluator, x -> true, DEFAULT_CACHE);
+        // Evaluator evaluator = new EvaluatorSimple(execCxt);
+        EvaluatorDispatchWithCaching ev = createForKeyedResult(execCxt, DEFAULT_CACHE); //new EvaluatorDispatchWithCaching(evaluator, x -> true, DEFAULT_CACHE);
         op.visit(ev);
         Table table = ev.getMyResult();
         return table;
@@ -135,7 +136,8 @@ public class EvaluatorDispatchWithCaching
 
     public static Multiset<Binding> evalToMultiset(Op op, ExecutionContext execCxt) {
         Multiset<Binding> result;
-        Table table = eval(op, execCxt);
+        Op wrappedOp = new OpExtTableToMultiset(op);
+        Table table = eval(wrappedOp, execCxt);
         if(table instanceof TableMultiset) {
             TableMultiset tmp = (TableMultiset)table;
             result = tmp.getRows();
