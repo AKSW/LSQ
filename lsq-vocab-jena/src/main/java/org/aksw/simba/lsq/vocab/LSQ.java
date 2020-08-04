@@ -143,7 +143,7 @@ public class LSQ {
         public static final String tpToGraphRatio = NS + "tpToGraphRatio";
 
         // Selectivity of a triple pattern in regard to the BGP in which it occurrs
-        public static final String tpSelBGPRestricted = NS +"tpSelBGPRestricted";
+        public static final String tpSelBGPRestricted = NS +"bgpRestrictedTpSel";
 
         public static final String tpToBgpRatio = NS +"tpToBgpRatio";
 

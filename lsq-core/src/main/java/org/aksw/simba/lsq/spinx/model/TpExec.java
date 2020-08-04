@@ -27,6 +27,10 @@ public interface TpExec
     TpInBgpExec getTpInBgpExec();
     TpExec setTpInBgpExec(TpInBgpExec tpInBgpExec);
 
+    @Iri(LSQ.Strs.tpSelBGPRestricted)
+    BigDecimal getBgpRestrictedTpSel();
+    TpExec setBgpRestrictedTpSel(BigDecimal bgpRestrictedTpSel);
+
     /**
      * Ratio of resultSetSize(tp) / resultSetSize(dataset)
      *

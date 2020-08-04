@@ -593,8 +593,6 @@ public class LsqBenchmarkProcessor {
                Long rawMaxItemCountForSerialization,
                Long rawMaxByteSizeForSerialization) {
 
-
-
            long connectionTimeout = Optional.ofNullable(rawConnectionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
            long executionTimeout = Optional.ofNullable(rawExecutionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
 

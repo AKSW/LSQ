@@ -2,8 +2,10 @@ package org.aksw.simba.lsq.core;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
@@ -19,9 +21,22 @@ import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.resultset.ResultSetLang;
+import org.apache.jena.sparql.algebra.Op;
+import org.apache.jena.sparql.algebra.op.OpProject;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.ExecutionContext;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.util.VarUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Multiset;
+import com.google.common.collect.Multisets;
 
 /**
  * Utilility methods for creating execution resources w.r.t. a given execution ID for the following SPARQL elements:
@@ -39,6 +54,8 @@ import org.apache.jena.rdf.model.Resource;
  *
  */
 public class LsqExec {
+
+    private static final Logger logger = LoggerFactory.getLogger(LsqExec.class);
 
     public static void createAllExecs(LsqQuery masterQuery, ExperimentRun expRun) {
         Model model = masterQuery.getModel();
@@ -106,6 +123,8 @@ public class LsqExec {
                 QueryExec subBgpQueryExec = subBgpExec.getQueryExec();
                 Long subBgpSize = subBgpQueryExec.getResultSetSize();
 
+                Op opSubBgpRs = parseOpTableFromQueryExec(subBgpQueryExec);
+
                 // For each tpInSubBgp compute its
                 for(TpInBgp tpInSubBgp : subBgp.getTpInBgp()) {
                     TpInBgpExec tpInSubBgpExec = getOrCreateTpInBgpExec(subBgpExec, tpInSubBgp);
@@ -118,6 +137,25 @@ public class LsqExec {
                     BigDecimal subBgpToTpRatio = safeDivide(subBgpSize, tpSize);
 
                     tpInSubBgpExec.setTpToBgpRatio(subBgpToTpRatio);
+
+                    Op opTpRs = parseOpTableFromQueryExec(tpQueryExec);
+
+                    LsqTriplePattern tp = tpExec.getTp();
+                    Triple triple = tp.toJenaTriple();
+                    List<Var> tpVars = VarUtils.getVars(triple).stream().sorted().collect(Collectors.toList());
+
+                    ExecutionContext execCxt = null;
+                    Multiset<Binding> tpBindings = EvaluatorDispatchWithCaching.evalToMultiset(opTpRs, execCxt);
+                    Multiset<Binding> bgpBindings = EvaluatorDispatchWithCaching.evalToMultiset(new OpProject(opSubBgpRs, tpVars), execCxt);
+                    //Multiset<Binding> bgpBindings = indexResultSet(subBgpRs, tpVars);new OpProject(tpVars);
+
+                    int compatibleBindingCount = Multisets.intersection(bgpBindings, tpBindings).size();
+                    int tpBindingCount = tpBindings.size();
+
+                    BigDecimal bgpRestrictedTpSel = safeDivide(compatibleBindingCount, tpBindingCount);
+                    tpExec.setBgpRestrictedTpSel(bgpRestrictedTpSel);
+
+
 
                     // Compute the ratios and selectivities between each tpInSubBgp and the subBgp
 
@@ -139,6 +177,46 @@ public class LsqExec {
 
         }
 
+    }
+
+//    public static Multiset<Binding> indexResultSet(ResultSet rs, Iterable<Var> vars) {
+//        Multiset<Binding> result = HashMultiset.create();
+//        while(rs.hasNext()) {
+//            Binding o = rs.nextBinding();
+//            Binding n = BindingUtils.project(o, vars);
+//
+//            result.add(n);
+//        }
+//        return result;
+//    }
+
+
+
+    /**
+     * Utility method with behavior tailored to LSQ.
+     *
+     * Parse a serialized result from a queryExec object.
+     * Returns null if the queryExec or the serializedResult are null or an exception is raised.
+     * The exception is passed to the logger.
+     *
+     * @param queryExec
+     * @return
+     */
+    public static OpExtKeyAndTableSupplier parseOpTableFromQueryExec(QueryExec queryExec) {
+        OpExtKeyAndTableSupplier result = null;
+        if(queryExec != null) {
+            String str = queryExec.getSerializedResult();
+            if(str != null) {
+                try {
+                    String key = queryExec.toString();
+                    result = new OpExtKeyAndTableSupplier(key, () ->
+                        TableMgr.parseTableFromString(str, ResultSetLang.SPARQLResultSetJSON));
+                } catch(Exception e) {
+                    logger.warn("Failed to parse a result set", e);
+                }
+            }
+        }
+        return result;
     }
 
     /**
