@@ -44,7 +44,7 @@ import org.apache.jena.riot.out.NodeFmtLib;
 public interface LsqQuery
     extends Resource
 {
-    @HashId
+    @HashId(excludeRdfProperty = true)
     @Iri(LSQ.Strs.text)
     String getText();
     LsqQuery setText(String text);

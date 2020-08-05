@@ -10,6 +10,7 @@ import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
+import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Quads;
@@ -69,6 +71,7 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
 import org.apache.jena.sparql.core.Var;
@@ -215,7 +218,7 @@ public class LsqBenchmarkProcessor {
                     indexConn);
 
             for(ResourceInDataset item : items) {
-                RDFDataMgr.write(StdIo.STDOUT, item.getDataset(), Lang.TRIG);
+                RDFDataMgr.write(StdIo.STDOUT, item.getDataset(), RDFFormat.TRIG_BLOCKS);
             }
         }
 
@@ -379,6 +382,13 @@ public class LsqBenchmarkProcessor {
         UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
         Txn.executeWrite(indexConn, () -> indexConn.update(ur));
 
+
+        // Remove the execStatus "processed" triples from the fetched datasets
+        for(Dataset ds : nodeToDataset.values()) {
+            for(Entry<String, Model> e : DatasetUtils.listModels(ds)) {
+                e.getValue().removeAll(null, LSQ.execStatus, null);
+            }
+        }
 //                Txn.executeRead(indexConn, () -> System.out.println(ResultSetFormatter.asText(indexConn.query("SELECT ?s { ?s ?p ?o }").execSelect())));
 
         for(Set<LsqQuery> pack : batch) {
@@ -453,11 +463,14 @@ public class LsqBenchmarkProcessor {
 //                    }
 
 //                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
-            renameResources(lsqBaseIri, renames);
+            Map<Resource, Resource> remap = renameResources(lsqBaseIri, renames);
 
+
+            // If the masterQuery was renamed
+            Resource tgtMasterQuery = remap.getOrDefault(masterQuery, masterQuery);
 
             //String graphIri = masterQuery.getURI();
-            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(masterQuery);
+            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtMasterQuery);
             result.add(item);
 
 
@@ -472,7 +485,18 @@ public class LsqBenchmarkProcessor {
 
 
 
-    public static void renameResources(String lsqBaseIri, Map<RDFNode, String> renames) {
+    /**
+     * Rename resources based on a map of local IDs and a IRI prefix - so the resulting IRI
+     * has the pattern ${baseIri}${localId}.
+     * Returns a map of all renamed resources.
+     *
+     * @param lsqBaseIri
+     * @param renames
+     * @return
+     */
+    public static Map<Resource, Resource> renameResources(String lsqBaseIri, Map<RDFNode, String> renames) {
+        Map<Resource, Resource> result = new HashMap<>();
+
         for(Entry<RDFNode, String> e : renames.entrySet()) {
 //                        HashCode hashCode = e.getValue();
 //                        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
@@ -481,14 +505,18 @@ public class LsqBenchmarkProcessor {
             String iri = lsqBaseIri + part;
             RDFNode n = e.getKey();
             if(n.isResource()) {
+                Resource src = n.asResource();
 //                            System.out.println("--- RENAME: ");
 //                            System.out.println(iri);
 //                            System.out.println(n);
 //                            System.out.println("------------------------");
 //
-                ResourceUtils.renameResource(n.asResource(), iri);
+                Resource tgt = ResourceUtils.renameResource(src, iri);
+                result.put(src, tgt);
             }
         }
+
+        return result;
     }
 
     public static LsqQuery updateLsqQueryIris(

@@ -79,6 +79,7 @@ import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.topbraid.spin.vocabulary.SP;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -330,9 +331,11 @@ public class MainCliLsq {
         Model model = ModelFactory.createDefaultModel();
 
         model
-            .setNsPrefix("lsq", LSQ.NS)
+            .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("dct", DCTerms.NS)
-            .setNsPrefix("xsd", XSD.NS);
+            .setNsPrefix("xsd", XSD.NS)
+            .setNsPrefix("lsqr", "http://lsq.aksw.org/")
+            .setNsPrefix("sp", SP.NS);
 
 
         ExperimentConfig cfg = model.createResource(expIri).as(ExperimentConfig.class);
