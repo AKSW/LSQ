@@ -1,20 +1,26 @@
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 @prefix lsq:   <http://lsq.aksw.org/vocab#> .
+
 
 <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
         lsq:baseIri                  <http://lsq.aksw.org/> ;
-        lsq:connectionTimeout        "60"^^xsd:decimal ;
-        lsq:datasetLabel             "mydataset" ;
-        lsq:datasetSize              "2005615"^^xsd:long ;
-        lsq:endpoint                 [ a       <http://w3id.org/rpif/vocab#DataRefSparqlEndpoint> ;
-                                       <http://w3id.org/rpif/vocab#serviceUrl>
-                                               <http://localhost:8890/sparql>
-                                     ] ;
-        lsq:executionTimeout         "300"^^xsd:decimal ;
+        lsq:connectionTimeoutForRetrieval        "60"^^xsd:decimal ;
+        lsq:executionTimeoutForRetrieval         "300"^^xsd:decimal ;
+        lsq:connectionTimeoutForCounting        "60"^^xsd:decimal ;
+        lsq:executionTimeoutForCounting         "300"^^xsd:decimal ;
         lsq:maxByteSizeForCounting   "-1"^^xsd:long ;
         lsq:maxByteSizeForSerialization
                 "1000000"^^xsd:long ;
         lsq:maxItemCountForCounting  "1000000"^^xsd:long ;
         lsq:maxItemCountForSerialization
                 "-1"^^xsd:long ;
+        lsq:maxCount                            "1000000"^^xsd:long ;
+        lsq:datasetLabel             "mydataset" ;
+        lsq:datasetSize              "2005615"^^xsd:long ;
+        lsq:endpoint                 [ a       <http://w3id.org/rpif/vocab#DataRefSparqlEndpoint> ;
+                                       <http://w3id.org/rpif/vocab#serviceUrl>
+                                               <http://localhost:8890/sparql>
+                                     ] ;
         lsq:userAgent                "Linked SPARQL Queries (LSQ) Client" ;
         dct:identifier               "xc-mydataset_2020-07-25" .

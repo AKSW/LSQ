@@ -4,14 +4,17 @@
 
 
 <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
-        lsq:connectionTimeout        "60"^^xsd:decimal ;
-        lsq:executionTimeout         "300"^^xsd:decimal ;
+        lsq:connectionTimeoutForRetrieval        "60"^^xsd:decimal ;
+        lsq:executionTimeoutForRetrieval         "300"^^xsd:decimal ;
+        lsq:connectionTimeoutForCounting        "60"^^xsd:decimal ;
+        lsq:executionTimeoutForCounting         "300"^^xsd:decimal ;
         lsq:maxByteSizeForCounting   "-1"^^xsd:long ;
         lsq:maxByteSizeForSerialization
                 "1000000"^^xsd:long ;
         lsq:maxItemCountForCounting  "1000000"^^xsd:long ;
         lsq:maxItemCountForSerialization
                 "-1"^^xsd:long ;
+        lsq:maxCount                            "1000000"^^xsd:long ;
         lsq:baseIri       <http://lsq.aksw.org/> ;
         lsq:datasetIri    <http://dbpedia.org/somedata> ;
         lsq:datasetLabel  "dbpedia.org-somedata" ;
@@ -24,7 +27,8 @@
         <http://purl.org/dc/terms/identifier>
                 "xc-dbpedia.org-somedata_2020-07-25" .
 
-<http://www.example.org/exprun-2020-07-25T12:55:55.410Z>
-        lsq:config  <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25> ;
+<http://lsq.aksw.org/xc-mydataset_2020-07-25_2020-08-05T00:24:05.487Z>
+        lsq:config      <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25> ;
+        dct:identifier  "xc-mydataset_2020-07-25_2020-08-05T00:24:05.487Z" ;
         <http://www.w3.org/ns/prov#atTime>
-                "2020-07-25T12:55:55.41Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+                "2020-08-05T00:24:05.487Z"^^xsd:dateTime .

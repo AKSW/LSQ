@@ -68,13 +68,22 @@ public interface ExperimentConfig
      * Benchmark options
      */
 
-    @Iri(LSQ.Strs.connectionTimeout)
-    BigDecimal getQueryConnectionTimeout();
-    ExperimentConfig setQueryConnectionTimeout(BigDecimal requestDelay);
+    @Iri(LSQ.Strs.connectionTimeoutForRetrieval)
+    BigDecimal getConnectionTimeoutForRetrieval();
+    ExperimentConfig setConnectionTimeoutForRetrieval(BigDecimal duration);
 
-    @Iri(LSQ.Strs.executionTimeout)
-    BigDecimal getQueryExecutionTimeout();
-    ExperimentConfig setQueryExecutionTimeout(BigDecimal requestDelay);
+    @Iri(LSQ.Strs.executionTimeoutForRetrieval)
+    BigDecimal getExecutionTimeoutForRetrieval();
+    ExperimentConfig setExecutionTimeoutForRetrieval(BigDecimal duration);
+
+    @Iri(LSQ.Strs.connectionTimeoutForCounting)
+    BigDecimal getConnectionTimeoutForCounting();
+    ExperimentConfig setConnectionTimeoutForCounting(BigDecimal duration);
+
+    @Iri(LSQ.Strs.executionTimeoutForCounting)
+    BigDecimal getExecutionTimeoutForCounting();
+    ExperimentConfig setExecutionTimeoutForCounting(BigDecimal duration);
+
 
     @Iri(LSQ.Strs.maxItemCountForCounting)
     Long getMaxItemCountForCounting();
@@ -92,4 +101,7 @@ public interface ExperimentConfig
     Long getMaxByteSizeForSerialization();
     ExperimentConfig setMaxByteSizeForSerialization(Long maxByteSizeForSerialization);
 
+    @Iri(LSQ.Strs.maxCount)
+    Long getMaxCount();
+    ExperimentConfig setMaxCount(Long maxItemCountForCounting);
 }

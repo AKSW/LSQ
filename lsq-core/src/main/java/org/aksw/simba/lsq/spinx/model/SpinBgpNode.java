@@ -112,7 +112,7 @@ public interface SpinBgpNode
      *
      * @return
      */
-    @Iri(LSQ.Strs.hasSubBGP)
+    @Iri(LSQ.Strs.hasSubBgp)
     SpinBgp getSubBgp();
     SpinBgpNode setSubBgp(Resource subBgp);
 

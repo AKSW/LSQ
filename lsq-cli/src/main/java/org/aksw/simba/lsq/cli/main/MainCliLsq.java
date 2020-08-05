@@ -1,11 +1,10 @@
 package org.aksw.simba.lsq.cli.main;
 
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -43,6 +42,7 @@ import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.core.Skolemize;
+import org.aksw.simba.lsq.core.StdIo;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
@@ -54,7 +54,7 @@ import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
-import org.apache.commons.io.output.CloseShieldOutputStream;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -64,6 +64,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
@@ -72,6 +73,7 @@ import org.apache.jena.riot.WebContent;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.sys.JenaSystem;
+import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
@@ -94,7 +96,6 @@ public class MainCliLsq {
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
 
     // File output stream that raises exceptions in contrast to System.out
-    protected static final OutputStream STDOUT = new CloseShieldOutputStream(new FileOutputStream(FileDescriptor.out));
 
     // public static void displayUsageIf()
 
@@ -195,7 +196,7 @@ public class MainCliLsq {
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
-            RDFDataMgrRx.writeResources(logRdfEvents, STDOUT, RDFFormat.TRIG_PRETTY);
+            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.STDOUT, RDFFormat.TRIG_PRETTY);
         } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
         }
@@ -225,7 +226,7 @@ public class MainCliLsq {
         cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         JenaSystem.init();
-        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, STDOUT);
+        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, StdIo.STDOUT);
     }
 
     // FIXME hasRemoteExec needs to be skolemized - this
@@ -245,7 +246,7 @@ public class MainCliLsq {
         })
         .map(ResourceInDataset::getDataset);
 
-        RDFDataMgrRx.writeDatasets(dsFlow, STDOUT, RDFFormat.TRIG_PRETTY);
+        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.STDOUT, RDFFormat.TRIG_PRETTY);
     }
 
 
@@ -342,12 +343,15 @@ public class MainCliLsq {
                     .setServiceUrl(endpointUrl)
                     .mutateDefaultGraphs(dgs -> dgs.addAll(benchmarkCreateCmd.defaultGraphs))
                     )
-            .setQueryExecutionTimeout(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
-            .setQueryConnectionTimeout(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
+            .setExecutionTimeoutForRetrieval(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
+            .setConnectionTimeoutForRetrieval(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
             .setMaxItemCountForCounting(1000000l) // 1M
             .setMaxByteSizeForCounting(-1l) // limit only by count
             .setMaxItemCountForSerialization(-1l) // limit by byte size
             .setMaxByteSizeForSerialization(1000000l) // 1MB
+            .setExecutionTimeoutForCounting(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
+            .setConnectionTimeoutForCounting(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
+            .setMaxCount(1000000000l)
             .setUserAgent(benchmarkCreateCmd.userAgent)
             .setDatasetSize(datasetSize)
             .setDatasetLabel(datasetLabel)
@@ -355,9 +359,20 @@ public class MainCliLsq {
             .setBaseIri(baseIri)
             ;
 
-        RDFDataMgr.write(STDOUT, model, RDFFormat.TURTLE_PRETTY);
+        RDFDataMgr.write(StdIo.STDOUT, model, RDFFormat.TURTLE_PRETTY);
     }
 
+    /**
+     * Replaces any non-word character (with the exception of '-') with an underescore.
+     * Only suitable for ASCII names; otherwise the result will be mostly composed of underscores!
+     *
+     * @param inputName
+     * @return
+     */
+    public static String sanitizeFilename(String inputName) {
+        String result = inputName.replaceAll("[^\\w-]", "_");
+        return result;
+    }
 
     public static void benchmarkExecute(CmdLsqBenchmarkRun benchmarkExecuteCmd) throws Exception {
         // TTODO Find a nicer way to pass config options around; reusing the command object is far from optimal
@@ -388,15 +403,36 @@ public class MainCliLsq {
         String lsqBaseIri = Objects.requireNonNull(cfg.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         //LsqBenchmeclipse-javadoc:%E2%98%82=jena-sparql-api-conjure/src%5C/main%5C/java%3Corg.aksw.jena_sparql_apiarkProcessor.createProcessor()
 
-        DataRefSparqlEndpoint dataRef = cfg.getDataRef();
-        try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
-            try(SparqlQueryConnection benchmarkConn = dataPod.openConnection()) {
 
-                // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
-                cfg.setDataRef(null);
+        String runId = run.getIdentifier();
+        Objects.requireNonNull(runId, "Experiment run identifier must not be null");
 
-                LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn);
+        // Quick hack to es
+        String fsSafeId = sanitizeFilename(runId);
+
+        Path tdb2BasePath = benchmarkExecuteCmd.tdb2BasePath;
+        Path tdb2FullPath = tdb2BasePath.resolve(fsSafeId);
+        Files.createDirectories(tdb2FullPath);
+        String fullPathStr = tdb2FullPath.toString();
+
+        logger.info("TDB2 benchmark db location: " + tdb2FullPath);
+
+        Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
+        try(RDFConnection indexConn = RDFConnectionFactory.connect(dataset)) {
+
+            DataRefSparqlEndpoint dataRef = cfg.getDataRef();
+            try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
+                try(SparqlQueryConnection benchmarkConn = dataPod.openConnection()) {
+
+                    // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
+                    cfg.setDataRef(null);
+
+                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
+                }
             }
+
+        } finally {
+            dataset.close();
         }
 
     }
@@ -461,7 +497,7 @@ public class MainCliLsq {
         ResourceUtils.renameResource(expRun, runIri);
 
 
-        RDFDataMgr.write(STDOUT, configModel, RDFFormat.TURTLE_PRETTY);
+        RDFDataMgr.write(StdIo.STDOUT, configModel, RDFFormat.TURTLE_PRETTY);
     }
 
 }

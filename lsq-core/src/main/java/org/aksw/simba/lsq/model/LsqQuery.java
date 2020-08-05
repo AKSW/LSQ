@@ -9,9 +9,14 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.jena.ext.com.google.common.hash.HashCode;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
+import org.apache.jena.ext.com.google.common.io.BaseEncoding;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.out.NodeFmtLib;
 
 
 /**
@@ -101,9 +106,16 @@ public interface LsqQuery
 
     public static String createHash(String str) {
 //        System.out.println("Hashing " + str.replace('\n', ' '));
-        String result = str == null ? null : Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
 
-//        System.out.println("Hashing result: " + result);
+        // FIXME The hash computation of the jsa-mapper includes the properties and use the RDF term serialization - so the hashes do not align
+        // The solution would have to exclude the property from id generation and use java string representations of the RDF terms
+        // such as @HashId(excludeProperty=true, toJavaString=true)
+
+        // Node tmp = NodeFmtLib.str(NodeFactory.createLiteral(str));
+        String tmp = str;
+        HashCode hashCode = str == null ? null : Hashing.sha256().hashString(tmp, StandardCharsets.UTF_8);
+        String result = hashCode == null ? null : BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
+
         return result;
     }
 

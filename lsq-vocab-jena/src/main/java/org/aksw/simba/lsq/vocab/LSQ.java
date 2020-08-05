@@ -22,17 +22,26 @@ public class LSQ {
         public static final String itemCount = NS + "itemCount";
         public static final String isDistinct = NS + "isDistinct";
 
+
+        // Thresholds for retrieval based statistics
         public static final String exceededMaxByteSizeForCounting = NS + "exceededMaxByteSizeForCounting";
         public static final String exceededMaxItemCountForCounting = NS + "exceededMaxItemCountForCounting";
         public static final String exceededMaxByteSizeForSerialization = NS + "exceededMaxByteSizeForSerialization";
         public static final String exceededMaxItemCountForSerialization = NS + "exceededMaxItemCountForSerialization";
 
+        public static final String exceededMaxCount = NS + "exceededMaxCount";
+
         public static final String serializedResult = NS + "serializedResult";
 
+        public static final String maxCount = NS + "maxCount";
         public static final String maxItemCountForCounting = NS + "maxItemCountForCounting";
         public static final String maxByteSizeForCounting = NS + "maxByteSizeForCounting";
         public static final String maxItemCountForSerialization = NS + "maxItemCountForSerialization";
         public static final String maxByteSizeForSerialization = NS + "maxByteSizeForSerialization";
+
+        public static final String retrievalDuration = NS + "retrievalDuration";
+        public static final String countingDuration = NS + "countingDuration";
+        public static final String evalDuration = NS + "evalDuration";
 
 
 //        public static final String distinctResultSize = ns + "distinctResultSize";
@@ -41,8 +50,8 @@ public class LSQ {
         public static final String hasSpin = NS + "hasSpin";
         public static final String hasTP = NS + "hasTP";
         public static final String hasTpInBgp = NS + "hasTpInBgp";
-        public static final String hasBGP = NS + "hasBGP";
-        public static final String hasSubBGP = NS + "hasSubBGP";
+        public static final String hasBgp = NS + "hasBgp";
+        public static final String hasSubBgp = NS + "hasSubBgp";
         public static final String extensionQuery = NS + "extensionQuery";
         public static final String joinExtensionQuery = NS + "joinExtensionQuery";
 
@@ -56,6 +65,10 @@ public class LSQ {
         public static final String processingError = NS + "processingError";
         public static final String parseError = NS + "parseError";
         public static final String runTimeMs = NS + "runTimeMs";
+
+        public static final String retrievalError = NS + "retrievalError";
+        public static final String countingError = NS + "countingError";
+
 
         public static final String benchmarkRun = NS + "benchmarkRun";
 
@@ -132,8 +145,13 @@ public class LSQ {
 
         public static final String config = NS + "config";
         public static final String requestDelay = NS + "requestDelay";
-        public static final String connectionTimeout = NS + "connectionTimeout";
-        public static final String executionTimeout = NS + "executionTimeout";
+
+        public static final String connectionTimeoutForRetrieval = NS + "connectionTimeoutForRetrieval";
+        public static final String executionTimeoutForRetrieval = NS + "executionTimeoutForRetrieval";
+        public static final String connectionTimeoutForCounting = NS + "connectionTimeoutForCounting";
+        public static final String executionTimeoutForCounting = NS + "executionTimeoutForCounting";
+
+
 //        public static final String resultSetSizeThreshold = ns + "resultSetSizeThreshold";
         public static final String datasetSize = NS + "datasetSize";
         public static final String datasetLabel = NS + "datasetLabel";
@@ -222,7 +240,7 @@ public class LSQ {
     public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
     public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
     public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
-    public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBGP);
+    public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBgp);
 
     public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBgpNode);
 

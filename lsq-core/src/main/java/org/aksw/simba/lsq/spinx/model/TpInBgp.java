@@ -20,7 +20,7 @@ public interface TpInBgp
     extends Resource
 {
     @HashId
-    @Iri(LSQ.Strs.hasBGP)
+    @Iri(LSQ.Strs.hasBgp)
     SpinBgp getBgp();
     TpInBgp setBgp(Resource bgp);
 

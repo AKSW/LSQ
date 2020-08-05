@@ -449,25 +449,25 @@ public class QueryStatistics2 {
      *
      * @param queryRes
      */
-    public static void enrichSpinQueryWithBgpStats(SpinQueryEx queryRes) {
-
-        List<Integer> bgpSizes = queryRes.getBgps().stream()
-                .map(SpinBgp::toBasicPattern)
-                .map(BasicPattern::size)
-                .collect(Collectors.toList());
-
-        // Find out minimum and maximum size of the bgpgs
-        int totalBgpCount = bgpSizes.size();
-        int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
-        int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
-        int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
-
-        queryRes
-            .setTotalBgpCount(totalBgpCount)
-            .setMinBgpTriples(minBgpTripleCount)
-            .setMaxBgpTriples(maxBgpTripleCount)
-            .setTriplePatternCount(triplePatternCount);
-    }
+//    public static void enrichSpinQueryWithBgpStats(SpinQueryEx queryRes) {
+//
+//        List<Integer> bgpSizes = queryRes.getBgps().stream()
+//                .map(SpinBgp::toBasicPattern)
+//                .map(BasicPattern::size)
+//                .collect(Collectors.toList());
+//
+//        // Find out minimum and maximum size of the bgpgs
+//        int totalBgpCount = bgpSizes.size();
+//        int maxBgpTripleCount = bgpSizes.stream().max(Integer::max).orElse(0);
+//        int minBgpTripleCount = bgpSizes.stream().min(Integer::min).orElse(0);
+//        int triplePatternCount = bgpSizes.stream().mapToInt(x -> x).sum();
+//
+//        queryRes
+//            .setTotalBgpCount(totalBgpCount)
+//            .setMinBgpTriples(minBgpTripleCount)
+//            .setMaxBgpTriples(maxBgpTripleCount)
+//            .setTriplePatternCount(triplePatternCount);
+//    }
 
 
 

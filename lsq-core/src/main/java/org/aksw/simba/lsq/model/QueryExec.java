@@ -29,9 +29,24 @@ public interface QueryExec extends Resource {
 //    ExperimentRun getBenchmarkRun();
 //    ElementExec setBenchmarkRun(Resource benchmarkRun);
 
-    @Iri(LSQ.Strs.runTimeMs)
-    BigDecimal getRuntimeInMs();
-    QueryExec setRuntimeInMs(BigDecimal runtimeInMs);
+    @Iri(LSQ.Strs.retrievalDuration)
+    BigDecimal getRetrievalDuration();
+    QueryExec setRetrievalDuration(BigDecimal runtimeInMs);
+
+    @Iri(LSQ.Strs.countingDuration)
+    BigDecimal getCountDuration();
+    QueryExec setCountDuration(BigDecimal runtimeInMs);
+
+    /**
+     * The total amount of time spent benchmarking which may have involved trying out multiple
+     * strategies
+     *
+     * @return
+     */
+    @Iri(LSQ.Strs.evalDuration)
+    BigDecimal getEvalDuration();
+    QueryExec setEvalDuration(BigDecimal duration);
+
 
     @Iri(LSQ.Strs.itemCount)
     Long getResultSetSize();
@@ -57,9 +72,13 @@ public interface QueryExec extends Resource {
     String getSerializedResult();
     QueryExec setSerializedResult(String serializedResult);
 
-    @Iri(LSQ.Strs.processingError)
-    String getProcessingError();
-    QueryExec setProcessingError(String error);
+    @Iri(LSQ.Strs.retrievalError)
+    String getRetrievalError();
+    QueryExec setRetrievalError(String msg);
+
+    @Iri(LSQ.Strs.countingError)
+    String getCountingError();
+    QueryExec setCountingError(String msg);
 
     @Iri(LSQ.Strs.atTime)
     XSDDateTime getTimestamp();

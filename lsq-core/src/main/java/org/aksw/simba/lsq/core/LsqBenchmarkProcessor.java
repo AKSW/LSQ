@@ -22,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.core.utils.QueryGenerationUtils;
+import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
@@ -34,10 +36,13 @@ import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Quads;
 import org.aksw.jena_sparql_api.utils.ResultSetUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
+import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
@@ -52,6 +57,7 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.rdf.model.Model;
@@ -63,9 +69,9 @@ import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.core.Var;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.ElementFilter;
@@ -129,7 +135,8 @@ public class LsqBenchmarkProcessor {
         Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
                 .map(r -> r.as(LsqQuery.class));
 
-        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn);
+        // TODO Need to set up an index connection
+        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
     }
 
     /**
@@ -145,7 +152,8 @@ public class LsqBenchmarkProcessor {
             String lsqBaseIri,
             ExperimentConfig config,
             ExperimentRun expRun,
-            SparqlQueryConnection benchmarkConn) {
+            SparqlQueryConnection benchmarkConn,
+            RDFConnection indexConn) {
 
 
         //ExperimentConfig config = expRun.getConfig();
@@ -195,23 +203,20 @@ public class LsqBenchmarkProcessor {
         Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
 
         // Create a database to ensure uniqueness of evaluation tasks
-        Dataset dataset = TDB2Factory.connectDataset("/tmp/lsq-benchmark-index");
-        try(RDFConnection indexConn = RDFConnectionFactory.connect(dataset)) {
+        while(itBatches.hasNext()) {
+            List<Set<LsqQuery>> batch = itBatches.next();
+            List<ResourceInDataset> items = processBatchOfQueries(
+                    batch,
+                    lsqBaseIri,
+                    config,
+                    expRun,
+                    benchmarkConn,
+                    lsqQueryExecFn,
+                    indexConn);
 
-            while(itBatches.hasNext()) {
-                List<Set<LsqQuery>> batch = itBatches.next();
-                processBatchOfQueries(
-                        batch,
-                        lsqBaseIri,
-                        config,
-                        expRun,
-                        benchmarkConn,
-                        lsqQueryExecFn,
-                        indexConn);
+            for(ResourceInDataset item : items) {
+                RDFDataMgr.write(StdIo.STDOUT, item.getDataset(), Lang.TRIG);
             }
-        } finally {
-            dataset.close();
-
         }
 
 
@@ -271,7 +276,7 @@ public class LsqBenchmarkProcessor {
     }
 
 
-    public static void processBatchOfQueries(
+    public static List<ResourceInDataset> processBatchOfQueries(
             List<Set<LsqQuery>> batch,
             String lsqBaseIri,
             ExperimentConfig config,
@@ -279,6 +284,8 @@ public class LsqBenchmarkProcessor {
             SparqlQueryConnection benchmarkConn,
             Function<LsqQuery, String> lsqQueryExecFn,
             RDFConnection indexConn) {
+
+        List<ResourceInDataset> result = new ArrayList<>();
 
         Set<Node> lookupHashNodes = batch.stream()
                 .flatMap(item -> item.stream())
@@ -344,12 +351,15 @@ public class LsqBenchmarkProcessor {
                     benchmarkConn,
                     queryStr,
                     qe,
-                    config.getQueryConnectionTimeout(),
-                    config.getQueryExecutionTimeout(),
+                    config.getConnectionTimeoutForRetrieval(),
+                    config.getExecutionTimeoutForRetrieval(),
                     config.getMaxItemCountForCounting(),
                     config.getMaxByteSizeForCounting(),
                     config.getMaxItemCountForSerialization(),
-                    config.getMaxByteSizeForSerialization());
+                    config.getMaxByteSizeForSerialization(),
+                    config.getConnectionTimeoutForCounting(),
+                    config.getConnectionTimeoutForRetrieval(),
+                    config.getMaxCount());
 
             item.getLocalExecutions().add(le);
             le.setBenchmarkRun(expRun);
@@ -446,10 +456,15 @@ public class LsqBenchmarkProcessor {
             renameResources(lsqBaseIri, renames);
 
 
+            //String graphIri = masterQuery.getURI();
+            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(masterQuery);
+            result.add(item);
 
 
-            RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
+            //RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
         }
+
+        return result;
     }
 
 
@@ -501,10 +516,11 @@ public class LsqBenchmarkProcessor {
         // Add self by default
         result.add(masterQuery);
 
-        SpinQueryEx spinNode = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+        //SpinQueryEx spinNode = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+        LsqStructuralFeatures bgpInfo = masterQuery.getStructuralFeatures();
 
 
-        for(SpinBgp bgp : spinNode.getBgps()) {
+        for(SpinBgp bgp : bgpInfo.getBgps()) {
             extractAllQueriesFromBgp(result, bgp);
         }
 
@@ -586,15 +602,20 @@ public class LsqBenchmarkProcessor {
                SparqlQueryConnection conn,
                String queryStr,
                QueryExec result,
-               BigDecimal rawConnectionTimeout,
-               BigDecimal rawExecutionTimeout,
+               BigDecimal rawConnectionTimeoutForRetrieval,
+               BigDecimal rawExecutionTimeoutForRetrieval,
                Long rawMaxItemCountForCounting,
                Long rawMaxByteSizeForCounting,
                Long rawMaxItemCountForSerialization,
-               Long rawMaxByteSizeForSerialization) {
+               Long rawMaxByteSizeForSerialization,
+               BigDecimal rawConnectionTimeoutForCounting,
+               BigDecimal rawExecutionTimeoutForCounting,
+               Long rawMaxCount
+               ) {
 
-           long connectionTimeout = Optional.ofNullable(rawConnectionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
-           long executionTimeout = Optional.ofNullable(rawExecutionTimeout).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+
+           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
 
            long maxItemCountForCounting = Optional.ofNullable(rawMaxItemCountForCounting).orElse(-1l);
            long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
@@ -602,27 +623,42 @@ public class LsqBenchmarkProcessor {
            long maxItemCountForSerialization = Optional.ofNullable(rawMaxItemCountForSerialization).orElse(-1l);
            long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
 
+           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+
+           long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
+
            boolean exceededMaxItemCountForSerialization = false;
            boolean exceededMaxByteSizeForSerialization = false;
 
            boolean exceededMaxItemCountForCounting = false;
            boolean exceededMaxByteSizeForCounting = false;
 
+           Instant now = Instant.now();
+           ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+           Calendar cal = GregorianCalendar.from(zdt);
+           XSDDateTime xsdDateTime = new XSDDateTime(cal);
 
-           Stopwatch sw = Stopwatch.createStarted();
+           result.setTimestamp(xsdDateTime);
+
            logger.info("Benchmarking " + queryStr);
+           Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
+           Stopwatch retrievalSw = Stopwatch.createStarted();
 
            List<String> varNames = new ArrayList<>();
+
+           boolean isItemCountComplete = false;
+           long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
+           List<Binding> cache = new ArrayList<>();
+
            try(QueryExecution qe = conn.query(queryStr)) {
-               qe.setTimeout(connectionTimeout, executionTimeout);
+               qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
 
                ResultSet rs = qe.execSelect();
                varNames.addAll(rs.getResultVars());
 
                long estimatedByteSize = 0;
-               List<Binding> cache = new ArrayList<>();
 
-               long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
                while(rs.hasNext()) {
                    ++itemCount;
 
@@ -684,29 +720,75 @@ public class LsqBenchmarkProcessor {
                    result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
                }
 
-               if(!exceededMaxItemCountForCounting && !exceededMaxByteSizeForCounting) {
-                   result.setResultSetSize(itemCount);
+               // Try obtaining a count with a separate query
+               isItemCountComplete = !exceededMaxItemCountForCounting && !exceededMaxByteSizeForCounting;
+
+           } catch(Exception e) {
+               String errorMsg = e.toString();
+               result.setRetrievalError(errorMsg);
+               logger.warn("Retrieval error: ", e);
+           }
+
+           BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
+                   .divide(new BigDecimal(1000000000));
+
+
+           result.setRetrievalDuration(retrievalDuration);
+
+
+           if(!isItemCountComplete) {
+               // Try to count using a query and discard the current elapsed time
+
+               Long countItemLimit = maxCount >= 0 ? maxCount : null;
+               Query query = QueryFactory.create(queryStr);
+               // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
+               Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
+
+               Var countVar = queryAndVar.getKey();
+               Query countQuery = queryAndVar.getValue();
+
+               Stopwatch countingSw = Stopwatch.createStarted();
+
+               try(QueryExecution qe = conn.query(countQuery)) {
+                   qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
+
+                   Number count = ServiceUtils.fetchNumber(qe, countVar);
+                   if(count != null) {
+                       itemCount = count.longValue();
+
+                       isItemCountComplete = countItemLimit == null | itemCount < countItemLimit;
+                   }
+               } catch(Exception e) {
+                   String errorMsg = e.toString();
+                   result.setCountingError(errorMsg);
+                   logger.warn("Counting error: ", e);
                }
 
+               BigDecimal countingDuration = new BigDecimal(countingSw.stop().elapsed(TimeUnit.NANOSECONDS))
+                       .divide(new BigDecimal(1000000000));
+
+               result.setCountDuration(countingDuration);
+           }
+
+           if(isItemCountComplete) {
+               result.setResultSetSize(itemCount);
+           }
+
+           if(cache != null) {
                ByteArrayOutputStream baos = new ByteArrayOutputStream();
                ResultSet replay = ResultSetUtils.create(varNames, cache.iterator());
                ResultSetFormatter.outputAsJSON(baos, replay);
                result.setSerializedResult(baos.toString());
-
-           } catch(Exception e) {
-               String errorMsg = e.toString();
-               result.setProcessingError(errorMsg);
-               logger.warn("Benchmark failure: ", e);
            }
 
-           BigDecimal durationInMillis = new BigDecimal(sw.stop().elapsed(TimeUnit.NANOSECONDS))
-                   .divide(new BigDecimal(1000000));
 
-           result
-               .setRuntimeInMs(durationInMillis)
-           ;
+           BigDecimal evalDuration = new BigDecimal(evalSw.stop().elapsed(TimeUnit.NANOSECONDS))
+                   .divide(new BigDecimal(1000000000));
 
-           logger.info("Benchmark result after " + durationInMillis + " ms: " + result.getResultSetSize() + " " + result.getProcessingError());
+
+           result.setEvalDuration(evalDuration);
+
+           logger.info("Benchmark result after " + evalDuration + " ms: " + result.getResultSetSize() + " " + result.getRetrievalError());
 
            return result;
            //Calendar end = Calendar.getInstance();
