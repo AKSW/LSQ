@@ -428,7 +428,7 @@ public class MainCliLsq {
                 try(SparqlQueryConnection benchmarkConn = dataPod.openConnection()) {
 
                     // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
-                    cfg.setDataRef(null);
+//                    cfg.setDataRef(null);
 
                     LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
                 }
