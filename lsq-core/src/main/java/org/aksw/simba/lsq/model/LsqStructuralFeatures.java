@@ -37,7 +37,7 @@ public interface LsqStructuralFeatures
     default String getStringId(HashIdCxt cxt) {
         LsqQuery query = getQuery();
         String queryId = cxt.getString(query) + "-sf"; // cxt.getHashAsString(query);
-        return "sf-" + queryId;
+        return queryId;
     }
 
 
