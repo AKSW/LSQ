@@ -13,7 +13,7 @@ import picocli.CommandLine.Option;
         CmdLsqProbe.class
 })
 public class CmdLsqMain {
-    @Option(names={"-h", "--help"}, help=true, description="Show general help")
+    @Option(names={"-h", "--help"}, usageHelp = true, description = "Show general help")
     public boolean help = false;
 
 }

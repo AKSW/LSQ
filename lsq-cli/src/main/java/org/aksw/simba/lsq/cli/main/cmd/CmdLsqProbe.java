@@ -10,11 +10,11 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name="probe", description = "Show LSQ log format prober options")
+@Command(name="probe", description = "Probe log files for known formats")
 public class CmdLsqProbe
     implements Callable<Integer>
 {
-    @Option(names={"-h", "--help"}, help=true)
+    @Option(names={"-h", "--help"}, usageHelp=true)
     public boolean help = false;
 
 //	@Parameter(names={"-m", "--format"}, description="Input log format")

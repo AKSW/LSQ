@@ -1,10 +1,14 @@
-## Work in Progress
+# Linked SPARQL Queries (LSQ) Framework
+A framework for RDFizing query logs and benchmarking queries and graph patterns.
 
-The new version of LSQ now allows for decoupling of the RDFization of log files from the analysis.
-The main improvements of the now approach of LSQ are:
+### What's New
 
-* No more single monolithic processing command: The new approach is easier-to-use and less error-prone.
-* No more single monolithic RDF output. We once created 3TB of plain ntriples - which was a huge pain to process. LSQ now employs an RDF Stream Processing approach, such that related information about web log entries and queries are grouped together in named graphs. Each named graph thus represents a meaningful unit of information that can be used indepedently.
+### 2020-08-06 LSQ2 Pre-release
+LSQ2 is a great step over the initial version.
+
+* Pretty CLI (thanks to on [picocli](https://github.com/remkop/picocli))
+* Easier yet more flexible to use: RDFization, static analysis and benchmarking now decoupled
+* Named graph stream approach: Information for each query is grouped in its own named graph which allows easily selecting subsets with complete information for detailed analysis.
 
 ## Working with streams of named graphs
 

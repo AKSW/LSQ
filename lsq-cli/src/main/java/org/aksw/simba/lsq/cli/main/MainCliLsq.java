@@ -316,12 +316,14 @@ public class MainCliLsq {
 //            logger.info("If successful, restart lsq with -s <obtainedDatasetSize>");
 
             // TODO inject default graphs
+            String countQueryStr = "SELECT (COUNT(*) AS ?c) { ?s ?p ?o }";
+            logger.info("Attempting to count number of triples using query " + countQueryStr);
             try(RDFConnection conn = RDFConnectionRemote.create()
                 .destination(endpointUrl)
                 .acceptHeaderSelectQuery(WebContent.contentTypeResultsXML)
                 .build()) {
 
-                Object raw = SparqlRx.execSelect(conn, "SELECT (COUNT(*) AS ?c) { ?s ?p ?o }")
+                Object raw = SparqlRx.execSelect(conn, countQueryStr)
                     .blockingFirst()
                     .get("c").asNode().getLiteralValue();
                 datasetSize = ((Number)raw).longValue();
