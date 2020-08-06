@@ -16,6 +16,8 @@ public class CmdLsqBenchmarkCreate
     @Option(names={"-h", "--help"}, help=true)
     public boolean help = false;
 
+    @Option(names= {"-o", "--stdout"}, description="Output generated config to STDOUT instead of a file")
+    public boolean stdout = false;
 
     @Option(names= {"-a", "--user-agent"}, description="User agent")
     public String userAgent = "Linked SPARQL Queries (LSQ) Client";

@@ -1,10 +1,14 @@
 package org.aksw.simba.lsq.cli.main;
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -54,7 +58,6 @@ import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
-import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
@@ -304,6 +307,11 @@ public class MainCliLsq {
 
 
         String expId = "xc-" + datasetLabel + "_" + timestamp;
+
+        // Not used if stdout flag is set
+        String outFilename = sanitizeFilename(expId) + ".conf.ttl";
+
+
         String expIri = baseIri + expId;
 
         Long qt = benchmarkCreateCmd.queryTimeoutInMs;
@@ -364,7 +372,21 @@ public class MainCliLsq {
             .setBaseIri(baseIri)
             ;
 
-        RDFDataMgr.write(StdIo.STDOUT, model, RDFFormat.TURTLE_PRETTY);
+        Path outPath = null;
+        if (!benchmarkCreateCmd.stdout) {
+            outPath = Paths.get(outFilename).toAbsolutePath().normalize();
+            logger.info("Writing config to " + outPath);
+        }
+
+        try(OutputStream out = outPath == null
+                ? StdIo.STDOUT
+                : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+            RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY);
+        }
+
+        if(outPath != null) {
+            System.out.println(outPath);
+        }
     }
 
     /**
@@ -412,7 +434,7 @@ public class MainCliLsq {
         String runId = run.getIdentifier();
         Objects.requireNonNull(runId, "Experiment run identifier must not be null");
 
-        // Quick hack to es
+        // Create a folder with the database for the run
         String fsSafeId = sanitizeFilename(runId);
 
         Path tdb2BasePath = benchmarkExecuteCmd.tdb2BasePath;
@@ -490,6 +512,9 @@ public class MainCliLsq {
         String configId = config.getIdentifier();
         String runId = configId + "_" + timestampStr;
 
+        // Not used if stdout flag is set
+        String outFilename = sanitizeFilename(runId) + ".run.ttl";
+
         ExperimentRun expRun = configModel
                 .createResource()
                 .as(ExperimentRun.class)
@@ -502,7 +527,21 @@ public class MainCliLsq {
         ResourceUtils.renameResource(expRun, runIri);
 
 
-        RDFDataMgr.write(StdIo.STDOUT, configModel, RDFFormat.TURTLE_PRETTY);
+        Path outPath = null;
+        if (!benchmarkCmd.stdout) {
+            outPath = Paths.get(outFilename).toAbsolutePath().normalize();
+            logger.info("Writing run information to " + outPath);
+        }
+
+        try (OutputStream out = outPath == null
+                ? StdIo.STDOUT
+                : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+            RDFDataMgr.write(out, configModel, RDFFormat.TURTLE_PRETTY);
+        }
+
+        if(outPath != null) {
+            System.out.println(outPath);
+        }
     }
 
 }
