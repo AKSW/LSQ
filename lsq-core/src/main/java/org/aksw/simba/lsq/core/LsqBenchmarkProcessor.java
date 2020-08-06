@@ -399,14 +399,16 @@ public class LsqBenchmarkProcessor {
             LsqQuery masterQuery = pack.iterator().next();
 
 
-            Model model = ModelFactory.createDefaultModel();
+            Model masterQueryModel = ModelFactory.createDefaultModel();
 
 
             // We need to add the config model in order to include the benchmark run id
+            // We remove the config once we are done
+
             // TODO We should ensure that only the minimal necessary config model is added
             Model configModel = config.getModel();
 //                    expRoot.getModel().add(configModel);
-            model.add(configModel);
+            masterQueryModel.add(configModel);
 
 
             //Model model = rootQuery.getModel();
@@ -427,12 +429,12 @@ public class LsqBenchmarkProcessor {
 //                        System.err.println("END***********************************************");
 
                 // Adding the master query's model to itself should be harmless
-                model.add(m);
-                model.add(item.getModel());
+                masterQueryModel.add(m);
+                masterQueryModel.add(item.getModel());
             }
 
 
-            masterQuery = masterQuery.inModel(model).as(LsqQuery.class);
+            masterQuery = masterQuery.inModel(masterQueryModel).as(LsqQuery.class);
 
             SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
 
@@ -463,6 +465,9 @@ public class LsqBenchmarkProcessor {
 //                    }
 
 //                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
+
+            masterQueryModel.remove(configModel);
+
             Map<Resource, Resource> remap = renameResources(lsqBaseIri, renames);
 
 
