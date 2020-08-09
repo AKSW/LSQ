@@ -675,6 +675,17 @@ public class LsqBenchmarkProcessor {
            result.setTimestamp(xsdDateTime);
 
            logger.info("Benchmarking " + queryStr);
+
+           Query query;
+
+           try {
+               query = QueryFactory.create(queryStr);
+           } catch (Exception e) {
+               logger.warn("Skipping benchmark because query failed to parse", e);
+               return result;
+           }
+
+
            Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
            Stopwatch retrievalSw = Stopwatch.createStarted();
 
@@ -684,7 +695,7 @@ public class LsqBenchmarkProcessor {
            long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
            List<Binding> cache = new ArrayList<>();
 
-           try(QueryExecution qe = conn.query(queryStr)) {
+           try(QueryExecution qe = conn.query(query)) {
                qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
 
                ResultSet rs = qe.execSelect();
@@ -773,7 +784,6 @@ public class LsqBenchmarkProcessor {
                // Try to count using a query and discard the current elapsed time
 
                Long countItemLimit = maxCount >= 0 ? maxCount : null;
-               Query query = QueryFactory.create(queryStr);
                // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
                Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
 
