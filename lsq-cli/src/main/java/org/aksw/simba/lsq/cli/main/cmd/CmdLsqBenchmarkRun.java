@@ -11,6 +11,7 @@ import org.aksw.simba.lsq.cli.main.MainCliLsq;
 import com.google.common.base.StandardSystemProperty;
 
 import picocli.CommandLine.Command;
+import picocli.CommandLine.Help.Visibility;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
@@ -25,7 +26,7 @@ public class CmdLsqBenchmarkRun
     @Option(names= {"-c", "--config"}, required=true, description="Configuration file (RDF)")
     public String config = null;
 
-    @Option(names= {"--tdb"}, description="Base path to the TDB2 database directory for indexing benchmark results")
+    @Option(names= {"--tdb"}, description="Base path to the TDB2 database directory for indexing benchmark results", showDefaultValue = Visibility.ALWAYS)
     public Path tdb2BasePath = Paths.get(StandardSystemProperty.JAVA_IO_TMPDIR.value()).resolve("lsq").normalize();
 
     @Parameters(arity = "1..*", paramLabel="FILE", description="Log files to process")

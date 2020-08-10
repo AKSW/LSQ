@@ -124,7 +124,8 @@ public class LsqEnrichments {
                     Node jenaNode = bgpNode.toJenaNode();
                     bgpNode.setLabel(NodeFmtLib.str(jenaNode));
 
-                    if(createQueryResources && jenaNode.isVariable()) {
+                    boolean createJoinExtension = false;
+                    if(createJoinExtension && createQueryResources && jenaNode.isVariable()) {
                         LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
                         if(extensionQuery == null) {
                             extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
