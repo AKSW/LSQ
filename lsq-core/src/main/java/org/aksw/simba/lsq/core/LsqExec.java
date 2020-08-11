@@ -11,12 +11,12 @@ import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.QueryExec;
+import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.JoinVertexExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
 import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
 import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
-import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
@@ -59,7 +59,8 @@ public class LsqExec {
 
     public static void createAllExecs(LsqQuery masterQuery, ExperimentRun expRun) {
         Model model = masterQuery.getModel();
-        SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+        //SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+        BgpInfo spinRoot = masterQuery.getStructuralFeatures();
 
         Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
         LocalExecution expRoot = rleMap.get(expRun);

@@ -7,17 +7,20 @@ import org.aksw.jena_sparql_api.cache.file.CacheBackendFile;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
+import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.riot.RDFDataMgr;
 
 public class MainDeleteme {
 
+
     public static void main(String[] args) {
     QueryExecutionFactory qef = FluentQueryExecutionFactory.http("http://akswnc7.informatik.uni-leipzig.de:8897/sparql")
         .config()
         .withCache(new CacheBackendFile(new File("/tmp/cache/foo2"), 7 * 24 * 60 * 60 * 1000 /* ms */)) // Das ist der letzte Wrapper in der Chain
-        .withPagination((int) 1000000)
+        .withPagination((int) 1000)
+        .withQueryTransform(QueryGenerationUtils::virtuosoFixForOrderedSlicing)
         //.withClientSideConstruct()
         .withParser(SparqlQueryParserImpl.create()) // Der wrapper kommt zuerst
             .end()
@@ -55,7 +58,7 @@ public class MainDeleteme {
                   "    FILTER regex(?huisletter,\"[a-z]\") #When the street number is followed by a letter (14a) it will always be in lower case.\n" +
                   "    BIND (replace(replace(?geometry, \",.*\", \"\"),\"POLYGON\\\\(\\\\(\", \"\") AS ?point) #Take the first point from the polygon\n" +
                   "    BIND (CONCAT(?openbareruimte,\" \",?huisnummer,?huisletter) AS ?address)\n" +
-                  "}").execConstructTriples();
+                  "} ORDER BY ?pand").execConstructTriples();
     //  FileOutputStream stream = null;
       //  try {
       //    stream = new FileOutputStream(new File(theDir.getPath(), fileName+".nt"));
@@ -80,8 +83,12 @@ public class MainDeleteme {
 //        RDFDataMgr.write(System.out, m, Lang.TURTLE);
 //        System.out.println("model size: " + m.size());
         Iterator<Triple> it = qe.execConstructTriples();
+        long c = 0;
         while(it.hasNext()) {
+            ++c;
             System.out.println(it.next());
         }
+
+        System.out.println("Counted: " + c);
     }
 }
