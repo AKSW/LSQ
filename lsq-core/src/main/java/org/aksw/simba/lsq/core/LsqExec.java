@@ -98,9 +98,11 @@ public class LsqExec {
                 tpInBgpExec.setSelectivity(value);
             }
 
+            // Process join vertices ...
             for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
                 Node jenaNode = bgpNode.toJenaNode();
 
+                // ... they need to be variables
                 if(!jenaNode.isVariable()) {
                     continue;
                 }
@@ -120,6 +122,10 @@ public class LsqExec {
 
                 SpinBgp subBgp = bgpNode.getSubBgp();
                 SpinBgpExec subBgpExec = getOrCreateSubBgpExec(expRun, subBgp);
+
+                // Connect the subBgp to the bgpNodeExec
+                bgpNodeExec.setSubBgpExec(subBgpExec);
+
 
                 QueryExec subBgpQueryExec = subBgpExec.getQueryExec();
                 Long subBgpSize = subBgpQueryExec.getResultSetSize();

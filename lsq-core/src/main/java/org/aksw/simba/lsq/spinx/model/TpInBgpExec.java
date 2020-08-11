@@ -29,7 +29,7 @@ public interface TpInBgpExec
     TpExec getTpExec();
     TpInBgpExec setTpExec(TpExec tpExec);
 
-    @Iri(LSQ.Strs.hasTP)
+    @Iri(LSQ.Strs.hasTp)
     @Inverse
     TpInBgp getTpInBgp();
     TpInBgpExec setTpInBgp(Resource tpInBgp);

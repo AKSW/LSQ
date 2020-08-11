@@ -48,7 +48,7 @@ public class LSQ {
 
         public static final String hasStructuralFeatures = NS + "hasStructuralFeatures";
         public static final String hasSpin = NS + "hasSpin";
-        public static final String hasTP = NS + "hasTP";
+        public static final String hasTp = NS + "hasTp";
         public static final String hasTpInBgp = NS + "hasTpInBgp";
         public static final String hasBgp = NS + "hasBgp";
         public static final String hasSubBgp = NS + "hasSubBgp";
@@ -239,7 +239,7 @@ public class LSQ {
     public static final Property itemCount = ResourceFactory.createProperty(Strs.itemCount);
     public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
     public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
-    public static final Property hasTP = ResourceFactory.createProperty(Strs.hasTP);
+    public static final Property hasTp = ResourceFactory.createProperty(Strs.hasTp);
     public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBgp);
 
     public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBgpNode);

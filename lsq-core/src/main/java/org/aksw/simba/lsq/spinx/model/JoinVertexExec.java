@@ -2,7 +2,6 @@ package org.aksw.simba.lsq.spinx.model;
 
 import java.math.BigDecimal;
 
-import org.aksw.facete.v3.bgp.api.BgpNode;
 import org.aksw.jena_sparql_api.mapper.annotation.IdPrefix;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -13,7 +12,6 @@ import org.aksw.simba.lsq.model.ElementExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.rdf.model.Resource;
 
 
 @ResourceView
@@ -21,10 +19,10 @@ import org.apache.jena.rdf.model.Resource;
 public interface JoinVertexExec
     extends ElementExec
 {
-    @Iri(LSQ.Strs.hasJoinVarExec)
+    @Iri(LSQ.Strs.hasExec)
     @Inverse
-    BgpNode getBgpNode();
-    JoinVertexExec setBgpNode(Resource bpgNode);
+    SpinBgpNode getBgpNode();
+    JoinVertexExec setBgpNode(SpinBgpNode bpgNode);
 
 
     @Iri(LSQ.Strs.tpSelJoinVarRestricted)
@@ -39,7 +37,6 @@ public interface JoinVertexExec
 
 
     @Iri(LSQ.Strs.hasSubBgpExec)
-    @Inverse
     SpinBgpExec getSubBgpExec();
     JoinVertexExec setSubBgpExec(SpinBgpExec exec);
 

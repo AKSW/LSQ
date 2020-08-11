@@ -282,7 +282,7 @@ public class SpinUtils {
         Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach(r ->
-            targetRes.addProperty(LSQ.hasTP, r)
+            targetRes.addProperty(LSQ.hasTp, r)
         );
     }
 
@@ -401,7 +401,7 @@ public class SpinUtils {
 
             queryTpExecRes
                 //.addProperty(RDF.type, LSQ.tpExec)
-                .addProperty(LSQ.hasTP, r);
+                .addProperty(LSQ.hasTp, r);
 
 
             //result.add(queryTpExecRes);
@@ -414,7 +414,7 @@ public class SpinUtils {
     public static void enrichModelWithTriplePatternSelectivities(Set<Resource> tpExecRess, QueryExecutionFactory qef, long totalTripleCount) {
 
         for(Resource tpExecRes : tpExecRess) {
-            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTP).getObject().as(TriplePattern.class);
+            org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTp).getObject().as(TriplePattern.class);
             Triple triple = toJenaTriple(spinTriple);
 
             long count = countTriplePattern(qef, triple);
@@ -509,7 +509,7 @@ public class SpinUtils {
         Map<org.topbraid.spin.model.Triple, Resource> tpToObservation = observationModel.listObjectsOfProperty(LSQ.hasTpExec).toSet().stream()
             .map(o -> o.asResource())
             .collect(Collectors.toMap(
-                    o -> o.getPropertyResourceValue(LSQ.hasTP).as(TriplePattern.class),
+                    o -> o.getPropertyResourceValue(LSQ.hasTp).as(TriplePattern.class),
                     o -> o));
 
         //Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = indexBasicPatterns2(queryRes);

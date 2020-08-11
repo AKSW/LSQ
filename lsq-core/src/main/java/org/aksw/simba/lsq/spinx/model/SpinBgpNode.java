@@ -100,10 +100,12 @@ public interface SpinBgpNode
     Set<DirectedHyperEdge> getOutEdges();
 
 
-    @Iri(LSQ.Strs.hasJoinVarExec)
-    Set<JoinVertexExec> getJoinRestrictedSelectivities();
+//    @Iri(LSQ.Strs.hasJoinVarExec)
+//    Set<JoinVertexExec> getJoinRestrictedSelectivities();
 
 
+    @Iri(LSQ.Strs.hasExec)
+    Set<JoinVertexExec> getBgpNodeExecs();
 
 
     /**
@@ -114,7 +116,7 @@ public interface SpinBgpNode
      */
     @Iri(LSQ.Strs.hasSubBgp)
     SpinBgp getSubBgp();
-    SpinBgpNode setSubBgp(Resource subBgp);
+    SpinBgpNode setSubBgp(SpinBgp subBgp);
 
     /**
      * The resource that corresponds to the query

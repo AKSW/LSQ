@@ -25,7 +25,7 @@ public interface TpInBgp
     TpInBgp setBgp(Resource bgp);
 
     @HashId
-    @Iri(LSQ.Strs.hasTP)
+    @Iri(LSQ.Strs.hasTp)
     LsqTriplePattern getTriplePattern();
     TpInBgp setTriplePattern(Resource tp);
 

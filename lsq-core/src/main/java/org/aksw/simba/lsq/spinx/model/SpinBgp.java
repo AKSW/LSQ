@@ -31,7 +31,7 @@ public interface SpinBgp
      * @return
      */
     @HashId
-    @Iri(LSQ.Strs.hasTP)
+    @Iri(LSQ.Strs.hasTp)
     List<LsqTriplePattern> getTriplePatterns();
 
 
