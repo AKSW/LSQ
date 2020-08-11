@@ -24,7 +24,7 @@ import com.google.common.hash.Hashing;
 
 
 @ResourceView
-public interface SpinBgpNode
+public interface BgpNode
     extends Resource, Labeled
 {
     @Iri(LSQ.Strs.hasBgpNode)
@@ -54,13 +54,28 @@ public interface SpinBgpNode
     @Iri(LSQ.Strs.proxyFor)
     Set<RDFNode> getProxyFor();
 
-    // Once the @Range annotation is working, we can remove the custom handler
-    //
+
+    /**
+     * Custom hashId handler because the jsa mapper currently does not support a range that
+     * may be literals as well as subclasses of resource. Literals are literals (so there is no problem) but
+     * we currently cannot tell the mapper that in case of Resource it should try a specific set of classes
+     * (a SPIN Variable in this specific case) and use appropriate's class associated id generation mechanism.
+     *
+     * Once the @Range annotation is working, we can remove this custom handler
+     *
+     * @param cxt
+     * @return
+     */
     @HashId
     default HashCode getHashId(HashIdCxt cxt) {
 
         HashFunction hashFn = cxt.getHashFunction();
         Set<RDFNode> proxies = getProxyFor();
+
+        // The set of proxy node either contains:
+        // - a single literal or
+        // - a set of resources nodes which denote a SPIN variable with a specific name
+
         RDFNode literalOrSpinVar = Iterables.getFirst(proxies, null);
 
         RDFNode literal;
@@ -76,12 +91,13 @@ public interface SpinBgpNode
                 ? hashFn.hashInt(0)
                 : cxt.getGlobalProcessor().apply(literal, cxt);
 
-        if(literalOrSpinVar.isResource() /* TODO and not processed */) {
+        if(literalOrSpinVar.isResource() && cxt.getHash(literalOrSpinVar) == null /* TODO maybe use !isProcessed? */) {
             cxt.putHash(literal, nodeHash);
 //            cxt.putString(actual, "var-" + actual.asLiteral().getString());
         }
 
-        HashCode bgpHash = cxt.getHash(getBgp());
+        SpinBgp bgp = getBgp();
+        HashCode bgpHash = cxt.getHash(bgp);
         HashCode result = Hashing.combineUnordered(Arrays.asList(bgpHash, nodeHash));
 
         return result;
@@ -105,7 +121,7 @@ public interface SpinBgpNode
 
 
     @Iri(LSQ.Strs.hasExec)
-    Set<JoinVertexExec> getBgpNodeExecs();
+    Set<BgpNodeExec> getBgpNodeExecs();
 
 
     /**
@@ -116,7 +132,7 @@ public interface SpinBgpNode
      */
     @Iri(LSQ.Strs.hasSubBgp)
     SpinBgp getSubBgp();
-    SpinBgpNode setSubBgp(SpinBgp subBgp);
+    BgpNode setSubBgp(SpinBgp subBgp);
 
     /**
      * The resource that corresponds to the query
@@ -126,7 +142,7 @@ public interface SpinBgpNode
      */
     @Iri(LSQ.Strs.joinExtensionQuery)
     LsqQuery getJoinExtensionQuery();
-    SpinBgpNode setJoinExtensionQuery(Resource joinExtensionQuery);
+    BgpNode setJoinExtensionQuery(Resource joinExtensionQuery);
 
     public default Node toJenaNode() {
         Set<RDFNode> set = getProxyFor();

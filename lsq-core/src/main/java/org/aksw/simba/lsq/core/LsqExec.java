@@ -7,16 +7,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
-import org.aksw.simba.lsq.spinx.model.JoinVertexExec;
+import org.aksw.simba.lsq.spinx.model.BgpNodeExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
-import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
-import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
+import org.aksw.simba.lsq.spinx.model.BgpExec;
+import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.TpExec;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.spinx.model.TpInBgpExec;
@@ -81,7 +82,7 @@ public class LsqExec {
         }
 
         // Now that all BgpExecs are set up descend into the tpExecs
-        for(SpinBgpExec bgpExec : expRoot.getBgpExecs()) {
+        for(BgpExec bgpExec : expRoot.getBgpExecs()) {
 
             for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
                 TpInBgpExec tpInBgpExec = getOrCreateTpInBgpExec(bgpExec, tpInBgp);
@@ -99,7 +100,7 @@ public class LsqExec {
             }
 
             // Process join vertices ...
-            for(SpinBgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
+            for(BgpNode bgpNode : bgpExec.getBgp().getBgpNodes()) {
                 Node jenaNode = bgpNode.toJenaNode();
 
                 // ... they need to be variables
@@ -107,7 +108,8 @@ public class LsqExec {
                     continue;
                 }
 
-                JoinVertexExec bgpNodeExec = LsqExec.getOrCreateBgpNodeExec(bgpExec, bgpNode);
+                BgpNodeExec bgpNodeExec = LsqExec.getOrCreateBgpNodeExec(bgpExec, bgpNode);
+                logger.info("Allocated bgpNodeExec for " + jenaNode + ": " + ResourceUtils.asBasicRdfNode(bgpNodeExec) + " - " + bgpNodeExec);
 
                 Long bgpNodeSize = bgpNodeExec.getQueryExec().getResultSetSize();
                 Long bgpSize = bgpExec.getQueryExec().getResultSetSize();
@@ -121,7 +123,7 @@ public class LsqExec {
                  */
 
                 SpinBgp subBgp = bgpNode.getSubBgp();
-                SpinBgpExec subBgpExec = getOrCreateSubBgpExec(expRun, subBgp);
+                BgpExec subBgpExec = getOrCreateSubBgpExec(expRun, subBgp);
 
                 // Connect the subBgp to the bgpNodeExec
                 bgpNodeExec.setSubBgpExec(subBgpExec);
@@ -240,11 +242,11 @@ public class LsqExec {
      * @param bgp
      * @return
      */
-    public static SpinBgpExec createBgpExec(RDFNode expRun, Model model, LocalExecution expRoot, SpinBgp bgp) {
-        SpinBgpExec bgpExec = expRoot.findBgpExec(bgp);
+    public static BgpExec createBgpExec(RDFNode expRun, Model model, LocalExecution expRoot, SpinBgp bgp) {
+        BgpExec bgpExec = expRoot.findBgpExec(bgp);
 
         if(bgpExec == null) {
-            bgpExec = model.createResource().as(SpinBgpExec.class);
+            bgpExec = model.createResource().as(BgpExec.class);
             LsqQuery extensionQuery = bgp.getExtensionQuery();
             Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
             LocalExecution le = leMap.get(expRun);
@@ -266,15 +268,15 @@ public class LsqExec {
     }
 
     // TODO Consolidate common parts with createBgpExec
-    public static SpinBgpExec getOrCreateSubBgpExec(RDFNode expRun, SpinBgp bgp) {
+    public static BgpExec getOrCreateSubBgpExec(RDFNode expRun, SpinBgp bgp) {
         LsqQuery bgpEq = bgp.getExtensionQuery();
         Objects.requireNonNull(bgpEq, "Missing extension query on bgp OR an execution for a sub-bgp of a non-variable bgp-node was requested " + bgp);
         Map<Resource, LocalExecution> bgpEqLeMap = bgpEq.getLocalExecutionMap();
-        SpinBgpExec bgpExec = bgp.findBgpExec(expRun);
+        BgpExec bgpExec = bgp.findBgpExec(expRun);
 
         if(bgpExec == null) {
             Model model = bgp.getModel();
-            bgpExec = model.createResource().as(SpinBgpExec.class);
+            bgpExec = model.createResource().as(BgpExec.class);
             LocalExecution le = bgpEqLeMap.get(expRun);
             QueryExec qe = le.getQueryExec();
 
@@ -338,7 +340,7 @@ public class LsqExec {
      * @param tp
      * @return
      */
-    public static TpInBgpExec getOrCreateTpInBgpExec(SpinBgpExec bgpExec, TpInBgp tpInBgp) {
+    public static TpInBgpExec getOrCreateTpInBgpExec(BgpExec bgpExec, TpInBgp tpInBgp) {
         RDFNode expRun = bgpExec.getQueryExec().getLocalExecution().getBenchmarkRun();
 
         TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
@@ -383,7 +385,7 @@ public class LsqExec {
      * @param bgpNode
      * @return
      */
-    public static JoinVertexExec getOrCreateBgpNodeExec(SpinBgpExec bgpExec, SpinBgpNode bgpNode) {
+    public static BgpNodeExec getOrCreateBgpNodeExec(BgpExec bgpExec, BgpNode bgpNode) {
         QueryExec queryExec = bgpExec.getQueryExec();
         RDFNode expRun = bgpExec.getQueryExec().getLocalExecution().getBenchmarkRun();
 
@@ -393,13 +395,13 @@ public class LsqExec {
 //        SpinBgp bgp = bgpNode.getBgp();
 //        SpinBgpExec bgpExec = bgpNodeLes.findBgpExec(bgp);
 //
-        JoinVertexExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
+        BgpNodeExec bgpNodeExec = bgpExec.findBgpNodeExec(bgpNode);
         if(bgpNodeExec == null) {
             Model model = bgpNode.getModel();
-            bgpNodeExec = model.createResource().as(JoinVertexExec.class);
+            bgpNodeExec = model.createResource().as(BgpNodeExec.class);
 
             bgpNodeExec
-            .setBgpNode(bgpNode)
+            .setBgpNode(bgpNode) /* inverse link */
             .setBgpExec(bgpExec) /* inverse link */
             .setQueryExec(queryExec)
             ;

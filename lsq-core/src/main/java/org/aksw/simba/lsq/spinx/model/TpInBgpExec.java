@@ -21,7 +21,7 @@ public interface TpInBgpExec
     @HashId
     @Iri(LSQ.Strs.hasTpInBgpExec)
     @Inverse
-    SpinBgpExec getBgpExec();
+    BgpExec getBgpExec();
     TpInBgpExec setBgpExec(Resource bgpExec);
 
     @HashId
@@ -43,6 +43,6 @@ public interface TpInBgpExec
     TpInBgpExec setTpToBgpRatio(BigDecimal value);
 
     @Iri(LSQ.Strs.hasJoinVarExec)
-    JoinVertexExec getJoinVarExec();
+    BgpNodeExec getJoinVarExec();
     TpInBgpExec setJoinVarExec(Resource joinVar);
 }

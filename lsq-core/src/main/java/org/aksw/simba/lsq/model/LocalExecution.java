@@ -9,7 +9,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.annotation.StringId;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
+import org.aksw.simba.lsq.spinx.model.BgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -33,13 +33,13 @@ public interface LocalExecution
 
 
     // TODO Maybe return a list of (bgp, exec) pairs - where setValue updates the exec?
-    default SpinBgpExec findBgpExec(Resource bgp) {
+    default BgpExec findBgpExec(Resource bgp) {
         Resource expRun = getBenchmarkRun();
         Objects.requireNonNull(expRun, "benchmark run resource not set");
 
-        Set<SpinBgpExec> cands = getBgpExecs();
-        SpinBgpExec result = null;
-        for(SpinBgpExec cand : cands) {
+        Set<BgpExec> cands = getBgpExecs();
+        BgpExec result = null;
+        for(BgpExec cand : cands) {
             if(Objects.equals(cand.getBgp(), bgp) && Objects.equals(cand.getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
                 result = cand;
                 break;
@@ -50,7 +50,7 @@ public interface LocalExecution
     }
 
     @Iri(LSQ.Strs.hasBgpExec)
-    Set<SpinBgpExec> getBgpExecs();
+    Set<BgpExec> getBgpExecs();
 
 
     @StringId

@@ -9,5 +9,5 @@ import org.apache.jena.rdf.model.Resource;
 public interface JoinVertex
     extends Resource
 {
-    Set<JoinVertexExec> getJoinVertexExecs();
+    Set<BgpNodeExec> getJoinVertexExecs();
 }

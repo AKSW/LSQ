@@ -49,7 +49,7 @@ public interface SpinBgp
 //    Set<JoinVertex> getJoinVertices();
 
     @Iri(LSQ.Strs.hasExec)
-    Set<SpinBgpExec> getSpinBgpExecs();
+    Set<BgpExec> getSpinBgpExecs();
 
     @Iri(LSQ.Strs.joinVertexCountTotal)
     Integer getJoinVertexCount();
@@ -64,7 +64,7 @@ public interface SpinBgp
     SpinQueryEx setMedianJoinVertexDegree(Integer cnt);
 
     @Iri(LSQ.Strs.hasBgpNode)
-    Set<SpinBgpNode> getBgpNodes();
+    Set<BgpNode> getBgpNodes();
 
     @Iri(LSQ.Strs.hasEdge)
     Set<DirectedHyperEdge> getEdges();
@@ -90,9 +90,9 @@ public interface SpinBgp
     }
 
     // TODO Eventually replace with a proper map view
-    default Map<Node, SpinBgpNode> indexBgpNodes() {
-        Map<Node, SpinBgpNode> result = new LinkedHashMap<>();
-        for(SpinBgpNode v : getBgpNodes()) {
+    default Map<Node, BgpNode> indexBgpNodes() {
+        Map<Node, BgpNode> result = new LinkedHashMap<>();
+        for(BgpNode v : getBgpNodes()) {
             Node k = v.toJenaNode();
             result.put(k, v);
         }
@@ -111,13 +111,13 @@ public interface SpinBgp
     }
 
 
-    default SpinBgpExec findBgpExec(RDFNode expRun) {
+    default BgpExec findBgpExec(RDFNode expRun) {
 //        Resource expRun = getBenchmarkRun();
         Objects.requireNonNull(expRun, "benchmark run resource not set");
 
-        Set<SpinBgpExec> cands = getSpinBgpExecs();
-        SpinBgpExec result = null;
-        for(SpinBgpExec cand : cands) {
+        Set<BgpExec> cands = getSpinBgpExecs();
+        BgpExec result = null;
+        for(BgpExec cand : cands) {
             //if(Objects.equals(cand.getBgp(), bgp) && Objects.equals(cand.getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
             if(cand.getQueryExec().getLocalExecution().getBenchmarkRun().equals(expRun)) {
                 result = cand;

@@ -48,7 +48,7 @@ import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
-import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
+import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
@@ -566,9 +566,9 @@ public class LsqBenchmarkProcessor {
             result.add(extensionQuery);
         }
 
-        Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+        Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
-        for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
+        for(BgpNode bgpNode : bgpNodeMap.values()) {
             extensionQuery = bgpNode.getJoinExtensionQuery();
             if(extensionQuery != null) {
                 result.add(extensionQuery);
@@ -595,7 +595,7 @@ public class LsqBenchmarkProcessor {
         }
 
         // Extract queries from subBgp
-        for(SpinBgpNode bgpNode : bgp.getBgpNodes()) {
+        for(BgpNode bgpNode : bgp.getBgpNodes()) {
             SpinBgp subBgp = bgpNode.getSubBgp();
 
             // The sub-bgp of a variable in a bgp with a single triple pattern is the original bgp;

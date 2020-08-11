@@ -2,7 +2,7 @@ package org.aksw.simba.lsq.spinx.model;
 
 import java.math.BigDecimal;
 
-import org.aksw.jena_sparql_api.mapper.annotation.IdPrefix;
+import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -15,30 +15,30 @@ import org.aksw.simba.lsq.vocab.LSQ;
 
 
 @ResourceView
-@IdPrefix("bgpnodeexec-")
-public interface JoinVertexExec
+public interface BgpNodeExec
     extends ElementExec
 {
     @Iri(LSQ.Strs.hasExec)
     @Inverse
-    SpinBgpNode getBgpNode();
-    JoinVertexExec setBgpNode(SpinBgpNode bpgNode);
+    @HashId // The id is based on having executed on this node (the link to the queryExec is in the base class)
+    BgpNode getBgpNode();
+    BgpNodeExec setBgpNode(BgpNode bpgNode);
 
 
     @Iri(LSQ.Strs.tpSelJoinVarRestricted)
     BigDecimal getBgpRestrictedSelectivitiy();
-    JoinVertexExec setBgpRestrictedSelectivitiy(BigDecimal selectivity);
+    BgpNodeExec setBgpRestrictedSelectivitiy(BigDecimal selectivity);
 
 
     @Iri(LSQ.Strs.hasJoinVarExec)
     @Inverse
-    SpinBgpExec getBgpExec();
-    JoinVertexExec setBgpExec(SpinBgpExec exec);
+    BgpExec getBgpExec();
+    BgpNodeExec setBgpExec(BgpExec exec);
 
 
     @Iri(LSQ.Strs.hasSubBgpExec)
-    SpinBgpExec getSubBgpExec();
-    JoinVertexExec setSubBgpExec(SpinBgpExec exec);
+    BgpExec getSubBgpExec();
+    BgpNodeExec setSubBgpExec(BgpExec exec);
 
 
     @StringId
@@ -48,8 +48,10 @@ public interface JoinVertexExec
 //        BgpNode bgpNode = getBgpNode();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
-        SpinBgpExec bgpExec = getBgpExec();
-        LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
+
+        //SpinBgpExec bgpExec = getBgpExec();
+        //LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
+        LocalExecution le = getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
         String result = "bgpNodeExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
         return result;

@@ -26,7 +26,7 @@ import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
-import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
+import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;

@@ -24,7 +24,7 @@ import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.SpinBgp;
-import org.aksw.simba.lsq.spinx.model.SpinBgpNode;
+import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
@@ -118,9 +118,9 @@ public class LsqEnrichments {
                     }
                 }
 
-                Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+                Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
-                for(SpinBgpNode bgpNode : bgpNodeMap.values()) {
+                for(BgpNode bgpNode : bgpNodeMap.values()) {
                     Node jenaNode = bgpNode.toJenaNode();
                     bgpNode.setLabel(NodeFmtLib.str(jenaNode));
 
@@ -181,7 +181,7 @@ public class LsqEnrichments {
         Model spinModel = bgpInfo.getModel();
 
         for(SpinBgp bgp : bgpInfo.getBgps()) {
-            Map<Node, SpinBgpNode> bgpNodeMap = bgp.indexBgpNodes();
+            Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
             for(TriplePattern tp : bgp.getTriplePatterns()) {
                 Set<RDFNode> rdfNodes = SpinUtils.listRDFNodes(tp);
@@ -192,8 +192,8 @@ public class LsqEnrichments {
                     // This is mandated the hypergraph model
 //                    if(node.isVariable()) {
 
-                        SpinBgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
-                                n -> SpinUtils.writeNode(spinModel, n).as(SpinBgpNode.class));
+                        BgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
+                                n -> SpinUtils.writeNode(spinModel, n).as(BgpNode.class));
 
                         // Redundant inserts into a set
                         bgp.getBgpNodes().add(bgpNode);
@@ -728,7 +728,7 @@ public class LsqEnrichments {
         //Map<Node, Resource> nodeToResource,
 
         Model result = spinBgp.getModel();
-        Map<Node, SpinBgpNode> bgpNodes = spinBgp.indexBgpNodes();
+        Map<Node, BgpNode> bgpNodes = spinBgp.indexBgpNodes();
 
 
         Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
@@ -761,9 +761,9 @@ public class LsqEnrichments {
 //            Resource px = nodeToResource.computeIfAbsent(p, (x) -> result.createResource());
 //            Resource ox = nodeToResource.computeIfAbsent(o, (x) -> result.createResource());
 
-              SpinBgpNode sx = bgpNodes.get(s);
-              SpinBgpNode px = bgpNodes.get(p);
-              SpinBgpNode ox = bgpNodes.get(o);
+              BgpNode sx = bgpNodes.get(s);
+              BgpNode px = bgpNodes.get(p);
+              BgpNode ox = bgpNodes.get(o);
 
 //            // Add the orginal nodes as annotations
 //            Resource ss = result.wrapAsResource(t.getSubject());

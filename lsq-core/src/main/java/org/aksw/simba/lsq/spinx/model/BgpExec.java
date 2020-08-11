@@ -23,7 +23,7 @@ import org.apache.jena.rdf.model.Resource;
  */
 @ResourceView
 //@IdPrefix("bgpexec-")
-public interface SpinBgpExec
+public interface BgpExec
     extends ElementExec
 {
 //    @Iri(LSQ.Strs.hasBgpExec)
@@ -36,7 +36,7 @@ public interface SpinBgpExec
     @HashId
     @Inverse
     SpinBgp getBgp();
-    SpinBgpExec setBgp(SpinBgp bgp);
+    BgpExec setBgp(SpinBgp bgp);
 
 
     // NOTE Calling the method getId is not recognized by the annotation processor
@@ -62,7 +62,7 @@ public interface SpinBgpExec
     Set<TpInBgpExec> getTpInBgpExecs();
 
     @Iri(LSQ.Strs.hasJoinVarExec)
-    Set<JoinVertexExec> getBgpNodeExecs();
+    Set<BgpNodeExec> getBgpNodeExecs();
 
 
     default TpInBgpExec findTpInBgpExec(Resource tpInBgp) {
@@ -82,13 +82,13 @@ public interface SpinBgpExec
     }
 
 
-    default JoinVertexExec findBgpNodeExec(Resource bpgNode) {
+    default BgpNodeExec findBgpNodeExec(Resource bpgNode) {
         Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();
         Objects.requireNonNull(expRun);
 
-        Set<JoinVertexExec> cands = getBgpNodeExecs();
-        JoinVertexExec result = null;
-        for(JoinVertexExec cand : cands) {
+        Set<BgpNodeExec> cands = getBgpNodeExecs();
+        BgpNodeExec result = null;
+        for(BgpNodeExec cand : cands) {
             if(Objects.equals(cand.getBgpNode(), bpgNode) && Objects.equals(cand.getBgpExec().getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
                 result = cand;
                 break;

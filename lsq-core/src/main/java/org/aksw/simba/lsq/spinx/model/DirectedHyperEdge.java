@@ -14,9 +14,9 @@ public interface DirectedHyperEdge
 {
     @Iri(LSQ.Strs.in)
     @HashId
-    Set<SpinBgpNode> getInNodes();
+    Set<BgpNode> getInNodes();
 
     @Iri(LSQ.Strs.out)
     @HashId
-    Set<SpinBgpNode> getOutNodes();
+    Set<BgpNode> getOutNodes();
 }

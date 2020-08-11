@@ -8,7 +8,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.annotation.StringId;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.simba.lsq.spinx.model.SpinBgpExec;
+import org.aksw.simba.lsq.spinx.model.BgpExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Resource;
@@ -23,7 +23,7 @@ public interface QueryExec extends Resource {
     @Iri(LSQ.Strs.hasQueryExec)
     @Inverse
     LocalExecution getLocalExecution();
-    SpinBgpExec setLocalExecution(LocalExecution le);
+    BgpExec setLocalExecution(LocalExecution le);
 
 //    @Iri(LSQ.Strs.benchmarkRun)
 //    ExperimentRun getBenchmarkRun();
