@@ -27,8 +27,9 @@ This is a typical maven project and can is thus built with `mvn clean install`.
 `./reinstall-debs.sh` (requires root access).
 
 
-#### Usage
-A quick reference for the typical process is as follows.
+#### Quick Usage
+A quick reference for the typical process is as follows:
+
 ```
 lsq probe file.log
 lsq rdfize file.log

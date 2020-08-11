@@ -1,7 +1,6 @@
 package org.aksw.simba.lsq.cli.main;
 
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
@@ -100,9 +99,6 @@ public class MainCliLsq {
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
 
     // File output stream that raises exceptions in contrast to System.out
-
-    // public static void displayUsageIf()
-
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new CmdLsqMain())
