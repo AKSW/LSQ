@@ -19,7 +19,7 @@ import org.topbraid.spin.model.Triple;
 
 @ResourceView
 //@IdPrefix("bgp-")
-public interface SpinBgp
+public interface Bgp
     extends LsqElement
 {
     /**
@@ -51,7 +51,7 @@ public interface SpinBgp
     @Iri(LSQ.Strs.hasExec)
     Set<BgpExec> getSpinBgpExecs();
 
-    @Iri(LSQ.Strs.joinVertexCountTotal)
+    @Iri(LSQ.Strs.joinVertexCount)
     Integer getJoinVertexCount();
     SpinQueryEx setJoinVertexCount(Integer cnt);
 

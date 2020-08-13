@@ -35,15 +35,15 @@ public interface BgpExec
     @Iri(LSQ.Strs.hasExec)
     @HashId
     @Inverse
-    SpinBgp getBgp();
-    BgpExec setBgp(SpinBgp bgp);
+    Bgp getBgp();
+    BgpExec setBgp(Bgp bgp);
 
 
     // NOTE Calling the method getId is not recognized by the annotation processor
     // because there is a method Resource.setId which has incompatible types
     @StringId
     default String getStringId(HashIdCxt cxt) {
-        SpinBgp bgp = getBgp();
+        Bgp bgp = getBgp();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
         String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getString(getQueryExec().getLocalExecution().getBenchmarkRun());

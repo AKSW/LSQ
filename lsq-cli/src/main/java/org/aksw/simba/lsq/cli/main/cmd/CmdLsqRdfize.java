@@ -15,7 +15,7 @@ import picocli.CommandLine.Parameters;
 public class CmdLsqRdfize
     implements Callable<Integer>
 {
-    @Option(names={"-h", "--help"}, help=true)
+    @Option(names={"-h", "--help"}, usageHelp = true)
     public boolean help = false;
 
     @Option(names={"-b", "--base-uri"}, description="Prefix for generated IRIs for queries, log records, etc.")

@@ -85,7 +85,7 @@ public interface ExperimentConfig
     ExperimentConfig setExecutionTimeoutForCounting(BigDecimal duration);
 
 
-    @Iri(LSQ.Strs.maxItemCountForCounting)
+    @Iri(LSQ.Strs.maxResultCountForCounting)
     Long getMaxItemCountForCounting();
     ExperimentConfig setMaxItemCountForCounting(Long maxItemCountForCounting);
 
@@ -93,7 +93,7 @@ public interface ExperimentConfig
     Long getMaxByteSizeForCounting();
     ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
 
-    @Iri(LSQ.Strs.maxItemCountForSerialization)
+    @Iri(LSQ.Strs.maxResultCountForSerialization)
     Long getMaxItemCountForSerialization();
     ExperimentConfig setMaxItemCountForSerialization(Long maxItemCountForSerialization);
 

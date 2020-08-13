@@ -12,5 +12,5 @@ public interface BgpInfo
     extends Resource
 {
     @Iri(LSQ.Strs.hasBgp)
-    Set<SpinBgp> getBgps();
+    Set<Bgp> getBgps();
 }

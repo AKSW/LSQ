@@ -47,7 +47,7 @@ import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
-import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -552,7 +552,7 @@ public class LsqBenchmarkProcessor {
         LsqStructuralFeatures bgpInfo = masterQuery.getStructuralFeatures();
 
 
-        for(SpinBgp bgp : bgpInfo.getBgps()) {
+        for(Bgp bgp : bgpInfo.getBgps()) {
             extractAllQueriesFromBgp(result, bgp);
         }
 
@@ -560,7 +560,7 @@ public class LsqBenchmarkProcessor {
     }
 
 
-    public static void extractAllQueriesFromBgp(Set<LsqQuery> result, SpinBgp bgp) {
+    public static void extractAllQueriesFromBgp(Set<LsqQuery> result, Bgp bgp) {
         LsqQuery extensionQuery = bgp.getExtensionQuery();
         if(extensionQuery != null) {
             result.add(extensionQuery);
@@ -574,7 +574,7 @@ public class LsqBenchmarkProcessor {
                 result.add(extensionQuery);
             }
 
-            SpinBgp subBgp = bgpNode.getSubBgp();
+            Bgp subBgp = bgpNode.getSubBgp();
 
             if(subBgp != null) {
                 extensionQuery = subBgp.getExtensionQuery();
@@ -596,7 +596,7 @@ public class LsqBenchmarkProcessor {
 
         // Extract queries from subBgp
         for(BgpNode bgpNode : bgp.getBgpNodes()) {
-            SpinBgp subBgp = bgpNode.getSubBgp();
+            Bgp subBgp = bgpNode.getSubBgp();
 
             // The sub-bgp of a variable in a bgp with a single triple pattern is the original bgp;
             // prevent infinite recursion

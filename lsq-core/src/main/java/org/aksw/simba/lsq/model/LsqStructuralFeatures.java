@@ -10,7 +10,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.annotation.StringId;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
-import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
@@ -29,7 +29,7 @@ public interface LsqStructuralFeatures
 {
     @Iri(LSQ.Strs.hasStructuralFeatures)
     @Inverse
-    @HashId
+    @HashId(excludeRdfProperty = true)
     LsqQuery getQuery();
 
 
@@ -90,7 +90,7 @@ public interface LsqStructuralFeatures
      * join vertex information
      */
 
-    @Iri(LSQ.Strs.joinVertexCountTotal)
+    @Iri(LSQ.Strs.joinVertexCount)
     Integer getJoinVertexCount();
     LsqStructuralFeatures setJoinVertexCount(Integer bgpCount);
 

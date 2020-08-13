@@ -19,24 +19,24 @@ public class LSQ {
 
         public static final String text = NS + "text";
         public static final String hash = NS + "hash";
-        public static final String itemCount = NS + "itemCount";
+        public static final String resultCount = NS + "resultCount";
         public static final String isDistinct = NS + "isDistinct";
 
 
         // Thresholds for retrieval based statistics
         public static final String exceededMaxByteSizeForCounting = NS + "exceededMaxByteSizeForCounting";
-        public static final String exceededMaxItemCountForCounting = NS + "exceededMaxItemCountForCounting";
+        public static final String exceededMaxResultCountForCounting = NS + "exceededMaxResultCountForCounting";
         public static final String exceededMaxByteSizeForSerialization = NS + "exceededMaxByteSizeForSerialization";
-        public static final String exceededMaxItemCountForSerialization = NS + "exceededMaxItemCountForSerialization";
+        public static final String exceededMaxResultCountForSerialization = NS + "exceededMaxResultCountForSerialization";
 
-        public static final String exceededMaxCount = NS + "exceededMaxCount";
+//        public static final String exceededMaxCount = NS + "exceededMaxCount";
 
         public static final String serializedResult = NS + "serializedResult";
 
         public static final String maxCount = NS + "maxCount";
-        public static final String maxItemCountForCounting = NS + "maxItemCountForCounting";
+        public static final String maxResultCountForCounting = NS + "maxResultCountForCounting";
         public static final String maxByteSizeForCounting = NS + "maxByteSizeForCounting";
-        public static final String maxItemCountForSerialization = NS + "maxItemCountForSerialization";
+        public static final String maxResultCountForSerialization = NS + "maxResultCountForSerialization";
         public static final String maxByteSizeForSerialization = NS + "maxByteSizeForSerialization";
 
         public static final String retrievalDuration = NS + "retrievalDuration";
@@ -120,7 +120,7 @@ public class LSQ {
         public static final String tpInBgpCountMean = NS + "tpInBgpCountMean";
         public static final String tpInBgpCountMedian = NS + "tpInBgpCountMedian";
 
-        public static final String joinVertexCountTotal = NS + "joinVertexCountTotal";
+        public static final String joinVertexCount = NS + "joinVertexCount";
         public static final String projectVarCount = NS + "projectVarCount";
 
         //public static final String avgJoinVerticesDegree = ns + "avgJoinVerticesDegree";
@@ -202,7 +202,7 @@ public class LSQ {
     public static final Property tps = ResourceFactory.createProperty(Strs.tpCount);
     public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMin);
     public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMax);
-    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertexCountTotal);
+    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertexCount);
     public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVarCount);
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
@@ -236,7 +236,7 @@ public class LSQ {
 
 
     public static final Property text = ResourceFactory.createProperty(Strs.text);
-    public static final Property itemCount = ResourceFactory.createProperty(Strs.itemCount);
+    public static final Property resultCount = ResourceFactory.createProperty(Strs.resultCount);
     public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
     public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
     public static final Property hasTp = ResourceFactory.createProperty(Strs.hasTp);

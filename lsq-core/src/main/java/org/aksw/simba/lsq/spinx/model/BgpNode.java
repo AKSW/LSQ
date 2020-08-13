@@ -30,7 +30,7 @@ public interface BgpNode
     @Iri(LSQ.Strs.hasBgpNode)
     @Inverse
     @HashId
-    SpinBgp getBgp();
+    Bgp getBgp();
 
 
     /**
@@ -96,7 +96,7 @@ public interface BgpNode
 //            cxt.putString(actual, "var-" + actual.asLiteral().getString());
         }
 
-        SpinBgp bgp = getBgp();
+        Bgp bgp = getBgp();
         HashCode bgpHash = cxt.getHash(bgp);
         HashCode result = Hashing.combineUnordered(Arrays.asList(bgpHash, nodeHash));
 
@@ -131,8 +131,8 @@ public interface BgpNode
      * @return
      */
     @Iri(LSQ.Strs.hasSubBgp)
-    SpinBgp getSubBgp();
-    BgpNode setSubBgp(SpinBgp subBgp);
+    Bgp getSubBgp();
+    BgpNode setSubBgp(Bgp subBgp);
 
     /**
      * The resource that corresponds to the query

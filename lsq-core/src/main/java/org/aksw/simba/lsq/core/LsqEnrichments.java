@@ -23,7 +23,7 @@ import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
-import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
@@ -58,7 +58,7 @@ import io.reactivex.rxjava3.core.Maybe;
 
 public class LsqEnrichments {
 
-    public static void enrichSpinBgpWithTpInBgp(SpinBgp bgp) {
+    public static void enrichSpinBgpWithTpInBgp(Bgp bgp) {
         Map<LsqTriplePattern, TpInBgp> tpToTpInBgp = bgp.indexTps();
 
         Collection<TpInBgp> tpInBgps = bgp.getTpInBgp();
@@ -78,7 +78,7 @@ public class LsqEnrichments {
     public static void enrichSpinBgpNodesWithSubBgpsAndQueries(BgpInfo bgpInfo, PrefixMapping prefixMapping) {
 
             boolean createQueryResources = true;
-            for(SpinBgp bgp : bgpInfo.getBgps()) {
+            for(Bgp bgp : bgpInfo.getBgps()) {
 
                 LsqEnrichments.enrichSpinBgpWithTpInBgp(bgp);
 
@@ -155,10 +155,10 @@ public class LsqEnrichments {
                     // Do not generate empty subBgps
 //                    if(!subBgpTps.isEmpty()) {
 
-                        SpinBgp subBgp = bgpNode.getSubBgp();
+                        Bgp subBgp = bgpNode.getSubBgp();
 
                         if(subBgp == null) {
-                            subBgp = bgpNode.getModel().createResource().as(SpinBgp.class);
+                            subBgp = bgpNode.getModel().createResource().as(Bgp.class);
                             bgpNode.setSubBgp(subBgp);
                         }
 
@@ -180,7 +180,7 @@ public class LsqEnrichments {
     public static void enrichSpinBgpsWithNodes(BgpInfo bgpInfo) {
         Model spinModel = bgpInfo.getModel();
 
-        for(SpinBgp bgp : bgpInfo.getBgps()) {
+        for(Bgp bgp : bgpInfo.getBgps()) {
             Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
             for(TriplePattern tp : bgp.getTriplePatterns()) {
@@ -242,7 +242,7 @@ public class LsqEnrichments {
     //            Resource bgpRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp-" + bgpId);
                 //Resource bgpCtxRes = queryExecRes.getModel().createResource(queryExecRes.getURI() + "-bgp-" + bgpId);
 
-                SpinBgp bgpCtxRes = spinModel.createResource().as(SpinBgp.class);
+                Bgp bgpCtxRes = spinModel.createResource().as(Bgp.class);
     //            if(bgpId != null) {
     //                bgpCtxRes.addProperty(Skolemize.skolemId, "-bgp-" + bgpId);
     //            }
@@ -287,7 +287,7 @@ public class LsqEnrichments {
 
         }
 
-    public static void enrichSpinBgpWithQuery(SpinBgp bgp, PrefixMapping prefixMapping) {
+    public static void enrichSpinBgpWithQuery(Bgp bgp, PrefixMapping prefixMapping) {
         LsqQuery extensionQuery = bgp.getExtensionQuery();
         if(extensionQuery == null) {
             extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
@@ -532,10 +532,10 @@ public class LsqEnrichments {
        // Copy the bgp information from the spin model to the structural features model
        // Thereby remove the link from the spinQuery to the bgs
        SpinQueryEx spinEx = queryRes.getSpinQuery().as(SpinQueryEx.class);
-       Set<SpinBgp> bgpsInSpin = spinEx.getBgps();
+       Set<Bgp> bgpsInSpin = spinEx.getBgps();
 
        BgpInfo bgpInfo = featureRes;
-       Set<SpinBgp> bgps = bgpInfo.getBgps();
+       Set<Bgp> bgps = bgpInfo.getBgps();
 
        bgps.addAll(bgpsInSpin);
        bgpsInSpin.clear();
@@ -547,7 +547,7 @@ public class LsqEnrichments {
 
        featureRes.setBgpCount(bgpCount);
 
-       for(SpinBgp bgp : bgpInfo.getBgps()) {
+       for(Bgp bgp : bgpInfo.getBgps()) {
            Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
            int tpCount = tpInBgps.size();
 
@@ -618,7 +618,7 @@ public class LsqEnrichments {
     }
 
 
-    public static List<Integer> setUpJoinVertices(SpinBgp bgp) {
+    public static List<Integer> setUpJoinVertices(Bgp bgp) {
 
 //        BasicPattern bgp = bgpRes.toBasicPattern();
         // int bgpHash = (new HashSet<>(bgp.getList())).hashCode();
@@ -721,7 +721,7 @@ public class LsqEnrichments {
      *            argument.
      * @param triples
      */
-    public static void enrichModelWithHyperGraphData(SpinBgp spinBgp) {
+    public static void enrichModelWithHyperGraphData(Bgp spinBgp) {
         //Iterable<org.topbraid.spin.model.Triple> triples) { //, Map<Resource, Node> hyperGraphResourceToNode) {
         // result = result == null ? ModelFactory.createDefaultModel() : result;
 

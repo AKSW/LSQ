@@ -974,7 +974,7 @@ public class LsqProcessor
 
             //double durationInSeconds = duration.toNanos() / 1000000.0;
             queryExecRes
-                .addLiteral(LSQ.itemCount, resultSetSize)
+                .addLiteral(LSQ.resultCount, resultSetSize)
                 .addLiteral(LSQ.runTimeMs, durationInMillis)
                 //.addLiteral(PROV.startedAtTime, start)
                 //.addLiteral(PROV.endAtTime, end)
@@ -1095,7 +1095,7 @@ public class LsqProcessor
 
                     Resource bgpVar = varToBgpVar.get(v);
 
-                    bgpVar.addLiteral(LSQ.itemCount, c);
+                    bgpVar.addLiteral(LSQ.resultCount, c);
                     bgpVar.addProperty(LSQ.proxyFor, queryVarRes);
                 });
                     //
@@ -1121,7 +1121,7 @@ public class LsqProcessor
 
                         double tpSelJoinVarRestricted = c == 0 ? 0d : bgpJoinVarCount / (double)c;
                         execTpVarRes
-                            .addLiteral(LSQ.itemCount, c)
+                            .addLiteral(LSQ.resultCount, c)
                             .addLiteral(LSQ.tpSelJoinVarRestricted, tpSelJoinVarRestricted)
                             .addProperty(LSQ.hasVar, varToRes.get(v))
                             //.addLiteral(LSQ.hasVar, )

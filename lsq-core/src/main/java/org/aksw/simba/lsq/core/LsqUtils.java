@@ -83,6 +83,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
+import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -589,10 +590,11 @@ public class LsqUtils {
                         String host = re.getHost();
                         String hostHash = host == null
                                 ? null
-                                : Hashing.sha256()
+                                : BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
                                     .hashString(hostHashSalt + host, StandardCharsets.UTF_8)
-                                    .toString();
+                                    .asBytes());
 
+                        // FIXME Respect the noHoshHash = true flag
                         re.setHostHash(hostHash);
                         re.setHost(null);
 

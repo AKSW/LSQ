@@ -15,7 +15,7 @@ import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.BgpNodeExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
-import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpExec;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.TpExec;
@@ -76,7 +76,7 @@ public class LsqExec {
         // Iterate the query's. bgps. For each bgp:
         // 1.) get-or-create the execution
         // 2.) then descend into the tp-in-bgp and the tps and update their stats
-        for(SpinBgp bgp : spinRoot.getBgps()) {
+        for(Bgp bgp : spinRoot.getBgps()) {
             // Get the bgp's execution in this experiment
             LsqExec.createBgpExec(expRun, model, expRoot, bgp);
         }
@@ -122,7 +122,7 @@ public class LsqExec {
                  * Sub-bgp executions (partitioned by bgp-node)
                  */
 
-                SpinBgp subBgp = bgpNode.getSubBgp();
+                Bgp subBgp = bgpNode.getSubBgp();
                 BgpExec subBgpExec = getOrCreateSubBgpExec(expRun, subBgp);
 
                 // Connect the subBgp to the bgpNodeExec
@@ -242,7 +242,7 @@ public class LsqExec {
      * @param bgp
      * @return
      */
-    public static BgpExec createBgpExec(RDFNode expRun, Model model, LocalExecution expRoot, SpinBgp bgp) {
+    public static BgpExec createBgpExec(RDFNode expRun, Model model, LocalExecution expRoot, Bgp bgp) {
         BgpExec bgpExec = expRoot.findBgpExec(bgp);
 
         if(bgpExec == null) {
@@ -268,7 +268,7 @@ public class LsqExec {
     }
 
     // TODO Consolidate common parts with createBgpExec
-    public static BgpExec getOrCreateSubBgpExec(RDFNode expRun, SpinBgp bgp) {
+    public static BgpExec getOrCreateSubBgpExec(RDFNode expRun, Bgp bgp) {
         LsqQuery bgpEq = bgp.getExtensionQuery();
         Objects.requireNonNull(bgpEq, "Missing extension query on bgp OR an execution for a sub-bgp of a non-variable bgp-node was requested " + bgp);
         Map<Resource, LocalExecution> bgpEqLeMap = bgpEq.getLocalExecutionMap();

@@ -21,7 +21,7 @@ public interface TpInBgp
 {
     @HashId
     @Iri(LSQ.Strs.hasBgp)
-    SpinBgp getBgp();
+    Bgp getBgp();
     TpInBgp setBgp(Resource bgp);
 
     @HashId

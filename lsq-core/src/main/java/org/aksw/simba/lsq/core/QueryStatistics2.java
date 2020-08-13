@@ -25,7 +25,7 @@ import org.aksw.jena_sparql_api.utils.MapUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
-import org.aksw.simba.lsq.spinx.model.SpinBgp;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
@@ -480,7 +480,7 @@ public class QueryStatistics2 {
      * @return
      */
     public static List<Integer> setUpJoinVertices(
-            SpinBgp bgpRes,
+            Bgp bgpRes,
             //Resource bgpRes,
             // BasicPattern bgp,
             Map<Node, RDFNode> nodeToModel
