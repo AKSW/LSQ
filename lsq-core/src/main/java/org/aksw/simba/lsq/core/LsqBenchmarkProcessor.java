@@ -646,8 +646,8 @@ public class LsqBenchmarkProcessor {
                ) {
 
 
-           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
-           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
            long maxItemCountForCounting = Optional.ofNullable(rawMaxItemCountForCounting).orElse(-1l);
            long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
@@ -655,8 +655,8 @@ public class LsqBenchmarkProcessor {
            long maxItemCountForSerialization = Optional.ofNullable(rawMaxItemCountForSerialization).orElse(-1l);
            long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
 
-           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
-           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting).orElse(new BigDecimal(-1)).divide(new BigDecimal(1000)).longValue();
+           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
            long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
 

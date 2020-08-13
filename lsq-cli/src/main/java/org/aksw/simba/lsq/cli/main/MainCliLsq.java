@@ -197,6 +197,7 @@ public class MainCliLsq {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
             RDFDataMgrRx.writeResources(logRdfEvents, StdIo.STDOUT, RDFFormat.TRIG_PRETTY);
+            logger.info("RDFization completed successfully");
         } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
         }
