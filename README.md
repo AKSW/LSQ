@@ -32,10 +32,10 @@ A quick reference for the typical process is as follows:
 
 ```
 lsq probe file.log
-lsq rdfize file.log
+lsq rdfize -e http://server.from/which/the/log/is/from file.log > file.log.trig
 lsq benchmark create -d myDatasetLabel -e http://localhost:8890/sparql -o > benchmark.conf.ttl
 lsq benchmark prepare -c benchmark.conf.ttl -o > benchmark.run.ttl
-lsq benchmark run -c benchmark.run.ttl *.log
+lsq benchmark run -c benchmark.run.ttl *.log.trig
 ```
 
 The `-o` option causes the settings to be written to the console. Omit `-o` to have LSQ auto-generate files.
