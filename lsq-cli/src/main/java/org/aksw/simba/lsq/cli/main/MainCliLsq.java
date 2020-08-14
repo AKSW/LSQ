@@ -28,6 +28,8 @@ import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.http.repository.impl.UriToPathUtils;
 import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
@@ -345,14 +347,15 @@ public class MainCliLsq {
             .setNsPrefix("sp", SP.NS);
 
 
+        DataRefSparqlEndpoint dataRef = model.createResource().as(DataRefSparqlEndpoint.class)
+                .setServiceUrl(endpointUrl)
+                .mutateDefaultGraphs(dgs -> dgs.addAll(benchmarkCreateCmd.defaultGraphs));
+
         ExperimentConfig cfg = model.createResource(expIri).as(ExperimentConfig.class);
         cfg
             .setIdentifier(expId)
             // .setCreationDate(nowCal)
-            .setDataRef(model.createResource().as(DataRefSparqlEndpoint.class)
-                    .setServiceUrl(endpointUrl)
-                    .mutateDefaultGraphs(dgs -> dgs.addAll(benchmarkCreateCmd.defaultGraphs))
-                    )
+            .setDataRef(dataRef)
             .setExecutionTimeoutForRetrieval(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
             .setConnectionTimeoutForRetrieval(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
             .setMaxResultCountForCounting(1000000l) // 1M
@@ -368,6 +371,10 @@ public class MainCliLsq {
             .setDatasetIri(datasetIri)
             .setBaseIri(baseIri)
             ;
+
+        HashIdCxt tmp = MapperProxyUtils.getHashId(dataRef);
+        ResourceUtils.renameResource(dataRef, baseIri + tmp.getStringId(dataRef));
+
 
         Path outPath = null;
         if (!benchmarkCreateCmd.stdout) {

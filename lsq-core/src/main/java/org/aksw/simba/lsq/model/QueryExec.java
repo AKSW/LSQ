@@ -88,7 +88,7 @@ public interface QueryExec extends Resource {
     default String getStringId(HashIdCxt cxt) {
         LocalExecution le = getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String result = "queryExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
+        String result = "queryExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

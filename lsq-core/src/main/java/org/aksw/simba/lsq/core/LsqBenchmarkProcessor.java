@@ -132,7 +132,7 @@ public class LsqBenchmarkProcessor {
                 .setTimestamp(xsddt);
 
         HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
-        String expRunIri = lsqBaseIri + tmp.getString(expRun);
+        String expRunIri = lsqBaseIri + tmp.getStringId(expRun);
         expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
 
         Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
@@ -451,7 +451,7 @@ public class LsqBenchmarkProcessor {
 
             HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
             //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
-            Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
+            Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
 
 //                    Map<Resource, String> renames = new LinkedHashMap<>();
 //                    for(SpinBgp bgp : spinRoot.getBgps()) {

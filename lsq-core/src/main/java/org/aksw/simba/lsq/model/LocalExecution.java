@@ -56,7 +56,7 @@ public interface LocalExecution
     @StringId
     default String getStringId(HashIdCxt cxt) {
         ExperimentRun bmr = getBenchmarkRun();
-        String result = "localExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
+        String result = "localExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

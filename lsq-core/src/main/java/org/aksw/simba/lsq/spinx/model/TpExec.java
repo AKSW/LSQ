@@ -44,7 +44,7 @@ public interface TpExec
     default String getStringId(HashIdCxt cxt) {
         LocalExecution le = this.getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String result = "tpExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
+        String result = "tpExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

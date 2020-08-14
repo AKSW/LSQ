@@ -46,7 +46,7 @@ public interface BgpExec
         Bgp bgp = getBgp();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
-        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getString(getQueryExec().getLocalExecution().getBenchmarkRun());
+        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + cxt.getStringId(getQueryExec().getLocalExecution().getBenchmarkRun());
         return result;
     }
 

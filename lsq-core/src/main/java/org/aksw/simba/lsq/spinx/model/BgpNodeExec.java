@@ -53,7 +53,7 @@ public interface BgpNodeExec
         //LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
         LocalExecution le = getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String result = "bgpNodeExec-" + cxt.getHashAsString(this) + "-" + cxt.getString(bmr);
+        String result = "bgpNodeExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

@@ -91,13 +91,13 @@ public interface BgpNode
                 ? hashFn.hashInt(0)
                 : cxt.getGlobalProcessor().apply(literal, cxt);
 
-        if(literalOrSpinVar.isResource() && cxt.getHash(literalOrSpinVar) == null /* TODO maybe use !isProcessed? */) {
-            cxt.putHash(literal, nodeHash);
+        if(literalOrSpinVar.isResource() && cxt.getHashId(literalOrSpinVar) == null /* TODO maybe use !isProcessed? */) {
+            cxt.putHashId(literal, nodeHash);
 //            cxt.putString(actual, "var-" + actual.asLiteral().getString());
         }
 
         Bgp bgp = getBgp();
-        HashCode bgpHash = cxt.getHash(bgp);
+        HashCode bgpHash = cxt.getHashId(bgp);
         HashCode result = Hashing.combineUnordered(Arrays.asList(bgpHash, nodeHash));
 
         return result;

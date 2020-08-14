@@ -397,7 +397,7 @@ public class LsqEnrichments {
 
             String lsqBaseIri = "http://lsq.aksw.org/spin-";
             HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(spinRes);//.getHash(bgp);
-            Map<RDFNode, String> renames = hashIdCxt.getStringMapping();
+            Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
             LsqBenchmarkProcessor.renameResources(lsqBaseIri, renames);
 
 
