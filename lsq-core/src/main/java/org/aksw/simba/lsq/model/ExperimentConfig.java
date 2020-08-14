@@ -86,16 +86,16 @@ public interface ExperimentConfig
 
 
     @Iri(LSQ.Strs.maxResultCountForCounting)
-    Long getMaxItemCountForCounting();
-    ExperimentConfig setMaxItemCountForCounting(Long maxItemCountForCounting);
+    Long getMaxResultCountForCounting();
+    ExperimentConfig setMaxResultCountForCounting(Long maxItemCountForCounting);
 
     @Iri(LSQ.Strs.maxByteSizeForCounting)
     Long getMaxByteSizeForCounting();
     ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
 
     @Iri(LSQ.Strs.maxResultCountForSerialization)
-    Long getMaxItemCountForSerialization();
-    ExperimentConfig setMaxItemCountForSerialization(Long maxItemCountForSerialization);
+    Long getMaxResultCountForSerialization();
+    ExperimentConfig setMaxResultCountForSerialization(Long maxItemCountForSerialization);
 
     @Iri(LSQ.Strs.maxByteSizeForSerialization)
     Long getMaxByteSizeForSerialization();

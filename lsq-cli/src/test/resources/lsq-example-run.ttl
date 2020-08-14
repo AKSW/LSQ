@@ -8,17 +8,17 @@
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 
 <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
-        lsq:connectionTimeoutForRetrieval        "60"^^xsd:decimal ;
-        lsq:executionTimeoutForRetrieval         "300"^^xsd:decimal ;
-        lsq:connectionTimeoutForCounting        "60"^^xsd:decimal ;
-        lsq:executionTimeoutForCounting         "300"^^xsd:decimal ;
+        lsq:connectionTimeoutForRetrieval        "0.01"^^xsd:decimal ;
+        lsq:executionTimeoutForRetrieval         "0.01"^^xsd:decimal ;
+        lsq:connectionTimeoutForCounting        "0.01"^^xsd:decimal ;
+        lsq:executionTimeoutForCounting         "0.01"^^xsd:decimal ;
         lsq:maxByteSizeForCounting   "-1"^^xsd:long ;
         lsq:maxByteSizeForSerialization
                 "1000000"^^xsd:long ;
-        lsq:maxItemCountForCounting  "1000000"^^xsd:long ;
-        lsq:maxItemCountForSerialization
+        lsq:maxResultCountForCounting  "1000"^^xsd:long ;
+        lsq:maxResultCountForSerialization
                 "-1"^^xsd:long ;
-        lsq:maxCount                            "1000000"^^xsd:long ;
+        lsq:maxCount                            "-1"^^xsd:long ;
         lsq:baseIri       <http://lsq.aksw.org/> ;
         lsq:datasetIri    <http://dbpedia.org/somedata> ;
         lsq:datasetLabel  "dbpedia.org-somedata" ;

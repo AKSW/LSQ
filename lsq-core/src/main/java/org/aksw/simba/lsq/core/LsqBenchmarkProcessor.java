@@ -51,6 +51,7 @@ import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.graph.Node;
@@ -355,9 +356,9 @@ public class LsqBenchmarkProcessor {
                     qe,
                     config.getConnectionTimeoutForRetrieval(),
                     config.getExecutionTimeoutForRetrieval(),
-                    config.getMaxItemCountForCounting(),
+                    config.getMaxResultCountForCounting(),
                     config.getMaxByteSizeForCounting(),
-                    config.getMaxItemCountForSerialization(),
+                    config.getMaxResultCountForSerialization(),
                     config.getMaxByteSizeForSerialization(),
                     config.getConnectionTimeoutForCounting(),
                     config.getConnectionTimeoutForRetrieval(),
@@ -636,9 +637,9 @@ public class LsqBenchmarkProcessor {
                QueryExec result,
                BigDecimal rawConnectionTimeoutForRetrieval,
                BigDecimal rawExecutionTimeoutForRetrieval,
-               Long rawMaxItemCountForCounting,
+               Long rawMaxResultCountForCounting,
                Long rawMaxByteSizeForCounting,
-               Long rawMaxItemCountForSerialization,
+               Long rawMaxResultCountForSerialization,
                Long rawMaxByteSizeForSerialization,
                BigDecimal rawConnectionTimeoutForCounting,
                BigDecimal rawExecutionTimeoutForCounting,
@@ -646,24 +647,28 @@ public class LsqBenchmarkProcessor {
                ) {
 
 
-           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval)
+                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval)
+                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
-           long maxItemCountForCounting = Optional.ofNullable(rawMaxItemCountForCounting).orElse(-1l);
+           long maxResultCountForCounting = Optional.ofNullable(rawMaxResultCountForCounting).orElse(-1l);
            long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
 
-           long maxItemCountForSerialization = Optional.ofNullable(rawMaxItemCountForSerialization).orElse(-1l);
+           long maxResultCountForSerialization = Optional.ofNullable(rawMaxResultCountForSerialization).orElse(-1l);
            long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
 
-           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting).map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting)
+                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting)
+                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
            long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
 
-           boolean exceededMaxItemCountForSerialization = false;
+           boolean exceededMaxResultCountForSerialization = false;
            boolean exceededMaxByteSizeForSerialization = false;
 
-           boolean exceededMaxItemCountForCounting = false;
+           boolean exceededMaxResultCountForCounting = false;
            boolean exceededMaxByteSizeForCounting = false;
 
            Instant now = Instant.now();
@@ -672,8 +677,6 @@ public class LsqBenchmarkProcessor {
            XSDDateTime xsdDateTime = new XSDDateTime(cal);
 
            result.setTimestamp(xsdDateTime);
-
-           logger.info("Benchmarking " + queryStr);
 
            Query query;
 
@@ -686,100 +689,103 @@ public class LsqBenchmarkProcessor {
 
 
            Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
-           Stopwatch retrievalSw = Stopwatch.createStarted();
 
            List<String> varNames = new ArrayList<>();
 
-           boolean isItemCountComplete = false;
+           boolean isResultCountComplete = false;
            long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
            List<Binding> cache = new ArrayList<>();
 
-           try(QueryExecution qe = conn.query(query)) {
-               qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
+           if (maxResultCountForCounting != 0 && maxByteSizeForCounting != 0) {
+               logger.info("Benchmarking " + queryStr);
+               Stopwatch retrievalSw = Stopwatch.createStarted();
 
-               ResultSet rs = qe.execSelect();
-               varNames.addAll(rs.getResultVars());
+               try(QueryExecution qe = conn.query(query)) {
+                   qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
 
-               long estimatedByteSize = 0;
+                   ResultSet rs = qe.execSelect();
+                   varNames.addAll(rs.getResultVars());
 
-               while(rs.hasNext()) {
-                   ++itemCount;
+                   long estimatedByteSize = 0;
 
-                   Binding binding = rs.nextBinding();
+                   while(rs.hasNext()) {
+                       ++itemCount;
 
-                   if(cache != null) {
-                       // Estimate the size of the binding (e.g. I once had polygons in literals of size 50MB)
-                       long bindingSizeContrib = binding.toString().length();
-                       estimatedByteSize += bindingSizeContrib;
-
-                       exceededMaxItemCountForSerialization = maxItemCountForSerialization >= 0
-                               && itemCount > maxItemCountForSerialization;
-
-                       if(exceededMaxItemCountForSerialization) {
-                           // Disable serialization but keep on counting
-                           cache = null;
-                       }
-
-                       exceededMaxByteSizeForSerialization = maxByteSizeForSerialization >= 0
-                               && estimatedByteSize > maxByteSizeForSerialization;
-                       if(exceededMaxByteSizeForSerialization) {
-                           // Disable serialization but keep on counting
-                           cache = null;
-                       }
-
+                       Binding binding = rs.nextBinding();
 
                        if(cache != null) {
-                           cache.add(binding);
+                           // Estimate the size of the binding (e.g. I once had polygons in literals of size 50MB)
+                           long bindingSizeContrib = binding.toString().length();
+                           estimatedByteSize += bindingSizeContrib;
+
+                           exceededMaxResultCountForSerialization = maxResultCountForSerialization >= 0
+                                   && itemCount > maxResultCountForSerialization;
+
+                           if(exceededMaxResultCountForSerialization) {
+                               // Disable serialization but keep on counting
+                               cache = null;
+                           }
+
+                           exceededMaxByteSizeForSerialization = maxByteSizeForSerialization >= 0
+                                   && estimatedByteSize > maxByteSizeForSerialization;
+                           if(exceededMaxByteSizeForSerialization) {
+                               // Disable serialization but keep on counting
+                               cache = null;
+                           }
+
+
+                           if(cache != null) {
+                               cache.add(binding);
+                           }
+                       }
+
+                       exceededMaxResultCountForCounting = maxResultCountForCounting >= 0
+                               && itemCount > maxResultCountForCounting;
+                       if(exceededMaxByteSizeForSerialization) {
+                           break;
+                       }
+
+                       exceededMaxByteSizeForCounting = maxByteSizeForCounting >= 0
+                               && estimatedByteSize > maxByteSizeForCounting;
+                       if(exceededMaxByteSizeForSerialization) {
+                           break;
                        }
                    }
 
-                   exceededMaxItemCountForCounting = maxItemCountForCounting >= 0
-                           && itemCount > maxItemCountForCounting;
-                   if(exceededMaxByteSizeForSerialization) {
-                       break;
+                   if(exceededMaxResultCountForSerialization) {
+                       result.setExceededMaxResultCountForSerialization(exceededMaxResultCountForSerialization);
                    }
 
-                   exceededMaxByteSizeForCounting = maxByteSizeForCounting >= 0
-                           && estimatedByteSize > maxByteSizeForCounting;
                    if(exceededMaxByteSizeForSerialization) {
-                       break;
+                       result.setExceededMaxByteSizeForSerialization(exceededMaxByteSizeForSerialization);
                    }
+
+
+                   if(exceededMaxResultCountForCounting) {
+                       result.setExceededMaxResultCountForCounting(exceededMaxResultCountForCounting);
+                   }
+
+                   if(exceededMaxByteSizeForCounting) {
+                       result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
+                   }
+
+                   // Try obtaining a count with a separate query
+                   isResultCountComplete = !exceededMaxResultCountForCounting && !exceededMaxByteSizeForCounting;
+
+               } catch(Exception e) {
+                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+                   result.setRetrievalError(errorMsg);
+                   logger.warn("Retrieval error: ", e);
                }
 
-               if(exceededMaxItemCountForSerialization) {
-                   result.setExceededMaxItemCountForSerialization(exceededMaxItemCountForSerialization);
-               }
+               BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
+                       .divide(new BigDecimal(1000000000));
 
-               if(exceededMaxByteSizeForSerialization) {
-                   result.setExceededMaxByteSizeForSerialization(exceededMaxByteSizeForSerialization);
-               }
-
-
-               if(exceededMaxItemCountForCounting) {
-                   result.setExceededMaxItemCountForCounting(exceededMaxItemCountForCounting);
-               }
-
-               if(exceededMaxByteSizeForCounting) {
-                   result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
-               }
-
-               // Try obtaining a count with a separate query
-               isItemCountComplete = !exceededMaxItemCountForCounting && !exceededMaxByteSizeForCounting;
-
-           } catch(Exception e) {
-               String errorMsg = e.toString();
-               result.setRetrievalError(errorMsg);
-               logger.warn("Retrieval error: ", e);
+               result.setRetrievalDuration(retrievalDuration);
            }
 
-           BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
-                   .divide(new BigDecimal(1000000000));
 
-
-           result.setRetrievalDuration(retrievalDuration);
-
-
-           if(!isItemCountComplete) {
+           if (!isResultCountComplete) {
                // Try to count using a query and discard the current elapsed time
 
                Long countItemLimit = maxCount >= 0 ? maxCount : null;
@@ -788,6 +794,8 @@ public class LsqBenchmarkProcessor {
 
                Var countVar = queryAndVar.getKey();
                Query countQuery = queryAndVar.getValue();
+
+               logger.info("Counting " + countQuery);
 
                Stopwatch countingSw = Stopwatch.createStarted();
 
@@ -798,10 +806,10 @@ public class LsqBenchmarkProcessor {
                    if(count != null) {
                        itemCount = count.longValue();
 
-                       isItemCountComplete = countItemLimit == null | itemCount < countItemLimit;
+                       isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
                    }
                } catch(Exception e) {
-                   String errorMsg = e.toString();
+                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
                    result.setCountingError(errorMsg);
                    logger.warn("Counting error: ", e);
                }
@@ -812,7 +820,7 @@ public class LsqBenchmarkProcessor {
                result.setCountDuration(countingDuration);
            }
 
-           if(isItemCountComplete) {
+           if(isResultCountComplete) {
                result.setResultSetSize(itemCount);
            }
 

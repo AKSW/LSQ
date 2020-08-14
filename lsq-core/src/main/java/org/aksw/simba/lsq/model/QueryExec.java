@@ -57,16 +57,16 @@ public interface QueryExec extends Resource {
     QueryExec setExceededMaxByteSizeForCounting(Boolean offOrOn);
 
     @Iri(LSQ.Strs.exceededMaxResultCountForCounting)
-    Boolean getExceededMaxItemCountForCounting();
-    QueryExec setExceededMaxItemCountForCounting(Boolean offOrOn);
+    Boolean getExceededMaxResultCountForCounting();
+    QueryExec setExceededMaxResultCountForCounting(Boolean offOrOn);
 
     @Iri(LSQ.Strs.exceededMaxByteSizeForSerialization)
     Boolean getExceededMaxByteSizeForSerialization();
     QueryExec setExceededMaxByteSizeForSerialization(Boolean offOrOn);
 
     @Iri(LSQ.Strs.exceededMaxResultCountForSerialization)
-    Boolean getExceededMaxItemCountForSerialization();
-    QueryExec setExceededMaxItemCountForSerialization(Boolean offOrOn);
+    Boolean getExceededMaxResultCountForSerialization();
+    QueryExec setExceededMaxResultCountForSerialization(Boolean offOrOn);
 
     @Iri(LSQ.Strs.serializedResult)
     String getSerializedResult();

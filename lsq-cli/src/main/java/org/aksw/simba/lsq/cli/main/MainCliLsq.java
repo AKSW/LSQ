@@ -355,9 +355,9 @@ public class MainCliLsq {
                     )
             .setExecutionTimeoutForRetrieval(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
             .setConnectionTimeoutForRetrieval(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
-            .setMaxItemCountForCounting(1000000l) // 1M
+            .setMaxResultCountForCounting(1000000l) // 1M
             .setMaxByteSizeForCounting(-1l) // limit only by count
-            .setMaxItemCountForSerialization(-1l) // limit by byte size
+            .setMaxResultCountForSerialization(-1l) // limit by byte size
             .setMaxByteSizeForSerialization(1000000l) // 1MB
             .setExecutionTimeoutForCounting(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
             .setConnectionTimeoutForCounting(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
