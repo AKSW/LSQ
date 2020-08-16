@@ -83,6 +83,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
+import com.google.common.hash.HashCode;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -373,7 +374,10 @@ public class LsqUtils {
 
 
 
-    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config, String inputResource) throws IOException {
+    public static Flowable<ResourceInDataset> createReader(
+            LsqConfigImpl config,
+            String inputResource) throws IOException {
+
 //        Long itemLimit = config.getItemLimit();
         String logFormat = config.getInQueryLogFormat();
         String baseIri = config.outBaseIri;
@@ -383,9 +387,20 @@ public class LsqUtils {
 
         Function<String, SparqlStmt> sparqlParser = SparqlStmtParserImpl.create(Syntax.syntaxARQ, new PrefixMappingImpl(), true);
 
+        Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
+                .hashString(str, StandardCharsets.UTF_8)
+                .asBytes());
+
         Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
         Flowable<ResourceInDataset> result = createReader(
-                inputResource, sparqlParser, logFormat, logFmtRegistry, baseIri, hostHashSalt, serviceUrl);
+                inputResource,
+                sparqlParser,
+                logFormat,
+                logFmtRegistry,
+                baseIri,
+                hostHashSalt,
+                serviceUrl,
+                hashFn);
 
 //        if(itemLimit != null) {
 //            result = result.take(itemLimit);
@@ -411,7 +426,8 @@ public class LsqUtils {
             Map<String, ResourceParser> logFmtRegistry,
             String baseIri,
             String hostHashSalt,
-            String serviceUrl
+            String serviceUrl,
+            Function<String, String> hashFn
             ) throws IOException {
 
 //		String filename;
@@ -556,7 +572,7 @@ public class LsqUtils {
                                 ? parsedQuery.getQuery().toString()
                                 : parsedQuery.getOriginalString();
 
-                        String queryHash = Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+                        String queryHash = hashFn.apply(str); // Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
                         q.setText(str);
                         q.setHash(queryHash);
 
@@ -590,9 +606,7 @@ public class LsqUtils {
                         String host = re.getHost();
                         String hostHash = host == null
                                 ? null
-                                : BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
-                                    .hashString(hostHashSalt + host, StandardCharsets.UTF_8)
-                                    .asBytes());
+                                : hashFn.apply(hostHashSalt + host);
 
                         // FIXME Respect the noHoshHash = true flag
                         re.setHostHash(hostHash);

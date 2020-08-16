@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -60,6 +61,7 @@ import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -84,6 +86,8 @@ import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
+
+import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
@@ -142,6 +146,10 @@ public class MainCliLsq {
 
         Map<String, ResourceParser> logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
 
+        Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
+                .hashString(str, StandardCharsets.UTF_8)
+                .asBytes());
+
 
         Flowable<ResourceInDataset> logRdfEvents = Flowable
             .fromIterable(logSources)
@@ -153,7 +161,8 @@ public class MainCliLsq {
                         logFmtRegistry,
                         baseIri,
                         hostHashSalt,
-                        endpointUrl);
+                        endpointUrl,
+                        hashFn);
 
                 return st;
             });
@@ -198,7 +207,7 @@ public class MainCliLsq {
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
-            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.STDOUT, RDFFormat.TRIG_PRETTY);
+            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.STDOUT, RDFFormat.TRIG_BLOCKS);
             logger.info("RDFization completed successfully");
         } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
@@ -249,7 +258,7 @@ public class MainCliLsq {
         })
         .map(ResourceInDataset::getDataset);
 
-        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.STDOUT, RDFFormat.TRIG_PRETTY);
+        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.STDOUT, RDFFormat.TRIG_BLOCKS);
     }
 
 
@@ -366,6 +375,7 @@ public class MainCliLsq {
             .setConnectionTimeoutForCounting(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
             .setMaxCount(1000000000l)
             .setUserAgent(benchmarkCreateCmd.userAgent)
+            .benchmarkSecondaryQueries(true)
             .setDatasetSize(datasetSize)
             .setDatasetLabel(datasetLabel)
             .setDatasetIri(datasetIri)
@@ -385,7 +395,7 @@ public class MainCliLsq {
         try(OutputStream out = outPath == null
                 ? StdIo.STDOUT
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-            RDFDataMgr.write(out, model, RDFFormat.TURTLE_PRETTY);
+            RDFDataMgr.write(out, model, RDFFormat.TURTLE_BLOCKS);
         }
 
         if(outPath != null) {
@@ -540,7 +550,7 @@ public class MainCliLsq {
         try (OutputStream out = outPath == null
                 ? StdIo.STDOUT
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
-            RDFDataMgr.write(out, configModel, RDFFormat.TURTLE_PRETTY);
+            RDFDataMgr.write(out, configModel, RDFFormat.TURTLE_BLOCKS);
         }
 
         if(outPath != null) {

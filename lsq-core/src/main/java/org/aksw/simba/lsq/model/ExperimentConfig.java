@@ -11,6 +11,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
+// FIXME Add config option to benchmark only master queries and not secondary ones
 @ResourceView
 public interface ExperimentConfig
     extends Resource
@@ -84,12 +85,11 @@ public interface ExperimentConfig
     BigDecimal getExecutionTimeoutForCounting();
     ExperimentConfig setExecutionTimeoutForCounting(BigDecimal duration);
 
-
-    @Iri(LSQ.Strs.maxResultCountForCounting)
+    @Iri(LSQ.Strs.maxResultCountForRetrieval)
     Long getMaxResultCountForCounting();
     ExperimentConfig setMaxResultCountForCounting(Long maxItemCountForCounting);
 
-    @Iri(LSQ.Strs.maxByteSizeForCounting)
+    @Iri(LSQ.Strs.maxByteSizeForRetrieval)
     Long getMaxByteSizeForCounting();
     ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
 
@@ -104,4 +104,9 @@ public interface ExperimentConfig
     @Iri(LSQ.Strs.maxCount)
     Long getMaxCount();
     ExperimentConfig setMaxCount(Long maxItemCountForCounting);
+
+    @Iri(LSQ.Strs.benchmarkSecondaryQueries)
+    Boolean benchmarkSecondaryQueries();
+    ExperimentConfig benchmarkSecondaryQueries(Boolean offOrOn);
+
 }

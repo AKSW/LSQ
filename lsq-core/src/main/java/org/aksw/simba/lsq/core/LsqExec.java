@@ -246,20 +246,23 @@ public class LsqExec {
         BgpExec bgpExec = expRoot.findBgpExec(bgp);
 
         if(bgpExec == null) {
-            bgpExec = model.createResource().as(BgpExec.class);
             LsqQuery extensionQuery = bgp.getExtensionQuery();
             Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
             LocalExecution le = leMap.get(expRun);
-            QueryExec qe = le.getQueryExec();
+            if (le != null) {
+                QueryExec qe = le.getQueryExec();
 
-            // Link the bgp with the corresponding query execution
-            bgpExec
-                .setBgp(bgp) /* inverse link */
-//                                .setBenchmarkRun(expRun)
-                .setQueryExec(qe)
-                ;
+                bgpExec = model.createResource().as(BgpExec.class);
 
-            expRoot.getBgpExecs().add(bgpExec);
+                // Link the bgp with the corresponding query execution
+                bgpExec
+                    .setBgp(bgp) /* inverse link */
+    //                                .setBenchmarkRun(expRun)
+                    .setQueryExec(qe)
+                    ;
+
+                expRoot.getBgpExecs().add(bgpExec);
+            }
 
 //                            expRoot.getBgpExecs().add(bgpExec);
         }
@@ -276,18 +279,21 @@ public class LsqExec {
 
         if(bgpExec == null) {
             Model model = bgp.getModel();
-            bgpExec = model.createResource().as(BgpExec.class);
             LocalExecution le = bgpEqLeMap.get(expRun);
-            QueryExec qe = le.getQueryExec();
 
-            // Link the bgp with the corresponding query execution
-            bgpExec
-                .setBgp(bgp) /* inverse link */
-//                                .setBenchmarkRun(expRun)
-                .setQueryExec(qe)
-                ;
+            if (le != null) {
+                QueryExec qe = le.getQueryExec();
+                bgpExec = model.createResource().as(BgpExec.class);
+
+                // Link the bgp with the corresponding query execution
+                bgpExec
+                    .setBgp(bgp) /* inverse link */
+    //                                .setBenchmarkRun(expRun)
+                    .setQueryExec(qe)
+                    ;
 
 //                            expRoot.getBgpExecs().add(bgpExec);
+            }
         }
 
         return bgpExec;

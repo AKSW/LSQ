@@ -33,9 +33,14 @@ public class LSQ {
 
         public static final String serializedResult = NS + "serializedResult";
 
+
+        // TODO In a future LSQ version we could repeat the benchmark threshold config params for
+        // primary queries and secondary ones (bgp and tps)
+        public static final String benchmarkSecondaryQueries = NS + "benchmarkSecondaryQueries";
+
         public static final String maxCount = NS + "maxCount";
-        public static final String maxResultCountForCounting = NS + "maxResultCountForCounting";
-        public static final String maxByteSizeForCounting = NS + "maxByteSizeForCounting";
+        public static final String maxResultCountForRetrieval = NS + "maxResultCountForRetrieval";
+        public static final String maxByteSizeForRetrieval = NS + "maxByteSizeForRetrieval";
         public static final String maxResultCountForSerialization = NS + "maxResultCountForSerialization";
         public static final String maxByteSizeForSerialization = NS + "maxByteSizeForSerialization";
 

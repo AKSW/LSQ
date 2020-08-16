@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -171,6 +172,7 @@ public class LsqBenchmarkProcessor {
         String expId = datasetLabel + "_" + benchmarkRunTimestampStr;
         String expSuffix = "_" + expId;
 
+        boolean benchmarkSecondaryQueries = Optional.ofNullable(config.benchmarkSecondaryQueries()).orElse(false);
 
         Function<String, String> lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
 
@@ -195,6 +197,7 @@ public class LsqBenchmarkProcessor {
 //                })
                 //.flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
                 .map(lsqQuery -> extractAllQueries(lsqQuery))
+                .map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
 //                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
 //                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
 //                .lift(OperatorObserveThroughput.create("throughput", 100))
@@ -395,11 +398,11 @@ public class LsqBenchmarkProcessor {
 
             logger.info("Processing pack of size: " + pack.size());
 
-            // The master query is assumed to always be the first element of a pack
-            LsqQuery masterQuery = pack.iterator().next();
+            // The primary query is assumed to always be the first element of a pack
+            LsqQuery primaryQuery = pack.iterator().next();
 
 
-            Model masterQueryModel = ModelFactory.createDefaultModel();
+            Model primaryQueryModel = ModelFactory.createDefaultModel();
 
 
             // We need to add the config model in order to include the benchmark run id
@@ -408,7 +411,7 @@ public class LsqBenchmarkProcessor {
             // TODO We should ensure that only the minimal necessary config model is added
             Model configModel = config.getModel();
 //                    expRoot.getModel().add(configModel);
-            masterQueryModel.add(configModel);
+            primaryQueryModel.add(configModel);
 
 
             //Model model = rootQuery.getModel();
@@ -428,24 +431,22 @@ public class LsqBenchmarkProcessor {
 //                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
 //                        System.err.println("END***********************************************");
 
-                // Adding the master query's model to itself should be harmless
-                masterQueryModel.add(m);
-                masterQueryModel.add(item.getModel());
+                // Adding the primary query's model to itself should be harmless
+                primaryQueryModel.add(m);
+                primaryQueryModel.add(item.getModel());
             }
 
 
-            masterQuery = masterQuery.inModel(masterQueryModel).as(LsqQuery.class);
-
-            SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
+            primaryQuery = primaryQuery.inModel(primaryQueryModel).as(LsqQuery.class);
 
             // Update triple pattern selectivities
 //                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
-            Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
+            Map<Resource, LocalExecution> rleMap = primaryQuery.getLocalExecutionMap();
             LocalExecution expRoot = rleMap.get(expRun);
 
 //                    expRoot.setBenchmarkRun(expRun);
 
-            LsqExec.createAllExecs(masterQuery, expRun);
+            LsqExec.createAllExecs(primaryQuery, expRun);
 
 
 
@@ -466,16 +467,16 @@ public class LsqBenchmarkProcessor {
 
 //                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
 
-            masterQueryModel.remove(configModel);
+            primaryQueryModel.remove(configModel);
 
             Map<Resource, Resource> remap = renameResources(lsqBaseIri, renames);
 
 
-            // If the masterQuery was renamed
-            Resource tgtMasterQuery = remap.getOrDefault(masterQuery, masterQuery);
+            // If the primaryQuery was renamed
+            Resource tgtPrimaryQuery = remap.getOrDefault(primaryQuery, primaryQuery);
 
-            //String graphIri = masterQuery.getURI();
-            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtMasterQuery);
+            //String graphIri = primaryQuery.getURI();
+            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtPrimaryQuery);
             result.add(item);
 
 
@@ -540,17 +541,17 @@ public class LsqBenchmarkProcessor {
     /**
      * Extract all queries associated with elements of the lsq query's spin representation
      *
-     * @param masterQuery
+     * @param primaryQuery
      * @return
      */
-    public static Set<LsqQuery> extractAllQueries(LsqQuery masterQuery) {
+    public static Set<LsqQuery> extractAllQueries(LsqQuery primaryQuery) {
         Set<LsqQuery> result = new LinkedHashSet<>();
 
         // Add self by default
-        result.add(masterQuery);
+        result.add(primaryQuery);
 
-        //SpinQueryEx spinNode = masterQuery.getSpinQuery().as(SpinQueryEx.class);
-        LsqStructuralFeatures bgpInfo = masterQuery.getStructuralFeatures();
+        //SpinQueryEx spinNode = primaryQuery.getSpinQuery().as(SpinQueryEx.class);
+        LsqStructuralFeatures bgpInfo = primaryQuery.getStructuralFeatures();
 
 
         for(Bgp bgp : bgpInfo.getBgps()) {
@@ -838,7 +839,7 @@ public class LsqBenchmarkProcessor {
 
            result.setEvalDuration(evalDuration);
 
-           logger.info("Benchmark result after " + evalDuration + " ms: " + result.getResultSetSize() + " " + result.getRetrievalError());
+           logger.info("Benchmark result after " + evalDuration + " seconds: " + result.getResultSetSize() + " results and error message " + result.getRetrievalError());
 
            return result;
            //Calendar end = Calendar.getInstance();
