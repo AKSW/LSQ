@@ -45,8 +45,11 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
+import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -325,7 +328,8 @@ public class LsqEnrichments {
             extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
 
             Element elt = new ElementTriplesBlock(bgp.toBasicPattern());
-            // TODO Use a prefixed form
+
+            // TODO Use a prefixed form?
             bgp.setLabel(elt.toString());
             Query query = QueryUtils.elementToQuery(elt);
             if(prefixMapping != null) {
