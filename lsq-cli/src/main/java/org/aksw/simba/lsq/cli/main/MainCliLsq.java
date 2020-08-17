@@ -452,7 +452,7 @@ public class MainCliLsq {
         String fsSafeId = sanitizeFilename(runId);
 
         Path tdb2BasePath = benchmarkExecuteCmd.tdb2BasePath;
-        Path tdb2FullPath = tdb2BasePath.resolve(fsSafeId);
+        Path tdb2FullPath = tdb2BasePath.resolve("lsq-" + fsSafeId);
         Files.createDirectories(tdb2FullPath);
         String fullPathStr = tdb2FullPath.toString();
 
