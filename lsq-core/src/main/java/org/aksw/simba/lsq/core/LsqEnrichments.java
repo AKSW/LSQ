@@ -20,11 +20,11 @@ import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
+import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
+import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
-import org.aksw.simba.lsq.spinx.model.Bgp;
-import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
@@ -35,10 +35,13 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
@@ -47,6 +50,8 @@ import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.TriplePattern;
 import org.topbraid.spin.vocabulary.SP;
 
@@ -57,6 +62,8 @@ import com.google.common.io.BaseEncoding;
 import io.reactivex.rxjava3.core.Maybe;
 
 public class LsqEnrichments {
+
+    private static final Logger logger = LoggerFactory.getLogger(LsqEnrichments.class);
 
     public static void enrichSpinBgpWithTpInBgp(Bgp bgp) {
         Map<LsqTriplePattern, TpInBgp> tpToTpInBgp = bgp.indexTps();
@@ -122,57 +129,59 @@ public class LsqEnrichments {
 
                 for(BgpNode bgpNode : bgpNodeMap.values()) {
                     Node jenaNode = bgpNode.toJenaNode();
-                    bgpNode.setLabel(NodeFmtLib.str(jenaNode));
 
-                    boolean createJoinExtension = false;
-                    if(createJoinExtension && createQueryResources && jenaNode.isVariable()) {
-                        LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
-                        if(extensionQuery == null) {
-                            extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
+                    // TODO Allow blank nodes?
+//                    if (jenaNode.isVariable()) {
 
-                            Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
-                            query.setQueryResultStar(false);
-                            query.setDistinct(true);
-                            query.getProject().clear();
-                            query.getProject().add((Var)jenaNode);
+                        boolean createJoinExtension = false;
+                        if(createJoinExtension && createQueryResources) {
+                            LsqQuery extensionQuery = bgpNode.getJoinExtensionQuery();
+                            if(extensionQuery == null) {
+                                extensionQuery = bgp.getModel().createResource().as(LsqQuery.class);
 
-                            if(prefixMapping != null) {
-                                query.setPrefixMapping(prefixMapping);
-                                QueryUtils.optimizePrefixes(query);
+                                Query query = QueryUtils.elementToQuery(new ElementTriplesBlock(bgp.toBasicPattern()));
+                                query.setQueryResultStar(false);
+                                query.setDistinct(true);
+                                query.getProject().clear();
+                                query.getProject().add((Var)jenaNode);
+
+                                if(prefixMapping != null) {
+                                    query.setPrefixMapping(prefixMapping);
+                                    QueryUtils.optimizePrefixes(query);
+                                }
+
+
+                                extensionQuery.setQueryAndHash(query);
+
+                                bgpNode.setJoinExtensionQuery(extensionQuery);
+                            }
+                        }
+
+
+                        List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
+                                .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
+                                .collect(Collectors.toList());
+                        // Do not generate empty subBgps
+    //                    if(!subBgpTps.isEmpty()) {
+
+                            Bgp subBgp = bgpNode.getSubBgp();
+
+                            if(subBgp == null) {
+                                subBgp = bgpNode.getModel().createResource().as(Bgp.class);
+                                bgpNode.setSubBgp(subBgp);
                             }
 
+                            Collection<LsqTriplePattern> dest = subBgp.getTriplePatterns();
+                            for(LsqTriplePattern tp : subBgpTps) {
+                                dest.add(tp);
+                            }
 
-                            extensionQuery.setQueryAndHash(query);
+                            LsqEnrichments.enrichSpinBgpWithTpInBgp(subBgp);
 
-                            bgpNode.setJoinExtensionQuery(extensionQuery);
+                            if(createQueryResources && jenaNode.isVariable()) {
+                                LsqEnrichments.enrichSpinBgpWithQuery(subBgp, prefixMapping);
+                            }
                         }
-                    }
-
-
-                    List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
-                            .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
-                            .collect(Collectors.toList());
-                    // Do not generate empty subBgps
-//                    if(!subBgpTps.isEmpty()) {
-
-                        Bgp subBgp = bgpNode.getSubBgp();
-
-                        if(subBgp == null) {
-                            subBgp = bgpNode.getModel().createResource().as(Bgp.class);
-                            bgpNode.setSubBgp(subBgp);
-                        }
-
-                        Collection<LsqTriplePattern> dest = subBgp.getTriplePatterns();
-                        for(LsqTriplePattern tp : subBgpTps) {
-                            dest.add(tp);
-                        }
-
-                        LsqEnrichments.enrichSpinBgpWithTpInBgp(subBgp);
-
-                        if(createQueryResources && jenaNode.isVariable()) {
-                            LsqEnrichments.enrichSpinBgpWithQuery(subBgp, prefixMapping);
-                        }
-                    }
 //                }
             }
         }
@@ -181,28 +190,51 @@ public class LsqEnrichments {
         Model spinModel = bgpInfo.getModel();
 
         for(Bgp bgp : bgpInfo.getBgps()) {
+            Set<BgpNode> bgpNodes = bgp.getBgpNodes();
+//            logger.info("next bgp\n" + bgp.toBasicPattern());
             Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
             for(TriplePattern tp : bgp.getTriplePatterns()) {
                 Set<RDFNode> rdfNodes = SpinUtils.listRDFNodes(tp);
+//                logger.info("triple pattern: " + tp);
                 for(RDFNode rdfNode : rdfNodes) {
                     Node node = SpinUtils.readNode(rdfNode);
+//                    logger.info("Read bgp node " + rdfNode + " -> " + node);
 
                     // Compute bgpNodes for all RDF terms - not just variables!
                     // This is mandated the hypergraph model
 //                    if(node.isVariable()) {
 
-                        BgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
-                                n -> SpinUtils.writeNode(spinModel, n).as(BgpNode.class));
+                    BgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
+                            n -> createBgpNode(spinModel, n));
 
-                        // Redundant inserts into a set
-                        bgp.getBgpNodes().add(bgpNode);
+                    bgpNode.setLabel(NodeFmtLib.str(node));
+                    bgpNode.getProxyFor().add(rdfNode);
 
-                        bgpNode.getProxyFor().add(rdfNode);
-//                    }
+
+                    // Redundant inserts into a set
+                    bgpNodes.add(bgpNode);
                 }
             }
         }
+    }
+
+    /**
+     * Creates a fresh blank BgpNode. If the jenaNode argument is a variable
+     * then the sp:varName attribute is copied to the blank node.
+     *
+     *
+     * @param model
+     * @param jenaNode
+     * @return
+     */
+    public static BgpNode createBgpNode(Model model, Node jenaNode) {
+        BgpNode result = (jenaNode.isVariable()
+                ? SpinUtils.writeNode(model, jenaNode)
+                : model.createResource())
+            .as(BgpNode.class);
+
+        return result;
     }
 
     /**
@@ -331,7 +363,8 @@ public class LsqEnrichments {
             // Query query = QueryFactory.create("SELECT * {  { ?s a ?x ; ?p ?o } UNION { ?s ?j ?k } }");
             String queryStr = lsqQuery.getText();
             Objects.requireNonNull(queryStr, "Query string must not be null");
-            Query query = QueryFactory.create(queryStr);
+
+            Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
 
             PrefixMapping prefixMapping = query.getPrefixMapping();
 
@@ -512,7 +545,7 @@ public class LsqEnrichments {
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
        String queryStr = queryRes.getText();
        // TODO Avoid repeated parse
-       Query query = QueryFactory.create(queryStr);
+       Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
 
 
        LsqStructuralFeatures featureRes = queryRes.getStructuralFeatures();
@@ -626,7 +659,7 @@ public class LsqEnrichments {
         // Create the hypergraph model over all bgps
         // (Could be changed if individual stats are desired)
         //Model hyperGraph = ModelFactory.createDefaultModel();
-        Model hyperGraph = bgp.getModel();
+//        Model hyperGraph = bgp.getModel();
 
         // for(BasicPattern bgp : bgps) {
         enrichModelWithHyperGraphData(bgp);
@@ -730,6 +763,7 @@ public class LsqEnrichments {
         Model result = spinBgp.getModel();
         Map<Node, BgpNode> bgpNodes = spinBgp.indexBgpNodes();
 
+//        RDFDataMgr.write(System.err, spinBgp.getModel(), RDFFormat.TURTLE_BLOCKS);
 
         Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
 

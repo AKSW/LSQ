@@ -64,6 +64,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -600,12 +601,16 @@ public class LsqBenchmarkProcessor {
         for(BgpNode bgpNode : bgp.getBgpNodes()) {
             Bgp subBgp = bgpNode.getSubBgp();
 
+            // SubBgp may is typically null if the bgp node is not a variable
+//            if (subBgp != null) {
+
             // The sub-bgp of a variable in a bgp with a single triple pattern is the original bgp;
             // prevent infinite recursion
-            if(!subBgp.equals(bgp)) {
-                extractAllQueriesFromBgp(result, subBgp);
+                if(!subBgp.equals(bgp)) {
+                    extractAllQueriesFromBgp(result, subBgp);
+                }
             }
-        }
+//        }
     }
 
 //    public SparqlQueryConnection configureConnection(SparqlQueryConnection rawConn, ExperimentConfig config) {
@@ -682,7 +687,7 @@ public class LsqBenchmarkProcessor {
            Query query;
 
            try {
-               query = QueryFactory.create(queryStr);
+               query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
            } catch (Exception e) {
                logger.warn("Skipping benchmark because query failed to parse", e);
                return result;

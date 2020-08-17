@@ -13,6 +13,7 @@ import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.topbraid.spin.vocabulary.SP;
@@ -72,26 +73,37 @@ public interface BgpNode
         HashFunction hashFn = cxt.getHashFunction();
         Set<RDFNode> proxies = getProxyFor();
 
-        // The set of proxy node either contains:
-        // - a single literal or
-        // - a set of resources nodes which denote a SPIN variable with a specific name
+        // The set of proxy nodes either contains:
+        // - a single literal
+        // - a single IRI
+        // - several resources which all have the same value for the sp:varName attribute
 
-        RDFNode literalOrSpinVar = Iterables.getFirst(proxies, null);
+        RDFNode literalOrIriOrSpinVar = Iterables.getFirst(proxies, null);
 
         RDFNode literal;
-        if(literalOrSpinVar == null) {
+        if(literalOrIriOrSpinVar == null) {
             literal = null;
-        } else if(literalOrSpinVar.isLiteral()) {
-            literal = literalOrSpinVar;
+        } else if(literalOrIriOrSpinVar.isLiteral()) {
+            literal = literalOrIriOrSpinVar;
         } else { // if(pick.isResource()) {
-            literal = ResourceUtils.getPropertyValue(literalOrSpinVar.asResource(), SP.varName);
+            literal = ResourceUtils.getPropertyValue(literalOrIriOrSpinVar.asResource(), SP.varName);
+
+            if(literal == null) {
+                if(literalOrIriOrSpinVar.isURIResource()) {
+                    Model model = getModel();
+                    // 'iri:' prefix to reduce change of clash with an IRI in a literal such as "http://foo.bar"
+                    literal = model.createLiteral("iri:" + literalOrIriOrSpinVar.asResource().getURI());
+                } else {
+                    throw new IllegalStateException("Proxy reference for a BgpNode must be either a literal or a resource with a SP.varName attribute or an IRI; got: " + literalOrIriOrSpinVar);
+                }
+            }
         }
 
         HashCode nodeHash = literal == null
                 ? hashFn.hashInt(0)
                 : cxt.getGlobalProcessor().apply(literal, cxt);
 
-        if(literalOrSpinVar.isResource() && cxt.getHashId(literalOrSpinVar) == null /* TODO maybe use !isProcessed? */) {
+        if(literalOrIriOrSpinVar.isResource() && cxt.getHashId(literalOrIriOrSpinVar) == null /* TODO maybe use !isProcessed? */) {
             cxt.putHashId(literal, nodeHash);
 //            cxt.putString(actual, "var-" + actual.asLiteral().getString());
         }
@@ -151,6 +163,7 @@ public interface BgpNode
         }
 
         RDFNode node = set.iterator().next();
-        return SpinUtils.readNode(node);
+        Node result = SpinUtils.readNode(node);
+        return result;
     }
 }

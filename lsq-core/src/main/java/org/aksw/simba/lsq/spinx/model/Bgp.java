@@ -92,7 +92,8 @@ public interface Bgp
     // TODO Eventually replace with a proper map view
     default Map<Node, BgpNode> indexBgpNodes() {
         Map<Node, BgpNode> result = new LinkedHashMap<>();
-        for(BgpNode v : getBgpNodes()) {
+        Set<BgpNode> bgpNodes = getBgpNodes();
+        for(BgpNode v : bgpNodes) {
             Node k = v.toJenaNode();
             result.put(k, v);
         }

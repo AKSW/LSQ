@@ -5,6 +5,6 @@ import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 public interface Labeled
 {
     @Iri("rdfs:label")
-    Bgp setLabel(String label);
+    Labeled setLabel(String label);
     String getLabel();
 }

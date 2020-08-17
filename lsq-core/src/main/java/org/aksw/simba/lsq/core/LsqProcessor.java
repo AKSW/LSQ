@@ -43,6 +43,7 @@ import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -371,7 +372,7 @@ public class LsqProcessor
         String queryStr = q.getText();
         String parseError = q.getParseError();
         if(queryStr != null && parseError == null) {
-            Query query = QueryFactory.create(queryStr);
+            Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
 
 //			String distributionId = UriToPathUtils.resolvePath(datasetLabel).toString()
 //					.replace('/', '-');

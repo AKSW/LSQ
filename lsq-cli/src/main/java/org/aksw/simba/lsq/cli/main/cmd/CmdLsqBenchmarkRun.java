@@ -27,7 +27,7 @@ public class CmdLsqBenchmarkRun
     public String config = null;
 
     @Option(names= {"--tdb"}, description="Base path to the TDB2 database directory for indexing benchmark results", showDefaultValue = Visibility.ALWAYS)
-    public Path tdb2BasePath = Paths.get(StandardSystemProperty.JAVA_IO_TMPDIR.value()).resolve("lsq").normalize();
+    public Path tdb2BasePath = Paths.get(StandardSystemProperty.JAVA_IO_TMPDIR.value()).resolve("lsq");
 
     @Parameters(arity = "1..*", paramLabel="FILE", description="Log files to process")
     public List<String> logSources = new ArrayList<>();
