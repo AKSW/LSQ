@@ -2,7 +2,7 @@
  * Copyright (c) 2009 TopQuadrant, Inc.
  * All rights reserved.
  *******************************************************************************/
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.trash;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.aksw.simba.lsq.core.LsqUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

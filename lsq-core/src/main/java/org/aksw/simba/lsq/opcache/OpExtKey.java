@@ -1,4 +1,6 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.opcache;
+
+import java.util.Objects;
 
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.sparql.algebra.Op;
@@ -8,19 +10,21 @@ import org.apache.jena.sparql.engine.QueryIterator;
 import org.apache.jena.sparql.serializer.SerializationContext;
 import org.apache.jena.sparql.util.NodeIsomorphismMap;
 
-public class OpExtTableToMultiset
+/**
+ * An operator that references a result set by key, such as a key of a cache entry.
+ * The evaluation depends on the execution context or the executor
+ *
+ * @author raven
+ *
+ */
+public class OpExtKey
     extends OpExt
 {
-    protected Op subOp;
+    protected Object key;
 
-
-    public OpExtTableToMultiset(Op subOp) {
-        super(OpExtTableToMultiset.class.getSimpleName());
-        this.subOp = subOp;
-    }
-
-    public Op getSubOp() {
-        return subOp;
+    public OpExtKey(Object key) {
+        super(OpExtKey.class.getSimpleName());
+        this.key = key;
     }
 
     @Override
@@ -30,21 +34,25 @@ public class OpExtTableToMultiset
 
     @Override
     public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
-        return null;
+        // ExprEvalException?
+        throw new RuntimeException("This class requires an xecutor that can handle " + getClass().getName());
     }
 
     @Override
     public void outputArgs(IndentedWriter out, SerializationContext sCxt) {
+        out.print(key);
     }
 
     @Override
     public int hashCode() {
-        return 12345;
+        //int result = tag.hashCode() * 13 + Objects.hashCode(key) * 11;
+        int result = Objects.hash(tag, key);
+        return result;
     }
 
     @Override
     public boolean equalTo(Op other, NodeIsomorphismMap labelMap) {
-        return other instanceof OpExtTableToMultiset;
+        return other instanceof OpExtKey && Objects.equals(key, ((OpExtKey)other).key);
     }
 
 }

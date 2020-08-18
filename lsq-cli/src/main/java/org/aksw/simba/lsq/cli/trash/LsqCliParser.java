@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main;
+package org.aksw.simba.lsq.cli.trash;
 
 import java.io.File;
 import java.io.IOException;

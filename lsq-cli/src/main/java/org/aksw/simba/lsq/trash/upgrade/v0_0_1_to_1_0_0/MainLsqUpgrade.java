@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.upgrade.v0_0_1_to_1_0_0;
+package org.aksw.simba.lsq.trash.upgrade.v0_0_1_to_1_0_0;
 
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;

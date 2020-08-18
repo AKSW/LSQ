@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.opcache;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -30,6 +30,7 @@ public class ConceptModelUtils {
 
     /**
      * Obtain the set of RDFNodes from a concept over a model.
+     * Unchecked means that Resource.canAs() is not checked.
      *
      * For example, SPIN2ARQ does not produce ?x a sp:TriplePattern triples, but canAs
      * on the Spin Resource Implementations returns false if the type is not present.

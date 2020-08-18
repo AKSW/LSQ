@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.commons.io;
 
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
