@@ -780,7 +780,8 @@ public class LsqBenchmarkProcessor {
                    isResultCountComplete = !exceededMaxResultCountForCounting && !exceededMaxByteSizeForCounting;
 
                } catch(Exception e) {
-                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+//                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+                   String errorMsg = ExceptionUtils.getStackTrace(e);
                    result.setRetrievalError(errorMsg);
                    logger.warn("Retrieval error: ", e);
                }
@@ -816,7 +817,8 @@ public class LsqBenchmarkProcessor {
                        isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
                    }
                } catch(Exception e) {
-                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+//                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+                   String errorMsg = ExceptionUtils.getStackTrace(e);
                    result.setCountingError(errorMsg);
                    logger.warn("Counting error: ", e);
                }

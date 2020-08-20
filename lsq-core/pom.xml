@@ -27,11 +27,11 @@
 
 		<!-- FIXME Get rid of this dependency; right now we use some ngs code which 
 			should go into a common module -->
-		<dependency>
-			<groupId>org.aksw.sparql-integrate</groupId>
-			<artifactId>sparql-integrate-cli</artifactId>
-			<version>1.0.5-SNAPSHOT</version>
-		</dependency>
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.aksw.sparql-integrate</groupId> -->
+<!-- 			<artifactId>sparql-integrate-cli</artifactId> -->
+<!-- 			<version>1.0.5-SNAPSHOT</version> -->
+<!-- 		</dependency> -->
 
 		<dependency>
 			<groupId>org.aksw.simba.lsq</groupId>

@@ -7,11 +7,11 @@ import java.util.stream.LongStream;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.op.OperatorOrderedGroupBy;
 import org.aksw.simba.lsq.model.LsqQuery;
+import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.riot.Lang;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import jersey.repackaged.com.google.common.collect.Maps;
 
 public class MainLsqConsumeExample {
     public static void main(String[] args) {

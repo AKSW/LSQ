@@ -24,6 +24,7 @@ import java.util.UUID;
 import java.util.function.Function;
 
 import org.aksw.commons.io.StdIo;
+import org.aksw.commons.util.exception.ExceptionUtils;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
@@ -55,8 +56,8 @@ import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
+import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap.MapSpec;
 import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
-import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
@@ -170,7 +171,8 @@ public class MainCliLsq {
 
         if(rdfizeCmd.slimMode) {
             CmdNgsMap cmd = new CmdNgsMap();
-            cmd.stmts.add("lsq-slimify.sparql");
+            cmd.mapSpec = new MapSpec();
+            cmd.mapSpec.stmts.add("lsq-slimify.sparql");
 //			cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
 //			JenaSystem.init();
@@ -179,7 +181,7 @@ public class MainCliLsq {
 //			SparqlStmtUtils.processFile(pm, "lsq-slimify.sparql");
 //			MainCliNamedGraphStream.createMapper2(); //map(DefaultPrefixes.prefixes, cmd);
             FlowableTransformer<ResourceInDataset, ResourceInDataset> mapper =
-                    MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd.stmts,
+                    MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd.mapSpec.stmts,
                             r -> r.getDataset(),
                             (r, ds) -> r.inDataset(ds), cxt -> {});
 
@@ -234,7 +236,8 @@ public class MainCliLsq {
     // log-record-to-query relation is no longer needed as it is now how the process works
     public static void invert(CmdLsqInvert cmdInvert) throws Exception {
         CmdNgsMap cmd = new CmdNgsMap();
-        cmd.stmts.add("lsq-invert-rdfized-log.sparql");
+        cmd.mapSpec = new MapSpec();
+        cmd.mapSpec.stmts.add("lsq-invert-rdfized-log.sparql");
         cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         JenaSystem.init();

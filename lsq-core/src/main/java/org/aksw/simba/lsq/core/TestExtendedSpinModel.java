@@ -1,9 +1,6 @@
 package org.aksw.simba.lsq.core;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -13,20 +10,9 @@ import java.util.Collections;
 import java.util.Map.Entry;
 
 import org.aksw.jena_sparql_api.http.repository.api.HttpRepository;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParser;
-import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
-import org.aksw.jena_sparql_api.utils.Vars;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.model.LsqQuery;
-import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
-import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
-import org.aksw.sparql_integrate.ngs.cli.main.ExceptionUtils;
-import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
 import org.apache.jena.ext.com.google.common.primitives.Ints;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.sparql.core.Quad;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

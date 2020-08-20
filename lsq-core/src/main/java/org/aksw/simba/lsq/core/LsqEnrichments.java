@@ -40,16 +40,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransform;
-import org.apache.jena.sparql.syntax.syntaxtransform.ElementTransformer;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -547,102 +542,103 @@ public class LsqEnrichments {
 //    }
 
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
-       String queryStr = queryRes.getText();
-       // TODO Avoid repeated parse
-       Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+        String queryStr = queryRes.getText();
+        // TODO Avoid repeated parse
+        Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
 
 
-       LsqStructuralFeatures featureRes = queryRes.getStructuralFeatures();
-       if(featureRes == null) {
-           featureRes = queryRes.getModel().createResource().as(LsqStructuralFeatures.class);
-           queryRes.setStructuralFeatures(featureRes);
-       }
+        LsqStructuralFeatures featureRes = queryRes.getStructuralFeatures();
+        if(featureRes == null) {
+            featureRes = queryRes.getModel().createResource().as(LsqStructuralFeatures.class);
+            queryRes.setStructuralFeatures(featureRes);
+        }
 
 
-       // Add used features
-       enrichResourceWithQueryFeatures(featureRes, query);
+        // Add used features
+        enrichResourceWithQueryFeatures(featureRes, query);
 
-       if(query.isSelectType()) {
-           featureRes.setProjectVarCount(query.getProjectVars().size());
-       }
+        if(query.isSelectType()) {
+            featureRes.setProjectVarCount(query.getProjectVars().size());
+        }
 
-       // Copy the bgp information from the spin model to the structural features model
-       // Thereby remove the link from the spinQuery to the bgs
-       SpinQueryEx spinEx = queryRes.getSpinQuery().as(SpinQueryEx.class);
-       Set<Bgp> bgpsInSpin = spinEx.getBgps();
+        // Copy the bgp information from the spin model to the structural features model
+        // Thereby remove the link from the spinQuery to the bgs
+        SpinQueryEx spinEx = queryRes.getSpinQuery().as(SpinQueryEx.class);
+        Set<Bgp> bgpsInSpin = spinEx.getBgps();
 
-       BgpInfo bgpInfo = featureRes;
-       Set<Bgp> bgps = bgpInfo.getBgps();
+        BgpInfo bgpInfo = featureRes;
+        Set<Bgp> bgps = bgpInfo.getBgps();
 
-       bgps.addAll(bgpsInSpin);
-       bgpsInSpin.clear();
-
-
-       int bgpCount = bgps.size();
-
-       List<Integer> tpInBgpTotalCounts = new ArrayList<>(bgpCount);
-
-       featureRes.setBgpCount(bgpCount);
-
-       for(Bgp bgp : bgpInfo.getBgps()) {
-           Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
-           int tpCount = tpInBgps.size();
-
-           tpInBgpTotalCounts.add(tpCount);
-       }
-
-       List<Integer> sortedTpCounts = tpInBgpTotalCounts.stream().sorted().collect(Collectors.toList());
-       int tpCount = intSum(tpInBgpTotalCounts);
-       int tpInBgpCountMin = Iterables.getFirst(sortedTpCounts, 0);
-       int tpInBgpCountMax = Iterables.getLast(sortedTpCounts, 0);
-       BigDecimal tpInBgpCountMean = LsqExec.safeDivide(tpCount, bgpCount);
-       BigDecimal tpInBgpCountMedian = median(sortedTpCounts, x -> new BigDecimal(x), LsqExec::avg).orElse(new BigDecimal(0));
-
-       featureRes
-               .setTpInBgpCountMin(tpInBgpCountMin)
-               .setTpInBgpCountMax(tpInBgpCountMax)
-               .setTpInBgpCountMean(tpInBgpCountMean)
-               .setTpInBgpCountMedian(tpInBgpCountMedian);
+        bgps.addAll(bgpsInSpin);
+        bgpsInSpin.clear();
 
 
-       /*
-        * join vertex computation
-        */
+        int bgpCount = bgps.size();
 
-       List<Integer> sortedJoinVertexDegrees = bgpInfo.getBgps().stream()
-               .flatMap(bgp -> setUpJoinVertices(bgp).stream()).sorted()
-               .collect(Collectors.toList());
+        List<Integer> tpInBgpTotalCounts = new ArrayList<>(bgpCount);
 
-       int n = sortedJoinVertexDegrees.size();
+        featureRes.setBgpCount(bgpCount);
 
+        for(Bgp bgp : bgpInfo.getBgps()) {
+            Set<TpInBgp> tpInBgps = bgp.getTpInBgp();
+            int tpCount = tpInBgps.size();
 
-       int joinVertexDegreeSum = intSum(sortedJoinVertexDegrees);
-       BigDecimal joinVertexDegreeMean = LsqExec.safeDivide(joinVertexDegreeSum, n);
-       BigDecimal joinVertexDegreeMedian = median(sortedJoinVertexDegrees, x -> new BigDecimal(x), LsqExec::avg).orElse(new BigDecimal(0));
+            tpInBgpTotalCounts.add(tpCount);
+        }
 
-       // This is on the query level
-       featureRes
-               .setJoinVertexCount(sortedJoinVertexDegrees.size())
-               .setJoinVertexDegreeMean(joinVertexDegreeMean)
-               .setJoinVertexDegreeMedian(joinVertexDegreeMedian)
-               ;
+        List<Integer> sortedTpCounts = tpInBgpTotalCounts.stream().sorted().collect(Collectors.toList());
+        int tpCount = intSum(tpInBgpTotalCounts);
+        int tpInBgpCountMin = Iterables.getFirst(sortedTpCounts, 0);
+        int tpInBgpCountMax = Iterables.getLast(sortedTpCounts, 0);
+        BigDecimal tpInBgpCountMean = LsqExec.safeDivide(tpCount, bgpCount);
+        BigDecimal tpInBgpCountMedian = median(sortedTpCounts, x -> new BigDecimal(x), LsqExec::avg).orElse(new BigDecimal(0));
 
-       QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
-
-       Model spinModel = queryRes.getModel();
-
-       // TODO Move to a util function
-       Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
-               .mapWith(stmt -> stmt.getObject().asResource()).toSet();
-
-       for(Resource serviceUri : serviceUris) {
-           featureRes.addProperty(LSQ.usesService, serviceUri);
-       }
+        featureRes
+            .setTpCount(tpCount)
+            .setTpInBgpCountMin(tpInBgpCountMin)
+            .setTpInBgpCountMax(tpInBgpCountMax)
+            .setTpInBgpCountMean(tpInBgpCountMean)
+            .setTpInBgpCountMedian(tpInBgpCountMedian);
 
 
+        /*
+         * join vertex computation
+         */
+
+        List<Integer> sortedJoinVertexDegrees = bgpInfo.getBgps().stream()
+                .flatMap(bgp -> setUpJoinVertices(bgp).stream()).sorted()
+                .collect(Collectors.toList());
+
+        int n = sortedJoinVertexDegrees.size();
 
 
-       //QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
+        int joinVertexDegreeSum = intSum(sortedJoinVertexDegrees);
+        BigDecimal joinVertexDegreeMean = LsqExec.safeDivide(joinVertexDegreeSum, n);
+        BigDecimal joinVertexDegreeMedian = median(sortedJoinVertexDegrees, x -> new BigDecimal(x), LsqExec::avg).orElse(new BigDecimal(0));
+
+        // This is on the query level
+        featureRes
+                .setJoinVertexCount(sortedJoinVertexDegrees.size())
+                .setJoinVertexDegreeMean(joinVertexDegreeMean)
+                .setJoinVertexDegreeMedian(joinVertexDegreeMedian)
+                ;
+
+        QueryStatistics2.enrichWithPropertyPaths(featureRes, query);
+
+        Model spinModel = queryRes.getModel();
+
+        // TODO Move to a util function
+        Set<Resource> serviceUris = spinModel.listStatements(null, SP.serviceURI, (RDFNode)null)
+                .mapWith(stmt -> stmt.getObject().asResource()).toSet();
+
+        for(Resource serviceUri : serviceUris) {
+            featureRes.addProperty(LSQ.usesService, serviceUri);
+        }
+
+
+
+
+        // QueryStatistics2.enrichWithMentions(featureRes, query); //the mentions subjects, predicates and objects can be obtained from Spin
 
 
 //   } catch (Exception ex) {
