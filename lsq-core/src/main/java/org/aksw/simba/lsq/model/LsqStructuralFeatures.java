@@ -65,7 +65,7 @@ public interface LsqStructuralFeatures
     LsqStructuralFeatures setBgpCount(Integer bgpCount);
 
     @Iri(LSQ.Strs.tpCount)
-    Integer getTpsCount();
+    Integer getTpCount();
     LsqStructuralFeatures setTpCount(Integer tpCount);
 
 
