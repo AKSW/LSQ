@@ -61,6 +61,7 @@ import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
 import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
 import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
 import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
+import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
@@ -209,7 +210,7 @@ public class MainCliLsq {
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
-            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.STDOUT, RDFFormat.TRIG_BLOCKS);
+            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);
             logger.info("RDFization completed successfully");
         } catch(Exception e) {
             ExceptionUtils.rethrowIfNotBrokenPipe(e);
@@ -241,7 +242,7 @@ public class MainCliLsq {
         cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         JenaSystem.init();
-        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, StdIo.STDOUT);
+        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, StdIo.openStdout());
     }
 
     // FIXME hasRemoteExec needs to be skolemized - this
@@ -261,7 +262,7 @@ public class MainCliLsq {
         })
         .map(ResourceInDataset::getDataset);
 
-        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.STDOUT, RDFFormat.TRIG_BLOCKS);
+        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);
     }
 
 
@@ -396,7 +397,7 @@ public class MainCliLsq {
         }
 
         try(OutputStream out = outPath == null
-                ? StdIo.STDOUT
+                ? new CloseShieldOutputStream(StdIo.openStdout())
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
             RDFDataMgr.write(out, model, RDFFormat.TURTLE_BLOCKS);
         }
@@ -551,7 +552,7 @@ public class MainCliLsq {
         }
 
         try (OutputStream out = outPath == null
-                ? StdIo.STDOUT
+                ? StdIo.openStdout()
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
             RDFDataMgr.write(out, configModel, RDFFormat.TURTLE_BLOCKS);
         }

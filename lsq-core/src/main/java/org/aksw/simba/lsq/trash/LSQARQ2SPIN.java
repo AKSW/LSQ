@@ -69,6 +69,7 @@ import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
 import org.apache.jena.sparql.syntax.ElementExists;
 import org.apache.jena.sparql.syntax.ElementFilter;
+import org.apache.jena.sparql.syntax.ElementFind;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementMinus;
 import org.apache.jena.sparql.syntax.ElementNamedGraph;
@@ -631,6 +632,12 @@ public class LSQARQ2SPIN {
                             members.add(SPINFactory.createTriplePattern(model, subject, predicate, object));
                         }
                     }
+                }
+
+                @Override
+                public void visit(ElementFind el) {
+                    // TODO Auto-generated method stub
+
                 }
             });
         }

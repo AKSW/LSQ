@@ -19,6 +19,9 @@ public class CmdLsqBenchmarkCreate
     @Option(names= {"-o", "--stdout"}, description="Output generated config to STDOUT instead of a file")
     public boolean stdout = false;
 
+    @Option(names= {"--import"}, description="Import settings from another config or run file")
+    public String importSource = null;
+
     @Option(names= {"-a", "--user-agent"}, description="User agent")
     public String userAgent = "Linked SPARQL Queries (LSQ) Client";
 
@@ -36,7 +39,7 @@ public class CmdLsqBenchmarkCreate
 //	@Parameter(names= {"--dist", "--distribution"}, required=true, description="SPARQL endpoint URL on which to execute queries")
 //	public String distribution = null;
 
-    @Option(names= {"-d", "--dataset"}, required=true, description="DatasetID identifier for the benchmark dataset")
+    @Option(names= {"-d", "--dataset"}, required=true, description="Label for the dataset the benchmark is run on; will appear in IRIs")
     public String dataset = null;
 
     @Option(names= {"-e", "--endpoint"}, required=true, description="SPARQL endpoint URL on which to execute queries")

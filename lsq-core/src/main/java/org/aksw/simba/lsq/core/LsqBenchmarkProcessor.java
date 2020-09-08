@@ -223,7 +223,7 @@ public class LsqBenchmarkProcessor {
                     indexConn);
 
             for(ResourceInDataset item : items) {
-                RDFDataMgr.write(StdIo.STDOUT, item.getDataset(), RDFFormat.TRIG_BLOCKS);
+                RDFDataMgr.write(StdIo.openStdout(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
             }
         }
 
