@@ -61,6 +61,11 @@
 		<jena.version>3.16.0</jena.version>
 		<jsa.subversion>1-SNAPSHOT</jsa.subversion>
 		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
+		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
+
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
@@ -74,9 +79,9 @@
 		<dependencies>
 
 			<dependency>
-				<groupId>org.aksw.sparql-integrate</groupId>
-				<artifactId>sparql-integrate-cli</artifactId>
-				<version>1.0.6-SNAPSHOT</version>
+				<groupId>org.aksw.rdf-processing-toolkit</groupId>
+				<artifactId>rdf-processing-toolkit-cli</artifactId>
+				<version>1.0.7-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
@@ -177,23 +182,12 @@
 				</exclusions>
 			</dependency>
 
-			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot</artifactId>
-				<version>1.5.10.RELEASE</version>
-			</dependency>
+			<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot</artifactId> 
+				<version>${spring-boot.version}</version> </dependency> -->
 
-			<dependency>
-				<groupId>net.sf.jopt-simple</groupId>
-				<artifactId>jopt-simple</artifactId>
-				<version>5.0.4</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.beust</groupId>
-				<artifactId>jcommander</artifactId>
-				<version>1.72</version>
-			</dependency>
+			<!-- <dependency> <groupId>net.sf.jopt-simple</groupId> <artifactId>jopt-simple</artifactId> 
+				<version>5.0.4</version> </dependency> <dependency> <groupId>com.beust</groupId> 
+				<artifactId>jcommander</artifactId> <version>1.72</version> </dependency> -->
 
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -223,11 +217,8 @@
 				<version>4.12</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-core</artifactId>
-				<version>5.0.3.RELEASE</version>
-			</dependency>
+			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+				<version>5.0.3.RELEASE</version> </dependency> -->
 
 			<dependency>
 				<groupId>org.topbraid</groupId>
@@ -246,8 +237,27 @@
 
 	<!-- Don't touch the stuff below unless you know what you are doing -->
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources-filtered</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 
 		<plugins>
+			<!-- A newer version of resources plugin is apparently needed to filter 
+				${project.build.timestamp} -->
+			<!-- Does not working although suggested at https://stackoverflow.com/questions/13228472/how-to-access-maven-build-timestamp-for-resource-filtering -->
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-resources-plugin</artifactId> -->
+			<!-- <version>3.2.0</version> -->
+			<!-- </plugin> -->
+
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
 				<artifactId>gitflow-maven-plugin</artifactId>

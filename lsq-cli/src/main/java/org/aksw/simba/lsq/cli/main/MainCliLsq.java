@@ -37,6 +37,12 @@ import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap;
+import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap.MapSpec;
+import org.aksw.named_graph_stream.cli.cmd.CmdNgsSort;
+import org.aksw.named_graph_stream.cli.main.MainCliNamedGraphStream;
+import org.aksw.named_graph_stream.cli.main.NamedGraphStreamOps;
+import org.aksw.named_graph_stream.cli.main.ResourceInDatasetFlowOps;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkCreate;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
@@ -55,12 +61,6 @@ import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap;
-import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsMap.MapSpec;
-import org.aksw.sparql_integrate.ngs.cli.cmd.CmdNgsSort;
-import org.aksw.sparql_integrate.ngs.cli.main.MainCliNamedGraphStream;
-import org.aksw.sparql_integrate.ngs.cli.main.NamedGraphStreamOps;
-import org.aksw.sparql_integrate.ngs.cli.main.ResourceInDatasetFlowOps;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
@@ -87,6 +87,7 @@ import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.io.BaseEncoding;
@@ -103,20 +104,57 @@ import picocli.CommandLine;
  * @author raven
  *
  */
+@SpringBootApplication
 public class MainCliLsq {
+
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
 
-    // File output stream that raises exceptions in contrast to System.out
+/*
+ * Spring Boot Code - in case we need it at some point; for now it turned out to not bring any benefit
+ */
+
+//    public static void main(String[] args) {
+//        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder()
+//                .sources(ConfigCliLsq.class)
+//            .bannerMode(Banner.Mode.OFF)
+//            // If true, Desktop.isDesktopSupported() will return false, meaning we can't
+//            // launch a browser
+//            .headless(false).web(WebApplicationType.NONE).run(args)) {
+//        }
+//    }
+
+//    @Configuration
+//    @PropertySource("classpath:lsq-core.properties")
+//    public static class ConfigCliLsq {
+//        @Value("lsq-core.version")
+//        protected String lsqCoreVersion;
+//
+//        @Bean
+//        public ApplicationRunner applicationRunner() {
+//            return args -> {
+//                try {
+//                    int exitCode = mainCore(args.getSourceArgs());
+//                    System.exit(exitCode);
+//
+//                } catch(Exception e) {
+//                    ExceptionUtils.rethrowIfNotBrokenPipe(e);
+//                }
+//            };
+//        }
+//    }
 
     public static void main(String[] args) {
-        int exitCode = new CommandLine(new CmdLsqMain())
+        int exitCode = mainCore(args);
+        System.exit(exitCode);
+    }
+
+    public static int mainCore(String[] args) {
+        return new CommandLine(new CmdLsqMain())
             .setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
                 ExceptionUtils.rethrowIfNotBrokenPipe(ex);
                 return 0;
             })
             .execute(args);
-
-        System.exit(exitCode);
     }
 
 
@@ -182,7 +220,7 @@ public class MainCliLsq {
 //			SparqlStmtUtils.processFile(pm, "lsq-slimify.sparql");
 //			MainCliNamedGraphStream.createMapper2(); //map(DefaultPrefixes.prefixes, cmd);
             FlowableTransformer<ResourceInDataset, ResourceInDataset> mapper =
-                    MainCliNamedGraphStream.createMapper(PrefixMapping.Extended, cmd.mapSpec.stmts,
+                    MainCliNamedGraphStream.createMapperDataset(PrefixMapping.Extended, cmd.mapSpec.stmts,
                             r -> r.getDataset(),
                             (r, ds) -> r.inDataset(ds), cxt -> {});
 
@@ -480,6 +518,7 @@ public class MainCliLsq {
             dataset.close();
         }
 
+        logger.info("Benchmark run " + runId + " completed successfully");
     }
 
     public static <T extends RDFNode> Optional<T> tryLoadResourceWithProperty(String src, Property p, Class<T> clazz) {

@@ -1,4 +1,12 @@
 #!/bin/sh
 
-java $JAVA_OPTS -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLsq $@
+#java $JAVA_OPTS -cp "/usr/share/lib/lsq-cli/lsq-cli.jar" org.aksw.simba.lsq.cli.main.MainCliLsq "$@"
+
+LIB_DIR="/usr/share/lib/lsq-cli/"
+MAIN_CLASS="org.aksw.simba.lsq.cli.main.MainCliLsq"
+
+#java $JAVA_OPTS -cp "$LIB_DIR:$LIB_DIR/lib/*" "$MAIN_CLASS" "$@"
+#java $JAVA_OPTS -cp "$LIB_DIR:$LIB_DIR/lib/*" "-Dloader.main=${MAIN_CLASS}" "org.springframework.boot.loader.PropertiesLauncher" "$@"
+
+java $JAVA_OPTS -cp "$LIB_DIR/lsq-cli.jar" "$MAIN_CLASS" "$@"
 
