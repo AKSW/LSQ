@@ -33,6 +33,7 @@ import org.aksw.jena_sparql_api.http.repository.impl.UriToPathUtils;
 import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
@@ -388,7 +389,7 @@ public class MainCliLsq {
             }
         }
 
-        Model model = ModelFactory.createDefaultModel();
+        Model model = DatasetFactoryEx.createInsertOrderPreservingDataset().getDefaultModel();
 
         model
             .setNsPrefix("lsqo", LSQ.NS)
@@ -552,7 +553,9 @@ public class MainCliLsq {
 
         // The config model is first loaded with the config file
         // and subsequently enriched with a benchmark run resource
-        Model configModel = RDFDataMgr.loadModel(configSrc);
+
+        Model configModel = DatasetFactoryEx.createInsertOrderPreservingDataset().getDefaultModel();
+        RDFDataMgr.read(configModel, configSrc);
 
         ExperimentConfig config = configModel.listResourcesWithProperty(LSQ.endpoint)
                 .nextOptional()
