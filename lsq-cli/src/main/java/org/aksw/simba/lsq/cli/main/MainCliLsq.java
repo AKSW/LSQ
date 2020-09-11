@@ -69,7 +69,6 @@ import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdfconnection.RDFConnection;
@@ -88,7 +87,6 @@ import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.io.BaseEncoding;
@@ -105,7 +103,7 @@ import picocli.CommandLine;
  * @author raven
  *
  */
-@SpringBootApplication
+//@SpringBootApplication
 public class MainCliLsq {
 
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
