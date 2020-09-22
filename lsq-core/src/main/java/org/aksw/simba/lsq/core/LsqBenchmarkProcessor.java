@@ -802,23 +802,26 @@ public class LsqBenchmarkProcessor {
 
                Long countItemLimit = maxCount >= 0 ? maxCount : null;
                // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
-               Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
+               Stopwatch countingSw = null;
+               try {
+                   Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
 
-               Var countVar = queryAndVar.getKey();
-               Query countQuery = queryAndVar.getValue();
+                   Var countVar = queryAndVar.getKey();
+                   Query countQuery = queryAndVar.getValue();
 
-               logger.info("Counting " + countQuery);
+                   logger.info("Counting " + countQuery);
 
-               Stopwatch countingSw = Stopwatch.createStarted();
+                   countingSw = Stopwatch.createStarted();
 
-               try(QueryExecution qe = conn.query(countQuery)) {
-                   qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
+                   try(QueryExecution qe = conn.query(countQuery)) {
+                       qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
 
-                   Number count = ServiceUtils.fetchNumber(qe, countVar);
-                   if(count != null) {
-                       itemCount = count.longValue();
+                       Number count = ServiceUtils.fetchNumber(qe, countVar);
+                       if(count != null) {
+                           itemCount = count.longValue();
 
-                       isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
+                           isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
+                       }
                    }
                } catch(Exception e) {
 //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
@@ -827,10 +830,12 @@ public class LsqBenchmarkProcessor {
                    logger.warn("Counting error: ", e);
                }
 
-               BigDecimal countingDuration = new BigDecimal(countingSw.stop().elapsed(TimeUnit.NANOSECONDS))
-                       .divide(new BigDecimal(1000000000));
+               if (countingSw != null) {
+                   BigDecimal countingDuration = new BigDecimal(countingSw.stop().elapsed(TimeUnit.NANOSECONDS))
+                           .divide(new BigDecimal(1000000000));
 
-               result.setCountDuration(countingDuration);
+                   result.setCountDuration(countingDuration);
+               }
            }
 
            if(isResultCountComplete) {
