@@ -367,7 +367,8 @@ public class LsqBenchmarkProcessor {
                     config.getMaxByteSizeForSerialization(),
                     config.getConnectionTimeoutForCounting(),
                     config.getConnectionTimeoutForRetrieval(),
-                    config.getMaxCount());
+                    config.getMaxCount(),
+                    config.getMaxCountAffectsTp());
 
             item.getLocalExecutions().add(le);
             le.setBenchmarkRun(expRun);
@@ -650,7 +651,8 @@ public class LsqBenchmarkProcessor {
                Long rawMaxByteSizeForSerialization,
                BigDecimal rawConnectionTimeoutForCounting,
                BigDecimal rawExecutionTimeoutForCounting,
-               Long rawMaxCount
+               Long rawMaxCount,
+               Boolean rawMaxCountAffectsTp
                ) {
 
 
@@ -671,6 +673,8 @@ public class LsqBenchmarkProcessor {
                    .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
            long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
+
+           boolean maxCountAffectsTp = Optional.ofNullable(rawMaxCountAffectsTp).orElse(false);
 
            boolean exceededMaxResultCountForSerialization = false;
            boolean exceededMaxByteSizeForSerialization = false;

@@ -39,6 +39,7 @@ public class LSQ {
         public static final String benchmarkSecondaryQueries = NS + "benchmarkSecondaryQueries";
 
         public static final String maxCount = NS + "maxCount";
+        public static final String maxCountAffectsTp = NS + "maxCountAffectsTp";
         public static final String maxResultCountForRetrieval = NS + "maxResultCountForRetrieval";
         public static final String maxByteSizeForRetrieval = NS + "maxByteSizeForRetrieval";
         public static final String maxResultCountForSerialization = NS + "maxResultCountForSerialization";

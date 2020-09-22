@@ -105,6 +105,10 @@ public interface ExperimentConfig
     Long getMaxCount();
     ExperimentConfig setMaxCount(Long maxItemCountForCounting);
 
+    @Iri(LSQ.Strs.maxCountAffectsTp)
+    Boolean getMaxCountAffectsTp();
+    ExperimentConfig getMaxCountAffectsTp(Boolean offOrOn);
+
     @Iri(LSQ.Strs.benchmarkSecondaryQueries)
     Boolean benchmarkSecondaryQueries();
     ExperimentConfig benchmarkSecondaryQueries(Boolean offOrOn);
