@@ -83,7 +83,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
-import com.google.common.hash.HashCode;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -529,10 +528,26 @@ public class LsqUtils {
 
                     return r;
                 })
-                //.zipWith(, zipper)
-                //.doOnNext()
-                .flatMapMaybe(x -> {
-                    RemoteExecution re = x.as(RemoteExecution.class);
+                .flatMapMaybe(record -> {
+                    Maybe<ResourceInDataset> r;
+                    try {
+                        r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                    } catch (Exception e) {
+                        logger.warn("Internal error; trying to continue", e);
+                        r = Maybe.empty();
+                    }
+                    return r;
+                });
+        }
+
+
+        return result;
+    }
+
+    public static Maybe<ResourceInDataset> processLogRecord(
+            Function<String, SparqlStmt> sparqlStmtParser, String baseIri, String hostHashSalt, String serviceUrl,
+            Function<String, String> hashFn, ResourceInDataset x) {
+        RemoteExecution re = x.as(RemoteExecution.class);
 
 
 //	        		// Long seqId = re.getSequenceId();
@@ -547,13 +562,13 @@ public class LsqUtils {
 //		        		x.addLiteral(LSQ.sequenceId, seqId);
 //	        		}
 //
-                    // If we cannot obtain a query from the log record, we omit the entry
-                    Maybe<ResourceInDataset> r = Maybe.empty();
+        // If we cannot obtain a query from the log record, we omit the entry
+        Maybe<ResourceInDataset> r = Maybe.empty();
 
-                    // Invert; map from query to log entry
-                    ResourceInDataset qq = x.wrapCreate(Model::createResource);
-                    LsqQuery q = qq.as(LsqQuery.class);
-                    q.getRemoteExecutions(Resource.class).add(x);
+        // Invert; map from query to log entry
+        ResourceInDataset qq = x.wrapCreate(Model::createResource);
+        LsqQuery q = qq.as(LsqQuery.class);
+        q.getRemoteExecutions(Resource.class).add(x);
 //        			String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
 //        			ResourceInDataset xx;
 //
@@ -565,182 +580,87 @@ public class LsqUtils {
 //        			}
 //        			String graphAndResourceIri = "urn:lsq:query:sha256:" + filename + "-" + seqId;
 
-                //try {
-                    SparqlStmtQuery parsedQuery = getParsedQuery(x, sparqlStmtParser);
-                    if(parsedQuery != null) {
-                        String str = parsedQuery.isParsed()
-                                ? parsedQuery.getQuery().toString()
-                                : parsedQuery.getOriginalString();
+            //try {
+        SparqlStmtQuery parsedQuery = getParsedQuery(x, sparqlStmtParser);
+        if(parsedQuery != null) {
+            String str = parsedQuery.isParsed()
+                    ? parsedQuery.getQuery().toString()
+                    : parsedQuery.getOriginalString();
 
-                        String queryHash = hashFn.apply(str); // Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
-                        q.setText(str);
-                        q.setHash(queryHash);
+            String queryHash = hashFn.apply(str); // Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+            q.setText(str);
+            q.setHash(queryHash);
 
-                        Throwable t = parsedQuery.getParseException();
-                        if(t != null) {
-                            q.setParseError(t.toString());
-                        }
+            Throwable t = parsedQuery.getParseException();
+            if(t != null) {
+                q.setParseError(t.toString());
+            }
 
-                        // String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
-                        String graphAndResourceIri = baseIri + "q-" + queryHash;
-                        // Note: We could also leave the resource as a blank node
-                        // The only important part is to have a named graph with the query hash
-                        // in order to merge records about equivalent queries
-                        qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
-
-
-                        /*
-                         * Generate IRI for log record
-                         */
-
-                        //if(host != null) {
-
-                        // http://www.example.org/sparql -> example.org-sparql
-                        String serviceId = serviceUrl == null
-                                ? "unknown-service"
-                                : UriToPathUtils.resolvePath(serviceUrl).toString()
-                                .replace('/', '-');
-
-                        // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
-
-                        String host = re.getHost();
-                        String hostHash = host == null
-                                ? null
-                                : hashFn.apply(hostHashSalt + host);
-
-                        // FIXME Respect the noHoshHash = true flag
-                        re.setHostHash(hostHash);
-                        re.setHost(null);
-
-                        re.setEndpointUrl(serviceUrl);
-
-                        Calendar timestamp = re.getTimestamp();
-
-                        long seqId = re.getSequenceId();
-                        // TODO If there is a timestamp then use it
-                        // Otherwise, use sourceFileName + sequenceId
-                        String logEntryId = serviceId + "_" + (timestamp != null
-                                ? timestamp.toInstant().toString()
-                                : seqId);
+            // String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
+            String graphAndResourceIri = baseIri + "q-" + queryHash;
+            // Note: We could also leave the resource as a blank node
+            // The only important part is to have a named graph with the query hash
+            // in order to merge records about equivalent queries
+            qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
 
 
-                        String reIri = baseIri + "re-" + logEntryId;
-                        org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
+            /*
+             * Generate IRI for log record
+             */
+
+            //if(host != null) {
+
+            // http://www.example.org/sparql -> example.org-sparql
+            String serviceId = serviceUrl == null
+                    ? "unknown-service"
+                    : UriToPathUtils.resolvePath(serviceUrl).toString()
+                    .replace('/', '-');
+
+            // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
+
+            String host = re.getHost();
+            String hostHash = host == null
+                    ? null
+                    : hashFn.apply(hostHashSalt + host);
+
+            // FIXME Respect the noHoshHash = true flag
+            re.setHostHash(hostHash);
+            re.setHost(null);
+
+            re.setEndpointUrl(serviceUrl);
+
+            Calendar timestamp = re.getTimestamp();
+
+            long seqId = re.getSequenceId();
+            // TODO If there is a timestamp then use it
+            // Otherwise, use sourceFileName + sequenceId
+            String logEntryId = serviceId + "_" + (timestamp != null
+                    ? timestamp.toInstant().toString()
+                    : seqId);
 
 
-                        qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
+            String reIri = baseIri + "re-" + logEntryId;
+            org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
 
 
-                        r = Maybe.just(qq);
-                    }
+            qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
 
 
-                    //LsqUtils.postProcessSparqlStmt(x, sparqlStmtParser);
+            r = Maybe.just(qq);
+        }
+
+
+        //LsqUtils.postProcessSparqlStmt(x, sparqlStmtParser);
 //	        	} catch(Exception e) {
 //	                qq.addLiteral(LSQ.processingError, e.toString());
 //	        	}
 
-                // Remove text and query properties, as LSQ.text is
-                // the polished one
-                // xx.removeAll(LSQ.query);
-                // xx.removeAll(RDFS.label);
+            // Remove text and query properties, as LSQ.text is
+            // the polished one
+            // xx.removeAll(LSQ.query);
+            // xx.removeAll(RDFS.label);
 
-                return r;
-            });
-            //.filter(x -> x != null);
-
-//    		result = result
-//    			.map(ResourceInDataset::getDataset)
-//    			.compose(MainCliNamedGraphStream.createMapper("lsq-invert-rdfized-log.sparql"))
-//    			.flatMap(ds -> Flowable.fromIterable(ResourceInDatasetImpl.selectByProperty(ds, LSQ.text)));
-
-        }
-
-
-
-
-        // effective log format is now non-null
-//        if(effectiveLogFormat == null) {
-//            throw new RuntimeException("Could not obtain effective log format for '" + logFormat + "'");
-//        }
-
-
-
-//    	Callable<InputStream> inSupp;
-//    	if(inputResource != null) {
-//        	// TODO We could make the resource loader part of the config
-//    		ResourceLoader loader = new DefaultResourceLoader();
-//    		org.springframework.core.io.Resource resource = loader.getResource(inputResource);
-//
-//    		// Retry with prepending file:
-//    		if(!resource.exists()) {
-//    			Path path = Paths.get(inputResource);
-//    			path = path.toAbsolutePath();
-//    			path = path.normalize();
-//    			logger.info("Attempting to open: [" + path + "]");
-//    			resource = new FileSystemResource(path.toFile());
-//    		}
-
-//            File inputFile = new File(inputResource);
-//            inputFile = inputFile.getAbsoluteFile();
-//            inSupp = resource::getInputStream;
-//        } else {
-//            inSupp = () -> new CloseShieldInputStream(System.in);
-//        }
-
-
-
-
-        // RDF Input overrides any log format
-
-
-        //Model logModel = ModelFactory.createDefaultModel();
-
-
-        //WebLogParser webLogParser = new WebLogParser(WebLogParser.apacheLogEntryPattern);
-
-        // TODO Use zipWithIndex in order to make the index part of the resource
-//        Stream<Resource> result = stream
-//            .map(line -> {
-//                Resource r = ModelFactory.createDefaultModel().createResource();
-//                r.addLiteral(RDFS.label, line);
-//
-//                boolean parsed;
-//                try {
-//                    parsed = webLogParser.parse(r, line) != 0;
-//                } catch(Exception e) {
-//                    parsed = false;
-//                    logger.warn("Parser error", e);
-//                }
-//
-//                if(!parsed) {
-//                    r.addLiteral(LSQ.processingError, "Failed to parse log line");
-//                }
-//
-//                return r;
-//            })
-//            ;
-//            .onClose(() -> {
-//                try { reader.close(); } catch (IOException e) { throw new RuntimeException(e); }
-//            });
-
-//        result.onClose(() -> {
-//            try {
-//                reader.close();
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        });
-
-//        result.onClose(() ->
-//            if(outNeedsClosing[0]) {
-//                logger.info("Shutdown hook: Flushing output");
-//                out.flush();
-//                out.close();
-//            }
-//        });
-
-        return result;
+            return r;
     }
 
 //	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {

@@ -400,7 +400,8 @@ public class LsqBenchmarkProcessor {
         for(Set<LsqQuery> pack : batch) {
 
             logger.info("Processing pack of size: " + pack.size());
-
+// TODO Move all the code into a nice processPack method of a new class
+try {
             // The primary query is assumed to always be the first element of a pack
             LsqQuery primaryQuery = pack.iterator().next();
 
@@ -481,7 +482,10 @@ public class LsqBenchmarkProcessor {
             //String graphIri = primaryQuery.getURI();
             ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtPrimaryQuery);
             result.add(item);
-
+}
+catch (Exception e) {
+    logger.warn("Internal error; trying to continue", e);
+}
 
             //RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
         }
