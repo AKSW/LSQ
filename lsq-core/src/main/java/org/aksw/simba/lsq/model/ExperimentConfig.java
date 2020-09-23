@@ -107,7 +107,7 @@ public interface ExperimentConfig
 
     @Iri(LSQ.Strs.maxCountAffectsTp)
     Boolean getMaxCountAffectsTp();
-    ExperimentConfig getMaxCountAffectsTp(Boolean offOrOn);
+    ExperimentConfig setMaxCountAffectsTp(Boolean offOrOn);
 
     @Iri(LSQ.Strs.benchmarkSecondaryQueries)
     Boolean benchmarkSecondaryQueries();

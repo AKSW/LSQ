@@ -415,6 +415,7 @@ public class MainCliLsq {
             .setExecutionTimeoutForCounting(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
             .setConnectionTimeoutForCounting(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
             .setMaxCount(1000000000l)
+            .setMaxCountAffectsTp(false)
             .setUserAgent(benchmarkCreateCmd.userAgent)
             .benchmarkSecondaryQueries(true)
             .setDatasetSize(datasetSize)
