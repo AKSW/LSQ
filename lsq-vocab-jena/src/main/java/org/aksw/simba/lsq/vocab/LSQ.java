@@ -367,6 +367,7 @@ public class LSQ {
     public static final Resource Union = resource("Union");
     public static final Resource Optional = resource("Optional");
     public static final Resource Reduced = resource("Reduced");
+    public static final Resource Find = resource("Find");
     public static final Resource Distinct = resource("Distinct");
     public static final Resource OrderBy = resource("OrderBy");
     public static final Resource GroupBy = resource("GroupBy");

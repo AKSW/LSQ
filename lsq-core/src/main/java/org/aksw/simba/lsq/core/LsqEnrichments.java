@@ -454,7 +454,9 @@ public class LsqEnrichments {
      *            The query object from which to extract the features
      */
     public static void enrichResourceWithQueryFeatures(Resource resource, Query query) {
-        Set<Resource> features = ElementVisitorFeatureExtractor.getFeatures(query);
+        Map<Resource, Integer> featureMap = ElementVisitorFeatureExtractor.getFeatures(query);
+        Set<Resource> features = featureMap.keySet();
+
         for (Resource feature : features) {
             resource.addProperty(LSQ.usesFeature, feature);
         }

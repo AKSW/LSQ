@@ -52,6 +52,7 @@ import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
+import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
@@ -808,6 +809,21 @@ catch (Exception e) {
                // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
                Stopwatch countingSw = null;
                try {
+
+                   // Check whether to disable thee count limit for single pattern queries
+                   if (!maxCountAffectsTp && countItemLimit != null) {
+                       Map<Resource, Integer> features = ElementVisitorFeatureExtractor.getFeatures(query);
+
+                       // Triple patterns and triple paths are counted separately so we need to sum them up
+                       int tpCount = features.getOrDefault(LSQ.TriplePattern, 0)
+                               + features.getOrDefault(LSQ.TriplePath, 0);
+
+                       if (tpCount == 1) {
+                           countItemLimit = null;
+                       }
+                   }
+
+
                    Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
 
                    Var countVar = queryAndVar.getKey();

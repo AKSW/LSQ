@@ -16,4 +16,12 @@ public interface QualifiedFeature
     @Iri(LSQ.Strs.count)
     Integer getCount();
     QualifiedFeature setCount(Integer count);
+
+    //
+    default int incrementAndGet() {
+        Integer count = getCount();
+        int nextCount = count == null ? 1 : ++count;
+        setCount(nextCount);
+        return count;
+    }
 }
