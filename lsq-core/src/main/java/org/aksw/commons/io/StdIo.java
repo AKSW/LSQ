@@ -7,15 +7,13 @@ import java.io.OutputStream;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 
 public class StdIo {
-    public static final OutputStream STDOUT = new FileOutputStream(FileDescriptor.out);
-    public static final OutputStream STDERR = new FileOutputStream(FileDescriptor.err);
 
     public static OutputStream openStdout() {
-        return new CloseShieldOutputStream(STDOUT);
+        return new CloseShieldOutputStream(new FileOutputStream(FileDescriptor.out));
     }
 
     public static OutputStream openStderr() {
-        return new CloseShieldOutputStream(STDERR);
+        return new CloseShieldOutputStream(new FileOutputStream(FileDescriptor.err));
     }
 
 //    public static OutputStream openStdin() {

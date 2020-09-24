@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -93,6 +94,7 @@ import org.topbraid.spin.model.TriplePattern;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
+import io.reactivex.rxjava3.core.Maybe;
 
 
 /**
@@ -147,6 +149,25 @@ public class LsqBenchmarkProcessor {
     }
 
     /**
+     * If something goes wrong when running the wrapped action
+     * then log an error return an empty maybe
+     *
+     * @param action A callable encapsulating some action
+     * @return A maybe with the action's return value or empty
+     */
+   public static <T> Maybe<T> safeMaybe(Callable<T> action) {
+       Maybe<T> result;
+       try {
+           T value = action.call();
+           result = Maybe.just(value);
+       } catch (Exception e) {
+           logger.warn("Internal error; trying to continue", e);
+           result = Maybe.empty();
+       }
+       return result;
+   }
+
+    /**
      *
      * @param lsqBaseIri The IRI prefix to prepend to generated resources
      * @param expSuffix A suffix to be appended to the automatically derived query hashes
@@ -190,10 +211,12 @@ public class LsqBenchmarkProcessor {
 //                .map(r -> r.as(LsqQuery.class))
 //                .skip(1)
 //                .take(1)
-                .flatMapMaybe(lsqQuery -> LsqEnrichments.enrichWithFullSpinModel(lsqQuery), false, 1)
+                .concatMapMaybe(lsqQuery ->
+                    safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
 //                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
                 .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
-                .map(lsqQuery -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery))
+                .concatMapMaybe(lsqQuery ->
+                    safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
 //                .doAfterNext(x -> {
 //                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
 //                    System.exit(1);

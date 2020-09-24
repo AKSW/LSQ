@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -343,18 +344,18 @@ public class LsqEnrichments {
      *
      * @param lsqQuery
      * @return
-     */
-    public static Maybe<LsqQuery> enrichWithFullSpinModel(LsqQuery lsqQuery) {
-        Maybe<LsqQuery> result;
-        try {
-            LsqQuery q = LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery);
-            result = Maybe.just(q);
-        } catch(Exception e) {
-            LsqBenchmarkProcessor.logger.error("Error processing query", e);
-            result = Maybe.empty();
-        }
-        return result;
-    }
+//     */
+//    public static Maybe<LsqQuery> enrichWithFullSpinModel(LsqQuery lsqQuery) {
+//        Maybe<LsqQuery> result;
+//        try {
+//            LsqQuery q = LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery);
+//            result = Maybe.just(q);
+//        } catch(Exception e) {
+//            LsqBenchmarkProcessor.logger.error("Error processing query", e);
+//            result = Maybe.empty();
+//        }
+//        return result;
+//    }
 
     public static LsqQuery enrichWithFullSpinModelCore(LsqQuery lsqQuery) {
     //        Maybe<LsqQuery> result;
@@ -542,6 +543,8 @@ public class LsqEnrichments {
 //
 //        return result;
 //    }
+
+
 
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
         String queryStr = queryRes.getText();
