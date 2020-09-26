@@ -21,14 +21,16 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.aksw.commons.io.StdIo;
-import org.aksw.commons.util.exception.ExceptionUtils;
+import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
 import org.aksw.jena_sparql_api.http.repository.impl.UriToPathUtils;
 import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
@@ -150,7 +152,7 @@ public class MainCliLsq {
     public static int mainCore(String[] args) {
         return new CommandLine(new CmdLsqMain())
             .setExecutionExceptionHandler((ex, commandLine, parseResult) -> {
-                ExceptionUtils.rethrowIfNotBrokenPipe(ex);
+                ExceptionUtilsAksw.rethrowIfNotBrokenPipe(ex);
                 return 0;
             })
             .execute(args);
@@ -250,7 +252,7 @@ public class MainCliLsq {
             RDFDataMgrRx.writeResources(logRdfEvents, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);
             logger.info("RDFization completed successfully");
         } catch(Exception e) {
-            ExceptionUtils.rethrowIfNotBrokenPipe(e);
+            ExceptionUtilsAksw.rethrowIfNotBrokenPipe(e);
         }
     }
 
@@ -505,11 +507,9 @@ public class MainCliLsq {
 
             DataRefSparqlEndpoint dataRef = cfg.getDataRef();
             try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
-                try(SparqlQueryConnection benchmarkConn = dataPod.openConnection()) {
 
-                    // FIXME HACK - dataRef currently conflicts with @HashId so we unset the attribute
-//                    cfg.setDataRef(null);
-
+                try(SparqlQueryConnection benchmarkConn =
+                        SparqlQueryConnectionWithReconnect.create(() -> dataPod.openConnection())) {
                     LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
                 }
             }

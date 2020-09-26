@@ -17,7 +17,6 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>${jena.version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

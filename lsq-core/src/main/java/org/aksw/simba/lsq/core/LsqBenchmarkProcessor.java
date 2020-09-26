@@ -26,6 +26,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.io.StdIo;
+import org.aksw.jena_sparql_api.core.connection.ConnectionLostException;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
@@ -49,10 +50,9 @@ import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QueryExec;
-import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
-import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
+import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -377,8 +377,7 @@ public class LsqBenchmarkProcessor {
             LocalExecution le = newModel.createResource().as(LocalExecution.class);
             QueryExec qe = newModel.createResource().as(QueryExec.class);
 
-            // TODO Skolemize these executions!
-
+            // TODO Skolemize these executions! Update: Its done - isn't it/
             rdfizeQueryExecutionBenchmark(
                     benchmarkConn,
                     queryStr,
@@ -810,12 +809,19 @@ catch (Exception e) {
 
                    // Try obtaining a count with a separate query
                    isResultCountComplete = !exceededMaxResultCountForCounting && !exceededMaxByteSizeForCounting;
+//               } catch (QueryExecException ce) {
+//                   // FIXME
+               } catch (ConnectionLostException e) {
+                   throw new ConnectionLostException(e);
+               } catch (Exception e) {
 
-               } catch(Exception e) {
-//                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+                   // Set the cache to null so we don't serialize result sets of failed queries
+                   cache = null;
+
+                   logger.warn("Retrieval error: ", e);
+    //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
                    String errorMsg = ExceptionUtils.getStackTrace(e);
                    result.setRetrievalError(errorMsg);
-                   logger.warn("Retrieval error: ", e);
                }
 
                BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
@@ -866,11 +872,13 @@ catch (Exception e) {
                            isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
                        }
                    }
+               } catch (ConnectionLostException e) {
+                   throw new ConnectionLostException(e);
                } catch(Exception e) {
-//                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+                   logger.warn("Counting error: ", e);
+    //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
                    String errorMsg = ExceptionUtils.getStackTrace(e);
                    result.setCountingError(errorMsg);
-                   logger.warn("Counting error: ", e);
                }
 
                if (countingSw != null) {
@@ -904,7 +912,8 @@ catch (Exception e) {
            return result;
            //Calendar end = Calendar.getInstance();
            //Duration duration = Duration.between(start.toInstant(), end.toInstant());
-       }
+    }
+
 
     public static Flowable<Entry<String, Dataset>> fetchDatasets(SparqlQueryConnection conn, Iterable<Node> graphNames) {
         Query query = createFetchNamedGraphQuery(graphNames);
