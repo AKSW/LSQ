@@ -20,7 +20,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -34,6 +33,7 @@ import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
+import org.aksw.jena_sparql_api.rx.query_flow.RxUtils;
 import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
 import org.aksw.jena_sparql_api.syntax.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
@@ -94,7 +94,6 @@ import org.topbraid.spin.model.TriplePattern;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;
-import io.reactivex.rxjava3.core.Maybe;
 
 
 /**
@@ -149,25 +148,6 @@ public class LsqBenchmarkProcessor {
     }
 
     /**
-     * If something goes wrong when running the wrapped action
-     * then log an error return an empty maybe
-     *
-     * @param action A callable encapsulating some action
-     * @return A maybe with the action's return value or empty
-     */
-   public static <T> Maybe<T> safeMaybe(Callable<T> action) {
-       Maybe<T> result;
-       try {
-           T value = action.call();
-           result = Maybe.just(value);
-       } catch (Exception e) {
-           logger.warn("Internal error; trying to continue", e);
-           result = Maybe.empty();
-       }
-       return result;
-   }
-
-    /**
      *
      * @param lsqBaseIri The IRI prefix to prepend to generated resources
      * @param expSuffix A suffix to be appended to the automatically derived query hashes
@@ -212,11 +192,11 @@ public class LsqBenchmarkProcessor {
 //                .skip(1)
 //                .take(1)
                 .concatMapMaybe(lsqQuery ->
-                    safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
+                    RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
 //                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
                 .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
                 .concatMapMaybe(lsqQuery ->
-                    safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
+                    RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
 //                .doAfterNext(x -> {
 //                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
 //                    System.exit(1);
@@ -378,20 +358,19 @@ public class LsqBenchmarkProcessor {
             QueryExec qe = newModel.createResource().as(QueryExec.class);
 
             // TODO Skolemize these executions! Update: Its done - isn't it/
-            rdfizeQueryExecutionBenchmark(
-                    benchmarkConn,
-                    queryStr,
-                    qe,
-                    config.getConnectionTimeoutForRetrieval(),
-                    config.getExecutionTimeoutForRetrieval(),
-                    config.getMaxResultCountForCounting(),
-                    config.getMaxByteSizeForCounting(),
-                    config.getMaxResultCountForSerialization(),
-                    config.getMaxByteSizeForSerialization(),
-                    config.getConnectionTimeoutForCounting(),
-                    config.getConnectionTimeoutForRetrieval(),
-                    config.getMaxCount(),
-                    config.getMaxCountAffectsTp());
+
+
+            Query query;
+            try {
+                query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+            } catch (Exception e) {
+                logger.warn("Skipping benchmark because query failed to parse", e);
+                continue;
+            }
+
+
+            SparqlQueryBenchmarker benchmarker = new SparqlQueryBenchmarkerImpl(config);
+            benchmarker.benchmark(benchmarkConn, query, qe);
 
             item.getLocalExecutions().add(le);
             le.setBenchmarkRun(expRun);
@@ -642,278 +621,6 @@ catch (Exception e) {
 //        }
     }
 
-//    public SparqlQueryConnection configureConnection(SparqlQueryConnection rawConn, ExperimentConfig config) {
-//        ExperimentConfig config;
-//        BigDecimal connectionTimeout = config.getConnectionTimeout();
-//        BigDecimal queryExecutionTimeout = config.getQueryTimeout();
-//        Long effectiveConnectionTimeout = connectionTimeout == null
-//                ? -1l
-//                : connectionTimeout.divide(new BigDecimal(1000)).longValue();
-//
-//        Long effectiveQueryExecutionTimeout = queryExecutionTimeout == null
-//                ? -1l
-//                : queryExecutionTimeout.divide(new BigDecimal(1000)).longValue();
-//
-//        qe.setTimeout(effectiveConnectionTimeout, effectiveQueryExecutionTimeout);
-//
-//        return null;
-//    }
-
-    /*
-        * Benchmark the combined execution and retrieval time of a given query
-        *
-        * @param query
-        * @param queryExecRes
-        * @param qef
-        */
-       public static QueryExec rdfizeQueryExecutionBenchmark(
-               SparqlQueryConnection conn,
-               String queryStr,
-               QueryExec result,
-               BigDecimal rawConnectionTimeoutForRetrieval,
-               BigDecimal rawExecutionTimeoutForRetrieval,
-               Long rawMaxResultCountForCounting,
-               Long rawMaxByteSizeForCounting,
-               Long rawMaxResultCountForSerialization,
-               Long rawMaxByteSizeForSerialization,
-               BigDecimal rawConnectionTimeoutForCounting,
-               BigDecimal rawExecutionTimeoutForCounting,
-               Long rawMaxCount,
-               Boolean rawMaxCountAffectsTp
-               ) {
-
-
-           long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval)
-                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-           long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval)
-                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-
-           long maxResultCountForCounting = Optional.ofNullable(rawMaxResultCountForCounting).orElse(-1l);
-           long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
-
-           long maxResultCountForSerialization = Optional.ofNullable(rawMaxResultCountForSerialization).orElse(-1l);
-           long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
-
-           long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting)
-                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-           long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting)
-                   .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
-
-           long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
-
-           boolean maxCountAffectsTp = Optional.ofNullable(rawMaxCountAffectsTp).orElse(false);
-
-           boolean exceededMaxResultCountForSerialization = false;
-           boolean exceededMaxByteSizeForSerialization = false;
-
-           boolean exceededMaxResultCountForCounting = false;
-           boolean exceededMaxByteSizeForCounting = false;
-
-           Instant now = Instant.now();
-           ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
-           Calendar cal = GregorianCalendar.from(zdt);
-           XSDDateTime xsdDateTime = new XSDDateTime(cal);
-
-           result.setTimestamp(xsdDateTime);
-
-           Query query;
-
-           try {
-               query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
-           } catch (Exception e) {
-               logger.warn("Skipping benchmark because query failed to parse", e);
-               return result;
-           }
-
-
-           Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
-
-           List<String> varNames = new ArrayList<>();
-
-           boolean isResultCountComplete = false;
-           long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
-           List<Binding> cache = new ArrayList<>();
-
-           if (maxResultCountForCounting != 0 && maxByteSizeForCounting != 0) {
-               logger.info("Benchmarking " + queryStr);
-               Stopwatch retrievalSw = Stopwatch.createStarted();
-
-               try(QueryExecution qe = conn.query(query)) {
-                   qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
-
-                   ResultSet rs = qe.execSelect();
-                   varNames.addAll(rs.getResultVars());
-
-                   long estimatedByteSize = 0;
-
-                   while(rs.hasNext()) {
-                       ++itemCount;
-
-                       Binding binding = rs.nextBinding();
-
-                       if(cache != null) {
-                           // Estimate the size of the binding (e.g. I once had polygons in literals of size 50MB)
-                           long bindingSizeContrib = binding.toString().length();
-                           estimatedByteSize += bindingSizeContrib;
-
-                           exceededMaxResultCountForSerialization = maxResultCountForSerialization >= 0
-                                   && itemCount > maxResultCountForSerialization;
-
-                           if(exceededMaxResultCountForSerialization) {
-                               // Disable serialization but keep on counting
-                               cache = null;
-                           }
-
-                           exceededMaxByteSizeForSerialization = maxByteSizeForSerialization >= 0
-                                   && estimatedByteSize > maxByteSizeForSerialization;
-                           if(exceededMaxByteSizeForSerialization) {
-                               // Disable serialization but keep on counting
-                               cache = null;
-                           }
-
-
-                           if(cache != null) {
-                               cache.add(binding);
-                           }
-                       }
-
-                       exceededMaxResultCountForCounting = maxResultCountForCounting >= 0
-                               && itemCount > maxResultCountForCounting;
-                       if(exceededMaxByteSizeForSerialization) {
-                           break;
-                       }
-
-                       exceededMaxByteSizeForCounting = maxByteSizeForCounting >= 0
-                               && estimatedByteSize > maxByteSizeForCounting;
-                       if(exceededMaxByteSizeForSerialization) {
-                           break;
-                       }
-                   }
-
-                   if(exceededMaxResultCountForSerialization) {
-                       result.setExceededMaxResultCountForSerialization(exceededMaxResultCountForSerialization);
-                   }
-
-                   if(exceededMaxByteSizeForSerialization) {
-                       result.setExceededMaxByteSizeForSerialization(exceededMaxByteSizeForSerialization);
-                   }
-
-
-                   if(exceededMaxResultCountForCounting) {
-                       result.setExceededMaxResultCountForCounting(exceededMaxResultCountForCounting);
-                   }
-
-                   if(exceededMaxByteSizeForCounting) {
-                       result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
-                   }
-
-                   // Try obtaining a count with a separate query
-                   isResultCountComplete = !exceededMaxResultCountForCounting && !exceededMaxByteSizeForCounting;
-//               } catch (QueryExecException ce) {
-//                   // FIXME
-               } catch (ConnectionLostException e) {
-                   throw new ConnectionLostException(e);
-               } catch (Exception e) {
-
-                   // Set the cache to null so we don't serialize result sets of failed queries
-                   cache = null;
-
-                   logger.warn("Retrieval error: ", e);
-    //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
-                   String errorMsg = ExceptionUtils.getStackTrace(e);
-                   result.setRetrievalError(errorMsg);
-               }
-
-               BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
-                       .divide(new BigDecimal(1000000000));
-
-               result.setRetrievalDuration(retrievalDuration);
-           }
-
-
-           if (!isResultCountComplete) {
-               // Try to count using a query and discard the current elapsed time
-
-               Long countItemLimit = maxCount >= 0 ? maxCount : null;
-               // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
-               Stopwatch countingSw = null;
-               try {
-
-                   // Check whether to disable thee count limit for single pattern queries
-                   if (!maxCountAffectsTp && countItemLimit != null) {
-                       Map<Resource, Integer> features = ElementVisitorFeatureExtractor.getFeatures(query);
-
-                       // Triple patterns and triple paths are counted separately so we need to sum them up
-                       int tpCount = features.getOrDefault(LSQ.TriplePattern, 0)
-                               + features.getOrDefault(LSQ.TriplePath, 0);
-
-                       if (tpCount == 1) {
-                           countItemLimit = null;
-                       }
-                   }
-
-
-                   Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
-
-                   Var countVar = queryAndVar.getKey();
-                   Query countQuery = queryAndVar.getValue();
-
-                   logger.info("Counting " + countQuery);
-
-                   countingSw = Stopwatch.createStarted();
-
-                   try(QueryExecution qe = conn.query(countQuery)) {
-                       qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
-
-                       Number count = ServiceUtils.fetchNumber(qe, countVar);
-                       if(count != null) {
-                           itemCount = count.longValue();
-
-                           isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
-                       }
-                   }
-               } catch (ConnectionLostException e) {
-                   throw new ConnectionLostException(e);
-               } catch(Exception e) {
-                   logger.warn("Counting error: ", e);
-    //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
-                   String errorMsg = ExceptionUtils.getStackTrace(e);
-                   result.setCountingError(errorMsg);
-               }
-
-               if (countingSw != null) {
-                   BigDecimal countingDuration = new BigDecimal(countingSw.stop().elapsed(TimeUnit.NANOSECONDS))
-                           .divide(new BigDecimal(1000000000));
-
-                   result.setCountDuration(countingDuration);
-               }
-           }
-
-           if(isResultCountComplete) {
-               result.setResultSetSize(itemCount);
-           }
-
-           if(cache != null) {
-               ByteArrayOutputStream baos = new ByteArrayOutputStream();
-               ResultSet replay = ResultSetUtils.create(varNames, cache.iterator());
-               ResultSetFormatter.outputAsJSON(baos, replay);
-               result.setSerializedResult(baos.toString());
-           }
-
-
-           BigDecimal evalDuration = new BigDecimal(evalSw.stop().elapsed(TimeUnit.NANOSECONDS))
-                   .divide(new BigDecimal(1000000000));
-
-
-           result.setEvalDuration(evalDuration);
-
-           logger.info("Benchmark result after " + evalDuration + " seconds: " + result.getResultSetSize() + " results and error message " + result.getRetrievalError());
-
-           return result;
-           //Calendar end = Calendar.getInstance();
-           //Duration duration = Duration.between(start.toInstant(), end.toInstant());
-    }
-
 
     public static Flowable<Entry<String, Dataset>> fetchDatasets(SparqlQueryConnection conn, Iterable<Node> graphNames) {
         Query query = createFetchNamedGraphQuery(graphNames);
@@ -984,6 +691,25 @@ catch (Exception e) {
 
 }
 
+
+
+
+//public SparqlQueryConnection configureConnection(SparqlQueryConnection rawConn, ExperimentConfig config) {
+//ExperimentConfig config;
+//BigDecimal connectionTimeout = config.getConnectionTimeout();
+//BigDecimal queryExecutionTimeout = config.getQueryTimeout();
+//Long effectiveConnectionTimeout = connectionTimeout == null
+//      ? -1l
+//      : connectionTimeout.divide(new BigDecimal(1000)).longValue();
+//
+//Long effectiveQueryExecutionTimeout = queryExecutionTimeout == null
+//      ? -1l
+//      : queryExecutionTimeout.divide(new BigDecimal(1000)).longValue();
+//
+//qe.setTimeout(effectiveConnectionTimeout, effectiveQueryExecutionTimeout);
+//
+//return null;
+//}
 
 
 
@@ -1131,3 +857,259 @@ catch (Exception e) {
 //
 //System.out.println("Generated: " + dq.toConstructQuery());
 
+
+
+///*
+//* Benchmark the combined execution and retrieval time of a given query
+//*
+//* @param query
+//* @param queryExecRes
+//* @param qef
+//*/
+//public static QueryExec rdfizeQueryExecutionBenchmark(
+//     SparqlQueryConnection conn,
+//     String queryStr,
+//     QueryExec result,
+//     BigDecimal rawConnectionTimeoutForRetrieval,
+//     BigDecimal rawExecutionTimeoutForRetrieval,
+//     Long rawMaxResultCountForCounting,
+//     Long rawMaxByteSizeForCounting,
+//     Long rawMaxResultCountForSerialization,
+//     Long rawMaxByteSizeForSerialization,
+//     BigDecimal rawConnectionTimeoutForCounting,
+//     BigDecimal rawExecutionTimeoutForCounting,
+//     Long rawMaxCount,
+//     Boolean rawMaxCountAffectsTp
+//     ) {
+//
+//
+// long connectionTimeoutForRetrieval = Optional.ofNullable(rawConnectionTimeoutForRetrieval)
+//         .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+// long executionTimeoutForRetrieval = Optional.ofNullable(rawExecutionTimeoutForRetrieval)
+//         .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+//
+// long maxResultCountForCounting = Optional.ofNullable(rawMaxResultCountForCounting).orElse(-1l);
+// long maxByteSizeForCounting = Optional.ofNullable(rawMaxByteSizeForCounting).orElse(-1l);
+//
+// long maxResultCountForSerialization = Optional.ofNullable(rawMaxResultCountForSerialization).orElse(-1l);
+// long maxByteSizeForSerialization = Optional.ofNullable(rawMaxByteSizeForSerialization).orElse(-1l);
+//
+// long connectionTimeoutForCounting = Optional.ofNullable(rawConnectionTimeoutForCounting)
+//         .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+// long executionTimeoutForCounting = Optional.ofNullable(rawExecutionTimeoutForCounting)
+//         .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
+//
+// long maxCount = Optional.ofNullable(rawMaxCount).orElse(-1l);
+//
+// boolean maxCountAffectsTp = Optional.ofNullable(rawMaxCountAffectsTp).orElse(false);
+//
+// boolean exceededMaxResultCountForSerialization = false;
+// boolean exceededMaxByteSizeForSerialization = false;
+//
+// boolean exceededMaxResultCountForCounting = false;
+// boolean exceededMaxByteSizeForCounting = false;
+//
+// Instant now = Instant.now();
+// ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+// Calendar cal = GregorianCalendar.from(zdt);
+// XSDDateTime xsdDateTime = new XSDDateTime(cal);
+//
+// result.setTimestamp(xsdDateTime);
+//
+// Query query;
+//
+// try {
+//     query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+// } catch (Exception e) {
+//     logger.warn("Skipping benchmark because query failed to parse", e);
+//     return result;
+// }
+//
+//
+// Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
+//
+// List<String> varNames = new ArrayList<>();
+//
+// boolean isResultCountComplete = false;
+// long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
+// List<Binding> cache = new ArrayList<>();
+//
+// if (maxResultCountForCounting != 0 && maxByteSizeForCounting != 0) {
+//     logger.info("Benchmarking " + queryStr);
+//     Stopwatch retrievalSw = Stopwatch.createStarted();
+//
+//     try(QueryExecution qe = conn.query(query)) {
+//         qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
+//
+//         ResultSet rs = qe.execSelect();
+//         varNames.addAll(rs.getResultVars());
+//
+//         long estimatedByteSize = 0;
+//
+//         while(rs.hasNext()) {
+//             ++itemCount;
+//
+//             Binding binding = rs.nextBinding();
+//
+//             if(cache != null) {
+//                 // Estimate the size of the binding (e.g. I once had polygons in literals of size 50MB)
+//                 long bindingSizeContrib = binding.toString().length();
+//                 estimatedByteSize += bindingSizeContrib;
+//
+//                 exceededMaxResultCountForSerialization = maxResultCountForSerialization >= 0
+//                         && itemCount > maxResultCountForSerialization;
+//
+//                 if(exceededMaxResultCountForSerialization) {
+//                     // Disable serialization but keep on counting
+//                     cache = null;
+//                 }
+//
+//                 exceededMaxByteSizeForSerialization = maxByteSizeForSerialization >= 0
+//                         && estimatedByteSize > maxByteSizeForSerialization;
+//                 if(exceededMaxByteSizeForSerialization) {
+//                     // Disable serialization but keep on counting
+//                     cache = null;
+//                 }
+//
+//
+//                 if(cache != null) {
+//                     cache.add(binding);
+//                 }
+//             }
+//
+//             exceededMaxResultCountForCounting = maxResultCountForCounting >= 0
+//                     && itemCount > maxResultCountForCounting;
+//             if(exceededMaxByteSizeForSerialization) {
+//                 break;
+//             }
+//
+//             exceededMaxByteSizeForCounting = maxByteSizeForCounting >= 0
+//                     && estimatedByteSize > maxByteSizeForCounting;
+//             if(exceededMaxByteSizeForSerialization) {
+//                 break;
+//             }
+//         }
+//
+//         if(exceededMaxResultCountForSerialization) {
+//             result.setExceededMaxResultCountForSerialization(exceededMaxResultCountForSerialization);
+//         }
+//
+//         if(exceededMaxByteSizeForSerialization) {
+//             result.setExceededMaxByteSizeForSerialization(exceededMaxByteSizeForSerialization);
+//         }
+//
+//
+//         if(exceededMaxResultCountForCounting) {
+//             result.setExceededMaxResultCountForCounting(exceededMaxResultCountForCounting);
+//         }
+//
+//         if(exceededMaxByteSizeForCounting) {
+//             result.setExceededMaxByteSizeForCounting(exceededMaxByteSizeForCounting);
+//         }
+//
+//         // Try obtaining a count with a separate query
+//         isResultCountComplete = !exceededMaxResultCountForCounting && !exceededMaxByteSizeForCounting;
+////     } catch (QueryExecException ce) {
+////         // FIXME
+//     } catch (ConnectionLostException e) {
+//         throw new ConnectionLostException(e);
+//     } catch (Exception e) {
+//
+//         // Set the cache to null so we don't serialize result sets of failed queries
+//         cache = null;
+//
+//         logger.warn("Retrieval error: ", e);
+////                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+//         String errorMsg = ExceptionUtils.getStackTrace(e);
+//         result.setRetrievalError(errorMsg);
+//     }
+//
+//     BigDecimal retrievalDuration = new BigDecimal(retrievalSw.stop().elapsed(TimeUnit.NANOSECONDS))
+//             .divide(new BigDecimal(1000000000));
+//
+//     result.setRetrievalDuration(retrievalDuration);
+// }
+//
+//
+// if (!isResultCountComplete) {
+//     // Try to count using a query and discard the current elapsed time
+//
+//     Long countItemLimit = maxCount >= 0 ? maxCount : null;
+//     // SparqlRx.fetchCountQuery(conn, query, countItemLimit, null)
+//     Stopwatch countingSw = null;
+//     try {
+//
+//         // Check whether to disable thee count limit for single pattern queries
+//         if (!maxCountAffectsTp && countItemLimit != null) {
+//             Map<Resource, Integer> features = ElementVisitorFeatureExtractor.getFeatures(query);
+//
+//             // Triple patterns and triple paths are counted separately so we need to sum them up
+//             int tpCount = features.getOrDefault(LSQ.TriplePattern, 0)
+//                     + features.getOrDefault(LSQ.TriplePath, 0);
+//
+//             if (tpCount == 1) {
+//                 countItemLimit = null;
+//             }
+//         }
+//
+//
+//         Entry<Var, Query> queryAndVar = QueryGenerationUtils.createQueryCount(query, countItemLimit, null);
+//
+//         Var countVar = queryAndVar.getKey();
+//         Query countQuery = queryAndVar.getValue();
+//
+//         logger.info("Counting " + countQuery);
+//
+//         countingSw = Stopwatch.createStarted();
+//
+//         try(QueryExecution qe = conn.query(countQuery)) {
+//             qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
+//
+//             Number count = ServiceUtils.fetchNumber(qe, countVar);
+//             if(count != null) {
+//                 itemCount = count.longValue();
+//
+//                 isResultCountComplete = countItemLimit == null || itemCount < countItemLimit;
+//             }
+//         }
+//     } catch (ConnectionLostException e) {
+//         throw new ConnectionLostException(e);
+//     } catch(Exception e) {
+//         logger.warn("Counting error: ", e);
+////                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
+//         String errorMsg = ExceptionUtils.getStackTrace(e);
+//         result.setCountingError(errorMsg);
+//     }
+//
+//     if (countingSw != null) {
+//         BigDecimal countingDuration = new BigDecimal(countingSw.stop().elapsed(TimeUnit.NANOSECONDS))
+//                 .divide(new BigDecimal(1000000000));
+//
+//         result.setCountDuration(countingDuration);
+//     }
+// }
+//
+// if(isResultCountComplete) {
+//     result.setResultSetSize(itemCount);
+// }
+//
+// if(cache != null) {
+//     ByteArrayOutputStream baos = new ByteArrayOutputStream();
+//     ResultSet replay = ResultSetUtils.create(varNames, cache.iterator());
+//     ResultSetFormatter.outputAsJSON(baos, replay);
+//     result.setSerializedResult(baos.toString());
+// }
+//
+//
+// BigDecimal evalDuration = new BigDecimal(evalSw.stop().elapsed(TimeUnit.NANOSECONDS))
+//         .divide(new BigDecimal(1000000000));
+//
+//
+// result.setEvalDuration(evalDuration);
+//
+// logger.info("Benchmark result after " + evalDuration + " seconds: " + result.getResultSetSize() + " results and error message " + result.getRetrievalError());
+//
+// return result;
+// //Calendar end = Calendar.getInstance();
+// //Duration duration = Duration.between(start.toInstant(), end.toInstant());
+//}

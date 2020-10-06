@@ -8,13 +8,14 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriType;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
+import org.aksw.simba.lsq.core.BenchmarkParams;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
 // FIXME Add config option to benchmark only master queries and not secondary ones
 @ResourceView
 public interface ExperimentConfig
-    extends Resource
+    extends Resource, BenchmarkParams
 {
     @Iri("dct:identifier")
     @HashId
@@ -69,42 +70,52 @@ public interface ExperimentConfig
      * Benchmark options
      */
 
+    @Override
     @Iri(LSQ.Strs.connectionTimeoutForRetrieval)
     BigDecimal getConnectionTimeoutForRetrieval();
     ExperimentConfig setConnectionTimeoutForRetrieval(BigDecimal duration);
 
+    @Override
     @Iri(LSQ.Strs.executionTimeoutForRetrieval)
     BigDecimal getExecutionTimeoutForRetrieval();
     ExperimentConfig setExecutionTimeoutForRetrieval(BigDecimal duration);
 
+    @Override
     @Iri(LSQ.Strs.connectionTimeoutForCounting)
     BigDecimal getConnectionTimeoutForCounting();
     ExperimentConfig setConnectionTimeoutForCounting(BigDecimal duration);
 
+    @Override
     @Iri(LSQ.Strs.executionTimeoutForCounting)
     BigDecimal getExecutionTimeoutForCounting();
     ExperimentConfig setExecutionTimeoutForCounting(BigDecimal duration);
 
+    @Override
     @Iri(LSQ.Strs.maxResultCountForRetrieval)
     Long getMaxResultCountForCounting();
     ExperimentConfig setMaxResultCountForCounting(Long maxItemCountForCounting);
 
+    @Override
     @Iri(LSQ.Strs.maxByteSizeForRetrieval)
     Long getMaxByteSizeForCounting();
     ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
 
+    @Override
     @Iri(LSQ.Strs.maxResultCountForSerialization)
     Long getMaxResultCountForSerialization();
     ExperimentConfig setMaxResultCountForSerialization(Long maxItemCountForSerialization);
 
+    @Override
     @Iri(LSQ.Strs.maxByteSizeForSerialization)
     Long getMaxByteSizeForSerialization();
     ExperimentConfig setMaxByteSizeForSerialization(Long maxByteSizeForSerialization);
 
+    @Override
     @Iri(LSQ.Strs.maxCount)
     Long getMaxCount();
     ExperimentConfig setMaxCount(Long maxItemCountForCounting);
 
+    @Override
     @Iri(LSQ.Strs.maxCountAffectsTp)
     Boolean getMaxCountAffectsTp();
     ExperimentConfig setMaxCountAffectsTp(Boolean offOrOn);
