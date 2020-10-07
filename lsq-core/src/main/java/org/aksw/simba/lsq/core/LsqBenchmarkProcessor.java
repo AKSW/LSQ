@@ -1,16 +1,12 @@
 package org.aksw.simba.lsq.core;
 
-import java.io.ByteArrayOutputStream;
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -20,27 +16,20 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.io.StdIo;
-import org.aksw.jena_sparql_api.core.connection.ConnectionLostException;
-import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
-import org.aksw.jena_sparql_api.rx.query_flow.RxUtils;
-import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
 import org.aksw.jena_sparql_api.syntax.UpdateRequestUtils;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Quads;
-import org.aksw.jena_sparql_api.utils.ResultSetUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
@@ -53,35 +42,25 @@ import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;
-import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFormatter;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
 import org.apache.jena.sparql.core.Quad;
-import org.apache.jena.sparql.core.Var;
-import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.Template;
@@ -93,7 +72,6 @@ import org.slf4j.LoggerFactory;
 import org.topbraid.spin.model.TriplePattern;
 
 import io.reactivex.rxjava3.core.Flowable;
-import io.reactivex.rxjava3.core.FlowableTransformer;
 
 
 /**
@@ -103,71 +81,30 @@ import io.reactivex.rxjava3.core.FlowableTransformer;
  *
  */
 public class LsqBenchmarkProcessor {
-    static final Logger logger = LoggerFactory.getLogger(LsqBenchmarkProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(LsqBenchmarkProcessor.class);
+
+    protected ExperimentConfig config;
+    protected ExperimentRun expRun;
+    protected SparqlQueryConnection benchmarkConn;
+    protected RDFConnection indexConn;
+
+    protected Function<String, String> lsqQueryBaseIriFn;
+    protected Function<LsqQuery, String> lsqQueryExecFn;
 
 
-    public static FlowableTransformer<LsqQuery, LsqQuery> createProcessor() {
-        return null;
-    }
-
-
-    public static void run() {
-        SparqlQueryConnection benchmarkConn = RDFConnectionFactory.connect(DatasetFactory.create());
-
-        Model configModel = ModelFactory.createDefaultModel();
-
-        String expId = "testrun";
-        String expSuffix = "_" + expId;
-        String lsqBaseIri = "http://lsq.aksw.org/";
-
-        ExperimentConfig config = configModel
-                .createResource("http://someconfig.at/now")
-                .as(ExperimentConfig.class)
-                .setIdentifier(expId);
-
-        Instant benchmarkRunStartTimestamp = Instant.ofEpochMilli(0);
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(benchmarkRunStartTimestamp, ZoneId.systemDefault());
-        Calendar cal = GregorianCalendar.from(zdt);
-        XSDDateTime xsddt = new XSDDateTime(cal);
-
-        ExperimentRun expRun = configModel
-                .createResource()
-                .as(ExperimentRun.class)
-                .setConfig(config)
-                .setTimestamp(xsddt);
-
-        HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
-        String expRunIri = lsqBaseIri + tmp.getStringId(expRun);
-        expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
-
-        Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-                .map(r -> r.as(LsqQuery.class));
-
-        // TODO Need to set up an index connection
-        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
-    }
-
-    /**
-     *
-     * @param lsqBaseIri The IRI prefix to prepend to generated resources
-     * @param expSuffix A suffix to be appended to the automatically derived query hashes
-     *        in order to generate the full id used for database lookup (and possibly update)
-     *        of benchmark information
-     * @param benchmarkConn The connection on which to perform benchmarking
-     */
-    public static void process(
-            Flowable<LsqQuery> rawQueryFlow,
-            String lsqBaseIri,
+    public LsqBenchmarkProcessor(
             ExperimentConfig config,
             ExperimentRun expRun,
             SparqlQueryConnection benchmarkConn,
             RDFConnection indexConn) {
+        super();
+        this.config = config;
+        this.expRun = expRun;
+        this.benchmarkConn = benchmarkConn;
+        this.indexConn = indexConn;
 
-
-        //ExperimentConfig config = expRun.getConfig();
-        //String expSuffix
-
-
+        // Construct a couple of lambdas from the given config
+        String lsqBaseIri = Objects.requireNonNull(config.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         String datasetLabel = config.getDatasetLabel();
         XSDDateTime benchmarkRunTimestamp = expRun.getTimestamp();
         Instant instant = benchmarkRunTimestamp.asCalendar().toInstant();
@@ -176,39 +113,38 @@ public class LsqBenchmarkProcessor {
         String expId = datasetLabel + "_" + benchmarkRunTimestampStr;
         String expSuffix = "_" + expId;
 
+        this.lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
+        this.lsqQueryExecFn = lsqQueryArg -> lsqQueryBaseIriFn.apply(lsqQueryArg.getHash()) + expSuffix;
+    }
+
+
+    public LsqQuery enrichWithStaticInformation(LsqQuery lsqQuery) {
+        LsqQuery result = LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery);
+        result = updateLsqQueryIris(result, q -> lsqQueryBaseIriFn.apply(q.getHash()));
+        result = LsqEnrichments.enrichWithStaticAnalysis(result);
+
+        return result;
+    }
+
+
+    /**
+    *
+    * @param lsqBaseIri The IRI prefix to prepend to generated resources
+    * @param expSuffix A suffix to be appended to the automatically derived query hashes
+    *        in order to generate the full id used for database lookup (and possibly update)
+    *        of benchmark information
+    * @param benchmarkConn The connection on which to perform benchmarking
+    */
+    public void process(LsqQuery lsqQuery) {
+
         boolean benchmarkSecondaryQueries = Optional.ofNullable(config.benchmarkSecondaryQueries()).orElse(false);
 
-        Function<String, String> lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
+        lsqQuery = enrichWithStaticInformation(lsqQuery);
 
-        // Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
-
-//        Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> "urn://" + lsqQuery.getHash() + expSuffix;
-        Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
-
-//        Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-//                Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/saleem.trig", Lang.TRIG, null)
-        Flowable<List<Set<LsqQuery>>> queryFlow = rawQueryFlow
-//                .map(r -> r.as(LsqQuery.class))
-//                .skip(1)
-//                .take(1)
-                .concatMapMaybe(lsqQuery ->
-                    RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
-//                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
-                .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
-                .concatMapMaybe(lsqQuery ->
-                    RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
-//                .doAfterNext(x -> {
-//                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
-//                    System.exit(1);
-//                })
-                //.flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
-                .map(lsqQuery -> extractAllQueries(lsqQuery))
+        Flowable<List<Set<LsqQuery>>> queryFlow = Flowable.just(lsqQuery)
+                .map(lsqQueryArg -> extractAllQueries(lsqQueryArg))
                 .map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
-//                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
-//                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
-//                .lift(OperatorObserveThroughput.create("throughput", 100))
                 .buffer(1)
-//                .lift(OperatorObserveThroughput.create("buffered", 100))
                 ;
 
         Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
@@ -217,85 +153,17 @@ public class LsqBenchmarkProcessor {
         // Create a database to ensure uniqueness of evaluation tasks
         while(itBatches.hasNext()) {
             List<Set<LsqQuery>> batch = itBatches.next();
-            List<ResourceInDataset> items = processBatchOfQueries(
-                    batch,
-                    lsqBaseIri,
-                    config,
-                    expRun,
-                    benchmarkConn,
-                    lsqQueryExecFn,
-                    indexConn);
+            List<ResourceInDataset> items = processBatchOfQueries(batch);
 
             for(ResourceInDataset item : items) {
                 RDFDataMgr.write(StdIo.openStdout(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
             }
         }
-
-
-//
-//        Model model = ModelFactory.createDefaultModel();
-//        SpinQueryEx spinRes = model.createResource("http://test.ur/i").as(SpinQueryEx.class);
-//
-//
-//
-//        // Create a stream of tasks which to benchmark:
-//        // Create a stream of bgps
-//        // Create a stream of tps
-//        // create a stream of sub-bgps
-//
-//        // Then for each of these resources,
-//
-//
-//
-////        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-//
-//        for(SpinBgp bgp : spinRes.getBgps()) {
-//            System.out.println(bgp);
-//            Collection<TriplePattern> tps = bgp.getTriplePatterns();
-//
-//            for(TriplePattern tp : tps) {
-//                System.out.println(tp);
-//            }
-//        }
-//
-//        QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
-//        // QueryStatistics2.setUpJoinVertices(spinRes);
-//        QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
-//
-//        // TODO Make skolemize reuse skolem ID resources
-//        Skolemize.skolemize(spinRes);
-//
-//
-//
-//        // TODO How to perform triple pattern and join evaluation?
-//        // Actually we would need to create a stream of unique Triple Patterns and BGPs
-//        // So should we use an (embedded DB) to keep track of for which items the statistics have already been computed
-//        // within a benchmark experiment?
-//
-//
-//
-////        QueryStatistics2.fetchCountJoinVarElement(qef, itemToElement)
-//
-//        // Now to create the evaluation results...
-//        // LsqProcessor.rdfizeQueryExecutionStats
-////        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
-//
-//
-//
-//        //Skolemize.skolemize(spinRes);
-//
-//        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
     }
 
 
-    public static List<ResourceInDataset> processBatchOfQueries(
-            List<Set<LsqQuery>> batch,
-            String lsqBaseIri,
-            ExperimentConfig config,
-            ExperimentRun expRun,
-            SparqlQueryConnection benchmarkConn,
-            Function<LsqQuery, String> lsqQueryExecFn,
-            RDFConnection indexConn) {
+    public  List<ResourceInDataset> processBatchOfQueries(
+            List<Set<LsqQuery>> batch) {
 
         List<ResourceInDataset> result = new ArrayList<>();
 
@@ -305,38 +173,18 @@ public class LsqBenchmarkProcessor {
                 .map(NodeFactory::createURI)
                 .collect(Collectors.toSet());
 
-//                for(Node n : lookupHashNodes) {
-//                    System.out.println("Lookup with: " + n.getURI());
-//                }
-//                Expr filter = ExprUtils.oneOf(Vars.g, lookupHashNodes);
-//                dq.filterDirect(new ElementFilter(filter));
-
         Map<String, Dataset> nodeToDataset = Txn.calculate(indexConn, () ->
             fetchDatasets(indexConn, lookupHashNodes)
             .toMap(Entry::getKey, Entry::getValue)
             .blockingGet());
 
-//                System.out.println(hashNodes);
         // Obtain the set of query strings already in the store
-
         Set<String> alreadyIndexedHashUrns = nodeToDataset.keySet();
-//                Set<String> alreadyIndexedHashUrns = Txn.calculate(indexConn, () ->
-//                      dq
-//                        .exec()
-//                        .map(x -> x.asNode().getURI())
-//                        .blockingStream()
-//                        .collect(Collectors.toSet()));
-//                        ;
 
-//                for(String str : alreadyIndexedHashUrns) {
-//                    System.out.println("Already indexed: " + str);
-//                }
         Set<LsqQuery> nonIndexed = batch.stream()
             .flatMap(item -> item.stream())
             .filter(item -> !alreadyIndexedHashUrns.contains(lsqQueryExecFn.apply(item)))
             .collect(Collectors.toSet());
-
-//                System.out.println(nonIndexed);
 
         List<Quad> inserts = new ArrayList<Quad>();
 
@@ -357,9 +205,7 @@ public class LsqBenchmarkProcessor {
             LocalExecution le = newModel.createResource().as(LocalExecution.class);
             QueryExec qe = newModel.createResource().as(QueryExec.class);
 
-            // TODO Skolemize these executions! Update: Its done - isn't it/
-
-
+            // TODO Skolemize these executions! Update: Its done - isn't it?
             Query query;
             try {
                 query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
@@ -400,99 +246,110 @@ public class LsqBenchmarkProcessor {
 //                Txn.executeRead(indexConn, () -> System.out.println(ResultSetFormatter.asText(indexConn.query("SELECT ?s { ?s ?p ?o }").execSelect())));
 
         for(Set<LsqQuery> pack : batch) {
-
             logger.info("Processing pack of size: " + pack.size());
-// TODO Move all the code into a nice processPack method of a new class
-try {
-            // The primary query is assumed to always be the first element of a pack
-            LsqQuery primaryQuery = pack.iterator().next();
-
-
-            Model primaryQueryModel = ModelFactory.createDefaultModel();
-
-
-            // We need to add the config model in order to include the benchmark run id
-            // We remove the config once we are done
-
-            // TODO We should ensure that only the minimal necessary config model is added
-            Model configModel = config.getModel();
-//                    expRoot.getModel().add(configModel);
-            primaryQueryModel.add(configModel);
-
-
-            //Model model = rootQuery.getModel();
-
-            // Extend the rootQuery's model with all related query executions
-            for(LsqQuery item : pack) {
-                String key = lsqQueryExecFn.apply(item);
-                Dataset ds = nodeToDataset.get(key);
-                Objects.requireNonNull(ds, "Expected dataset for key "  + key);
-                Model m = ds.getNamedModel(key);
-                Objects.requireNonNull(m, "Should not happen: No query execution model for " + key);
-
-//                        System.err.println("BEGIN***********************************************");
-//                        if(item.getModel().contains(ResourceFactory.createResource("http://www.bigdata.com/rdf#serviceParam"), null, (RDFNode)null)) {
-//                            System.out.println("here");
-//                        }
-//                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
-//                        System.err.println("END***********************************************");
-
-                // Adding the primary query's model to itself should be harmless
-                primaryQueryModel.add(m);
-                primaryQueryModel.add(item.getModel());
+            try {
+                processPack(pack, result, nodeToDataset, lsqQueryExecFn);
             }
-
-
-            primaryQuery = primaryQuery.inModel(primaryQueryModel).as(LsqQuery.class);
-
-            // Update triple pattern selectivities
-//                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
-            Map<Resource, LocalExecution> rleMap = primaryQuery.getLocalExecutionMap();
-            LocalExecution expRoot = rleMap.get(expRun);
-
-//                    expRoot.setBenchmarkRun(expRun);
-
-            LsqExec.createAllExecs(primaryQuery, expRun);
-
-
-
-            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
-            //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
-            Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
-
-//                    Map<Resource, String> renames = new LinkedHashMap<>();
-//                    for(SpinBgp bgp : spinRoot.getBgps()) {
-//                        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(bgp);//.getHash(bgp);
-//
-//                        for(Entry<RDFNode, HashCode> e : hashIdCxt.getMapping().entrySet()) {
-//                            if(e.getKey().isResource()) {
-//                                renames.put(e.getKey().asResource(), e.getValue().toString());
-//                            }
-//                        }
-//                    }
-
-//                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
-
-            primaryQueryModel.remove(configModel);
-
-            Map<Resource, Resource> remap = renameResources(lsqBaseIri, renames);
-
-
-            // If the primaryQuery was renamed
-            Resource tgtPrimaryQuery = remap.getOrDefault(primaryQuery, primaryQuery);
-
-            //String graphIri = primaryQuery.getURI();
-            ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtPrimaryQuery);
-            result.add(item);
-}
-catch (Exception e) {
-    logger.warn("Internal error; trying to continue", e);
-}
+            catch (Exception e) {
+                logger.warn("Internal error; trying to continue", e);
+            }
 
             //RDFDataMgr.write(System.out, spinRoot.getModel(), RDFFormat.TURTLE_BLOCKS);
         }
 
         return result;
+    }
+
+
+    public void processPack(
+            Set<LsqQuery> pack,
+            List<ResourceInDataset> result,
+            Map<String, Dataset> nodeToDataset,
+            Function<LsqQuery, String> lsqQueryExecFn
+            ) {
+
+        String lsqBaseIri = config.getBaseIri();
+
+        // The primary query is assumed to always be the first element of a pack
+        LsqQuery primaryQuery = pack.iterator().next();
+
+
+        Model primaryQueryModel = ModelFactory.createDefaultModel();
+
+
+        // We need to add the config model in order to include the benchmark run id
+        // We remove the config once we are done
+
+        // TODO We should ensure that only the minimal necessary config model is added
+        Model configModel = config.getModel();
+   //                    expRoot.getModel().add(configModel);
+        primaryQueryModel.add(configModel);
+
+
+        //Model model = rootQuery.getModel();
+
+        // Extend the rootQuery's model with all related query executions
+        for(LsqQuery item : pack) {
+            String key = lsqQueryExecFn.apply(item);
+            Dataset ds = nodeToDataset.get(key);
+            Objects.requireNonNull(ds, "Expected dataset for key "  + key);
+            Model m = ds.getNamedModel(key);
+            Objects.requireNonNull(m, "Should not happen: No query execution model for " + key);
+
+   //                        System.err.println("BEGIN***********************************************");
+   //                        if(item.getModel().contains(ResourceFactory.createResource("http://www.bigdata.com/rdf#serviceParam"), null, (RDFNode)null)) {
+   //                            System.out.println("here");
+   //                        }
+   //                        RDFDataMgr.write(System.err, item.getModel(), RDFFormat.TURTLE_PRETTY);
+   //                        System.err.println("END***********************************************");
+
+            // Adding the primary query's model to itself should be harmless
+            primaryQueryModel.add(m);
+            primaryQueryModel.add(item.getModel());
+        }
+
+
+        primaryQuery = primaryQuery.inModel(primaryQueryModel).as(LsqQuery.class);
+
+        // Update triple pattern selectivities
+   //                    LocalExecution expRoot = model.createResource().as(LocalExecution.class);
+        Map<Resource, LocalExecution> rleMap = primaryQuery.getLocalExecutionMap();
+        LocalExecution expRoot = rleMap.get(expRun);
+
+   //                    expRoot.setBenchmarkRun(expRun);
+
+        LsqExec.createAllExecs(primaryQuery, expRun);
+
+
+
+        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
+        //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
+        Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
+
+   //                    Map<Resource, String> renames = new LinkedHashMap<>();
+   //                    for(SpinBgp bgp : spinRoot.getBgps()) {
+   //                        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(bgp);//.getHash(bgp);
+   //
+   //                        for(Entry<RDFNode, HashCode> e : hashIdCxt.getMapping().entrySet()) {
+   //                            if(e.getKey().isResource()) {
+   //                                renames.put(e.getKey().asResource(), e.getValue().toString());
+   //                            }
+   //                        }
+   //                    }
+
+   //                    for(Entry<RDFNode, HashCode> e : renames.entrySet()) {
+
+        primaryQueryModel.remove(configModel);
+
+        Map<Resource, Resource> remap = renameResources(lsqBaseIri, renames);
+
+
+        // If the primaryQuery was renamed
+        Resource tgtPrimaryQuery = remap.getOrDefault(primaryQuery, primaryQuery);
+
+        //String graphIri = primaryQuery.getURI();
+        ResourceInDataset item = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtPrimaryQuery);
+        result.add(item);
     }
 
 
@@ -692,6 +549,42 @@ catch (Exception e) {
 }
 
 
+
+//public static void run() {
+//    SparqlQueryConnection benchmarkConn = RDFConnectionFactory.connect(DatasetFactory.create());
+//
+//    Model configModel = ModelFactory.createDefaultModel();
+//
+//    String expId = "testrun";
+//    String expSuffix = "_" + expId;
+//    String lsqBaseIri = "http://lsq.aksw.org/";
+//
+//    ExperimentConfig config = configModel
+//            .createResource("http://someconfig.at/now")
+//            .as(ExperimentConfig.class)
+//            .setIdentifier(expId);
+//
+//    Instant benchmarkRunStartTimestamp = Instant.ofEpochMilli(0);
+//    ZonedDateTime zdt = ZonedDateTime.ofInstant(benchmarkRunStartTimestamp, ZoneId.systemDefault());
+//    Calendar cal = GregorianCalendar.from(zdt);
+//    XSDDateTime xsddt = new XSDDateTime(cal);
+//
+//    ExperimentRun expRun = configModel
+//            .createResource()
+//            .as(ExperimentRun.class)
+//            .setConfig(config)
+//            .setTimestamp(xsddt);
+//
+//    HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
+//    String expRunIri = lsqBaseIri + tmp.getStringId(expRun);
+//    expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
+//
+//    Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
+//            .map(r -> r.as(LsqQuery.class));
+//
+//    // TODO Need to set up an index connection
+//    process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
+//}
 
 
 //public SparqlQueryConnection configureConnection(SparqlQueryConnection rawConn, ExperimentConfig config) {
@@ -1112,4 +1005,132 @@ catch (Exception e) {
 // return result;
 // //Calendar end = Calendar.getInstance();
 // //Duration duration = Duration.between(start.toInstant(), end.toInstant());
+//}
+
+//
+//public static void processOld(
+//      Flowable<LsqQuery> rawQueryFlow,
+//      String lsqBaseIri,
+//      ExperimentConfig config,
+//      ExperimentRun expRun,
+//      SparqlQueryConnection benchmarkConn,
+//      RDFConnection indexConn) {
+//
+//
+//  //ExperimentConfig config = expRun.getConfig();
+//  //String expSuffix
+//
+//
+//  String datasetLabel = config.getDatasetLabel();
+//  XSDDateTime benchmarkRunTimestamp = expRun.getTimestamp();
+//  Instant instant = benchmarkRunTimestamp.asCalendar().toInstant();
+//  ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+//  String benchmarkRunTimestampStr = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+//  String expId = datasetLabel + "_" + benchmarkRunTimestampStr;
+//  String expSuffix = "_" + expId;
+//
+//  boolean benchmarkSecondaryQueries = Optional.ofNullable(config.benchmarkSecondaryQueries()).orElse(false);
+//
+//  Function<String, String> lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
+//
+//  // Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
+//
+////  Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> "urn://" + lsqQuery.getHash() + expSuffix;
+//  Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
+//
+////  Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
+////          Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/saleem.trig", Lang.TRIG, null)
+//  Flowable<List<Set<LsqQuery>>> queryFlow = rawQueryFlow
+////          .map(r -> r.as(LsqQuery.class))
+////          .skip(1)
+////          .take(1)
+//          .concatMapMaybe(lsqQuery ->
+//              RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
+////          .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
+//          .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
+//          .concatMapMaybe(lsqQuery ->
+//              RxUtils.safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
+////          .doAfterNext(x -> {
+////              RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
+////              System.exit(1);
+////          })
+//          //.flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
+//          .map(lsqQuery -> extractAllQueries(lsqQuery))
+//          .map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
+////          .doAfterNext(lsqQuery -> lsqQuery.updateHash())
+////          .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
+////          .lift(OperatorObserveThroughput.create("throughput", 100))
+//          .buffer(1)
+////          .lift(OperatorObserveThroughput.create("buffered", 100))
+//          ;
+//
+//  Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
+//  Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
+//
+//  // Create a database to ensure uniqueness of evaluation tasks
+//  while(itBatches.hasNext()) {
+//      List<Set<LsqQuery>> batch = itBatches.next();
+//      List<ResourceInDataset> items = processBatchOfQueries(
+//              batch,
+//              lsqQueryExecFn);
+//
+//      for(ResourceInDataset item : items) {
+//          RDFDataMgr.write(StdIo.openStdout(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
+//      }
+//  }
+//
+//
+////
+////  Model model = ModelFactory.createDefaultModel();
+////  SpinQueryEx spinRes = model.createResource("http://test.ur/i").as(SpinQueryEx.class);
+////
+////
+////
+////  // Create a stream of tasks which to benchmark:
+////  // Create a stream of bgps
+////  // Create a stream of tps
+////  // create a stream of sub-bgps
+////
+////  // Then for each of these resources,
+////
+////
+////
+//////  RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+////
+////  for(SpinBgp bgp : spinRes.getBgps()) {
+////      System.out.println(bgp);
+////      Collection<TriplePattern> tps = bgp.getTriplePatterns();
+////
+////      for(TriplePattern tp : tps) {
+////          System.out.println(tp);
+////      }
+////  }
+////
+////  QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
+////  // QueryStatistics2.setUpJoinVertices(spinRes);
+////  QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
+////
+////  // TODO Make skolemize reuse skolem ID resources
+////  Skolemize.skolemize(spinRes);
+////
+////
+////
+////  // TODO How to perform triple pattern and join evaluation?
+////  // Actually we would need to create a stream of unique Triple Patterns and BGPs
+////  // So should we use an (embedded DB) to keep track of for which items the statistics have already been computed
+////  // within a benchmark experiment?
+////
+////
+////
+//////  QueryStatistics2.fetchCountJoinVarElement(qef, itemToElement)
+////
+////  // Now to create the evaluation results...
+////  // LsqProcessor.rdfizeQueryExecutionStats
+//////  SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
+////
+////
+////
+////  //Skolemize.skolemize(spinRes);
+////
+////  RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
 //}

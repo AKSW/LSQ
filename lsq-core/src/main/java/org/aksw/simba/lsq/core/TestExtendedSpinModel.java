@@ -181,13 +181,5 @@ public class TestExtendedSpinModel {
     }
 
 
-    public static void main(String[] args) {
-        LsqBenchmarkProcessor.run();
-//        Flowable<LsqQuery> flow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-//                .map(r -> r.as(LsqQuery.class));
-//
-//        createIndexBgps(flow);
-    }
-
 
 }

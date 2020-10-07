@@ -21,7 +21,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import org.aksw.commons.io.StdIo;
@@ -510,7 +509,17 @@ public class MainCliLsq {
 
                 try(SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.openConnection())) {
-                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor benchmarkProcessor = new LsqBenchmarkProcessor(
+                            cfg,
+                            run,
+                            benchmarkConn,
+                            indexConn);
+
+                    Iterable<LsqQuery> lsqQueries = queryFlow.blockingIterable();
+                    for (LsqQuery lsqQuery : lsqQueries) {
+                        benchmarkProcessor.process(lsqQuery);
+                    }
+                    //LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
                 }
             }
 

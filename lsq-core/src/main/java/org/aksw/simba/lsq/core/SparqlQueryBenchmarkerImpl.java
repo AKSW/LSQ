@@ -41,9 +41,9 @@ public class SparqlQueryBenchmarkerImpl
 {
     private static final Logger logger = LoggerFactory.getLogger(SparqlQueryBenchmarkerImpl.class);
 
-    protected BenchmarkParams config;
+    protected LsqBenchmarkParams config;
 
-    public SparqlQueryBenchmarkerImpl(BenchmarkParams config) {
+    public SparqlQueryBenchmarkerImpl(LsqBenchmarkParams config) {
         super();
         this.config = Objects.requireNonNull(config, "Config must not be null");
     }

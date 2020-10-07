@@ -8,14 +8,14 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.IriType;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.simba.lsq.core.BenchmarkParams;
+import org.aksw.simba.lsq.core.LsqBenchmarkParams;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 
 // FIXME Add config option to benchmark only master queries and not secondary ones
 @ResourceView
 public interface ExperimentConfig
-    extends Resource, BenchmarkParams
+    extends Resource, LsqBenchmarkParams
 {
     @Iri("dct:identifier")
     @HashId
