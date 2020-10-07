@@ -22,11 +22,11 @@ public interface LsqBenchmarkParams {
     BigDecimal getExecutionTimeoutForCounting();
     LsqBenchmarkParams setExecutionTimeoutForCounting(BigDecimal duration);
 
-    Long getMaxResultCountForCounting();
-    LsqBenchmarkParams setMaxResultCountForCounting(Long maxItemCountForCounting);
+    Long getMaxResultCountForRetrieval();
+    LsqBenchmarkParams setMaxResultCountForRetrieval(Long maxItemCountForCounting);
 
-    Long getMaxByteSizeForCounting();
-    LsqBenchmarkParams setMaxByteSizeForCounting(Long maxByteSizeForCounting);
+    Long getMaxByteSizeForRetrieval();
+    LsqBenchmarkParams setMaxByteSizeForRetrieval(Long maxByteSizeForCounting);
 
     Long getMaxResultCountForSerialization();
     LsqBenchmarkParams setMaxResultCountForSerialization(Long maxItemCountForSerialization);

@@ -92,13 +92,13 @@ public interface ExperimentConfig
 
     @Override
     @Iri(LSQ.Strs.maxResultCountForRetrieval)
-    Long getMaxResultCountForCounting();
-    ExperimentConfig setMaxResultCountForCounting(Long maxItemCountForCounting);
+    Long getMaxResultCountForRetrieval();
+    ExperimentConfig setMaxResultCountForRetrieval(Long maxItemCountForCounting);
 
     @Override
     @Iri(LSQ.Strs.maxByteSizeForRetrieval)
-    Long getMaxByteSizeForCounting();
-    ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
+    Long getMaxByteSizeForRetrieval();
+    ExperimentConfig setMaxByteSizeForRetrieval(Long maxByteSizeForCounting);
 
     @Override
     @Iri(LSQ.Strs.maxResultCountForSerialization)

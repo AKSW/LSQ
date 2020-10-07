@@ -409,8 +409,8 @@ public class MainCliLsq {
             .setDataRef(dataRef)
             .setExecutionTimeoutForRetrieval(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))
             .setConnectionTimeoutForRetrieval(ct == null ? new BigDecimal(60) : new BigDecimal(ct).divide(new BigDecimal(1000)))
-            .setMaxResultCountForCounting(1000000l) // 1M
-            .setMaxByteSizeForCounting(-1l) // limit only by count
+            .setMaxResultCountForRetrieval(1000000l) // 1M
+            .setMaxByteSizeForRetrieval(-1l) // limit only by count
             .setMaxResultCountForSerialization(-1l) // limit by byte size
             .setMaxByteSizeForSerialization(1000000l) // 1MB
             .setExecutionTimeoutForCounting(qt == null ? new BigDecimal(300) : new BigDecimal(qt).divide(new BigDecimal(1000)))

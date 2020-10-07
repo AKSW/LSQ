@@ -173,7 +173,7 @@ public class LsqBenchmarkProcessor {
                 .map(NodeFactory::createURI)
                 .collect(Collectors.toSet());
 
-        Map<String, Dataset> nodeToDataset = Txn.calculate(indexConn, () ->
+        Map<String, Dataset> nodeToDataset = Txn.calculateRead(indexConn, () ->
             fetchDatasets(indexConn, lookupHashNodes)
             .toMap(Entry::getKey, Entry::getValue)
             .blockingGet());

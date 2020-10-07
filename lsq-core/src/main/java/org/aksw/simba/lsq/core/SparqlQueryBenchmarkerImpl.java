@@ -73,8 +73,8 @@ public class SparqlQueryBenchmarkerImpl
         long executionTimeoutForRetrieval = Optional.ofNullable(config.getExecutionTimeoutForRetrieval())
                 .map(x -> x.multiply(new BigDecimal(1000)).longValue()).orElse(-1l);
 
-        long maxResultCountForCounting = Optional.ofNullable(config.getMaxResultCountForCounting()).orElse(-1l);
-        long maxByteSizeForCounting = Optional.ofNullable(config.getMaxByteSizeForCounting()).orElse(-1l);
+        long maxResultCountForCounting = Optional.ofNullable(config.getMaxResultCountForRetrieval()).orElse(-1l);
+        long maxByteSizeForCounting = Optional.ofNullable(config.getMaxByteSizeForRetrieval()).orElse(-1l);
 
         long maxResultCountForSerialization = Optional.ofNullable(config.getMaxResultCountForSerialization()).orElse(-1l);
         long maxByteSizeForSerialization = Optional.ofNullable(config.getMaxByteSizeForSerialization()).orElse(-1l);
