@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.vocab;
 
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -174,6 +175,8 @@ public class LSQ {
         // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
         public static final String tpSelJoinVarRestricted = NS + "tpSelJoinVarRestricted";
 
+
+        public static final String headers = NS + "headers";
     }
 
 
@@ -327,12 +330,14 @@ public class LSQ {
     public static final Property requestPath = property("uri");
     public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
-    public static final Property headers = property("headers");
+    public static final Property headers = ResourceFactory.createProperty(Strs.headers);
     public static final Property verb = property("verb");
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
     public static final Property statusCode = property("statusCode");
     public static final Property execStatus = ResourceFactory.createProperty(Strs.execStatus);
+
+    public static final Literal execStatusProcessed = ResourceFactory.createStringLiteral("processed");
 
     public static final Property numResponseBytes = property("numResponseBytes");
 

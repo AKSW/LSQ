@@ -568,7 +568,10 @@ public class LsqUtils {
         // Invert; map from query to log entry
         ResourceInDataset qq = x.wrapCreate(Model::createResource);
         LsqQuery q = qq.as(LsqQuery.class);
-        q.getRemoteExecutions(Resource.class).add(x);
+//        q.getRemoteExecutions(Resource.class).add(x);
+
+        q.getRemoteExecutions().add(x.as(RemoteExecution.class));
+
 //        			String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
 //        			ResourceInDataset xx;
 //

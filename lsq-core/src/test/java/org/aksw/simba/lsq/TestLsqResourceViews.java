@@ -11,27 +11,27 @@ import org.junit.Test;
 
 public class TestLsqResourceViews {
 
-	@Test
-	public void testLsqResourceViews() {
-		Model m = ModelFactory.createDefaultModel();
+    @Test
+    public void testLsqResourceViews() {
+        Model m = ModelFactory.createDefaultModel();
 
-		LsqQuery q = m.createResource().as(LsqQuery.class);
-		String queryStr = "SELECT * { ?s a ?o }";
-		q.setText(queryStr);
-		
-		
-		q.getRemoteExecutions(RemoteExecution.class).add(m.createResource().as(RemoteExecution.class)
-			.setHost("host")
-			.setSequenceId(0l)
-		);
-		LsqStructuralFeatures summary = m.createResource().as(LsqStructuralFeatures.class);
-		summary.setProjectVarCount(2);
-		
-		q.setStructuralFeatures(summary);
-		
-		
-		Assert.assertEquals(q.getText(), queryStr);
-		Assert.assertEquals((long)q.getStructuralFeatures().getProjectVarCount(), 2l);
-		Assert.assertEquals(q.getRemoteExecutions(RemoteExecution.class).iterator().next().getHost(), "host");
-	}
+        LsqQuery q = m.createResource().as(LsqQuery.class);
+        String queryStr = "SELECT * { ?s a ?o }";
+        q.setText(queryStr);
+
+
+        q.getRemoteExecutions().add(m.createResource().as(RemoteExecution.class)
+            .setHost("host")
+            .setSequenceId(0l)
+        );
+        LsqStructuralFeatures summary = m.createResource().as(LsqStructuralFeatures.class);
+        summary.setProjectVarCount(2);
+
+        q.setStructuralFeatures(summary);
+
+
+        Assert.assertEquals(q.getText(), queryStr);
+        Assert.assertEquals((long)q.getStructuralFeatures().getProjectVarCount(), 2l);
+        Assert.assertEquals(q.getRemoteExecutions().iterator().next().getHost(), "host");
+    }
 }

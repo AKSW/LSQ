@@ -16,7 +16,14 @@ import org.junit.Test;
 
 public class TestBenchmarkDbCache {
 
-    public ExperimentConfig createTestConfig(Model model) {
+    public static ExperimentRun createTestRun(ExperimentConfig cfg) {
+        ExperimentRun run = cfg.getModel().createResource().as(ExperimentRun.class);
+        run.setConfig(cfg).setIdentifier("test-run").setTimestamp(new XSDDateTime(new GregorianCalendar()));
+
+        return run;
+    }
+
+    public static ExperimentConfig createTestConfig(Model model) {
 
         ExperimentConfig cfg = model.createResource("http://lsq.aksw.org/testConfig").as(ExperimentConfig.class);
         Long qt = null;
@@ -55,8 +62,7 @@ public class TestBenchmarkDbCache {
     public void testBenchmarkDbCache() {
         Model cfgModel = ModelFactory.createDefaultModel();
         ExperimentConfig cfg = createTestConfig(cfgModel);
-        ExperimentRun run = cfgModel.createResource().as(ExperimentRun.class);
-        run.setConfig(cfg).setIdentifier("test-run").setTimestamp(new XSDDateTime(new GregorianCalendar()));
+        ExperimentRun run = createTestRun(cfg);
 
         try(RDFConnection indexConn = RDFConnectionBuilder.start().defaultDataset().getConnection()) {
             try(RDFConnection benchConn = RDFConnectionBuilder.start().defaultDataset().getConnection()) {

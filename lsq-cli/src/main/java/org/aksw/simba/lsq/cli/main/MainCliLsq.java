@@ -37,8 +37,10 @@ import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
+import org.aksw.jena_sparql_api.rx.query_flow.RxUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap;
 import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap.MapSpec;
 import org.aksw.named_graph_stream.cli.cmd.CmdNgsSort;
@@ -72,6 +74,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
@@ -290,14 +293,25 @@ public class MainCliLsq {
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
         rdfizeCmd.noMerge = true;
 
+        String lsqBaseIri = rdfizeCmd.baseIri;
+        Function<String, String> lsqQueryBaseIriFn = LsqBenchmarkProcessor.createDefaultLsqQueryBaseIriFn(lsqBaseIri);
 
         Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
 
-        Flowable<Dataset> dsFlow = flow.map(rid -> {
+        Flowable<Dataset> dsFlow = flow.concatMapMaybe(rid -> RxUtils.safeMaybe(() -> {
             LsqQuery q = rid.as(LsqQuery.class);
-            rdfizeStructuralFeatures(q);
-            return rid;
-        })
+            LsqBenchmarkProcessor.enrichWithStaticInformation(q, lsqQueryBaseIriFn);
+
+            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+            Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
+
+            Map<Resource, Resource> remap = LsqBenchmarkProcessor.renameResources(lsqBaseIri, renames);
+            Resource tgtPrimaryQuery = remap.getOrDefault(q, q);
+
+            ResourceInDataset newRid = ResourceInDatasetImpl.createFromCopyIntoResourceGraph(tgtPrimaryQuery);
+
+            return newRid;
+        }))
         .map(ResourceInDataset::getDataset);
 
         RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);

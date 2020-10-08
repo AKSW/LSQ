@@ -12,11 +12,8 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.ext.com.google.common.hash.HashCode;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.ext.com.google.common.io.BaseEncoding;
-import org.apache.jena.graph.Node;
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.out.NodeFmtLib;
 
 
 /**
@@ -80,7 +77,8 @@ public interface LsqQuery
     //Set<>getLocalExecutions();
 
     @Iri(LSQ.Strs.hasRemoteExec)
-    <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
+//    <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
+    Set<RemoteExecution> getRemoteExecutions();
 
 
     /**

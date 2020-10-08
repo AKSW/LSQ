@@ -113,12 +113,15 @@ public class LsqBenchmarkProcessor {
         String expId = datasetLabel + "_" + benchmarkRunTimestampStr;
         String expSuffix = "_" + expId;
 
-        this.lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
+        this.lsqQueryBaseIriFn = createDefaultLsqQueryBaseIriFn(lsqBaseIri);
         this.lsqQueryExecFn = lsqQueryArg -> lsqQueryBaseIriFn.apply(lsqQueryArg.getHash()) + expSuffix;
     }
 
+    public static Function<String, String> createDefaultLsqQueryBaseIriFn(String lsqBaseIri) {
+        return queryHash -> lsqBaseIri + "q-" + queryHash;
+    }
 
-    public LsqQuery enrichWithStaticInformation(LsqQuery lsqQuery) {
+    public static LsqQuery enrichWithStaticInformation(LsqQuery lsqQuery, Function<String, String> lsqQueryBaseIriFn) {
         LsqQuery result = LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery);
         result = updateLsqQueryIris(result, q -> lsqQueryBaseIriFn.apply(q.getHash()));
         result = LsqEnrichments.enrichWithStaticAnalysis(result);
@@ -139,7 +142,7 @@ public class LsqBenchmarkProcessor {
 
         boolean benchmarkSecondaryQueries = Optional.ofNullable(config.benchmarkSecondaryQueries()).orElse(false);
 
-        lsqQuery = enrichWithStaticInformation(lsqQuery);
+        lsqQuery = enrichWithStaticInformation(lsqQuery, lsqQueryBaseIriFn);
 
         Flowable<List<Set<LsqQuery>>> queryFlow = Flowable.just(lsqQuery)
                 .map(lsqQueryArg -> extractAllQueries(lsqQueryArg))
@@ -225,7 +228,7 @@ public class LsqBenchmarkProcessor {
             newDataset.asDatasetGraph().find().forEachRemaining(inserts::add);
 
 
-            inserts.add(new Quad(s, s, LSQ.execStatus.asNode(), NodeFactory.createLiteral("processed")));
+            inserts.add(new Quad(s, s, LSQ.execStatus.asNode(), LSQ.execStatusProcessed.asNode()));
 //                    RDFDataMgr.write(new FileOutputStream(FileDescriptor.out), item.getModel(), RDFFormat.TURTLE_PRETTY);
 
 //                    System.out.println(s.getURI().equals("urn://33c4205f90fdeb7d1db68426806a816e3ffbfa3980461b556b32fded407568c9"));
