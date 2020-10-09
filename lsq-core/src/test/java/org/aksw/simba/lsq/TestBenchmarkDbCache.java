@@ -1,7 +1,9 @@
 package org.aksw.simba.lsq;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
+import java.util.List;
 
 import org.aksw.jena_sparql_api.core.connection.RDFConnectionBuilder;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithExecFails;
@@ -80,11 +82,16 @@ public class TestBenchmarkDbCache {
 
                 LsqBenchmarkProcessor processor = new LsqBenchmarkProcessor(cfg, run, benchConn, indexConn);
 
-                LsqQuery lsqQuery = ModelFactory.createDefaultModel().createResource().as(LsqQuery.class);
-                lsqQuery.setQueryAndHash("SELECT * { { ?a ?b ?c . ?x ?y ?z } UNION { ?a ?b ?c } }");
+                List<LsqQuery> lsqQueries = Arrays.asList(
+                        ModelFactory.createDefaultModel().createResource().as(LsqQuery.class)
+                            .setQueryAndHash(QueryFactory.create("SELECT * { { ?a ?b ?c . ?x ?y ?z } UNION { ?a ?b ?c } }")),
+                        ModelFactory.createDefaultModel().createResource().as(LsqQuery.class)
+                            .setQueryAndHash(QueryFactory.create("SELECT * { ?a ?b ?c } LIMIT 10"))
+                );
 
-                lsqQuery = processor.process(lsqQuery);
-                lsqQuery = processor.process(lsqQuery);
+                for (LsqQuery lsqQuery : lsqQueries) {
+                    lsqQuery = processor.process(lsqQuery);
+                }
             }
         }
     }
