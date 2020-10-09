@@ -138,7 +138,7 @@ public class LsqBenchmarkProcessor {
     *        of benchmark information
     * @param benchmarkConn The connection on which to perform benchmarking
     */
-    public void process(LsqQuery lsqQuery) {
+    public LsqQuery process(LsqQuery lsqQuery) {
 
         boolean benchmarkSecondaryQueries = Optional.ofNullable(config.benchmarkSecondaryQueries()).orElse(false);
 
@@ -151,17 +151,20 @@ public class LsqBenchmarkProcessor {
                 ;
 
         Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
-        Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
+//        Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
 
         // Create a database to ensure uniqueness of evaluation tasks
-        while(itBatches.hasNext()) {
-            List<Set<LsqQuery>> batch = itBatches.next();
+//        while(itBatches.hasNext()) {
+        for (List<Set<LsqQuery>> batch : batches) {
+//            List<Set<LsqQuery>> batch = itBatches.next();
             List<ResourceInDataset> items = processBatchOfQueries(batch);
 
             for(ResourceInDataset item : items) {
                 RDFDataMgr.write(StdIo.openStdout(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
             }
         }
+
+        return lsqQuery;
     }
 
 

@@ -110,9 +110,11 @@ public class SparqlQueryBenchmarkerImpl
 
         boolean isResultCountComplete = false;
         long itemCount = 0; // We could use rs.getRowNumber() but let's not rely on it
-        List<Binding> cache = new ArrayList<>();
+        List<Binding> cache = null;
 
         if (maxResultCountForCounting != 0 && maxByteSizeForCounting != 0) {
+            cache = new ArrayList<>();
+
             logger.info("Benchmarking " + query);
             Stopwatch retrievalSw = Stopwatch.createStarted();
 

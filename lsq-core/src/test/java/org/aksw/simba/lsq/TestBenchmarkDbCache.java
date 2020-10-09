@@ -4,14 +4,19 @@ import java.math.BigDecimal;
 import java.util.GregorianCalendar;
 
 import org.aksw.jena_sparql_api.core.connection.RDFConnectionBuilder;
+import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithExecFails;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
+import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdfconnection.RDFConnection;
+import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.junit.Test;
 
 public class TestBenchmarkDbCache {
@@ -65,13 +70,21 @@ public class TestBenchmarkDbCache {
         ExperimentRun run = createTestRun(cfg);
 
         try(RDFConnection indexConn = RDFConnectionBuilder.start().defaultDataset().getConnection()) {
-            try(RDFConnection benchConn = RDFConnectionBuilder.start().defaultDataset().getConnection()) {
+            try(RDFConnection tmpBenchConn = RDFConnectionBuilder.start().defaultDataset().getConnection()) {
+                SparqlQueryConnection benchConn = new SparqlQueryConnectionWithExecFails(tmpBenchConn,
+                    ImmutableMap.<Query, Throwable>builder()
+                        .put(QueryFactory.create("SELECT (COUNT(*) AS ?c_1) { ?a ?b ?c }"),
+                                new RuntimeException("purposely failed"))
+                        .build()::get
+                );
+
                 LsqBenchmarkProcessor processor = new LsqBenchmarkProcessor(cfg, run, benchConn, indexConn);
 
                 LsqQuery lsqQuery = ModelFactory.createDefaultModel().createResource().as(LsqQuery.class);
                 lsqQuery.setQueryAndHash("SELECT * { { ?a ?b ?c . ?x ?y ?z } UNION { ?a ?b ?c } }");
 
-                processor.process(lsqQuery);
+                lsqQuery = processor.process(lsqQuery);
+                lsqQuery = processor.process(lsqQuery);
             }
         }
     }
