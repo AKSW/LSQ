@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import org.aksw.commons.util.bean.PropertyUtils;
+import org.aksw.commons.beans.model.PropertyUtils;
 import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
