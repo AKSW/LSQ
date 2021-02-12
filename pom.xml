@@ -58,9 +58,12 @@
 	</modules>
 
 	<properties>
-		<jena.version>3.16.0</jena.version>
-		<jsa.subversion>2-SNAPSHOT</jsa.subversion>
+		<jena.version>3.17.0</jena.version>
+		<jsa.subversion>1-SNAPSHOT</jsa.subversion>
 		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
+		<aksw-commons.version>0.8.16-SNAPSHOT</aksw-commons.version>
+		
+		
 		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
 
 		<timestamp>${maven.build.timestamp}</timestamp>
@@ -78,10 +81,22 @@
 	<dependencyManagement>
 		<dependencies>
 
+<!-- 			<dependency> -->
+<!-- 				<groupId>org.aksw.rdf-processing-toolkit</groupId> -->
+<!-- 				<artifactId>rdf-processing-toolkit-cli</artifactId> -->
+<!-- 				<version>1.0.7-SNAPSHOT</version> -->
+<!-- 			</dependency> -->
+
 			<dependency>
-				<groupId>org.aksw.rdf-processing-toolkit</groupId>
-				<artifactId>rdf-processing-toolkit-cli</artifactId>
-				<version>1.0.7-SNAPSHOT</version>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-beans</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-io-utils</artifactId>
+				<version>${aksw-commons.version}</version>
 			</dependency>
 
 			<dependency>
@@ -90,11 +105,11 @@
 				<version>4.4.0</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.hobbit</groupId>
-				<artifactId>facete3-impl</artifactId>
-				<version>1.2.0-SNAPSHOT</version>
-			</dependency>
+<!-- 			<dependency> -->
+<!-- 				<groupId>org.hobbit</groupId> -->
+<!-- 				<artifactId>facete3-impl</artifactId> -->
+<!-- 				<version>1.2.0-SNAPSHOT</version> -->
+<!-- 			</dependency> -->
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -155,6 +170,12 @@
 			<dependency>
 				<groupId>org.aksw.jena-sparql-api</groupId>
 				<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+				<version>${jsa.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jena-sparql-api</groupId>
+				<artifactId>jena-sparql-api-rx-io</artifactId>
 				<version>${jsa.version}</version>
 			</dependency>
 

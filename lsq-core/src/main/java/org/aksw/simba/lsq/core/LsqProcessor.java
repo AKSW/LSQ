@@ -7,7 +7,6 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -34,12 +33,11 @@ import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.graph.Node;
-import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryFactory;
@@ -917,7 +915,7 @@ public class LsqProcessor
 
 
         } catch (Exception ex) {
-            String msg = ExceptionUtils.getFullStackTrace(ex);//ex.getMessage();
+            String msg = ExceptionUtils.getStackTrace(ex);//ex.getMessage();
             queryRes.addLiteral(LSQ.processingError, msg);
             logger.warn("Failed to process query " + query, ex);
         }

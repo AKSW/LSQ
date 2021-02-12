@@ -24,7 +24,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Var;
 import org.junit.Test;
-import org.springframework.core.io.ClassPathResource;
 import org.topbraid.spin.arq.ARQ2SPIN;
 import org.topbraid.spin.model.Query;
 import org.topbraid.spin.model.Triple;
@@ -39,7 +38,7 @@ public class TestLsqSelectivity {
         Model dataModel = RDFDataMgr.loadModel("lsq-tests/01/data.ttl");
         QueryExecutionFactory dataQef = FluentQueryExecutionFactory.from(dataModel).create();
 
-        Stream<String> queryStrs = new BufferedReader(new InputStreamReader(new ClassPathResource("lsq-tests/01/query.sparql.log").getInputStream())).lines()
+        Stream<String> queryStrs = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("lsq-tests/01/query.sparql.log"))).lines()
                 .map(String::trim)
                 .filter(str -> !Strings.isNullOrEmpty(str));//.collect(Collectors.joining("\n"));
         //Stream<String> queryStr = queryStrs.findFirst();

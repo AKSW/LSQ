@@ -13,6 +13,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.List;
@@ -21,31 +22,30 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import org.aksw.commons.io.StdIo;
+import org.aksw.commons.io.syscall.sort.SysSort;
+import org.aksw.commons.io.util.StdIo;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
-import org.aksw.jena_sparql_api.common.DefaultPrefixes;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
 import org.aksw.jena_sparql_api.http.repository.impl.UriToPathUtils;
-import org.aksw.jena_sparql_api.io.json.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
+import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
+import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
+import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
+import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
+import org.aksw.jena_sparql_api.rx.io.resultset.NamedGraphStreamCliUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
-import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap;
-import org.aksw.named_graph_stream.cli.cmd.CmdNgsMap.MapSpec;
-import org.aksw.named_graph_stream.cli.cmd.CmdNgsSort;
-import org.aksw.named_graph_stream.cli.main.MainCliNamedGraphStream;
-import org.aksw.named_graph_stream.cli.main.NamedGraphStreamOps;
-import org.aksw.named_graph_stream.cli.main.ResourceInDatasetFlowOps;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkCreate;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
@@ -77,12 +77,11 @@ import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
+import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
-import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
-import org.apache.jena.sys.JenaSystem;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
@@ -210,9 +209,16 @@ public class MainCliLsq {
 
 
         if(rdfizeCmd.slimMode) {
-            CmdNgsMap cmd = new CmdNgsMap();
-            cmd.mapSpec = new MapSpec();
-            cmd.mapSpec.stmts.add("lsq-slimify.sparql");
+//            CmdNgsMap cmd = new CmdNgsMap();
+//            cmd.mapSpec = new MapSpec();
+//            cmd.mapSpec.stmts.add("lsq-slimify.sparql");
+            
+            SparqlScriptProcessor sparqlProcessor = SparqlScriptProcessor.createWithEnvSubstitution(null);
+            sparqlProcessor.process("lsq-slimify.sparql");
+            List<SparqlStmt> sparqlStmts = sparqlProcessor.getSparqlStmts().stream()
+            		.map(Entry::getKey).collect(Collectors.toList());
+            
+            
 //			cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
 //			JenaSystem.init();
@@ -220,10 +226,13 @@ public class MainCliLsq {
 
 //			SparqlStmtUtils.processFile(pm, "lsq-slimify.sparql");
 //			MainCliNamedGraphStream.createMapper2(); //map(DefaultPrefixes.prefixes, cmd);
+            // PrefixMapping.Extended
             FlowableTransformer<ResourceInDataset, ResourceInDataset> mapper =
-                    MainCliNamedGraphStream.createMapperDataset(PrefixMapping.Extended, cmd.mapSpec.stmts,
+                    DatasetFlowOps.createMapperDataset(sparqlStmts,
                             r -> r.getDataset(),
-                            (r, ds) -> r.inDataset(ds), cxt -> {});
+                            (r, ds) -> r.inDataset(ds),
+                            DatasetGraphFactoryEx::createInsertOrderPreservingDatasetGraph,
+                            cxt -> {});
 
 
             logRdfEvents = logRdfEvents
@@ -231,7 +240,7 @@ public class MainCliLsq {
         }
 
         if(!rdfizeCmd.noMerge) {
-            CmdNgsSort sortCmd = new CmdNgsSort();
+        	SysSort sortCmd = new SysSort();
             sortCmd.bufferSize = rdfizeCmd.bufferSize;
             sortCmd.temporaryDirectory = rdfizeCmd.temporaryDirectory;
 
@@ -249,7 +258,7 @@ public class MainCliLsq {
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
-            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);
+            RDFDataMgrRx.writeResources(logRdfEvents, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);
             logger.info("RDFization completed successfully");
         } catch(Exception e) {
             ExceptionUtilsAksw.rethrowIfNotBrokenPipe(e);
@@ -275,13 +284,41 @@ public class MainCliLsq {
     @Deprecated // The process was changed that inversion of the
     // log-record-to-query relation is no longer needed as it is now how the process works
     public static void invert(CmdLsqInvert cmdInvert) throws Exception {
-        CmdNgsMap cmd = new CmdNgsMap();
-        cmd.mapSpec = new MapSpec();
-        cmd.mapSpec.stmts.add("lsq-invert-rdfized-log.sparql");
-        cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
+        //CmdNgsMap cmd = new CmdNgsMap();
+//        SparqlScriptProcessor sparqlProcessor = SparqlScriptProcessor.createWithEnvSubstitution(null);
+//        sparqlProcessor.process("lsq-invert-rdfized-log.sparql");
+        // cmd.mapSpec = new MapSpec();
+        // cmd.mapSpec.stmts.add("lsq-invert-rdfized-log.sparql");
+        // sparqlProcessor.process(cmdInvert.nonOptionArgs) ;
+        // cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
-        JenaSystem.init();
-        NamedGraphStreamOps.map(DefaultPrefixes.prefixes, cmd, StdIo.openStdout());
+        // JenaSystem.init();
+        
+    	NamedGraphStreamCliUtils.execMap(null,
+    			cmdInvert.nonOptionArgs,
+    			Arrays.asList(Lang.TRIG, Lang.NQUADS),
+    			Arrays.asList("lsq-invert-rdfized-log.sparql"),    			
+    			null,
+    			null,
+    			20);
+
+        
+//        Flowable<Dataset> flow = NamedGraphStreamCliUtils.createNamedGraphStreamFromArgs(cmdInvert.nonOptionArgs, null, null, Arrays.asList(Lang.TRIG, Lang.NQUADS));
+//        
+//        try (OutputStream out = StdIo.openStdOutWithCloseShield()) {
+//	        // StreamRdf streamRdf = StreamRDFWriter.getWriterStream(out, RDFFormat.TRIG_PRETTY, null);
+//	        
+//	        // NamedGraphStreamOps.map(DefasultPrefixes.prefixes, sparqlProcessor.getSparqlStmts(), StdIo.openStdout());
+//	        try (SPARQLResultExProcessor resultProcessor = SPARQLResultExProcessorBuilder.createForQuadOutput().build()) {
+//	        	SparqlStmtUtils.execAny(null, null)
+//	        	
+//	        }
+//        }
+        
+        
+        // SparqlStmtUtils
+        // Function<RDFConnection, SPARQLResultEx> mapper = SparqlMappers.createMapperFromDataset(outputMode, stmts, resultProcessor);
+
     }
 
     // FIXME hasRemoteExec needs to be skolemized - this
@@ -301,7 +338,7 @@ public class MainCliLsq {
         })
         .map(ResourceInDataset::getDataset);
 
-        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdout(), RDFFormat.TRIG_BLOCKS);
+        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);
     }
 
 
@@ -437,7 +474,7 @@ public class MainCliLsq {
         }
 
         try(OutputStream out = outPath == null
-                ? new CloseShieldOutputStream(StdIo.openStdout())
+                ? new CloseShieldOutputStream(StdIo.openStdOutWithCloseShield())
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
             RDFDataMgr.write(out, model, RDFFormat.TURTLE_BLOCKS);
         }
@@ -593,7 +630,7 @@ public class MainCliLsq {
         }
 
         try (OutputStream out = outPath == null
-                ? StdIo.openStdout()
+                ? StdIo.openStdOutWithCloseShield()
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
             RDFDataMgr.write(out, configModel, RDFFormat.TURTLE_BLOCKS);
         }

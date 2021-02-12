@@ -23,37 +23,38 @@
 	</scm>
 
 	<dependencies>
+		<dependency>
+			<groupId>org.aksw.jena-sparql-api</groupId>
+			<artifactId>jena-sparql-api-rx-io</artifactId>
+		</dependency>
 
 		<!-- <dependency> -->
 		<!-- <groupId>org.springframework.boot</groupId> -->
 		<!-- <artifactId>spring-boot</artifactId> -->
 		<!-- </dependency> -->
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.beust</groupId> -->
-<!-- 			<artifactId>jcommander</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.beust</groupId> -->
+		<!-- <artifactId>jcommander</artifactId> -->
+		<!-- </dependency> -->
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>net.sf.jopt-simple</groupId> -->
-<!-- 			<artifactId>jopt-simple</artifactId> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>net.sf.jopt-simple</groupId> -->
+		<!-- <artifactId>jopt-simple</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.rdf-processing-toolkit</groupId> -->
+		<!-- <artifactId>rdf-processing-toolkit-cli</artifactId> -->
+		<!-- </dependency> -->
+
 
 		<dependency>
-		  <groupId>org.aksw.rdf-processing-toolkit</groupId>
-		  <artifactId>rdf-processing-toolkit-cli</artifactId>
+			<groupId>info.picocli</groupId>
+			<artifactId>picocli</artifactId>
 		</dependency>
-
-		<dependency>
-		  <groupId>info.picocli</groupId>
-		  <artifactId>picocli</artifactId>
-		</dependency>
-<!--
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot</artifactId>
-		</dependency>
--->
+		<!-- <dependency> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>org.aksw.simba.lsq</groupId>

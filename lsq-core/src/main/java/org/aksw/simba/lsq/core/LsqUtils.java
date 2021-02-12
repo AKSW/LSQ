@@ -21,7 +21,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import org.aksw.commons.util.bean.PropertyUtils;
+import org.aksw.commons.beans.model.PropertyUtils;
 import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
@@ -50,6 +50,7 @@ import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.lib.Sink;
 import org.apache.jena.ext.com.google.common.base.Strings;
 import org.apache.jena.ext.com.google.common.collect.Iterables;
@@ -76,7 +77,6 @@ import org.apache.jena.sparql.core.Var;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

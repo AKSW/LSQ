@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.io.StdIo;
+import org.aksw.commons.io.util.StdIo;
 import org.aksw.jena_sparql_api.core.connection.ConnectionLostException;
 import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
@@ -247,7 +247,7 @@ public class LsqBenchmarkProcessor {
                     indexConn);
 
             for(ResourceInDataset item : items) {
-                RDFDataMgr.write(StdIo.openStdout(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
+                RDFDataMgr.write(StdIo.openStdOutWithCloseShield(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
             }
         }
 
