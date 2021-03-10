@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.rx.op.OperatorOrderedGroupBy;
+import org.aksw.jena_sparql_api.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.riot.Lang;
@@ -25,7 +25,7 @@ public class MainLsqConsumeExample {
 
         Flowable<Entry<Long, Long>> flow = Flowable
                 .fromIterable(vals)
-                .lift(OperatorOrderedGroupBy.create(
+                .lift(FlowableOperatorSequentialGroupBy.create(
                         v -> (v / 10) * 10,
                         x -> new AtomicLong(), (acc, x) -> acc.incrementAndGet()))
                 .map(g -> Maps.immutableEntry(g.getKey(), g.getValue().get()))
