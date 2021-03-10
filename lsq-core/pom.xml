@@ -36,6 +36,11 @@
 			<artifactId>jena-tdb2</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-shacl</artifactId>
+		</dependency>
+
 		<!-- FIXME Get rid of this dependency; right now we use some ngs code which 
 			should go into a common module -->
 		<!-- <dependency> -->
@@ -55,11 +60,12 @@
 			<artifactId>spin</artifactId>
 		</dependency>
 
+<!--
 		<dependency>
 			<groupId>org.topbraid</groupId>
 			<artifactId>shacl</artifactId>
 		</dependency>
-
+-->
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>

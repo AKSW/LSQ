@@ -1,13 +1,12 @@
 package org.aksw.simba.lsq;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.shacl.ShaclValidator;
+import org.apache.jena.shacl.ValidationReport;
 import org.junit.Assert;
 import org.junit.Test;
-import org.topbraid.shacl.validation.ValidationUtil;
-import org.topbraid.shacl.vocabulary.SH;
 
 public class TestLsqValidationWithShacl {
 
@@ -20,15 +19,26 @@ public class TestLsqValidationWithShacl {
 
 		// Perform the validation of everything, using the data model
 		// also as the shapes model - you may have them separated
-		Resource report = ValidationUtil.validateModel(dataModel, shaclModel, true);		
-		
-		boolean conforms = report.getProperty(SH.conforms).getBoolean();
-		
-		if(!conforms) {
-			// Print violations
-			RDFDataMgr.write(System.err, report.getModel(), RDFFormat.TURTLE_PRETTY);
-		}
-		
+        ValidationReport report;
+        try {
+                report = ShaclValidator.get().validate(shaclModel.getGraph(), dataModel.getGraph());
+        } catch (Exception e) {
+                RDFDataMgr.write(System.err, shaclModel, RDFFormat.NTRIPLES);
+                throw new RuntimeException("Internal error during shacl validation - model printed to stderr", e);
+        }
+        
+        boolean conforms = report.conforms();
+
+//		
+//		Resource report = ValidationUtil.validateModel(dataModel, shaclModel, true);		
+//		
+//		boolean conforms = report.getProperty(SH.conforms).getBoolean();
+//		
+//		if(!conforms) {
+//			// Print violations
+//			RDFDataMgr.write(System.err, report.getModel(), RDFFormat.TURTLE_PRETTY);
+//		}
+//		
 		Assert.assertTrue(conforms);		
 	}
 }

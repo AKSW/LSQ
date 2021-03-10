@@ -118,6 +118,12 @@
 			</dependency>
 
 			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-shacl</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-vocab-jena</artifactId>
 				<version>${project.version}</version>
@@ -241,6 +247,8 @@
 			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
 				<version>5.0.3.RELEASE</version> </dependency> -->
 
+
+<!--
 			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>shacl</artifactId>
@@ -252,6 +260,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+-->
 
 		</dependencies>
 	</dependencyManagement>
@@ -565,8 +574,14 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>org.topbraid</id>
+			<id>com.topquadrant.internal</id>
 			<url>http://topquadrant.com/repository/spin</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 </project>
