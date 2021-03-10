@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -285,7 +286,11 @@ public class LsqUtils {
         //Stream<String> stream = reader.lines();
 
         Flowable<String> flow = Flowable.generate(
-                () -> new BufferedReader(new InputStreamReader(in.call(), StandardCharsets.UTF_8)),
+                () -> {
+                	InputStream tmp = in.call();
+                	Objects.requireNonNull(tmp, "An InputStream supplier supplied null");
+                	return new BufferedReader(new InputStreamReader(tmp, StandardCharsets.UTF_8));
+                },
                 (reader, emitter) -> {
                     String line = reader.readLine();
                     if(line != null) {
