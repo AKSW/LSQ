@@ -23,7 +23,7 @@ public class LSQ {
         public static final String isDistinct = NS + "isDistinct";
 
 
-        // Thresholds for retrieval based statistics
+        // Error reporting duing benchmarking upon exceeding thresholds during counting and/or retrieval
         public static final String exceededMaxByteSizeForCounting = NS + "exceededMaxByteSizeForCounting";
         public static final String exceededMaxResultCountForCounting = NS + "exceededMaxResultCountForCounting";
         public static final String exceededMaxByteSizeForSerialization = NS + "exceededMaxByteSizeForSerialization";
@@ -34,8 +34,11 @@ public class LSQ {
         public static final String serializedResult = NS + "serializedResult";
 
 
-        // TODO In a future LSQ version we could repeat the benchmark threshold config params for
-        // primary queries and secondary ones (bgp and tps)
+        // Vocab for benchmark configuration
+        // Note: In a future LSQ version we could allow configuration of thresholds separately for
+        // primary queries (the queries from the log) and secondary ones (those derived from bgp and tps)
+        // (However, secondary queries may occurr also occur as primary ones, so more management would be needed)
+        
         public static final String benchmarkSecondaryQueries = NS + "benchmarkSecondaryQueries";
 
         public static final String maxCount = NS + "maxCount";
@@ -59,12 +62,14 @@ public class LSQ {
         public static final String hasBgp = NS + "hasBgp";
         public static final String hasSubBgp = NS + "hasSubBgp";
         public static final String extensionQuery = NS + "extensionQuery";
+        
+        // Link to the resource that corresponds to the query SELECT COUNT(DISTINCT joinVar) WHERE subBgp
         public static final String joinExtensionQuery = NS + "joinExtensionQuery";
 
         //public static final String tpText = ns + "tpText";
         //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
 
-        // Used in benchmark run - align with other error msgs
+        // Vocab for benchmark statistics (TODO group with the other error reporting (threshold exceeded) predicates above)
         public static final String execStatus = NS + "execStatus";
 
         public static final String execError = NS + "execError";
@@ -102,7 +107,9 @@ public class LSQ {
 
         public static final String in = NS + "in";
         public static final String out = NS + "out";
-        // Internal use. Indicates that one resource represents another one
+        
+        // Indicates that a resource represents an RDF term or a variable
+        // (we cannot have those in the subject position so we need a "proxy" resource)
         public static final String proxyFor = NS + "proxyFor";
 
 
@@ -189,7 +196,9 @@ public class LSQ {
 
     public static final Property in = ResourceFactory.createProperty(Strs.in);
     public static final Property out = ResourceFactory.createProperty(Strs.out);
-    // Internal use. Indicates that one resource represents another one
+    
+    // Indicates that a resource represents an RDF term or a variable
+    // (we cannot have those in the subject position so we need a "proxy" resource)
     public static final Property proxyFor = property("proxyFor");
 
 
