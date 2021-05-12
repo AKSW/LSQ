@@ -104,7 +104,7 @@ import picocli.CommandLine;
  * @author raven
  *
  */
-//@SpringBootApplication
+// @SpringBootApplication
 public class MainCliLsq {
 
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
