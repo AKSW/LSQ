@@ -9,13 +9,12 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import org.aksw.commons.beans.model.PropertyUtils;
-import org.aksw.commons.io.util.UriToPathUtils;
 import org.aksw.fedx.jsa.FedXFactory;
 import org.aksw.jena_sparql_api.cache.core.QueryExecutionFactoryExceptionCache;
 import org.aksw.jena_sparql_api.cache.staging.CacheBackendMem;
@@ -34,6 +32,8 @@ import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQuery
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
+import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
@@ -43,6 +43,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
+import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.model.LsqQuery;
@@ -60,6 +61,7 @@ import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
@@ -536,7 +538,7 @@ public class LsqUtils {
                 .flatMapMaybe(record -> {
                     Maybe<ResourceInDataset> r;
                     try {
-                        r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                    	r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
                     } catch (Exception e) {
                         logger.warn("Internal error; trying to continue", e);
                         r = Maybe.empty();
@@ -550,8 +552,12 @@ public class LsqUtils {
     }
 
     public static Maybe<ResourceInDataset> processLogRecord(
-            Function<String, SparqlStmt> sparqlStmtParser, String baseIri, String hostHashSalt, String serviceUrl,
-            Function<String, String> hashFn, ResourceInDataset x) {
+            Function<String, SparqlStmt> sparqlStmtParser,
+            String baseIri,
+            String hostHashSalt,
+            String serviceUrl,
+            Function<String, String> hashFn,
+            ResourceInDataset x) {
         RemoteExecution re = x.as(RemoteExecution.class);
 
 
@@ -568,12 +574,13 @@ public class LsqUtils {
 //	        		}
 //
         // If we cannot obtain a query from the log record, we omit the entry
-        Maybe<ResourceInDataset> r = Maybe.empty();
+        Maybe<ResourceInDataset> result;
 
         // Invert; map from query to log entry
-        ResourceInDataset qq = x.wrapCreate(Model::createResource);
-        LsqQuery q = qq.as(LsqQuery.class);
-        q.getRemoteExecutions(Resource.class).add(x);
+        ResourceInDataset queryInDataset = x.wrapCreate(Model::createResource);
+        LsqQuery q = queryInDataset.as(LsqQuery.class);
+//        q.getRemoteExecutions(Resource.class).add(x);
+        q.getRemoteExecutions().add(re);
 //        			String graphAndResourceIri = "urn:lsq:" + filename + "-" + seqId;
 //        			ResourceInDataset xx;
 //
@@ -592,21 +599,25 @@ public class LsqUtils {
                     ? parsedQuery.getQuery().toString()
                     : parsedQuery.getOriginalString();
 
-            String queryHash = hashFn.apply(str); // Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
-            q.setText(str);
-            q.setHash(queryHash);
+            //String queryHash = hashFn.apply(str); // Hashing.sha256().hashString(str, StandardCharsets.UTF_8).toString();
+            q.setQueryAndHash(str);
+            //q.setHash(queryHash);
 
             Throwable t = parsedQuery.getParseException();
             if(t != null) {
                 q.setParseError(t.toString());
             }
 
+            // Map<Resource, Resource> remap = org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.renameResources(baseIri, renames);
+
+
+            
             // String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
-            String graphAndResourceIri = baseIri + "q-" + queryHash;
+            // String graphAndResourceIri = baseIri + "q-" + queryHash;
             // Note: We could also leave the resource as a blank node
             // The only important part is to have a named graph with the query hash
             // in order to merge records about equivalent queries
-            qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
+            // qq = ResourceInDatasetImpl.renameResource(qq, graphAndResourceIri);
 
 
             /*
@@ -616,10 +627,6 @@ public class LsqUtils {
             //if(host != null) {
 
             // http://www.example.org/sparql -> example.org-sparql
-            String serviceId = serviceUrl == null
-                    ? "unknown-service"
-                    : UriToPathUtils.resolvePath(serviceUrl).toString()
-                    .replace('/', '-');
 
             // Hashing.sha256().hashString(hostHash, StandardCharsets.UTF_8);
 
@@ -634,24 +641,35 @@ public class LsqUtils {
 
             re.setEndpointUrl(serviceUrl);
 
-            Calendar timestamp = re.getTimestamp();
-
-            long seqId = re.getSequenceId();
-            // TODO If there is a timestamp then use it
-            // Otherwise, use sourceFileName + sequenceId
-            String logEntryId = serviceId + "_" + (timestamp != null
-                    ? timestamp.toInstant().toString()
-                    : seqId);
+//            Calendar timestamp = re.getTimestamp();
 
 
-            String reIri = baseIri + "re-" + logEntryId;
-            org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
+//            String reIri = baseIri + "re-" + logEntryId;
+//            org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
 
 
-            qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
+            // GraphUtil.
+            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+            Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
+            Node newRoot = renames.get(q.asNode());
+            
+            // Also rename the original graph name to match the IRI of the new lsq query root
+            renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
+            
+            Dataset dataset = queryInDataset.getDataset();
+            // Apply an in-place node transform on the dataset
+            // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
+            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
+            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
+
+            
+//            RDFDataMgr.write(System.out, dataset, RDFFormat.NQUADS);
+
+            // qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
 
 
-            r = Maybe.just(qq);
+        } else {
+        	result = Maybe.empty();
         }
 
 
@@ -665,7 +683,7 @@ public class LsqUtils {
             // xx.removeAll(LSQ.query);
             // xx.removeAll(RDFS.label);
 
-            return r;
+            return result;
     }
 
 //	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {

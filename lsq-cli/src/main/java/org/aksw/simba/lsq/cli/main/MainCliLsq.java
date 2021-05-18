@@ -186,10 +186,11 @@ public class MainCliLsq {
 
         Map<String, ResourceParser> logFmtRegistry = LsqUtils.createDefaultLogFmtRegistry();
 
+
+        // Hash function which is applied after combining host names with salts
         Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
-
 
         Flowable<ResourceInDataset> logRdfEvents = Flowable
             .fromIterable(logSources)
@@ -267,9 +268,9 @@ public class MainCliLsq {
 
     public static void probe(CmdLsqProbe cmdProbe) {
         List<String> nonOptionArgs = cmdProbe.nonOptionArgs;
-        if(nonOptionArgs.size() == 0) {
-            System.err.println("No arguments provided.");
-            System.err.println("Argument must be one or more log files which will be probed against all registered LSQ log formats");
+        if(nonOptionArgs.isEmpty()) {
+            logger.error("No arguments provided.");
+            logger.error("Argument must be one or more log files which will be probed against all registered LSQ log formats");
         }
 
         for(int i = 0; i < nonOptionArgs.size(); ++i) {

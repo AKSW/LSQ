@@ -2,6 +2,7 @@ package org.aksw.simba.lsq.model;
 
 import java.math.BigDecimal;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -88,7 +89,9 @@ public interface QueryExec extends Resource {
     default String getStringId(HashIdCxt cxt) {
         LocalExecution le = getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String result = "queryExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
+        String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "queryExec"
+
+        String result = prefix + "-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

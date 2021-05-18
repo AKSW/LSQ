@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Objects;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
@@ -56,6 +57,7 @@ public interface ExperimentRun
         String id = getConfig().getIdentifier();
         Calendar cal = Objects.requireNonNull(getTimestamp(), "no timestamp given").asCalendar();
         String timestamp = dateFormat.format(cal.getTime());
+        //String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // ""
         String result = id + "_at_" + timestamp;
         return result;
     }

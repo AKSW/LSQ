@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.model;
 import java.util.Objects;
 import java.util.Set;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -56,7 +57,10 @@ public interface LocalExecution
     @StringId
     default String getStringId(HashIdCxt cxt) {
         ExperimentRun bmr = getBenchmarkRun();
-        String result = "localExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
+        
+        // String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName());
+        String prefix = "localExec";
+        String result = prefix + "-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 

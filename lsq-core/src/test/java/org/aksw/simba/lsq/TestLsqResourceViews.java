@@ -20,7 +20,9 @@ public class TestLsqResourceViews {
 		q.setText(queryStr);
 		
 		
-		q.getRemoteExecutions(RemoteExecution.class).add(m.createResource().as(RemoteExecution.class)
+//		q.getRemoteExecutions(RemoteExecution.class)
+		q.getRemoteExecutions()
+				.add(m.createResource().as(RemoteExecution.class)
 			.setHost("host")
 			.setSequenceId(0l)
 		);
@@ -32,6 +34,6 @@ public class TestLsqResourceViews {
 		
 		Assert.assertEquals(q.getText(), queryStr);
 		Assert.assertEquals((long)q.getStructuralFeatures().getProjectVarCount(), 2l);
-		Assert.assertEquals(q.getRemoteExecutions(RemoteExecution.class).iterator().next().getHost(), "host");
+		Assert.assertEquals(q.getRemoteExecutions().iterator().next().getHost(), "host");
 	}
 }

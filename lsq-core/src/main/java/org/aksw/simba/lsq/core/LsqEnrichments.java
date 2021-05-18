@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
@@ -431,8 +432,7 @@ public class LsqEnrichments {
             String lsqBaseIri = "http://lsq.aksw.org/spin-";
             HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(spinRes);//.getHash(bgp);
             Map<RDFNode, String> renames = hashIdCxt.getStringIdMapping();
-            LsqBenchmarkProcessor.renameResources(lsqBaseIri, renames);
-
+            ResourceUtils.renameResources(lsqBaseIri, renames);
 
 
     //        RDFDataMgr.write(System.out, lsqQuery.getModel(), RDFFormat.TURTLE_FLAT);

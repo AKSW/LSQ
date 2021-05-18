@@ -2,6 +2,7 @@ package org.aksw.simba.lsq.spinx.model;
 
 import java.math.BigDecimal;
 
+import org.aksw.commons.util.strings.StringUtils;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
@@ -53,7 +54,8 @@ public interface BgpNodeExec
         //LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
         LocalExecution le = getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String result = "bgpNodeExec-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
+        String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "bgpNodeExec-"
+        String result = prefix + "-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
 
