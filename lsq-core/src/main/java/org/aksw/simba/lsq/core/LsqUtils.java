@@ -66,6 +66,7 @@ import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.riot.Lang;
@@ -648,20 +649,21 @@ public class LsqUtils {
 //            org.apache.jena.util.ResourceUtils.renameResource(re, reIri);
 
 
-            // GraphUtil.
-            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
-            Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
-            Node newRoot = renames.get(q.asNode());
-            
-            // Also rename the original graph name to match the IRI of the new lsq query root
-            renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
-            
-            Dataset dataset = queryInDataset.getDataset();
-            // Apply an in-place node transform on the dataset
-            // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
-            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
-            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
+//            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+//            Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
+//            Node newRoot = renames.get(q.asNode());
+//            
+//            // Also rename the original graph name to match the IRI of the new lsq query root
+//            renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
+//            
+//            Dataset dataset = queryInDataset.getDataset();
+//            // Apply an in-place node transform on the dataset
+//            // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
+//            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
+//            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
+            ResourceInDataset r = skolemize(queryInDataset, baseIri, LsqQuery.class);
+            result = Maybe.just(r);
             
 //            RDFDataMgr.write(System.out, dataset, RDFFormat.NQUADS);
 
@@ -686,6 +688,27 @@ public class LsqUtils {
             return result;
     }
 
+    
+    public static <T extends RDFNode> ResourceInDataset skolemize(
+    		ResourceInDataset queryInDataset,
+    		String baseIri,
+    		Class<T> cls) {
+        T q = queryInDataset.as(cls);
+    	HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+        Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
+        Node newRoot = renames.get(q.asNode());
+        
+        // Also rename the original graph name to match the IRI of the new lsq query root
+        renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
+        
+        Dataset dataset = queryInDataset.getDataset();
+        // Apply an in-place node transform on the dataset
+        // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
+        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
+        ResourceInDataset result = new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot);
+        return result;
+    }
+    
 //	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {
 //		// Enrich potentially missing information
 //        result = Streams.mapWithIndex(result, (r, i) -> {

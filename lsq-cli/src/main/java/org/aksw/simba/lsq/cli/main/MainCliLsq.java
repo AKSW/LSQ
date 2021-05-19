@@ -55,6 +55,7 @@ import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
+import org.aksw.simba.lsq.core.LsqEnrichments;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
@@ -334,7 +335,10 @@ public class MainCliLsq {
 
         Flowable<Dataset> dsFlow = flow.map(rid -> {
             LsqQuery q = rid.as(LsqQuery.class);
-            rdfizeStructuralFeatures(q);
+            LsqEnrichments.enrichWithFullSpinModelCore(q);
+            LsqEnrichments.enrichWithStaticAnalysis(q);
+            // TODO createLsqRdfFlow already performs skolemize; duplicated effort
+            LsqUtils.skolemize(rid, rdfizeCmd.baseIri, LsqQuery.class);
             return rid;
         })
         .map(ResourceInDataset::getDataset);
@@ -343,6 +347,7 @@ public class MainCliLsq {
     }
 
 
+    @Deprecated
     public static void rdfizeStructuralFeatures(LsqQuery q) {
         NestedResource queryRes = NestedResource.from(q);
         Function<String, NestedResource> queryAspectFn =

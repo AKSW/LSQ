@@ -1,0 +1,30 @@
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix lsqo:  <http://lsq.aksw.org/vocab#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix lsqr:  <http://lsq.aksw.org/> .
+@prefix sp:    <http://spinrdf.org/sp#> .
+
+lsqr:xc-test_2021-05-19
+        dct:identifier                  "xc-test_2021-05-19" ;
+        lsqo:executionTimeoutForRetrieval  "300"^^xsd:decimal ;
+        lsqo:connectionTimeoutForRetrieval  "60"^^xsd:decimal ;
+        lsqo:maxResultCountForRetrieval  "1000000"^^xsd:long ;
+        lsqo:maxByteSizeForRetrieval    "-1"^^xsd:long ;
+        lsqo:maxResultCountForSerialization  "-1"^^xsd:long ;
+        lsqo:maxByteSizeForSerialization  "1000000"^^xsd:long ;
+        lsqo:executionTimeoutForCounting  "300"^^xsd:decimal ;
+        lsqo:connectionTimeoutForCounting  "60"^^xsd:decimal ;
+        lsqo:maxCount                   "1000000000"^^xsd:long ;
+        lsqo:maxCountAffectsTp          false ;
+        lsqo:userAgent                  "Linked SPARQL Queries (LSQ) Client" ;
+        lsqo:benchmarkSecondaryQueries  true ;
+        lsqo:datasetSize                "2005615"^^xsd:long ;
+        lsqo:datasetLabel               "test" ;
+        lsqo:baseIri                    lsqr: ;
+        lsqo:endpoint                   lsqr:dataRefSparqlEndpoint-zFGdmLcrQYdbNV-39nKlA-qiv-lGQ1ndyHhNatbeV7s .
+
+lsqr:dataRefSparqlEndpoint-zFGdmLcrQYdbNV-39nKlA-qiv-lGQ1ndyHhNatbeV7s
+        a       <http://w3id.org/rpif/vocab#DataRefSparqlEndpoint> ;
+        <http://w3id.org/rpif/vocab#serviceUrl>  <http://localhost:8890/sparql> ;
+        <http://w3id.org/rpif/vocab#namedGraph>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> ;
+        <http://w3id.org/rpif/vocab#defaultGraph>  <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .

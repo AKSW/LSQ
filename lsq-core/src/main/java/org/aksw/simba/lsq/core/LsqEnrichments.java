@@ -376,10 +376,7 @@ public class LsqEnrichments {
             // Immediately skolemize the spin model - before attachment of
             // additional properties changes the hashes
     //        String part = BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes());
-            spinQuery = Skolemize.skolemizeTree(spinQuery, false,
-                    (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
-                    (r, d) -> true).asResource();
-
+            spinQuery = skolemizeSpin(spinQuery);
             SpinQueryEx spinRes = spinQuery.as(SpinQueryEx.class);
 
             lsqQuery.setSpinQuery(spinQuery);
@@ -443,8 +440,21 @@ public class LsqEnrichments {
     //
     //        System.exit(0);
             return lsqQuery;
-        }
+    }
 
+    
+    public static Resource skolemizeSpin(Resource spinQuery) {
+    	return skolemizeSpin(spinQuery, "http://lsq.aksw.org/spin-");
+    }
+    
+    public static Resource skolemizeSpin(Resource spinQuery, String prefix) {
+        Resource result = Skolemize.skolemizeTree(spinQuery, false,
+                (r, hashCode) -> prefix + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
+                (r, d) -> true).asResource();
+        
+        return result;
+    }
+    
     /**
      * Analyze the query for a set of structural features (e.g. use of optional,
      * union, exists, etc...) and attach them to the given resource
@@ -546,6 +556,7 @@ public class LsqEnrichments {
 
 
 
+    // Requires the spin model to exist on the argument
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
         String queryStr = queryRes.getText();
         // TODO Avoid repeated parse
