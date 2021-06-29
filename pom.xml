@@ -563,7 +563,7 @@
 		<snapshotRepository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -571,7 +571,7 @@
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
@@ -579,9 +579,24 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+
+<!--
+                <repository>
+                        <id>maven.aksw.internal</id>
+                        <name>AKSW Internal Repository</name>
+                        <url>https://maven.aksw.org/archiva/repository/internal</url>
+                        <releases>
+                                <enabled>true</enabled>
+                        </releases>
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                </repository>
+-->
+
 		<repository>
 			<id>com.topquadrant.internal</id>
-			<url>http://topquadrant.com/repository/spin</url>
+			<url>https://www.topquadrant.com/repository/spin</url>
 			<releases>
 				<enabled>true</enabled>
 			</releases>

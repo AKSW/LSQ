@@ -11,22 +11,25 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 /**
- * Static analysis of queries
+ * For a given {@link org.aksw.simba.lsq.model.LsqQuery} read out its hash, then
+ * generate a new hash using the latest approach. If the new hash differes, then
+ * replace any occurrences of the hash in any of the underlying model's RDF
+ * terms with the new hash
  *
  * @author raven
  *
  */
-@Command(name = "analyze", description = "Analyze queries and emit structural features")
-public class CmdLsqAnalyze implements Callable<Integer> {
+@Command(name = "rehash", description = "Update IDs of lsq query objects generated with older versions of LSQ")
+public class CmdLsqRehash implements Callable<Integer> {
     @Option(names = { "-h", "--help" }, usageHelp = true)
     public boolean help = false;
 
-    @Parameters(arity = "1..*", description = "file-list to probe")
+    @Parameters(arity = "0..*", description = "file-list to probe")
     public List<String> nonOptionArgs = new ArrayList<>();
 
     @Override
     public Integer call() throws Exception {
-        MainCliLsq.analyze(this);
+        MainCliLsq.rehash(this);
         return 0;
     }
 }

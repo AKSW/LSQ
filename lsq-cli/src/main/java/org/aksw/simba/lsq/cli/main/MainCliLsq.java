@@ -33,10 +33,12 @@ import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
+import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
+import org.aksw.jena_sparql_api.rx.RDFDataMgrEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
@@ -44,6 +46,7 @@ import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.io.resultset.NamedGraphStreamCliUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
 import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
@@ -54,6 +57,7 @@ import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
+import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRehash;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.core.LsqEnrichments;
 import org.aksw.simba.lsq.core.LsqProcessor;
@@ -68,6 +72,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
+import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -82,6 +87,10 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
+import org.apache.jena.riot.out.NodeFmtLib;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
+import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
@@ -214,13 +223,13 @@ public class MainCliLsq {
 //            CmdNgsMap cmd = new CmdNgsMap();
 //            cmd.mapSpec = new MapSpec();
 //            cmd.mapSpec.stmts.add("lsq-slimify.sparql");
-            
+
             SparqlScriptProcessor sparqlProcessor = SparqlScriptProcessor.createWithEnvSubstitution(null);
             sparqlProcessor.process("lsq-slimify.sparql");
             List<SparqlStmt> sparqlStmts = sparqlProcessor.getSparqlStmts().stream()
-            		.map(Entry::getKey).collect(Collectors.toList());
-            
-            
+                    .map(Entry::getKey).collect(Collectors.toList());
+
+
 //			cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
 //			JenaSystem.init();
@@ -242,7 +251,7 @@ public class MainCliLsq {
         }
 
         if(!rdfizeCmd.noMerge) {
-        	SysSort sortCmd = new SysSort();
+            SysSort sortCmd = new SysSort();
             sortCmd.bufferSize = rdfizeCmd.bufferSize;
             sortCmd.temporaryDirectory = rdfizeCmd.temporaryDirectory;
 
@@ -295,41 +304,42 @@ public class MainCliLsq {
         // cmd.nonOptionArgs.addAll(cmdInvert.nonOptionArgs);
 
         // JenaSystem.init();
-        
-    	NamedGraphStreamCliUtils.execMap(null,
-    			cmdInvert.nonOptionArgs,
-    			Arrays.asList(Lang.TRIG, Lang.NQUADS),
-    			Arrays.asList("lsq-invert-rdfized-log.sparql"),    			
-    			null,
-    			null,
-    			20);
 
-        
+        NamedGraphStreamCliUtils.execMap(null,
+                cmdInvert.nonOptionArgs,
+                Arrays.asList(Lang.TRIG, Lang.NQUADS),
+                Arrays.asList("lsq-invert-rdfized-log.sparql"),
+                null,
+                null,
+                20);
+
+
 //        Flowable<Dataset> flow = NamedGraphStreamCliUtils.createNamedGraphStreamFromArgs(cmdInvert.nonOptionArgs, null, null, Arrays.asList(Lang.TRIG, Lang.NQUADS));
-//        
+//
 //        try (OutputStream out = StdIo.openStdOutWithCloseShield()) {
 //	        // StreamRdf streamRdf = StreamRDFWriter.getWriterStream(out, RDFFormat.TRIG_PRETTY, null);
-//	        
+//
 //	        // NamedGraphStreamOps.map(DefasultPrefixes.prefixes, sparqlProcessor.getSparqlStmts(), StdIo.openStdout());
 //	        try (SPARQLResultExProcessor resultProcessor = SPARQLResultExProcessorBuilder.createForQuadOutput().build()) {
 //	        	SparqlStmtUtils.execAny(null, null)
-//	        	
+//
 //	        }
 //        }
-        
-        
+
+
         // SparqlStmtUtils
         // Function<RDFConnection, SPARQLResultEx> mapper = SparqlMappers.createMapperFromDataset(outputMode, stmts, resultProcessor);
 
     }
 
-    // FIXME hasRemoteExec needs to be skolemized - this
-    // should probably be done in 'rdfize'
     public static void analyze(CmdLsqAnalyze analyzeCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
         rdfizeCmd.noMerge = true;
-
+        // TODO How to obtain the baseIRI? A simple hack would be to 'grep'
+        // for the id part before lsqQuery
+        // The only 'clean' option would be to make the baseIri an attribute of every lsqQuery resource
+        // which might be somewhat overkill
 
         Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
 
@@ -363,6 +373,98 @@ public class MainCliLsq {
             // Post processing: Remove skolem identifiers
             q.getModel().removeAll(null, Skolemize.skolemId, null);
         }
+    }
+
+
+
+    public static NodeTransform createReplace(String target, String replacement) {
+        return node -> {
+            String oldStr = NodeFmtLib.str(node, null);
+            String newStr = oldStr.replace(target, replacement);
+            Node r = RDFNodeJsonUtils.strToNode(newStr);
+            return r;
+        };
+    }
+
+
+    /*
+    public static DatasetGraph replace(DatasetGraph datasetGraph, String target, String replacement) {
+        DatasetGraph result;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            StreamRDF streamRDF = StreamRDFWriterEx.getWriterStream(
+                    baos,
+                    RDFFormat.NTRIPLES);
+
+            StreamRDFOps.sendDatasetToStream(datasetGraph, streamRDF);
+
+            String ntriples = new String(baos.toByteArray());
+            ntriples.replace(target, replacement);
+
+            result = DatasetGraphFactoryEx.createInsertOrderPreservingDatasetGraph();
+            try (InputStream in = new ByteArrayInputStream(ntriples.getBytes(StandardCharsets.UTF_8))) {
+                RDFDataMgr.read(result, in, Lang.NTRIPLES);
+            }
+        }
+        return result;
+    }
+    */
+
+
+    public static ResourceInDataset rehash(ResourceInDataset rid) {
+        LsqQuery q = rid.as(LsqQuery.class);
+
+        String oldHash = q.getHash();
+        String queryStr = q.getText();
+        String newHash = queryStr == null ? null : LsqQuery.createHash(queryStr);
+
+        ResourceInDataset result;
+        if (oldHash != null && newHash != null && !newHash.equals(oldHash)) {
+
+            // Set up a node transform that does the string replace
+            NodeTransform replacer = createReplace(oldHash, newHash);
+            Dataset target = DatasetFactoryEx.createInsertOrderPreservingDataset();
+            result = NodeTransformLib2.copyWithNodeTransform(rid, target, replacer);
+        } else {
+            result = rid;
+        }
+
+        return result;
+    }
+
+    public static void rehash(CmdLsqRehash rehashCmd) throws Exception {
+        CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
+        rdfizeCmd.nonOptionArgs = rehashCmd.nonOptionArgs;
+        rdfizeCmd.noMerge = true;
+        // TODO How to obtain the baseIRI? A simple hack would be to 'grep'
+        // for the id part before lsqQuery
+        // The only 'clean' option would be to make the baseIri an attribute of every lsqQuery resource
+        // which might be somewhat overkill
+
+//        PrefixMapping pm = new PrefixMappingImpl();
+//        addLsqPrefixes(pm);
+
+        // Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
+        Flowable<Dataset> flow = NamedGraphStreamCliUtils.createNamedGraphStreamFromArgs(
+                rehashCmd.nonOptionArgs, null, null, RDFDataMgrEx.DEFAULT_PROBE_LANGS);
+
+
+        Flowable<Dataset> dsFlow = flow
+                .flatMap(ResourceInDatasetFlowOps::naturalResources)
+                .map(MainCliLsq::rehash)
+                .map(ResourceInDataset::getDataset);
+
+
+        RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);
+    }
+
+
+    public static void addLsqPrefixes(PrefixMapping model) {
+        model
+            .setNsPrefix("lsqo", LSQ.NS)
+            .setNsPrefix("dct", DCTerms.NS)
+            .setNsPrefix("xsd", XSD.NS)
+            .setNsPrefix("lsqr", "http://lsq.aksw.org/")
+            .setNsPrefix("sp", SP.NS);
     }
 
 
@@ -433,14 +535,7 @@ public class MainCliLsq {
         }
 
         Model model = DatasetFactoryEx.createInsertOrderPreservingDataset().getDefaultModel();
-
-        model
-            .setNsPrefix("lsqo", LSQ.NS)
-            .setNsPrefix("dct", DCTerms.NS)
-            .setNsPrefix("xsd", XSD.NS)
-            .setNsPrefix("lsqr", "http://lsq.aksw.org/")
-            .setNsPrefix("sp", SP.NS);
-
+        addLsqPrefixes(model);
 
         DataRefSparqlEndpoint dataRef = model.createResource().as(DataRefSparqlEndpoint.class)
                 .setServiceUrl(endpointUrl)

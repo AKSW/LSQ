@@ -14,7 +14,7 @@ import picocli.CommandLine.Parameters;
 public class CmdLsqProbe
     implements Callable<Integer>
 {
-    @Option(names={"-h", "--help"}, usageHelp=true)
+    @Option(names = {"-h", "--help"}, usageHelp = true)
     public boolean help = false;
 
 //	@Parameter(names={"-m", "--format"}, description="Input log format")
