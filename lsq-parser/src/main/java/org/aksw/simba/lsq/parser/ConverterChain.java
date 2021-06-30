@@ -5,6 +5,16 @@ import java.util.function.BiFunction;
 
 import com.google.common.base.Converter;
 
+/**
+ * A converter backed by a sequence of converters.
+ * The result of the overall conversion is determined by the first
+ * converter in the sequence that can convert the input.
+ *
+ * @author raven
+ *
+ * @param <A>
+ * @param <B>
+ */
 public class ConverterChain<A, B>
     extends Converter<A, B>
 {

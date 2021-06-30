@@ -54,6 +54,7 @@
 		<module>lsq-vocab-jena</module>
 		<module>lsq-core</module>
 		<module>lsq-cli</module>
+		<module>lsq-spark-core</module>
 		<module>lsq-debian-cli</module>
 	</modules>
 
@@ -62,18 +63,19 @@
 		<jsa.subversion>1-SNAPSHOT</jsa.subversion>
 		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
 		<aksw-commons.version>0.9.1-SNAPSHOT</aksw-commons.version>
-		
-		
+
+		<spark.version>3.0.1</spark.version>
+
+		<scala.binary.version>2.12</scala.binary.version>
+		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
+
 		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
 
 		<timestamp>${maven.build.timestamp}</timestamp>
 		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
 
 		<maven.compiler.release>11</maven.compiler.release>
-<!--
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
--->
+		<!-- <maven.compiler.source>1.8</maven.compiler.source> <maven.compiler.target>1.8</maven.compiler.target> -->
 		<java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
 		<file.encoding>UTF-8</file.encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -84,11 +86,11 @@
 	<dependencyManagement>
 		<dependencies>
 
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.aksw.rdf-processing-toolkit</groupId> -->
-<!-- 				<artifactId>rdf-processing-toolkit-cli</artifactId> -->
-<!-- 				<version>1.0.7-SNAPSHOT</version> -->
-<!-- 			</dependency> -->
+			<!-- <dependency> -->
+			<!-- <groupId>org.aksw.rdf-processing-toolkit</groupId> -->
+			<!-- <artifactId>rdf-processing-toolkit-cli</artifactId> -->
+			<!-- <version>1.0.7-SNAPSHOT</version> -->
+			<!-- </dependency> -->
 
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
@@ -108,11 +110,18 @@
 				<version>4.4.0</version>
 			</dependency>
 
-<!-- 			<dependency> -->
-<!-- 				<groupId>org.hobbit</groupId> -->
-<!-- 				<artifactId>facete3-impl</artifactId> -->
-<!-- 				<version>1.2.0-SNAPSHOT</version> -->
-<!-- 			</dependency> -->
+			<dependency>
+				<groupId>net.sansa-stack</groupId>
+				<artifactId>sansa-rdf-spark${scala.version.suffix}</artifactId>
+				<version>0.8.0-RC2-SNAPSHOT</version>
+			</dependency>
+
+
+			<!-- <dependency> -->
+			<!-- <groupId>org.hobbit</groupId> -->
+			<!-- <artifactId>facete3-impl</artifactId> -->
+			<!-- <version>1.2.0-SNAPSHOT</version> -->
+			<!-- </dependency> -->
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -251,24 +260,26 @@
 				<version>5.0.3.RELEASE</version> </dependency> -->
 
 
-<!--
-			<dependency>
-				<groupId>org.topbraid</groupId>
-				<artifactId>shacl</artifactId>
-				<version>1.1.0</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.jena</groupId>
-						<artifactId>jena-arq</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
--->
+			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId> 
+				<artifactId>jena-arq</artifactId> </exclusion> </exclusions> </dependency> -->
 
 		</dependencies>
 	</dependencyManagement>
 
 	<!-- Don't touch the stuff below unless you know what you are doing -->
+
+
+	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
+		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId> 
+		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId> 
+		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin> 
+		</reportPlugins> </configuration> </plugin> </plugins> </reporting> -->
+
+
+
+
 	<build>
 		<resources>
 			<resource>
@@ -324,10 +335,7 @@
 				<version>3.6.2</version>
 				<configuration>
 					<release>${maven.compiler.release}</release>
-<!--
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
--->
+					<!-- <source>${maven.compiler.source}</source> <target>${maven.compiler.target}</target> -->
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
@@ -580,19 +588,10 @@
 			</snapshots>
 		</repository>
 
-<!--
-                <repository>
-                        <id>maven.aksw.internal</id>
-                        <name>AKSW Internal Repository</name>
-                        <url>https://maven.aksw.org/archiva/repository/internal</url>
-                        <releases>
-                                <enabled>true</enabled>
-                        </releases>
-                        <snapshots>
-                                <enabled>false</enabled>
-                        </snapshots>
-                </repository>
--->
+		<!-- <repository> <id>maven.aksw.internal</id> <name>AKSW Internal Repository</name> 
+			<url>https://maven.aksw.org/archiva/repository/internal</url> <releases> 
+			<enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
+			</snapshots> </repository> -->
 
 		<repository>
 			<id>com.topquadrant.internal</id>
