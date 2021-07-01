@@ -1,27 +1,14 @@
 package org.aksw.simba.lsq.spark.cmd.impl;
 
-import java.io.OutputStream;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.io.util.StdIo;
-import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
-import org.aksw.jena_sparql_api.utils.io.StreamRDFDeferred;
-import org.aksw.jena_sparql_api.utils.io.WriterStreamRDFBaseUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
-import org.apache.jena.riot.system.StreamRDF;
-import org.apache.jena.riot.system.StreamRDFOps;
-import org.apache.jena.riot.system.StreamRDFWriter;
-import org.apache.jena.riot.system.SyntaxLabels;
-import org.apache.jena.riot.writer.WriterStreamRDFBase;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.spark.SparkConf;
@@ -33,6 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sansa_stack.rdf.spark.io.RddRdfSaver;
+import net.sansa_stack.rdf.spark.io.input.api.RdfSource;
+import net.sansa_stack.rdf.spark.io.input.api.RdfSourceFactory;
+import net.sansa_stack.rdf.spark.io.input.impl.RdfSourceFactoryImpl;
 
 class Cmd {
     public List<String> nonOptionArgs;
@@ -52,15 +42,19 @@ public class CmdLsqRehashSparkImpl {
 
         Stopwatch sw = Stopwatch.createStarted();
 
+        // List<String> sources = Arrays.asList("/home/raven/.dcat/test3/cache/gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl/_content/data.nt");
+        List<String> sources = Arrays.asList("/home/raven/Datasets/lsq/kegg.merged.lsq.v2.trig.bz2");
+
+
         Cmd cmd = new Cmd();
-        cmd.nonOptionArgs = Arrays.asList("/home/raven/Datasets/lsq/kegg.merged.lsq.v2.trig.bz2");
+        cmd.nonOptionArgs = sources;
         cmd.outFolder = "/tmp/spark";
         cmd.outFormat = "trig/blocks";
         cmd.deferOutputForUsedPrefixes = 100;
         cmd.prefixSources = Arrays.asList();
         cmd.outFile = "/tmp/result.trig";
 
-        boolean isOutputToConsole = true;
+        boolean isOutputToConsole = false;
 
         if (isOutputToConsole) {
             cmd.outFolder = null;
