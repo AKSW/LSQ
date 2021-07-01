@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.spark.cmd.impl;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.jena.hadoop.rdf.types.AbstractNodeTupleWritable;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
@@ -32,18 +33,47 @@ public interface RddRdfLoader<T> {
 
 
 
+//
+//    public static <T> RDD<T> createRddElephas(
+//            SparkContext sparkContext,
+//            String path,
+//            Class<T> clazz,
+//            Class<? extends FileInputFormat<LongWritable, ? extends AbstractNodeTupleWritable<T>>> fileInputFormat) {
+//        return createJavaRdd(sparkContext, path, clazz, fileInputFormat).rdd();
+//    }
+//
+//    public static <T> RDD<Tuple2<LongWritable, T>> createRddOfDatasetCoreElephas(
+//            SparkContext sparkContext,
+//            String path,
+//            Class<T> clazz,
+//            Class<? extends FileInputFormat<LongWritable, ? extends AbstractNodeTupleWritable<T>>> fileInputFormat) {
+//        Configuration confHadoop = sparkContext.hadoopConfiguration();
+//
+//        RDD<Tuple2<LongWritable, T>> result = sparkContext
+//            .newAPIHadoopFile(
+//                path,
+//                fileInputFormat,
+//                LongWritable.class,
+//                clazz,
+//                confHadoop);
+//
+//        return result;
+//    }
+//
+
+
 
     public static <T> RDD<Tuple2<LongWritable, T>> createRddOfDatasetCore(
             SparkContext sparkContext,
             String path,
             Class<T> clazz,
-            Class<? extends FileInputFormat<LongWritable, T>> fileInputFromat) {
+            Class<? extends FileInputFormat<LongWritable, T>> fileInputFormat) {
         Configuration confHadoop = sparkContext.hadoopConfiguration();
 
         RDD<Tuple2<LongWritable, T>> result = sparkContext
             .newAPIHadoopFile(
                 path,
-                fileInputFromat,
+                fileInputFormat,
                 LongWritable.class,
                 clazz,
                 confHadoop);

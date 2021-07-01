@@ -3,6 +3,16 @@ package org.aksw.simba.lsq.spark.cmd.impl;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+
+/**
+ * Turn source references into sources of RDF data.
+ *
+ * Note: This interface uses {@link FileSystem}. It may be possible
+ * to abstract this with a {@link java.nio.file.FileSystem} at a later stage.
+ *
+ * @author raven
+ *
+ */
 public interface RdfSourceFactory {
 
     default RdfSource get(String sourceStr) {

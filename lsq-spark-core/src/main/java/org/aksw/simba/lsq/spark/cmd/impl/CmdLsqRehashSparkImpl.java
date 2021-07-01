@@ -4,6 +4,7 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.io.util.StdIo;
@@ -11,6 +12,7 @@ import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.jena_sparql_api.utils.io.StreamRDFDeferred;
 import org.aksw.jena_sparql_api.utils.io.WriterStreamRDFBaseUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.RDFDataMgr;
@@ -48,6 +50,8 @@ public class CmdLsqRehashSparkImpl {
 
     public static void main(String[] args) throws Exception {
 
+        Stopwatch sw = Stopwatch.createStarted();
+
         Cmd cmd = new Cmd();
         cmd.nonOptionArgs = Arrays.asList("/home/raven/Datasets/lsq/kegg.merged.lsq.v2.trig.bz2");
         cmd.outFolder = "/tmp/spark";
@@ -56,6 +60,12 @@ public class CmdLsqRehashSparkImpl {
         cmd.prefixSources = Arrays.asList();
         cmd.outFile = "/tmp/result.trig";
 
+        boolean isOutputToConsole = true;
+
+        if (isOutputToConsole) {
+            cmd.outFolder = null;
+            cmd.outFile = null;
+        }
 
         PrefixMapping prefixes = new PrefixMappingImpl();
 
@@ -79,8 +89,6 @@ public class CmdLsqRehashSparkImpl {
 
         JavaSparkContext javaSparkContext = JavaSparkContext.fromSparkContext(sparkSession.sparkContext());
 
-        Configuration hadoopConf = sparkSession.sparkContext().hadoopConfiguration();
-
 
         RdfSourceFactory rdfSourceFactory = RdfSourceFactoryImpl.from(sparkSession);
 
@@ -98,44 +106,20 @@ public class CmdLsqRehashSparkImpl {
 
         JavaRDD<Dataset> effectiveRdd = initialRdd;
 
-        if (cmd.outFolder == null && cmd.outFile == null) {
 
-            OutputStream out = StdIo.openStdOutWithCloseShield();
+        RddRdfSaver.createForDataset(effectiveRdd.repartition(10))
+            .setGlobalPrefixMapping(new PrefixMappingImpl())
+            .setOutputFormat(cmd.outFormat)
+            .setMapQuadsToTriplesForTripleLangs(true)
+            // .setAllowOverwriteFiles(true)
+            .setPartitionFolder(cmd.outFolder)
+            .setTargetFile(cmd.outFile)
+            // .setUseElephas(true)
+            .setAllowOverwriteFiles(true)
+            .setDeletePartitionFolderAfterMerge(true)
+            .run();
 
-            // val out = Files.newOutputStream(Paths.get("output.trig"),
-            // StandardOpenOption.WRITE, StandardOpenOption.CREATE)
-            // System.out
-            RDFFormat outRdfFormat = RDFLanguagesEx.findRdfFormat(cmd.outFormat);
-            StreamRDF coreWriter = StreamRDFWriter.getWriterStream(out, outRdfFormat, null);
-
-            if (coreWriter instanceof WriterStreamRDFBase) {
-                WriterStreamRDFBaseUtils.setNodeToLabel((WriterStreamRDFBase) coreWriter,
-                        SyntaxLabels.createNodeToLabelAsGiven());
-            }
-
-            StreamRDF writer = new StreamRDFDeferred(coreWriter, true, prefixes, cmd.deferOutputForUsedPrefixes,
-                    Long.MAX_VALUE, null);
-
-            writer.start();
-            StreamRDFOps.sendPrefixesToStream(prefixes, writer);
-
-            // val it = effectiveRdd.collect
-            Iterator<Dataset> it = effectiveRdd.toLocalIterator();
-            it.forEachRemaining(ds -> StreamRDFOps.sendDatasetToStream(ds.asDatasetGraph(), writer));
-            writer.finish();
-            out.flush();
-        } else {
-            RddRdfSaver.createForDataset(effectiveRdd)
-                .setGlobalPrefixMapping(new PrefixMappingImpl())
-                .setOutputFormat(cmd.outFormat)
-                .setMapQuadsToTriplesForTripleLangs(true)
-                // .setAllowOverwriteFiles(true)
-                .setPartitionFolder(cmd.outFolder)
-                .setTargetFile(cmd.outFile)
-                // .setUseElephas(true)
-                .setDeletePartitionFolderAfterMerge(true)
-                .run();
-          }
+        System.err.println("Total process took: " + sw.elapsed(TimeUnit.SECONDS) + " seconds");
     }
 
 }

@@ -12,6 +12,12 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.spark.sql.SparkSession;
 
+/**
+ * Implementation of a source factory based on spark/hadoop.
+ *
+ * @author raven
+ *
+ */
 public class RdfSourceFactoryImpl
     implements RdfSourceFactory
 {
