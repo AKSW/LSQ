@@ -44,21 +44,21 @@ import com.google.common.collect.Streams;
  *
  * @author raven
  *
- * @param <T>
- * @param <K>
- * @param <V>
+ * @param <T> The upstream (input) item type
+ * @param <K> The key type by which to group items
+ * @param <V> The type of the result of grouping items
  */
 class SequentialGroupByBase<T, K, V> {
-    /* Function to derive a group key from an item in the flow */
+    /** Function to derive a group key from an item in the flow */
     protected Function<? super T, ? extends K> getGroupKey;
 
-    /* Comparison whether two group keys are equal */
+    /** Comparison whether two group keys are equal */
     protected BiPredicate<? super K, ? super K> groupKeyCompare;
 
-    /* Constructor function for accumulators. Receives item index and group key */
+    /** Constructor function for accumulators. Receives item index and group key */
     protected BiFunction<? super Long, ? super K, ? extends V> accCtor;
 
-    /* Reduce an item with the accumulator to obtain a new accumulator */
+    /** Reduce an item with the accumulator to obtain a new accumulator */
     protected BiFunction<? super V, ? super T, ? extends V> accAdd;
 
     public SequentialGroupByBase(SequentialGroupByBase<T, K, V> other) {
@@ -287,7 +287,7 @@ public class StreamOperatorSequentialGroupBy<T, K, V>
             return downstream;
         }
 
-        class InternalIterator extends AbstractIterator<Entry<K, V>> {
+        public class InternalIterator extends AbstractIterator<Entry<K, V>> {
 
             @Override
             protected Entry<K, V> computeNext() {

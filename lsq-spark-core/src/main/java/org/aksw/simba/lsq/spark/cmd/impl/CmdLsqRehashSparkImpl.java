@@ -129,10 +129,11 @@ public class CmdLsqRehashSparkImpl {
     public static void main(String[] args) throws Exception {
         Stopwatch sw = Stopwatch.createStarted();
 
-        String src = "/home/raven/Datasets/lsq/kegg.merged.lsq.v2.trig.bz2";
+        // String src = "/home/raven/Datasets/lsq/kegg.merged.lsq.v2.trig.bz2";
+        String src = "/home/raven/Datasets/lsq/lsq1.ttl.bz2";
         // mainRx(src);
-        mainSpark(src);
-        // mainJena(src);
+        // mainSpark(src);
+        mainJena(src);
 
         System.err.println("Total process took: " + sw.elapsed(TimeUnit.SECONDS) + " seconds");
 
@@ -140,10 +141,18 @@ public class CmdLsqRehashSparkImpl {
 
     public static void mainJena(String src) throws Exception {
 
-        try (InputStream in = new BZip2CompressorInputStream(
-                Files.newInputStream(Paths.get(src)), true)) {
-            Iterator<Quad> it = createIteratorQuads(in, Lang.TRIG, null);
-            System.out.println("Size: " + Iterators.size(it));
+        if (false) {
+            try (InputStream in = Files.newInputStream(Paths.get(src))) {
+                Iterator<Quad> it = createIteratorQuads(in, Lang.TRIG, null);
+                System.out.println("Size: " + Iterators.size(it));
+            }
+
+        } else {
+            try (InputStream in = new BZip2CompressorInputStream(
+                    Files.newInputStream(Paths.get(src)), true)) {
+                Iterator<Quad> it = createIteratorQuads(in, Lang.TRIG, null);
+                System.out.println("Size: " + Iterators.size(it));
+            }
         }
     }
 
@@ -191,7 +200,10 @@ public class CmdLsqRehashSparkImpl {
             .set("spark.kryoserializer.buffer.max", "1000") // MB
             .set("spark.kryo.registrator",
                     String.join(", ", "net.sansa_stack.rdf.spark.io.JenaKryoRegistrator"))
-            .set("spark.sql.crossJoin.enabled", "true");
+            .set("spark.sql.crossJoin.enabled", "true")
+            .set("spark.hadoop.mapred.max.split.size", "" + 4 * 1024 * 1024)
+            //		mapreduce.input.fileinputformat.split.minsize
+            ;
 
         sparkConf.setMaster("local[*]");
 
@@ -204,7 +216,7 @@ public class CmdLsqRehashSparkImpl {
 
 
         if (true) {
-            System.out.println("Size spark: " + rdfSourceFactory.get(src).asQuads().count());
+            System.out.println("Size spark: " + rdfSourceFactory.get(src, Lang.TURTLE).asQuads().count());
             return;
         }
 
@@ -225,7 +237,7 @@ public class CmdLsqRehashSparkImpl {
 
         System.out.println("Size spark: " + effectiveRdd.count());
 
-        RddRdfSaver.createForDataset(effectiveRdd.repartition(10))
+        RddRdfSaver.createForDataset(effectiveRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
             .setOutputFormat(cmd.outFormat)
             .setMapQuadsToTriplesForTripleLangs(true)
