@@ -294,9 +294,9 @@ public class StreamOperatorSequentialGroupBy<T, K, V>
 
                 Entry<K, V> result = null;
 
-                // It is crucial to check for a (non-null) result first before calling
-                // upstream.hasNext() which may drain another item which then
-                // gets lost in the spliterator code!
+                // It is crucial to check for a non-null result first!
+                // Calling upstream.hasNext() may drain another item which
+                // would then get lost in the spliterator code!
                 while (result == null && upstream.hasNext()) {
                     item = upstream.next();
 
