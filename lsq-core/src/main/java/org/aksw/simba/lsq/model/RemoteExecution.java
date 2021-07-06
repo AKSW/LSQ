@@ -15,19 +15,19 @@ import org.apache.jena.rdf.model.Resource;
 
 @ResourceView
 public interface RemoteExecution
-	extends Resource
+    extends Resource
 {
     @StringId
     default String getStringId(HashIdCxt cxt) {
 
-    	String serviceUrl = getEndpointUrl();
-    	
+        String serviceUrl = getEndpointUrl();
+
         String serviceId = serviceUrl == null
                 ? "unknown-service"
                 : UriToPathUtils.resolvePath(serviceUrl).toString()
                 .replace('/', '-');
 
-        long seqId = getSequenceId();
+        Long seqId = getSequenceId();
         Calendar timestamp = getTimestamp();
         // TODO If there is a timestamp then use it
         // Otherwise, use sourceFileName + sequenceId
@@ -40,35 +40,35 @@ public interface RemoteExecution
         String result = prefix + "-" + logEntryId;
 
         return result;
-	}
-	
-	@Iri(LSQ.Strs.host)
-	@HashId
-	String getHost();
-	RemoteExecution setHost(String host);
+    }
 
-	@Iri(LSQ.Strs.userAgent)
-	String getUserAgent();
-	RemoteExecution setUserAgent(String userAgent);
+    @Iri(LSQ.Strs.host)
+    @HashId
+    String getHost();
+    RemoteExecution setHost(String host);
 
-	@Iri(LSQ.Strs.hostHash)
-	@HashId
-	String getHostHash();
-	RemoteExecution setHostHash(String hostHash);
+    @Iri(LSQ.Strs.userAgent)
+    String getUserAgent();
+    RemoteExecution setUserAgent(String userAgent);
 
-	@Iri(LSQ.Strs.atTime)
-	@HashId
-	Calendar getTimestamp();
-	RemoteExecution setTimestamp(Calendar calendar);
+    @Iri(LSQ.Strs.hostHash)
+    @HashId
+    String getHostHash();
+    RemoteExecution setHostHash(String hostHash);
 
-	@Iri(LSQ.Strs.endpoint)
-	@IriType
-	@HashId
-	String getEndpointUrl();
-	RemoteExecution setEndpointUrl(String endpointUrl);
+    @Iri(LSQ.Strs.atTime)
+    @HashId
+    Calendar getTimestamp();
+    RemoteExecution setTimestamp(Calendar calendar);
 
-	@Iri(LSQ.Strs.sequenceId)
-	@HashId
-	Long getSequenceId();
-	RemoteExecution setSequenceId(Long value);
+    @Iri(LSQ.Strs.endpoint)
+    @IriType
+    @HashId
+    String getEndpointUrl();
+    RemoteExecution setEndpointUrl(String endpointUrl);
+
+    @Iri(LSQ.Strs.sequenceId)
+    @HashId
+    Long getSequenceId();
+    RemoteExecution setSequenceId(Long value);
 }
