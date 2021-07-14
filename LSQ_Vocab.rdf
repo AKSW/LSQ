@@ -1,206 +1,296 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- The Linked SPARQL Queries Vocabulary (LSQ(V)) -->
-<rdf:RDF 
-	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" 
-	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" 
-	xmlns:owl="http://www.w3.org/2002/07/owl#" 
-	xmlns:foaf="http://xmlns.com/foaf/0.1/" 
-	xmlns:dc="http://purl.org/dc/terms/"
-	xmlns:sd="http://www.w3.org/ns/sparql-service-description#"
-	xml:lang="en">
-	
-<owl:Ontology rdf:about="http://lsq.aksw.org/vocab" dc:title="The Linked SPARQL Queries Vocabulary (LSQ(V))" dc:description="The Linked SPARQL Queries Vocabulary (LSQ(V)), defined using RDF(S) and OWL, provides a machine readable vocabulary to help describe queries in SPARQL logs and their statistics. The vocabulary builds upon the SPIN vocabulary and the Service Description vocabulary.">
-  <dc:creator rdf:resource="http://aidanhogan.com/foaf.rdf#me" />
-  <dc:date rdf:datatype="http://www.w3.org/2001/XMLSchema#date">2015-09-07Z</dc:date>
-</owl:Ontology>
+@prefix lsqv: <http://lsq.aksw.org/vocab#>.
+@prefix cogs: <http://vocab.deri.ie/cogs#>.
+@prefix dct:  <http://purl.org/dc/terms/>.
+@prefix owl:  <http://www.w3.org/2002/07/owl#>.
+@prefix prov: <http://www.w3.org/ns/prov#>.
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sd: <http://www.w3.org/ns/sparql-service-description#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix spin: <http://spinrdf.org/spin#>.
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#>.
 
-<!-- Object properties -->
+lsqv: a owl:Ontology ;
+	rdfs:label "The Linked SPARQL Queries Vocabulary"@en ;
+	dct:creator <http://aidanhogan.com/foaf.rdf#me> ;
+	dct:modified "2021-07-07"^^xsd:date .
 
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#agent">
- <rdfs:label>run by agent</rdfs:label>
- <rdfs:comment>Links a query execution instance to the agent that initiated the execution</rdfs:comment>
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:ObjectProperty>
+lsqv:Query a rdfs:Class , owl:Class ;
+	rdfs:label "Query"@en ;
+	rdfs:comment "A query unique in a particular log that may have multiple executions in that log"@en .
 
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#endpoint">
- <rdfs:label>run at endpoint</rdfs:label>
- <rdfs:comment>Links a query execution instance to the endpoint against which it was run</rdfs:comment>
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:ObjectProperty>
+lsqv:QueryExec a rdfs:Class , owl:Class ;
+	rdfs:label "Query Execution"@en ;
+	rdfs:comment "An execution of a query or a sub-query"@en .
 
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#execution">
- <rdfs:label>has execution</rdfs:label>
- <rdfs:comment>Links a query to an execution of it against a particular endpoint by a particular agent at a particular time</rdfs:comment>
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:ObjectProperty>
+lsqv:LocalExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:QueryExec ;
+	rdfs:label "Local Execution"@en ;
+	rdfs:comment "An execution of a query in a local/controlled setting"@en .
 
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#joinVertex">
- <rdfs:label>has join vertex</rdfs:label>
- <rdfs:comment>Links a query to a join vertex it contains</rdfs:comment>
-</owl:ObjectProperty>
+lsqv:RemoteExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:QueryExec ;
+	rdfs:label "Remote Execution"@en ;
+	rdfs:comment "An execution of a query over the remote endpoint (e.g., as recorded in a remote log)"@en .
 
-<!--the following may be deprecated soon in favour of simply rdf:type -->
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#joinVertexType">
- <rdfs:label>is of type</rdfs:label>
- <rdfs:comment>Links a join vertex to the type of vertex it is</rdfs:comment>
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:ObjectProperty>
+lsqv:BgpExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:QueryExec ;
+	rdfs:label "BGP Execution"@en ;
+	rdfs:comment "An execution of a query encoding a basic graph pattern"@en .
 
-<owl:ObjectProperty rdf:about="http://lsq.aksw.org/vocab#usesFeature">
- <rdfs:label>uses feature</rdfs:label>
- <rdfs:comment>A feature used by the query</rdfs:comment>
-</owl:ObjectProperty>
+lsqv:BgpVarExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:QueryExec ;
+	rdfs:label "BGP Variable Execution"@en ;
+	rdfs:comment "An execution of a query encoding a sub-basic graph pattern sharing a common (join) variable"@en .
 
-<!-- Datatype properties -->
-<!-- We add ranges just for error checking -->
+lsqv:TpInBgpExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:QueryExec ;
+	rdfs:label "TP in BGP Execution"@en ;
+	rdfs:comment "An execution of a query encoding a triple pattern within a basic graph pattern"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#bgps">
- <rdfs:label>number of bgps</rdfs:label>
- <rdfs:comment>The number of Basic Graph Patterns in a query</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" />
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:DatatypeProperty>
+lsqv:TpExec a rdfs:Class , owl:Class ;
+	rdfs:subClassOf lsqv:BgpVarExec ;
+	rdfs:label "TP Execution"@en ;
+	rdfs:comment "An execution of a query encoding a triple pattern (i.e., a basic graph pattern with one triple pattern)"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#executionError">
- <rdfs:label>execution error</rdfs:label>
- <rdfs:comment>The text of an error encountered during a query execution</rdfs:comment>
-</owl:DatatypeProperty>
+lsqv:BenchmarkRun a rdfs:Class , owl:Class ;
+	rdfs:subClassOf prov:Activity ;
+	rdfs:label "Benchmark Run"@en ;
+	rdfs:comment "A sequence of local executions of queries"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#joinVertices">
- <rdfs:label>number of join vertices</rdfs:label>
- <rdfs:comment>The number of join vertices in a query</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" />
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:DatatypeProperty>
+lsqv:StructuralFeatures a rdfs:Class , owl:Class ;
+	rdfs:label "Structural Features"@en ;
+	rdfs:comment "A description of the static/structural features of a query"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#meanJoinVerticesDegree">
- <rdfs:label>mean join vertex degree</rdfs:label>
- <rdfs:comment>The mean degree across all the join vertices</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:DatatypeProperty>
+lsqv:Bgp a rdfs:Class , owl:Class ;
+	rdfs:label "Basic graph pattern"@en ;
+	rdfs:comment "A basic graph pattern"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#meanTriplePatternSelectivity">
- <rdfs:label>mean selectivity of triple patterns</rdfs:label>
- <rdfs:comment>The mean selectivity of all triple patterns</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-</owl:DatatypeProperty>
+lsqv:Tp a rdfs:Class , owl:Class ;
+	rdfs:label "Triple pattern"@en ;
+	rdfs:comment "A triple pattern"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#parseError">
- <rdfs:label>parse error</rdfs:label>
- <rdfs:comment>The text of an error encountered when parsing query</rdfs:comment>
-</owl:DatatypeProperty>
+lsqv:TpInBgp a rdfs:Class , owl:Class ;
+	rdfs:label "Triple pattern in a basic graph pattern"@en ;
+	rdfs:comment "A triple pattern in the context of a specific basic graph pattern"@en .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#resultSize">
- <rdfs:label>result size</rdfs:label>
- <rdfs:comment>Number of results returned when executed locally</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" />
-</owl:DatatypeProperty>
+lsqv:Vertex a rdfs:Class , owl:Class ;
+	rdfs:label "Basic graph pattern vertex"@en ;
+	rdfs:comment "A vertex in a basic graph pattern"@en . 
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#runTimeMs">
- <rdfs:label>run time in milliseconds</rdfs:label>
- <rdfs:comment>The run time of the query in milliseconds when executed locally</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#decimal" />
-</owl:DatatypeProperty>
+lsqv:Edge a rdfs:Class , owl:Class ;
+	rdfs:label "Basic graph pattern (hyper)edge"@en ;
+	rdfs:comment "A (hyper)edge in a basic graph pattern"@en . 
 
-<!-- slight inconsistency with capitalisation here compared with runTimeMs :( -->
-<!-- may be deprecated in future -->
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#runtimeError">
- <rdfs:label>runtime error</rdfs:label>
- <rdfs:comment>The text of an error encountered when running the query locally</rdfs:comment>
-</owl:DatatypeProperty>
+lsqv:hasSpin a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has spin query"@en ;
+	rdfs:comment "relates a query in a log to its SPIN representation"@en ;
+	rdfs:domain lsqv:Query ;
+	rdfs:range spin:Query .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#spinError">
- <rdfs:label>SPIN error</rdfs:label>
- <rdfs:comment>The text of an error encountered when generating the SPIN description</rdfs:comment>
-</owl:DatatypeProperty>
+lsqv:hasExec a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has execution"@en ;
+	rdfs:comment "relates a query (possibly a sub-query or query element) to its execution"@en ;
+	rdfs:range lsqv:QueryExec .
 
-<owl:DatatypeProperty rdf:about="http://lsq.aksw.org/vocab#triplePatterns">
- <rdfs:label>number of triple patterns</rdfs:label>
- <rdfs:comment>The number of triple patterns in a query</rdfs:comment>
- <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#nonNegativeInteger" />
- <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty" />
-</owl:DatatypeProperty>
+lsqv:hasSubBgpExec a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has sub-basic graph pattern execution"@en ;
+	rdfs:comment "relates a basic graph pattern to the execution of one of it sub-basic graph patterns"@en ;
+	rdfs:range lsqv:BgpExec .
 
-<!-- RDF Properties, can be used with literals or IRIs -->
-<!-- Not compatible with Direct Semantics of OWL -->
-<!-- ... but I don't really care. -->
+lsqv:hasRemoteExec a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has remote execution"@en ;
+	rdfs:comment "relates a query (possibly a sub-query or query element) to its remote execution"@en ;
+	rdfs:subPropertyOf lsqv:hasExec ;
+	rdfs:range lsqv:RemoteExec .
 
-<rdf:Property rdf:about="http://lsq.aksw.org/vocab#mentionsObject">
- <rdfs:label>mentions object</rdfs:label>
- <rdfs:comment>Links a query to a term it mentions in the object of a triple pattern</rdfs:comment>
-</rdf:Property>
+lsqv:hasLocalExec a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has local execution"@en ;
+	rdfs:comment "relates a query (possibly a sub-query or query element) to its local execution"@en ;
+	rdfs:subPropertyOf lsqv:hasExec ;
+	rdfs:range lsqv:LocalExec .
 
-<rdf:Property rdf:about="http://lsq.aksw.org/vocab#mentionsPredicate">
- <rdfs:label>mentions predicate</rdfs:label>
- <rdfs:comment>Links a query to a term it mentions in the predicate of a triple pattern</rdfs:comment>
-</rdf:Property>
+lsqv:hasBgp a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has basic graph pattern"@en ;
+	rdfs:comment "contains a (complete) basic graph pattern"@en ;
+	rdfs:range lsqv:Bgp .
 
-<rdf:Property rdf:about="http://lsq.aksw.org/vocab#mentionsSubject">
- <rdfs:label>mentions subject</rdfs:label>
- <rdfs:comment>Links a query to a term it mentions in the subject of a triple pattern</rdfs:comment>
-</rdf:Property>
+lsqv:hasSubBgp a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has sub-basic graph pattern"@en ;
+	rdfs:comment "contains a sub-basic graph pattern"@en ;
+	rdfs:range lsqv:Bgp .
 
-<!-- Classes -->
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#Execution">
- <rdfs:label>Query Execution</rdfs:label>
- <rdfs:comment>Each instance is an execution of a particular query against a particular endpoint at a particular time by a particular agent</rdfs:comment>
-</owl:Class>
+lsqv:hasTp a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has triple pattern"@en ;
+	rdfs:comment "contains a triple pattern"@en ;
+	rdfs:range lsqv:Tp .
 
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#JoinVertex">
- <rdfs:label>Join Vertex</rdfs:label>
- <rdfs:comment>Each instance is a join vertex (position) in the query</rdfs:comment>
-</owl:Class>
+lsqv:hasTpInBgp a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has triple pattern in a basic graph pattern"@en ;
+	rdfs:comment "contains a triple pattern within a basic graph pattern"@en ;
+	rdfs:range lsqv:TpInBgp .
 
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#Star">
- <rdfs:label>Star Join Vertex</rdfs:label>
- <rdfs:comment>Each instance is a star-shaped join vertex (position) in the query (zero incoming edges, multiple outgoing edges)</rdfs:comment>
- <rdfs:subClassOf rdf:resource="http://lsq.aksw.org/vocab#JoinVertex" />
-</owl:Class>
+lsqv:extensionQuery a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "extension query"@en ;
+	rdfs:comment "denotes a wrapper query that returns the same results as a pattern (e.g., wrapping SELECT * WHERE { ... })"@en ;
+	rdfs:range lsqv:Query .
 
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#Path">
- <rdfs:label>Path Join Vertex</rdfs:label>
- <rdfs:comment>Each instance is a path-shaped join vertex (position) in the query (one incoming edge, one outgoing edge)</rdfs:comment>
- <rdfs:subClassOf rdf:resource="http://lsq.aksw.org/vocab#JoinVertex" />
-</owl:Class>
+lsqv:hasBgpNode a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has basic graph pattern node (or vertex)"@en ;
+	rdfs:comment "denotes a vertex within a basic graph pattern"@en ;
+	rdfs:range lsqv:Vertex .
 
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#Hybrid">
- <rdfs:label>Hybrid Join Vertex</rdfs:label>
- <rdfs:comment>Each instance is a hybrid join vertex (position) in the query (at least one incoming edge, at least one outgoing edge, at least three edges)</rdfs:comment>
- <rdfs:subClassOf rdf:resource="http://lsq.aksw.org/vocab#JoinVertex" />
-</owl:Class>
+lsqv:hasEdge a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has basic graph pattern (hyper)edge"@en ;
+	rdfs:comment "denotes a (hyper)edge within a basic graph pattern"@en ;
+	rdfs:range lsqv:Edge .
 
-<owl:Class rdf:about="http://lsq.aksw.org/vocab#Sink">
- <rdfs:label>Sink Join Vertex</rdfs:label>
- <rdfs:comment>Each instance is a sink join vertex (position) in the query (multiple incoming edges, zero outgoing edges)</rdfs:comment>
- <rdfs:subClassOf rdf:resource="http://lsq.aksw.org/vocab#JoinVertex" />
-</owl:Class>
+lsqv:in a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "inward edge"@en ;
+	rdfs:comment "denotes an inward (hyper)edge for this vertex (aka. node)"@en ;
+	rdfs:domain lsqv:Vertex ;
+	rdfs:range lsqv:Edge .
 
+lsqv:out a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "outward edge"@en ;
+	rdfs:comment "denotes an outward (hyper)edge for this vertex (aka. node)"@en ;
+	rdfs:domain lsqv:Vertex ;
+	rdfs:range lsqv:Edge .
 
-<!-- Instances -->
+lsqv:proxyFor a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "proxy for"@en ;
+	rdfs:comment "denotes the term forming a vertex (aka. node)"@en ;
+	rdfs:domain lsqv:Vertex .
 
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Avg" rdfs:label="Avg" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Bind" rdfs:label="Bind" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Count" rdfs:label="Count" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Distinct" rdfs:label="Distinct" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Filter" rdfs:label="Filter" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#FromNamed" rdfs:label="FromNamed" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#GroupBy" rdfs:label="GroupBy" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Having" rdfs:label="Having" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Limit" rdfs:label="Limit" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Max" rdfs:label="Max" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Min" rdfs:label="Min" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Minus" rdfs:label="Minus" />
-<!-- typo in the current data ... should be NamedGraph, not namedGraph ... -->
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#NamedGraph" rdfs:label="NamedGraph"><owl:sameAs rdf:resource="http://lsq.aksw.org/vocab#namedGraph" /></sd:Feature>
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Offset" rdfs:label="Offset" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Optional" rdfs:label="Optional" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#OrderBy" rdfs:label="OrderBy" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Regex" rdfs:label="Regex" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Service" rdfs:label="Service" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#SubQuery" rdfs:label="SubQuery" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Sum" rdfs:label="Sum" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Union" rdfs:label="Union" />
-<sd:Feature rdf:about="http://lsq.aksw.org/vocab#Values" rdfs:label="Values" />
+lsqv:hasStructuralFeatures a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "has structural features"@en ;
+	rdfs:comment "relates a query to its structural (aka. static) features"@en ;
+	rdfs:domain lsqv:Query ;
+	rdfs:range lsqv:StructuralFeatures .
 
-</rdf:RDF>
+lsqv:endpoint a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "execution endpoint"@en ;
+	rdfs:comment "the endpoint on which a given query execution was run"@en ;
+	rdfs:domain lsqv:QueryExev ;
+	rdfs:range cogs:Endpoint .
+
+lsqv:usesFeature a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "uses feature"@en ;
+	rdfs:comment "links structural features of a query to individual SPARQL features used" ;
+	rdfs:domain lsqv:StructuralFeatures ;
+	rdfs:range sd:Feature .
+
+lsqv:text a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "text"@en ;
+	rdfs:comment "textual expression in SPARQL syntax" ;
+	rdfs:range xsd:string . 
+
+lsqv:hash a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "hash"@en ;
+	rdfs:comment "a hash of the text" ;
+	rdfs:range xsd:string . 
+
+lsqv:hostHash a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "host hash"@en ;
+	rdfs:comment "a hash of the hostname or IP" ;
+	rdfs:range xsd:string . 
+
+lsqv:countingDuration a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "counting duration"@en ;
+	rdfs:comment "the duration taken to count results" ;
+	rdfs:range xsd:decimal . 
+
+lsqv:countingDuration a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "counting duration (s)"@en ;
+	rdfs:comment "the duration taken to count results in seconds" ;
+	rdfs:range xsd:decimal . 
+
+lsqv:evalDuration a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "evaluation duration (s)"@en ;
+	rdfs:comment "the duration taken to evaluate/execute the query in seconds" ;
+	rdfs:range xsd:decimal . 
+
+lsqv:resultCount a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "result count"@en ;
+	rdfs:comment "the number of results generated by an execution"@en ;
+	rdfs:range xsd:integer . 
+
+lsqv:serializedResult a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "serialized result"@en ;
+	rdfs:comment "the results generated by an execution serialized in JSON format"@en ;
+	rdfs:range xsd:string . 
+
+lsqv:joinVertexCount a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join vertex count"@en ;
+	rdfs:comment "the number of vertices (aka. nodes) involved in a join"@en ;
+	rdfs:range xsd:integer .
+
+lsqv:joinVertexDegreeMean a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join vertex degree mean"@en ;
+	rdfs:comment "the average degree of vertices (aka. nodes) involved in a join"@en ;
+	rdfs:range xsd:decimal .
+
+lsqv:joinVertexDegreeMedian a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join vertex degree median"@en ;
+	rdfs:comment "the median degree of vertices (aka. nodes) involved in a join"@en ;
+	rdfs:range xsd:integer .
+
+lsqv:joinVertexDegreeMax a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join vertex degree max"@en ;
+	rdfs:comment "the maximum degree of a single vertex (aka. node) involved in a join"@en ;
+	rdfs:range xsd:integer .
+
+lsqv:joinVertexDegreeMin a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join vertex degree min"@en ;
+	rdfs:comment "the minimum degree of a single vertex (aka. node) involved in a join"@en ;
+	rdfs:range xsd:integer .
+
+lsqv:projectVarCount a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "projected variable count"@en ;
+	rdfs:comment "the number of projected variables for a query" ;
+	rdfs:range xsd:integer .
+
+lsqv:tpCount a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "triple pattern count"@en ;
+	rdfs:comment "the number of triple patterns contained in a query" ;
+	rdfs:range xsd:integer .
+
+lsqv:tpInBgpCountMean a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "mean count of triple patterns per basic graph pattern"@en ;
+	rdfs:comment "the average number of triple patterns contained in each basic graph pattern" ;
+	rdfs:range xsd:decimal .
+
+lsqv:tpInBgpCountMedian a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "median count of triple patterns per basic graph pattern"@en ;
+	rdfs:comment "the median number of triple patterns contained in each basic graph pattern" ;
+	rdfs:range xsd:integer .
+
+lsqv:tpInBgpCountMax a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "max count of triple patterns in basic graph pattern"@en ;
+	rdfs:comment "the maximum number of triple patterns contained in a single basic graph pattern" ;
+	rdfs:range xsd:integer .
+
+lsqv:tpInBgpCountMin a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "minimum count of triple patterns in basic graph patterns"@en ;
+	rdfs:comment "the minimum number of triple patterns contained in each basic graph pattern" ;
+	rdfs:range xsd:integer .
+
+lsqv:tpToBgpRatio a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "triple pattern to basic graph pattern ratio"@en ;
+	rdfs:comment "the ratio of the number of results for the triple pattern versus the number of results for the basic graph pattern containing it" ;
+	rdfs:range xsd:decimal .
+
+lsqv:tpToGraphRatio a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "triple pattern to graph ratio"@en ;
+	rdfs:comment "the ratio of the number of results returned by the triple pattern versus the number of triples in the graph (i.e., selectivity)" ;
+	rdfs:range xsd:decimal .
+
+lsqv:bgpRestrictedTpSel a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "basic graph pattern-restricted triple pattern selectivity"@en ;
+	rdfs:comment "the ratio of results for the triple pattern that are compatible with the results for the basic graph pattern versus all results for the triple pattern" ;
+	rdfs:range xsd:decimal .
+
+lsqv:tpSelJoinVarRestricted a rdf:Property , owl:DatatypeProperty ;
+	rdfs:label "join variable-restricted triple pattern selectivity"@en ;
+	rdfs:comment "the ratio of results for the triple pattern that are compatible with the results produced by a join versus all results for the triple pattern" ;
+	rdfs:range xsd:decimal .
