@@ -1,6 +1,6 @@
 ---
 parent: Usage
-title: Probing Log Files
+title: RDFization
 nav_order: 2
 ---
 
