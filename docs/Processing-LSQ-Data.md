@@ -1,0 +1,1 @@
+How to work with LSQ ; sparql-integrate tool (sit) and named graph streams (ngs)
