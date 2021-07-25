@@ -1,3 +1,7 @@
+---
+title: Announcements
+nav_order: 2
+---
 
 ### Release Announcement ~2020-08-13
 

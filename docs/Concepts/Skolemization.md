@@ -1,3 +1,9 @@
+---
+parent: Concepts
+title: Skolemization
+nav_order: 2
+---
+
 # Skolemization
 
 LSQ relies on the external framework [mapper-proxy](https://github.com/SmartDataAnalytics/jena-sparql-api/tree/master/jena-sparql-api-mapper-proxy) to generate structural hash IDs, local string IDs and eventually global IRIs. 

@@ -1,3 +1,9 @@
+---
+title: Data Model
+nav_order: 1
+---
+
+
 # LSQ Data Model
 
 **This is the data model of version 2 of LSQ**

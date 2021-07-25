@@ -1,3 +1,9 @@
+---
+title: Home
+nav_order: 1
+permalink: /
+---
+
 LSQ is a framework for extracting, analyzing and benchmarking SPARQL queries.
 
 Sources of queries are typically logs of triple stores or web servers in general.
