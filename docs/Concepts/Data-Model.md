@@ -1,4 +1,5 @@
 ---
+parent: Concepts
 title: Data Model
 nav_order: 1
 ---
