@@ -1,3 +1,9 @@
+---
+parent: Usage
+title: Probing Log Files
+nav_order: 1
+---
+
 Probing is performed with the `lsq probe` subcommand. Multiple files can be processed at once using globbing.
 
 It attempts to automatically detect the format of an input log in order to recognize the semantics of the contained records.

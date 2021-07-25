@@ -1,3 +1,9 @@
+---
+parent: Usage
+title: Benchmarking
+nav_order: 3
+---
+
 # Benchmarking 
 
 Setting up a benchmark involves three steps:

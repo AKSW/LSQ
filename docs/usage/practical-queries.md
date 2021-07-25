@@ -1,3 +1,10 @@
+---
+parent: Usage
+title: Useful Queries
+nav_order: 5
+---
+
+
 ### Pratical Queries For Working With LSQ
 
 
