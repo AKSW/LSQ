@@ -79,20 +79,16 @@ public class ElementVisitorFeatureExtractor
         return newCount;
     }
 
-
-
     public static <K> int addAndGet(Map<K, Integer> map, K key) {
         int newCount = addAndGet(map, key, 1);
         return newCount;
     }
-
 
     public static <K> int addAndGet(Map<K, Integer> map, K key, int delta) {
         int newCount = map.compute(key, (k, v) -> ((v == null ? 0 : v) + delta));
 
         return newCount;
     }
-
 
     @Override
     public void visit(ElementTriplesBlock el) {
