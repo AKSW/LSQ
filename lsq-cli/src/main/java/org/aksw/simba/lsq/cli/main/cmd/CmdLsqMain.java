@@ -13,7 +13,8 @@ import picocli.CommandLine.Option;
         CmdLsqRdfize.class,
         CmdLsqBenchmarkMain.class,
         CmdLsqProbe.class,
-        CmdLsqRehash.class
+        // CmdLsqRehash.class
+        CmdLsqSparkRehash.class
 })
 public class CmdLsqMain {
     public static class LsqVersionProvider extends VersionProviderFromClasspathProperties {

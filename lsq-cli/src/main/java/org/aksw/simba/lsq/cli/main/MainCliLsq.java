@@ -67,6 +67,7 @@ import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
+import org.aksw.simba.lsq.spark.cmd.impl.CmdLsqRehashSparkImpl;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.output.CloseShieldOutputStream;
@@ -408,7 +409,6 @@ public class MainCliLsq {
         return result;
     }
     */
-
 
     public static ResourceInDataset rehash(ResourceInDataset rid) {
         LsqQuery q = rid.as(LsqQuery.class);

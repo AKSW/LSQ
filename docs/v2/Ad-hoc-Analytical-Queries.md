@@ -49,3 +49,50 @@ ngs head -n 1000 bench-genage-lsq2.trig.bz2 |\
 ngs map -s 'PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT ?agent (1 AS ?qc_contrib) { ?s lsq:hasRemoteExec ?re . OPTIONAL { ?re lsq:headers [ <http://example.org/header#User-agent> ?agent ] } }' |\
 sbs map -o tsv -s 'SELECT ?agent (SUM(?qc_contrib) AS ?qc) {} GROUP BY ?agent ORDER BY ?qec'
 ```
+
+
+
+
+Lorenz curve: Query count to host count
+
+```sparql
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+
+SELECT ?endpoint ?queryCount (COUNT(DISTINCT ?hostHash) AS ?hostCountPerQueryCount) {
+  SELECT ?endpoint ?hostHash (COUNT(?s) AS ?queryCount) {
+
+    # { SELECT DISTINCT ?s { ?s lsqv:hasRemoteExec ?re } limit 10 }
+
+    ?s
+      lsqv:hasRemoteExec [
+        lsqv:endpoint ?endpoint ;
+        lsqv:hostHash ?hostHash
+      ]
+
+
+  } GROUP BY ?endpoint ?hostHash
+} GROUP BY ?endpoint ?queryCount
+ORDER BY ?endpoint DESC(?queryCount) DESC(?hostCountPerQueryCount)
+```
+
+
+```sparql
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+
+SELECT ?endpoint ?queryCount {
+  SELECT ?endpoint ?hostHash (COUNT(?s) AS ?queryCount) {
+
+    # { SELECT DISTINCT ?s { ?s lsqv:hasRemoteExec ?re } limit 10 }
+
+    ?s
+      lsqv:hasRemoteExec [
+        lsqv:endpoint ?endpoint ;
+        lsqv:hostHash ?hostHash
+      ]
+
+
+  } GROUP BY ?endpoint ?hostHash
+} ORDER BY ?endpoint ASC(?queryCount)
+```
+
+

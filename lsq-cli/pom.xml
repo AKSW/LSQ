@@ -23,6 +23,7 @@
 	</scm>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-rx-io</artifactId>
@@ -60,6 +61,26 @@
 			<groupId>org.aksw.simba.lsq</groupId>
 			<artifactId>lsq-core</artifactId>
 		</dependency>
+
+
+		<!-- <SPARK> -->
+
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-common</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-spark-core</artifactId>
+		</dependency>
+
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.commons</groupId> -->
+		<!-- <artifactId>commons-configuration2</artifactId> -->
+		<!-- </dependency> -->
+
+		<!-- </SPARK> -->
 
 		<dependency>
 			<groupId>org.slf4j</groupId>

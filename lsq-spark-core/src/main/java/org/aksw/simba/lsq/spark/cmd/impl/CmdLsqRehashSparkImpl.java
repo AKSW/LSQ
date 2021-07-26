@@ -3,13 +3,9 @@ package org.aksw.simba.lsq.spark.cmd.impl;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.Spliterators.AbstractSpliterator;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
@@ -47,47 +43,6 @@ import net.sansa_stack.rdf.spark.io.input.impl.RdfSourceFactoryImpl;
 
 
 
-class Cmd {
-    public List<String> nonOptionArgs;
-    public String outFile;
-    public String outFolder;
-    public String outFormat;
-    public List<String> prefixSources;
-    public long deferOutputForUsedPrefixes;
-}
-
-
-class MySpliterator<T>
-    extends AbstractSpliterator<T>
-{
-    protected Spliterator<T> upstream;
-
-    protected MySpliterator(long est, int additionalCharacteristics) {
-        super(est, additionalCharacteristics);
-        // TODO Auto-generated constructor stub
-    }
-
-    @Override
-    public boolean tryAdvance(Consumer<? super T> action) {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-//    @Override
-//    public Spliterator<T> trySplit() {
-//    	Spliterator<T> next = upstream.trySplit();
-//
-//    	T[]
-//    	while (next.tryAdvance(null)) {
-//
-//    	}
-//    	// next.
-//
-//    	// TODO Auto-generated method stub
-//    	return super.trySplit();
-//    }
-
-}
 
 public class CmdLsqRehashSparkImpl {
     private static final Logger logger = LoggerFactory.getLogger(CmdLsqRehashSparkImpl.class);
@@ -164,31 +119,11 @@ public class CmdLsqRehashSparkImpl {
         System.out.println("Size rx: " + count);
     }
 
-    public static void mainSpark(String src) throws Exception {
-
-
-        // List<String> sources = Arrays.asList("/home/raven/.dcat/test3/cache/gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl/_content/data.nt");
-        List<String> sources = Arrays.asList(src);
-
-
-        Cmd cmd = new Cmd();
-        cmd.nonOptionArgs = sources;
-        cmd.outFolder = "/tmp/spark";
-        cmd.outFormat = "trig/blocks";
-        cmd.deferOutputForUsedPrefixes = 100;
-        cmd.prefixSources = Arrays.asList();
-        cmd.outFile = "/tmp/result.trig";
-
-        boolean isOutputToConsole = false;
-
-        if (isOutputToConsole) {
-            cmd.outFolder = null;
-            cmd.outFile = null;
-        }
+    public static void mainSpark(CmdRdfIo cmd) throws Exception {
 
         PrefixMapping prefixes = new PrefixMappingImpl();
 
-        for (String prefixSource : cmd.prefixSources) {
+        for (String prefixSource : cmd.getPrefixSources()) {
             logger.info("Adding prefixes from " + prefixSource);
             Model tmp = RDFDataMgr.loadModel(prefixSource);
             prefixes.setNsPrefixes(tmp);
@@ -215,13 +150,13 @@ public class CmdLsqRehashSparkImpl {
         RdfSourceFactory rdfSourceFactory = RdfSourceFactoryImpl.from(sparkSession);
 
 
-        if (true) {
-            System.out.println("Size spark: " + rdfSourceFactory.get(src, Lang.TURTLE).asQuads().count());
-            return;
-        }
+//        if (true) {
+//            System.out.println("Size spark: " + rdfSourceFactory.get(src, Lang.TURTLE).asQuads().count());
+//            return;
+//        }
 
 
-        List<JavaRDD<Dataset>> rdds = cmd.nonOptionArgs.stream()
+        List<JavaRDD<Dataset>> rdds = cmd.getNonOptionArgs().stream()
             .map(rdfSourceFactory::get)
             .map(RdfSource::asDatasets)
             .map(RDD::toJavaRDD)
@@ -239,16 +174,36 @@ public class CmdLsqRehashSparkImpl {
 
         RddRdfSaver.createForDataset(effectiveRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
-            .setOutputFormat(cmd.outFormat)
+            .setOutputFormat(cmd.getOutFormat())
             .setMapQuadsToTriplesForTripleLangs(true)
             // .setAllowOverwriteFiles(true)
-            .setPartitionFolder(cmd.outFolder)
-            .setTargetFile(cmd.outFile)
+            .setPartitionFolder(cmd.getOutFolder())
+            .setTargetFile(cmd.getOutFile())
             // .setUseElephas(true)
             .setAllowOverwriteFiles(true)
             .setDeletePartitionFolderAfterMerge(true)
             .run();
     }
+
+
+    // List<String> sources = Arrays.asList("/home/raven/.dcat/test3/cache/gitlab.com/limbo-project/metadata-catalog/raw/master/catalog.all.ttl/_content/data.nt");
+    // List<String> sources = Arrays.asList(src);
+
+
+//    CmdRdfIoBase cmd = new CmdRdfIoBase();
+//    cmd.nonOptionArgs = sources;
+//    cmd.outFolder = "/tmp/spark";
+//    cmd.outFormat = "trig/blocks";
+//    cmd.deferOutputForUsedPrefixes = 100;
+//    cmd.prefixSources = Arrays.asList();
+//    cmd.outFile = "/tmp/result.trig";
+
+//    boolean isOutputToConsole = false;
+//
+//    if (isOutputToConsole) {
+//        cmd.setOutFolder(null);
+//        cmd.setOutFile(null);
+//    }
 
 }
 
