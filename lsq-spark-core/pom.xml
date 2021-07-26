@@ -35,6 +35,10 @@
 			<scope>${spark.deps.scope}</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.thoughtworks.paranamer</groupId>
+			<artifactId>paranamer</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>junit</groupId>
