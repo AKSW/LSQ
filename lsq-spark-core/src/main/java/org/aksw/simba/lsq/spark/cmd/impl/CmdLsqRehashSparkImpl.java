@@ -136,7 +136,7 @@ public class CmdLsqRehashSparkImpl {
             .set("spark.kryo.registrator",
                     String.join(", ", "net.sansa_stack.rdf.spark.io.JenaKryoRegistrator"))
             .set("spark.sql.crossJoin.enabled", "true")
-            .set("spark.hadoop.mapred.max.split.size", "" + 4 * 1024 * 1024)
+            // .set("spark.hadoop.mapred.max.split.size", "" + 4 * 1024 * 1024)
             //		mapreduce.input.fileinputformat.split.minsize
             ;
 
@@ -170,7 +170,7 @@ public class CmdLsqRehashSparkImpl {
 
         JavaRDD<Dataset> effectiveRdd = initialRdd; //.repartition(4);
 
-        System.out.println("Size spark: " + effectiveRdd.count());
+        // System.out.println("Size spark: " + effectiveRdd.count());
 
         RddRdfSaver.createForDataset(effectiveRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
