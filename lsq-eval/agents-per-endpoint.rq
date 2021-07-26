@@ -1,0 +1,12 @@
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+SELECT ?g ?endpoint (COUNT(DISTINCT ?hash) AS ?agents)
+WHERE {
+  GRAPH ?g {
+   ?query lsqv:hasRemoteExec ?rexec .
+   ?rexec lsqv:hostHash ?hash .
+   ?rexec lsqv:endpoint ?endpoint .
+  }
+}
+GROUP BY ?g ?endpoint
+
