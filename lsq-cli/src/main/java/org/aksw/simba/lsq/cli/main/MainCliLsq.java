@@ -33,7 +33,6 @@ import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
-import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
@@ -46,7 +45,6 @@ import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.io.resultset.NamedGraphStreamCliUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
 import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
@@ -67,13 +65,11 @@ import org.aksw.simba.lsq.core.Skolemize;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
-import org.aksw.simba.lsq.spark.cmd.impl.CmdLsqRehashSparkImpl;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
-import org.apache.jena.graph.Node;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -88,10 +84,7 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
-import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.shared.impl.PrefixMappingImpl;
-import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
@@ -377,17 +370,6 @@ public class MainCliLsq {
     }
 
 
-
-    public static NodeTransform createReplace(String target, String replacement) {
-        return node -> {
-            String oldStr = NodeFmtLib.str(node, null);
-            String newStr = oldStr.replace(target, replacement);
-            Node r = RDFNodeJsonUtils.strToNode(newStr);
-            return r;
-        };
-    }
-
-
     /*
     public static DatasetGraph replace(DatasetGraph datasetGraph, String target, String replacement) {
         DatasetGraph result;
@@ -410,26 +392,7 @@ public class MainCliLsq {
     }
     */
 
-    public static ResourceInDataset rehash(ResourceInDataset rid) {
-        LsqQuery q = rid.as(LsqQuery.class);
 
-        String oldHash = q.getHash();
-        String queryStr = q.getText();
-        String newHash = queryStr == null ? null : LsqQuery.createHash(queryStr);
-
-        ResourceInDataset result;
-        if (oldHash != null && newHash != null && !newHash.equals(oldHash)) {
-
-            // Set up a node transform that does the string replace
-            NodeTransform replacer = createReplace(oldHash, newHash);
-            Dataset target = DatasetFactoryEx.createInsertOrderPreservingDataset();
-            result = NodeTransformLib2.copyWithNodeTransform(rid, target, replacer);
-        } else {
-            result = rid;
-        }
-
-        return result;
-    }
 
     public static void rehash(CmdLsqRehash rehashCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
@@ -450,7 +413,7 @@ public class MainCliLsq {
 
         Flowable<Dataset> dsFlow = flow
                 .flatMap(ResourceInDatasetFlowOps::naturalResources)
-                .map(MainCliLsq::rehash)
+                .map(LsqUtils::rehashQueryHash)
                 .map(ResourceInDataset::getDataset);
 
 

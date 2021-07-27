@@ -32,8 +32,10 @@ import org.aksw.jena_sparql_api.core.connection.QueryExecutionFactorySparqlQuery
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
 import org.aksw.jena_sparql_api.delay.extra.Delayer;
 import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
+import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
@@ -74,10 +76,12 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.jena.riot.RDFWriterRegistry;
+import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.ARQConstants;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.graph.NodeTransform;
 import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -290,9 +294,9 @@ public class LsqUtils {
 
         Flowable<String> flow = Flowable.generate(
                 () -> {
-                	InputStream tmp = in.call();
-                	Objects.requireNonNull(tmp, "An InputStream supplier supplied null");
-                	return new BufferedReader(new InputStreamReader(tmp, StandardCharsets.UTF_8));
+                    InputStream tmp = in.call();
+                    Objects.requireNonNull(tmp, "An InputStream supplier supplied null");
+                    return new BufferedReader(new InputStreamReader(tmp, StandardCharsets.UTF_8));
                 },
                 (reader, emitter) -> {
                     String line = reader.readLine();
@@ -539,7 +543,7 @@ public class LsqUtils {
                 .flatMapMaybe(record -> {
                     Maybe<ResourceInDataset> r;
                     try {
-                    	r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                        r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
                     } catch (Exception e) {
                         logger.warn("Internal error; trying to continue", e);
                         r = Maybe.empty();
@@ -612,7 +616,7 @@ public class LsqUtils {
             // Map<Resource, Resource> remap = org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.renameResources(baseIri, renames);
 
 
-            
+
             // String graphAndResourceIri = "urn:lsq:query:sha256:" + hash;
             // String graphAndResourceIri = baseIri + "q-" + queryHash;
             // Note: We could also leave the resource as a blank node
@@ -652,10 +656,10 @@ public class LsqUtils {
 //            HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
 //            Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
 //            Node newRoot = renames.get(q.asNode());
-//            
+//
 //            // Also rename the original graph name to match the IRI of the new lsq query root
 //            renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
-//            
+//
 //            Dataset dataset = queryInDataset.getDataset();
 //            // Apply an in-place node transform on the dataset
 //            // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
@@ -664,14 +668,14 @@ public class LsqUtils {
 
             ResourceInDataset r = skolemize(queryInDataset, baseIri, LsqQuery.class);
             result = Maybe.just(r);
-            
+
 //            RDFDataMgr.write(System.out, dataset, RDFFormat.NQUADS);
 
             // qq = ResourceInDatasetImpl.renameGraph(qq, graphAndResourceIri);
 
 
         } else {
-        	result = Maybe.empty();
+            result = Maybe.empty();
         }
 
 
@@ -688,19 +692,19 @@ public class LsqUtils {
             return result;
     }
 
-    
+
     public static <T extends RDFNode> ResourceInDataset skolemize(
-    		ResourceInDataset queryInDataset,
-    		String baseIri,
-    		Class<T> cls) {
+            ResourceInDataset queryInDataset,
+            String baseIri,
+            Class<T> cls) {
         T q = queryInDataset.as(cls);
-    	HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
         Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
         Node newRoot = renames.get(q.asNode());
-        
+
         // Also rename the original graph name to match the IRI of the new lsq query root
         renames.put(NodeFactory.createURI(queryInDataset.getGraphName()), newRoot);
-        
+
         Dataset dataset = queryInDataset.getDataset();
         // Apply an in-place node transform on the dataset
         // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
@@ -708,7 +712,7 @@ public class LsqUtils {
         ResourceInDataset result = new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot);
         return result;
     }
-    
+
 //	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {
 //		// Enrich potentially missing information
 //        result = Streams.mapWithIndex(result, (r, i) -> {
@@ -1054,4 +1058,36 @@ public class LsqUtils {
 
         return result;
     }
+
+
+    public static NodeTransform createReplace(String target, String replacement) {
+        return node -> {
+            String oldStr = NodeFmtLib.str(node, null);
+            String newStr = oldStr.replace(target, replacement);
+            Node r = RDFNodeJsonUtils.strToNode(newStr);
+            return r;
+        };
+    }
+
+    public static ResourceInDataset rehashQueryHash(ResourceInDataset rid) {
+        LsqQuery q = rid.as(LsqQuery.class);
+
+        String oldHash = q.getHash();
+        String queryStr = q.getText();
+        String newHash = queryStr == null ? null : LsqQuery.createHash(queryStr);
+
+        ResourceInDataset result;
+        if (oldHash != null && newHash != null && !newHash.equals(oldHash)) {
+
+            // Set up a node transform that does the string replace
+            NodeTransform replacer = createReplace(oldHash, newHash);
+            Dataset target = DatasetFactoryEx.createInsertOrderPreservingDataset();
+            result = NodeTransformLib2.copyWithNodeTransform(rid, target, replacer);
+        } else {
+            result = rid;
+        }
+
+        return result;
+    }
+
 }

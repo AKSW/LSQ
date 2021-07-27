@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.simba.lsq.core.LsqUtils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.jena.atlas.iterator.IteratorResourceClosing;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
@@ -40,6 +42,8 @@ import net.sansa_stack.rdf.spark.io.RddRdfSaver;
 import net.sansa_stack.rdf.spark.io.input.api.RdfSource;
 import net.sansa_stack.rdf.spark.io.input.api.RdfSourceFactory;
 import net.sansa_stack.rdf.spark.io.input.impl.RdfSourceFactoryImpl;
+import net.sansa_stack.rdf.spark.rdd.op.java.DatasetOpsRddJava;
+import net.sansa_stack.rdf.spark.rdd.op.java.NamedModelOpsRddJava;
 
 
 
@@ -170,9 +174,19 @@ public class CmdLsqRehashSparkImpl {
 
         JavaRDD<Dataset> effectiveRdd = initialRdd; //.repartition(4);
 
+        JavaRDD<ResourceInDataset> ridRdd =
+                NamedModelOpsRddJava.mapToResourceInDataset(
+                        DatasetOpsRddJava.toNamedModels(effectiveRdd));
+
+        JavaRDD<Dataset> outRdd = ridRdd
+            .map(LsqUtils::rehashQueryHash)
+            .map(ResourceInDataset::getDataset);
+
+
+
         // System.out.println("Size spark: " + effectiveRdd.count());
 
-        RddRdfSaver.createForDataset(effectiveRdd)
+        RddRdfSaver.createForDataset(outRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
             .setOutputFormat(cmd.getOutFormat())
             .setMapQuadsToTriplesForTripleLangs(true)
