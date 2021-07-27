@@ -1080,7 +1080,7 @@ public class LsqUtils {
         if (oldHash != null && newHash != null && !newHash.equals(oldHash)) {
 
             // Set up a node transform that does the string replace
-            NodeTransform replacer = createReplace(oldHash, newHash);
+            NodeTransform replacer = createReplace("q-" + oldHash, "lsqQuery-" + newHash);
             Dataset target = DatasetFactoryEx.createInsertOrderPreservingDataset();
             result = NodeTransformLib2.copyWithNodeTransform(rid, target, replacer);
         } else {
