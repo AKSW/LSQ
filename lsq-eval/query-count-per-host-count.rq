@@ -1,0 +1,21 @@
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+
+SELECT ?g ?endpoint ?queryCount (COUNT(DISTINCT ?hostHash) AS ?hostCountPerQueryCount) {
+  SELECT ?g ?endpoint ?hostHash (COUNT(DISTINCT ?query) AS ?queryCount) {
+
+    # { SELECT DISTINCT ?query { ?query lsqv:hasRemoteExec ?re } limit 10 }
+
+    GRAPH ?g {
+      ?query
+        lsqv:hasRemoteExec [
+          lsqv:endpoint ?endpoint ;
+          lsqv:hostHash ?hostHash
+        ]
+    }
+
+
+  } GROUP BY ?g ?endpoint ?hostHash
+} GROUP BY ?g ?endpoint ?queryCount
+ORDER BY ?g ?endpoint DESC(?queryCount) DESC(?hostCountPerQueryCount)
+
+
