@@ -41,7 +41,7 @@ Please cite us Saleem, Muhammad, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmo
 <ul>
 <li>
 <a href="https://sites.google.com/site/saleemsweb/">Muhammad Saleem</a> </li>
-<li><a href="http://www.intizarali.org">Claus Stadler</a>https://aksw.org/ClausStadler.html</li>
+<li><a href="https://aksw.org/ClausStadler.html">Claus Stadler</a></li>
 <li><a href="https://www.insight-centre.org/users/qaiser-mehmood">Qaiser Mehmood</a></li>
 <li><a href="http://aidanhogan.com/">Aidan Hogan</a></li>
 <li><a href="http://aksw.org/AxelNgonga.html">Axel-Cyrille Ngonga Ngomo</a></li>
