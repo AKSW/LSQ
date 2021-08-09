@@ -25,6 +25,7 @@ The RDF dumps of the LSQ v2.0 datasets are available [here](https://hobbitdata.i
 ```javascript
 select distinct ?g where {Graph ?g {?s ?p ?o}}
 ```
+LSQ V1.0 is available from [here]() 
 ## Useful Queries over LSQ datasets
 
 Some of the useful queries which can be executed over LSQ datasets are available [here](https://docs.google.com/spreadsheets/d/1jndGJ2qicN2WworS3Q_4FAjM_QOEUGlWiPPX4hkRoNE/edit?usp=sharing) 
