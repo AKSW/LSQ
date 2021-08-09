@@ -30,3 +30,20 @@ Some of the useful queries which can be executed over LSQ datasets are available
 * [Data Model](Data-Model) of LSQ for capturing SPARQL queries, their constituents and benchmark executions
 * [Named Graph Streams](Named-Graph-Streams) explains the design choices for using named graphs instead of vanilla triples
 * [Skolemization](Skolemization) explains the procedure employed by LSQ for crafting IRIs based on a model full of blank nodes.
+
+### Licencing 
+
+LSQ is available under [ Creative Commons CC0 License](https://creativecommons.org/publicdomain/zero/1.0/). 
+Please cite us Saleem, Muhammad, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmood, and Axel-Cyrille Ngonga Ngomo. "LSQ: the linked SPARQL queries dataset." In International semantic web conference, pp. 261-269, 2015. 
+
+### LSQ Team
+
+<ul>
+<li>
+<a href="https://sites.google.com/site/saleemsweb/">Muhammad Saleem</a> (Maintainer) </li>
+<li><a href="http://www.intizarali.org">Intizar Ali</a></li>
+<li><a href="https://www.insight-centre.org/users/qaiser-mehmood">Qaiser Mehmood</a></li>
+<li><a href="http://aidanhogan.com/">Aidan Hogan</a></li>
+<li><a href="http://aksw.org/AxelNgonga.html">Axel-Cyrille Ngonga Ngomo</a></li>
+</ul>
+
