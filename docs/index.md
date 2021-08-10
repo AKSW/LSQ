@@ -80,7 +80,7 @@ Muhammad Saleem, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmood, and Axel-Cyr
                Aidan Hogan and
                Qaiser Mehmood and
                Axel{-}Cyrille Ngonga Ngomo},
-  title     = {{LSQ: The Linked SPARQL} Queries Dataset}},
+  title     = {{LSQ: The Linked SPARQL} Queries Dataset},
   booktitle = {International Semantic Web Conference (ISWC)},
   series    = {LNCS},
   volume    = {9367},
