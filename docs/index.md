@@ -23,14 +23,14 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 ## LSQ datasets and Public SPARQL endpoint. 
 
 * The RDF dumps of the LSQ v2.0 datasets are available [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/dumps/).
-* A public SPARQL endpoint for the complete LSQ v2.0 dataset can be queried at [https://lsq.data.dice-research.org/sparql](https://lsq.data.dice-research.org/sparql), where each dataset (log) is loaded into a separate named graph (see useful queries below). 
+* A public SPARQL endpoint for the complete LSQ v2.0 dataset can be queried at [https://lsq.aksw.org/sparql](https://lsq.aksw.org/sparql), where each dataset (log) is loaded into a separate named graph (see useful queries below). 
 * The original datasets were uploaded to Virtuoso 7.2, with instances available from [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/endpoints/lsq-endpoints-v2/).
 * A Virtuoso triplestore for the complete LSQ v2.0 is available from [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/endpoints/). 
-* LSQ v1.0 is available from [here](http://lsq.aksw.org/v1/index.html).
+* LSQ v1.0 documentation is available from [here](v1/index.html).
 
 ## Useful Queries over LSQ datasets
 
-In order to see the named graphs referring to different logs in the [LSQ v2.0 endpoint](https://lsq.data.dice-research.org/sparql) you can use:
+In order to see the named graphs referring to different logs in the [LSQ v2.0 endpoint](https://lsq.aksw.org/sparql) you can use:
 
 ````
 SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o}}
