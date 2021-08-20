@@ -12,13 +12,13 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 
 ## Installation of LSQ Framework
 
-* [Setup](usage/setup.md) of the LSQ Framework
+* [Setup](v2/usage/setup.md) of the LSQ Framework
 
 ## Using the LSQ Command Line Tool
 
-* [Probing Logs](Probing-Logs) for their format
-* [RDFization](RDFization) of query logs
-* [Benchmarking](Benchmarking) documents how to create and run benchmarks
+* [Probing Logs](v2/usage/probing-logs.md) for their format
+* [RDFization](v2/usage/rdfization.md) of query logs
+* [Benchmarking](v2/usage/benchmarking.md) documents how to create and run benchmarks
 
 ## LSQ datasets and Public SPARQL endpoint. 
 
