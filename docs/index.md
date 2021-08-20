@@ -66,9 +66,9 @@ Other useful queries which can be executed over LSQ datasets in order to collect
 
 ## Understanding LSQ
 
-* [Data Model](concepts/data-model.md) of LSQ for capturing SPARQL queries, their constituents and benchmark executions
-* [Named Graph Streams](concepts/named-graph-streams.md) explains the design choices for using named graphs instead of vanilla triples
-* [Skolemization](concepts/skolemization.md) explains the procedure employed by LSQ for crafting IRIs based on a model full of blank nodes.
+* [Data Model](v2/concepts/data-model.md) of LSQ for capturing SPARQL queries, their constituents and benchmark executions
+* [Named Graph Streams](v2/concepts/named-graph-streams.md) explains the design choices for using named graphs instead of vanilla triples
+* [Skolemization](v2/concepts/skolemization.md) explains the procedure employed by LSQ for crafting IRIs based on a model full of blank nodes.
 
 ### Licencing 
 
