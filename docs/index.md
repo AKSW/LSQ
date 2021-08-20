@@ -12,25 +12,25 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 
 ## Installation of LSQ Framework
 
-* [Setup](usage/setup.md) of the LSQ Framework
+* [Setup](v2/setup.md) of the LSQ Framework
 
 ## Using the LSQ Command Line Tool
 
-* [Probing Logs](Probing-Logs) for their format
-* [RDFization](RDFization) of query logs
-* [Benchmarking](Benchmarking) documents how to create and run benchmarks
+* [Probing Logs](v2/usage/probing-logs.md) for their format
+* [RDFization](v2/usage/rdfization.md) of query logs
+* [Benchmarking](v2/usage/benchmarking.md) documents how to create and run benchmarks
 
 ## LSQ datasets and Public SPARQL endpoint. 
 
 * The RDF dumps of the LSQ v2.0 datasets are available [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/dumps/).
-* A public SPARQL endpoint for the complete LSQ v2.0 dataset can be queried at [https://lsq.data.dice-research.org/sparql](https://lsq.data.dice-research.org/sparql), where each dataset (log) is loaded into a separate named graph (see useful queries below). 
+* A public SPARQL endpoint for the complete LSQ v2.0 dataset can be queried at [https://lsq.aksw.org/sparql](https://lsq.aksw.org/sparql), where each dataset (log) is loaded into a separate named graph (see useful queries below). 
 * The original datasets were uploaded to Virtuoso 7.2, with instances available from [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/endpoints/lsq-endpoints-v2/).
 * A Virtuoso triplestore for the complete LSQ v2.0 is available from [here](https://hobbitdata.informatik.uni-leipzig.de/lsqv2/endpoints/). 
-* LSQ v1.0 is available from [here](http://lsq.aksw.org/v1/index.html).
+* LSQ v1.0 documentation is available from [here](v1/index.html).
 
 ## Useful Queries over LSQ datasets
 
-In order to see the named graphs referring to different logs in the [LSQ v2.0 endpoint](https://lsq.data.dice-research.org/sparql) you can use:
+In order to see the named graphs referring to different logs in the [LSQ v2.0 endpoint](https://lsq.aksw.org/sparql) you can use:
 
 ````
 SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o}}
@@ -66,9 +66,9 @@ Other useful queries which can be executed over LSQ datasets in order to collect
 
 ## Understanding LSQ
 
-* [Data Model](Data-Model) of LSQ for capturing SPARQL queries, their constituents and benchmark executions
-* [Named Graph Streams](Named-Graph-Streams) explains the design choices for using named graphs instead of vanilla triples
-* [Skolemization](Skolemization) explains the procedure employed by LSQ for crafting IRIs based on a model full of blank nodes.
+* [Data Model](v2/concepts/data-model.md) of LSQ for capturing SPARQL queries, their constituents and benchmark executions
+* [Named Graph Streams](v2/concepts/named-graph-streams.md) explains the design choices for using named graphs instead of vanilla triples
+* [Skolemization](v2/concepts/skolemization.md) explains the procedure employed by LSQ for crafting IRIs based on a model full of blank nodes.
 
 ### Licencing 
 
