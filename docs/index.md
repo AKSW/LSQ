@@ -12,7 +12,7 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 
 ## Installation of LSQ Framework
 
-* [usage/setup.md](Setup) of the LSQ Framework
+* [Setup](usage/setup.md) of the LSQ Framework
 
 ## Using the LSQ Command Line Tool
 
