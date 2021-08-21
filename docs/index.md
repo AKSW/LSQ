@@ -1,7 +1,4 @@
----
-title: LSQ
-nav_order: 1
----
+
 
 # LSQ
 LSQ is a framework for extracting, analyzing and benchmarking SPARQL queries. A set of Linked Datasets describing SPARQL queries extracted from the logs of a variety of prominent public SPARQL endpoints is made available. We argue that LSQ datasets have a variety of uses for the SPARQL research community, be it, for example, to generate benchmarks on-the-fly by selecting real-world queries with specific characteristics that we describe, or to conduct analysis of what SPARQL (1.1) query features are most often used to interrogate endpoints, or to characterize the behavior of the different types of agents that are using these endpoints, or to find out what queries agents are asking about a given resource, etc. 
