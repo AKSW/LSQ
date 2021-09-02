@@ -19,17 +19,17 @@ import picocli.CommandLine.Parameters;
  * @author raven
  *
  */
-@Command(name = "rehash", description = "Update IDs of lsq query objects generated with older versions of LSQ")
-public class CmdLsqRehash implements Callable<Integer> {
-    @Option(names = { "-h", "--help" }, usageHelp = true)
-    public boolean help = false;
-
-    @Parameters(arity = "0..*", description = "file-list to probe")
-    public List<String> nonOptionArgs = new ArrayList<>();
-
-    @Override
-    public Integer call() throws Exception {
-        MainCliLsq.rehash(this);
-        return 0;
-    }
-}
+//@Command(name = "rehash", description = "Update IDs of lsq query objects generated with older versions of LSQ")
+//public class CmdLsqRehash implements Callable<Integer> {
+//    @Option(names = { "-h", "--help" }, usageHelp = true)
+//    public boolean help = false;
+//
+//    @Parameters(arity = "0..*", description = "file-list to probe")
+//    public List<String> nonOptionArgs = new ArrayList<>();
+//
+//    @Override
+//    public Integer call() throws Exception {
+//        MainCliLsq.rehash(this);
+//        return 0;
+//    }
+//}

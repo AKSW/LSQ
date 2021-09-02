@@ -1069,12 +1069,32 @@ public class LsqUtils {
         };
     }
 
-    public static ResourceInDataset rehashQueryHash(ResourceInDataset rid) {
+    public static ResourceInDataset rehashQueryHash(ResourceInDataset rid, Function<String, SparqlStmt> sparqlStmtParser) {
         LsqQuery q = rid.as(LsqQuery.class);
 
         String oldHash = q.getHash();
-        String queryStr = q.getText();
-        String newHash = queryStr == null ? null : LsqQuery.createHash(queryStr);
+        String oldStmtStr = q.getText();
+
+        if (oldStmtStr != null) {
+
+            SparqlStmt stmt = sparqlStmtParser.apply(oldStmtStr);
+            if(stmt != null && stmt.isParsed()) {
+                SparqlStmtUtils.optimizePrefixes(stmt);
+            }
+
+            String newStmtStr = stmt.isParsed()
+                    ? stmt.getQuery().toString()
+                    : stmt.getOriginalString();
+
+            q.setQueryAndHash(newStmtStr);
+
+            Throwable t = stmt.getParseException();
+            if (t != null) {
+                q.setParseError(t.toString());
+            }
+        }
+
+        String newHash = q.getHash();
 
         ResourceInDataset result;
         if (oldHash != null && newHash != null && !newHash.equals(oldHash)) {

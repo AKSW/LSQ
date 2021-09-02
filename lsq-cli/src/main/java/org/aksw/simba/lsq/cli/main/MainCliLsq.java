@@ -37,7 +37,6 @@ import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
 import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
@@ -55,7 +54,6 @@ import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRehash;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.core.LsqEnrichments;
 import org.aksw.simba.lsq.core.LsqProcessor;
@@ -393,7 +391,7 @@ public class MainCliLsq {
     */
 
 
-
+/* Use the spark version instead
     public static void rehash(CmdLsqRehash rehashCmd) throws Exception {
         CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
         rdfizeCmd.nonOptionArgs = rehashCmd.nonOptionArgs;
@@ -413,13 +411,13 @@ public class MainCliLsq {
 
         Flowable<Dataset> dsFlow = flow
                 .flatMap(ResourceInDatasetFlowOps::naturalResources)
-                .map(LsqUtils::rehashQueryHash)
+                .map(rid -> LsqUtils::rehashQueryHash)
                 .map(ResourceInDataset::getDataset);
 
 
         RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);
     }
-
+*/
 
     public static void addLsqPrefixes(PrefixMapping model) {
         model

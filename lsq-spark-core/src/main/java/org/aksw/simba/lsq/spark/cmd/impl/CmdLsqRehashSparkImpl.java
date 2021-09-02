@@ -9,6 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
+import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -16,6 +18,7 @@ import org.apache.jena.atlas.iterator.IteratorResourceClosing;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -33,10 +36,13 @@ import org.apache.jena.sparql.util.Context;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Streams;
 
 import net.sansa_stack.rdf.spark.io.RddRdfSaver;
 import net.sansa_stack.rdf.spark.io.input.api.RdfSource;
@@ -127,11 +133,14 @@ public class CmdLsqRehashSparkImpl {
 
         PrefixMapping prefixes = new PrefixMappingImpl();
 
-        for (String prefixSource : cmd.getPrefixSources()) {
+        Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(cmd.getPrefixSources());
+
+        for (String prefixSource : prefixSources) {
             logger.info("Adding prefixes from " + prefixSource);
             Model tmp = RDFDataMgr.loadModel(prefixSource);
             prefixes.setNsPrefixes(tmp);
         }
+
 
         SparkConf sparkConf = new SparkConf()
             .setAppName("Lsq Rehash ( ${cmd.trigFiles} )")
@@ -174,13 +183,24 @@ public class CmdLsqRehashSparkImpl {
 
         JavaRDD<Dataset> effectiveRdd = initialRdd; //.repartition(4);
 
+
         JavaRDD<ResourceInDataset> ridRdd =
                 NamedModelOpsRddJava.mapToResourceInDataset(
                         DatasetOpsRddJava.toNamedModels(effectiveRdd));
 
+
+        Broadcast<PrefixMapping> prefixesBc = javaSparkContext.broadcast(prefixes);
         JavaRDD<Dataset> outRdd = ridRdd
-            .map(LsqUtils::rehashQueryHash)
-            .map(ResourceInDataset::getDataset);
+            .mapPartitions(ridIt -> {
+                PrefixMapping pm = prefixesBc.getValue();
+                SparqlStmtParser sparqlStmtParser = SparqlStmtParserImpl.create(
+                        Syntax.syntaxARQ, pm, true);
+
+                return Streams.stream(ridIt)
+                    .map(rid -> LsqUtils.rehashQueryHash(rid, sparqlStmtParser))
+                    .map(ResourceInDataset::getDataset)
+                    .iterator();
+            });
 
 
 
