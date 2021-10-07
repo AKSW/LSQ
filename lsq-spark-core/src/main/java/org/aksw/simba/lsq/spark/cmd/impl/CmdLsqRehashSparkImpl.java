@@ -186,7 +186,7 @@ public class CmdLsqRehashSparkImpl {
 
         JavaRDD<ResourceInDataset> ridRdd =
                 JavaRddOfNamedModelsOps.mapToResourceInDataset(
-                        JavaRddOfDatasetsOps.toNamedModels(effectiveRdd));
+                        JavaRddOfDatasetsOps.flatMapToNamedModels(effectiveRdd));
 
 
         Broadcast<PrefixMapping> prefixesBc = javaSparkContext.broadcast(prefixes);

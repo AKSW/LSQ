@@ -13,7 +13,6 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -29,11 +28,71 @@ import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
 
 public class CsvParserSpark {
 
-    public interface RddTransformer<I, O>
-        extends SerializableFunction<JavaRDD<I>, JavaRDD<O>> {}
+    @FunctionalInterface
+    public interface JavaRddFunction<I, O>
+        extends SerializableFunction<JavaRDD<I>, JavaRDD<O>> {
+
+        default <X> JavaRddFunction<I, X> andThen(JavaRddFunction<O, X> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        default <K, V> ToJavaPairRddFunction<I, K, V> toPairRdd(ToJavaPairRddFunction<O, K, V> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        public static <I> JavaRddFunction<I, I> identity() {
+            return x -> x;
+        }
+    }
+
+    @FunctionalInterface
+    public interface ToJavaPairRddFunction<I, K, V>
+        extends SerializableFunction<JavaRDD<I>, JavaPairRDD<K, V>> {
+
+        default <KO, VO> ToJavaPairRddFunction<I, KO, VO> andThen(JavaPairRddFunction<K, V, KO, VO> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        default <O> JavaRddFunction<I, O> toRdd(ToJavaRddFunction<K, V, O> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+    }
+
+    @FunctionalInterface
+    public interface ToJavaRddFunction<K, V, O>
+        extends SerializableFunction<JavaPairRDD<K, V>, JavaRDD<O>> {
+
+        default <X> ToJavaRddFunction<K, V, X> andThen(JavaRddFunction<O, X> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        default <KX, VX> JavaPairRddFunction<K, V, KX, VX> toPairRdd(ToJavaPairRddFunction<O, KX, VX> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+    }
+
+    @FunctionalInterface
+    public interface JavaPairRddFunction<KI, VI, KO, VO>
+        extends SerializableFunction<JavaPairRDD<KI, VI>, JavaPairRDD<KO, VO>> {
+
+        default <KX, VX> JavaPairRddFunction<KI, VI, KX, VX> andThen(JavaPairRddFunction<KO, VO, KX, VX> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        default <X> ToJavaRddFunction<KI, VI, X> toRdd(ToJavaRddFunction<KO, VO, X> next) {
+            return rdd -> next.apply(this.apply(rdd));
+        }
+
+        public static <K, V> JavaPairRddFunction<K, V, K, V> identity() {
+            return x -> x;
+        }
+    }
+
+
+
 
     public interface BindingToResourceTransform
-        extends RddTransformer<Binding, Resource> {}
+        extends JavaRddFunction<Binding, Resource> {}
 
     public static BindingToResourceTransform newTransformerBindingToResource(Query query) {
         // Convert to string for lambda serialization
@@ -41,8 +100,8 @@ public class CsvParserSpark {
 
         return rdd -> {
             JavaRDD<Dataset> datasetRdd = JavaRddOfBindingsOps.tarqlDatasets(rdd, QueryFactory.create(queryStr)); //   RxOps.map(rdd, QueryFlowOps.createMapperQuads(query)::apply);
-            JavaPairRDD<String, Model> namedModelRdd = JavaRddOfDatasetsOps.toNamedModels(datasetRdd);
-            JavaRDD<Resource> resourceRdd = JavaRddOfNamedModelsOps.mapToResource(namedModelRdd);
+            JavaPairRDD<String, Model> namedModelRdd = JavaRddOfDatasetsOps.flatMapToNamedModels(datasetRdd);
+            JavaRDD<Resource> resourceRdd = JavaRddOfNamedModelsOps.mapToResources(namedModelRdd);
             return resourceRdd;
         };
     }
@@ -54,7 +113,7 @@ public class CsvParserSpark {
     }
 
 
-    public static RddTransformer<String, Resource> createWebLogMapper(String logPattern) throws IOException {
+    public static JavaRddFunction<String, Resource> createWebLogMapper(String logPattern) throws IOException {
 
         // Attempt to create a mapper for validation - we are not using the instance
         // because we only reference the serializable string pattern in the mapper

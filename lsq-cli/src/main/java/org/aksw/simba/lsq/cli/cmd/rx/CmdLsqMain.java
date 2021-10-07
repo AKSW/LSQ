@@ -1,8 +1,11 @@
-package org.aksw.simba.lsq.cli.main.cmd;
+package org.aksw.simba.lsq.cli.cmd.rx;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
+
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
+import org.aksw.simba.lsq.cli.cmd.spark.CmdLsqSparkParent;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -10,7 +13,7 @@ import picocli.CommandLine.Option;
 
 @Command(name="lsq", version="LSQ version", versionProvider = CmdLsqMain.LsqVersionProvider.class, description = "LSQ Subcommands", subcommands = {
         CmdLsqAnalyze.class,
-        CmdLsqRdfize.class,
+        CmdLsqRdfizeBase.class,
         CmdLsqBenchmarkMain.class,
         CmdLsqProbe.class,
         CmdLsqSparkParent.class,

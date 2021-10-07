@@ -47,14 +47,14 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkCreate;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkRun;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqInvert;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqMain;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbe;
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqRdfize;
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqAnalyze;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqBenchmarkCreate;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqBenchmarkPrepare;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqBenchmarkRun;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqInvert;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqMain;
+import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqProbe;
 import org.aksw.simba.lsq.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.core.LsqEnrichments;
 import org.aksw.simba.lsq.core.LsqProcessor;
@@ -162,7 +162,7 @@ public class MainCliLsq {
     }
 
 
-    public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfize rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
+    public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
         String logFormat = rdfizeCmd.inputLogFormat;
         List<String> logSources = rdfizeCmd.nonOptionArgs;
         String baseIri = rdfizeCmd.baseIri;
@@ -238,8 +238,7 @@ public class MainCliLsq {
                     DatasetFlowOps.createMapperDataset(sparqlStmts,
                             r -> r.getDataset(),
                             (r, ds) -> r.inDataset(ds),
-                            DatasetGraphFactoryEx::createInsertOrderPreservingDatasetGraph,
-                            cxt -> {});
+                            DatasetGraphFactoryEx::createInsertOrderPreservingDatasetGraph);
 
 
             legacyLogRdfEvents = legacyLogRdfEvents
@@ -266,7 +265,7 @@ public class MainCliLsq {
 
 
 
-    public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
+    public static void rdfize(CmdLsqRdfizeBase cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
             RDFDataMgrRx.writeResources(logRdfEvents, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);
@@ -333,7 +332,7 @@ public class MainCliLsq {
     }
 
     public static void analyze(CmdLsqAnalyze analyzeCmd) throws Exception {
-        CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
+        CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
         rdfizeCmd.noMerge = true;
         // TODO How to obtain the baseIRI? A simple hack would be to 'grep'
@@ -569,7 +568,7 @@ public class MainCliLsq {
 
     public static void benchmarkExecute(CmdLsqBenchmarkRun benchmarkExecuteCmd) throws Exception {
         // TTODO Find a nicer way to pass config options around; reusing the command object is far from optimal
-        CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
+        CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
         rdfizeCmd.nonOptionArgs = benchmarkExecuteCmd.logSources;
         rdfizeCmd.noMerge = true;
 

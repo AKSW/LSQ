@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.simba.lsq.cli.main.cmd.CmdLsqProbeSpark;
+import org.aksw.simba.lsq.cli.cmd.spark.CmdLsqProbeSpark;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

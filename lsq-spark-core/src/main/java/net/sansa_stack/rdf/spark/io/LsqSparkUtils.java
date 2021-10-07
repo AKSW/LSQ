@@ -8,7 +8,7 @@ public class LsqSparkUtils {
 
     public static JavaSparkContext createSparkContext() {
         SparkConf sparkConf = new SparkConf()
-            .setAppName("Lsq Rehash ( ${cmd.trigFiles} )")
+            .setAppName("Lsq")
             .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
             .set("spark.kryoserializer.buffer.max", "1000") // MB
             .set("spark.kryo.registrator",
@@ -26,4 +26,5 @@ public class LsqSparkUtils {
 
         return sc;
     }
+
 }

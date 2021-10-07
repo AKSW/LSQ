@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main.cmd;
+package org.aksw.simba.lsq.cli.cmd.spark;
 
 import picocli.CommandLine.Command;
 

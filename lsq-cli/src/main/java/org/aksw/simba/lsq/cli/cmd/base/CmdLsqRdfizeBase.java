@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.cli.main.cmd;
+package org.aksw.simba.lsq.cli.cmd.base;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,9 +12,8 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "rdfize", description = "RDFize query logs")
-public class CmdLsqRdfize
-    implements Callable<Integer>, LsqRdfizeSpec
+public class CmdLsqRdfizeBase
+    implements LsqRdfizeSpec
 {
     @Option(names={"-h", "--help"}, usageHelp = true)
     public boolean help = false;
@@ -72,69 +71,62 @@ public class CmdLsqRdfize
     }
 
     @Override
-	public String getBaseIri() {
+    public String getBaseIri() {
         return baseIri;
     }
 
     @Override
-	public String getInputLogFormat() {
+    public String getInputLogFormat() {
         return inputLogFormat;
     }
 
     @Override
-	public List<String> getPrefixSources() {
+    public List<String> getPrefixSources() {
         return prefixSources;
     }
 
     @Override
-	public boolean isNoMerge() {
+    public boolean isNoMerge() {
         return noMerge;
     }
 
     @Override
-	public boolean isNoHostHash() {
+    public boolean isNoHostHash() {
         return noHostHash;
     }
 
     @Override
-	public String getHostSalt() {
+    public String getHostSalt() {
         return hostSalt;
     }
 
     @Override
-	public boolean isSlimMode() {
+    public boolean isSlimMode() {
         return slimMode;
     }
 
     @Override
-	public String getEndpointUrl() {
+    public String getEndpointUrl() {
         return endpointUrl;
     }
 
     @Override
-	public List<String> getNonOptionArgs() {
+    public List<String> getNonOptionArgs() {
         return nonOptionArgs;
     }
 
     @Override
-	public String getBufferSize() {
+    public String getBufferSize() {
         return bufferSize;
     }
 
     @Override
-	public String getTemporaryDirectory() {
+    public String getTemporaryDirectory() {
         return temporaryDirectory;
     }
 
     @Override
-	public int getParallel() {
+    public int getParallel() {
         return parallel;
     }
-
-    @Override
-    public Integer call() throws Exception {
-        MainCliLsq.rdfize(this);
-        return 0;
-    }
-
 }
