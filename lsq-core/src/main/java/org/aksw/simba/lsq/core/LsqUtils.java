@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -96,6 +98,7 @@ import com.google.common.io.BaseEncoding;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 
+
 public class LsqUtils {
     private static final Logger logger = LoggerFactory.getLogger(LsqUtils.class);
 
@@ -173,24 +176,8 @@ public class LsqUtils {
                 logger.debug("Probing against format " + formatName + " raised exception", e);
             }
 
-            int availableItems = baseItems.size();
-
-            //List<Resource> items =
-            List<Resource> parsedItems = baseItems.stream()
-                    .filter(r -> !r.hasProperty(LSQ.processingError))
-                    .collect(Collectors.toList());
-                    //.collect(Collectors.toList());
-
-            long parsedItemCount = parsedItems.size();
-
-            double avgImmediatePropertyCount = parsedItems.stream()
-                    .mapToInt(r -> r.listProperties().toList().size())
-                    .average().orElse(0);
-
-            // Weight is the average number of properties multiplied by the
-            // fraction of successfully parsed items
-            double parsedFraction = availableItems == 0 ? 0 : (parsedItemCount / (double)availableItems);
-            double weight = parsedFraction * avgImmediatePropertyCount;
+            // int availableItems = baseItems.size();
+            double weight = analyzeInformationRatio(baseItems, r -> r.hasProperty(LSQ.processingError));
 
             result.put(weight, formatName);
         }
@@ -198,6 +185,29 @@ public class LsqUtils {
         return result;
     }
 
+
+    /** Analyze the avg number of properties per resource */
+    public static double analyzeInformationRatio(
+            Collection<? extends Resource> baseItems,
+            Predicate<? super Resource> errorCondition) {
+        int availableItems = baseItems.size();
+
+        List<Resource> parsedItems = baseItems.stream()
+                .filter(r -> !errorCondition.test(r))
+                .collect(Collectors.toList());
+
+        long parsedItemCount = parsedItems.size();
+
+        double avgImmediatePropertyCount = parsedItems.stream()
+                .mapToInt(r -> r.listProperties().toList().size())
+                .average().orElse(0);
+
+        // Weight is the average number of properties multiplied by the
+        // fraction of successfully parsed items
+        double parsedFraction = availableItems == 0 ? 0 : (parsedItemCount / (double)availableItems);
+        double weight = parsedFraction * avgImmediatePropertyCount;
+        return weight;
+    }
     public static void applyDefaults(LsqConfigImpl config) {
         // Set the default log format registry if no other has been set
         PropertyUtils.applyIfAbsent(config::setLogFmtRegistry, config::getLogFmtRegistry, LsqUtils::createDefaultLogFmtRegistry);
@@ -359,7 +369,7 @@ public class LsqUtils {
     }
 
 
-    public static Flowable<ResourceInDataset> createReader(LsqConfigImpl config) throws IOException {
+    public static Flowable<Resource> createReader(LsqConfigImpl config) throws IOException {
 
         List<String> inputResources = config.getInQueryLogFiles();
         logger.info("Input resources: " + inputResources);
@@ -371,7 +381,7 @@ public class LsqUtils {
 //
 //		}
 //
-        Flowable<ResourceInDataset> result = Flowable.fromIterable(inputResources)
+        Flowable<Resource> result = Flowable.fromIterable(inputResources)
                 .flatMap(inputResource -> {
                     try {
                         return createReader(config, inputResource);
@@ -385,7 +395,7 @@ public class LsqUtils {
 
 
 
-    public static Flowable<ResourceInDataset> createReader(
+    public static Flowable<Resource> createReader(
             LsqConfigImpl config,
             String inputResource) throws IOException {
 
@@ -403,7 +413,7 @@ public class LsqUtils {
                 .asBytes());
 
         Map<String, ResourceParser> logFmtRegistry = config.getLogFmtRegistry();
-        Flowable<ResourceInDataset> result = createReader(
+        Flowable<Resource> result = createReader(
                 inputResource,
                 sparqlParser,
                 logFormat,
@@ -430,7 +440,7 @@ public class LsqUtils {
      * @return
      * @throws IOException
      */
-    public static Flowable<ResourceInDataset> createReader(
+    public static Flowable<Resource> createReader(
             String logSource,
             Function<String, SparqlStmt> sparqlStmtParser,
             String logFormat,
@@ -461,7 +471,7 @@ public class LsqUtils {
             lang = RDFDataMgr.determineLang(logSource, null, null);
         }
 
-        Flowable<ResourceInDataset> result = null;
+        Flowable<Resource> result = null;
 
 
         // Check if we are dealing with RDF
@@ -521,7 +531,8 @@ public class LsqUtils {
                 throw new RuntimeException("No log format parser found for '" + logFormat + "'");
             }
 
-            result = webLogParser.parse(() -> RDFDataMgr.open(logSource));
+            result = webLogParser.parse(() -> RDFDataMgr.open(logSource))
+                    .map(r -> r); // Turn ResourceInDataset to plain Resource
 
 
             // The webLogParser yields resources (blank nodes) for the log entry
@@ -532,7 +543,7 @@ public class LsqUtils {
                 .zipWith(LongStream.iterate(1, x -> x + 1)::iterator, Maps::immutableEntry)
                 // Add the zipped index to the resource
                 .map(e -> {
-                    ResourceInDataset r = e.getKey();
+                    Resource r = e.getKey();
                     Long idx = e.getValue();
 
                     RemoteExecution re = r.as(RemoteExecution.class);
@@ -541,9 +552,9 @@ public class LsqUtils {
                     return r;
                 })
                 .flatMapMaybe(record -> {
-                    Maybe<ResourceInDataset> r;
+                    Maybe<Resource> r;
                     try {
-                        r = processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                        r = Maybe.fromOptional(processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record));
                     } catch (Exception e) {
                         logger.warn("Internal error; trying to continue", e);
                         r = Maybe.empty();
@@ -556,13 +567,13 @@ public class LsqUtils {
         return result;
     }
 
-    public static Maybe<ResourceInDataset> processLogRecord(
+    public static Optional<Resource> processLogRecord(
             Function<String, SparqlStmt> sparqlStmtParser,
             String baseIri,
             String hostHashSalt,
             String serviceUrl,
             Function<String, String> hashFn,
-            ResourceInDataset x) {
+            Resource x) {
         RemoteExecution re = x.as(RemoteExecution.class);
 
 
@@ -579,10 +590,12 @@ public class LsqUtils {
 //	        		}
 //
         // If we cannot obtain a query from the log record, we omit the entry
-        Maybe<ResourceInDataset> result;
+        Optional<Resource> result;
 
         // Invert; map from query to log entry
-        ResourceInDataset queryInDataset = x.wrapCreate(Model::createResource);
+        //ResourceInDataset queryInDataset = x.wrapCreate(Model::createResource);
+        Resource queryInDataset = re.getModel().createResource();
+
         LsqQuery q = queryInDataset.as(LsqQuery.class);
 //        q.getRemoteExecutions(Resource.class).add(x);
         q.getRemoteExecutions().add(re);
@@ -666,8 +679,8 @@ public class LsqUtils {
 //            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
 //            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
-            ResourceInDataset r = skolemize(queryInDataset, baseIri, LsqQuery.class);
-            result = Maybe.just(r);
+            Resource r = skolemize(queryInDataset, baseIri, LsqQuery.class);
+            result = Optional.of(r);
 
 //            RDFDataMgr.write(System.out, dataset, RDFFormat.NQUADS);
 
@@ -675,7 +688,7 @@ public class LsqUtils {
 
 
         } else {
-            result = Maybe.empty();
+            result = Optional.empty();
         }
 
 
@@ -712,6 +725,30 @@ public class LsqUtils {
         ResourceInDataset result = new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot);
         return result;
     }
+
+
+
+    public static <T extends RDFNode> Resource skolemize(
+            Resource root,
+            String baseIri,
+            Class<T> cls) {
+        T q = root.as(cls);
+        HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
+        Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
+        Node newRoot = renames.get(q.asNode());
+
+        // Also rename the original graph name to match the IRI of the new lsq query root
+
+        Model model = root.getModel();
+        // Apply an in-place node transform on the dataset
+        // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
+        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), model);
+        Resource result = model.asRDFNode(newRoot).asResource();
+
+        return result;
+    }
+
+
 
 //	public static <T extends Resource> Flowable<T> postProcessStream(Flowable<T> result) {
 //		// Enrich potentially missing information

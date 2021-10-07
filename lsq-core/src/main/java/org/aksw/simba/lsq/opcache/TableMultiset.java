@@ -76,7 +76,7 @@ public class TableMultiset extends TableBase {
 
     @Override
     public QueryIterator iterator(ExecutionContext execCxt) {
-        return new QueryIterPlainWrapper(rows.iterator(), execCxt) ;
+        return QueryIterPlainWrapper.create(rows.iterator(), execCxt) ;
     }
 
     @Override

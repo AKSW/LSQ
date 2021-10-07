@@ -13,7 +13,6 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionJsa;
 import org.aksw.jena_sparql_api.utils.ModelDiff;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;
@@ -35,7 +34,6 @@ import org.apache.jena.sparql.util.graph.GraphUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.junit.Assert;
-import org.junit.Test;
 
 import com.google.common.collect.Streams;
 
@@ -124,7 +122,7 @@ public class TestLsqQueryExecutionTime {
 
 
         LsqUtils.applyDefaults(config);
-        Flowable<ResourceInDataset> stream = LsqUtils.createReader(config);
+        Flowable<Resource> stream = LsqUtils.createReader(config);
         LsqProcessor processor = LsqUtils.createProcessor(config);
         processor.setLegacyMode(true);
 

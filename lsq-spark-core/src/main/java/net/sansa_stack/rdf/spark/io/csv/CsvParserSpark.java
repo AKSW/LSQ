@@ -1,0 +1,94 @@
+package net.sansa_stack.rdf.spark.io.csv;
+
+import java.io.IOException;
+
+import org.aksw.commons.lambda.serializable.SerializableFunction;
+import org.aksw.simba.lsq.parser.Mapper;
+import org.aksw.simba.lsq.parser.WebLogParser;
+import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.api.java.JavaSparkContext;
+
+import com.google.common.collect.Streams;
+
+import net.sansa_stack.query.spark.io.input.csv.CsvSources;
+import net.sansa_stack.query.spark.rdd.op.JavaRddOfBindingsOps;
+import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
+import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
+
+
+public class CsvParserSpark {
+
+    public interface RddTransformer<I, O>
+        extends SerializableFunction<JavaRDD<I>, JavaRDD<O>> {}
+
+    public interface BindingToResourceTransform
+        extends RddTransformer<Binding, Resource> {}
+
+    public static BindingToResourceTransform newTransformerBindingToResource(Query query) {
+        // Convert to string for lambda serialization
+        String queryStr = query.toString();
+
+        return rdd -> {
+            JavaRDD<Dataset> datasetRdd = JavaRddOfBindingsOps.tarqlDatasets(rdd, QueryFactory.create(queryStr)); //   RxOps.map(rdd, QueryFlowOps.createMapperQuads(query)::apply);
+            JavaPairRDD<String, Model> namedModelRdd = JavaRddOfDatasetsOps.toNamedModels(datasetRdd);
+            JavaRDD<Resource> resourceRdd = JavaRddOfNamedModelsOps.mapToResource(namedModelRdd);
+            return resourceRdd;
+        };
+    }
+
+    public static JavaRDD<Resource> loadMappedCsv(JavaSparkContext sc, String path, CSVFormat csvFormat, Query query) throws IOException {
+        JavaRDD<Binding> rdd = CsvSources.createRddOfBindings(sc, path, csvFormat);
+
+        return newTransformerBindingToResource(query).apply(rdd);
+    }
+
+
+    public static RddTransformer<String, Resource> createWebLogMapper(String logPattern) throws IOException {
+
+        // Attempt to create a mapper for validation - we are not using the instance
+        // because we only reference the serializable string pattern in the mapper
+        Mapper validation = WebLogParser.create(logPattern);
+
+
+        return rdd -> rdd.mapPartitions(lineIt -> {
+            Mapper mapper = WebLogParser.create(logPattern);
+
+            return Streams.stream(lineIt).map(line -> {
+                Resource r = processLogLine(mapper, line);
+                return r;
+            }).iterator();
+        });
+    }
+
+    public static Resource processLogLine(Mapper mapper, String line) {
+        Resource r = ModelFactory.createDefaultModel().createResource();
+
+        r.addLiteral(LSQ.logRecord, line);
+
+        boolean parsed;
+        try {
+            parsed = mapper.parse(r, line) != 0;
+            if(!parsed) {
+                r.addLiteral(LSQ.processingError, "Failed to parse log line (no detailed information available)");
+            }
+        } catch(Exception e) {
+            parsed = false;
+            r.addLiteral(LSQ.processingError, "Failed to parse log line: " + e);
+            // logger.warn("Parser error", e);
+        }
+
+        return r;
+    }
+
+}

@@ -46,6 +46,7 @@ import org.aksw.jena_sparql_api.rx.io.resultset.NamedGraphStreamCliUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
+import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkCreate;
 import org.aksw.simba.lsq.cli.main.cmd.CmdLsqBenchmarkPrepare;
@@ -74,6 +75,7 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
 import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
@@ -194,10 +196,10 @@ public class MainCliLsq {
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
 
-        Flowable<ResourceInDataset> logRdfEvents = Flowable
+        Flowable<Resource> logRdfEvents = Flowable
             .fromIterable(logSources)
             .flatMap(logSource -> {
-                Flowable<ResourceInDataset> st = LsqUtils.createReader(
+                Flowable<Resource> st = LsqUtils.createReader(
                         logSource,
                         sparqlStmtParser,
                         logFormat,
@@ -210,6 +212,8 @@ public class MainCliLsq {
                 return st;
             });
 
+
+        Flowable<ResourceInDataset> legacyLogRdfEvents = logRdfEvents.map(ResourceInDatasetImpl::createFromCopyIntoResourceGraph);
 
         if(rdfizeCmd.slimMode) {
 //            CmdNgsMap cmd = new CmdNgsMap();
@@ -238,7 +242,7 @@ public class MainCliLsq {
                             cxt -> {});
 
 
-            logRdfEvents = logRdfEvents
+            legacyLogRdfEvents = legacyLogRdfEvents
                     .compose(mapper);
         }
 
@@ -248,15 +252,19 @@ public class MainCliLsq {
             sortCmd.temporaryDirectory = rdfizeCmd.temporaryDirectory;
 
             FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
-            logRdfEvents = logRdfEvents
+            legacyLogRdfEvents = legacyLogRdfEvents
                     .compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
                     .compose(sorter)
                     .compose(ResourceInDatasetFlowOps::mergeConsecutiveResourceInDatasets)
                     .flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset);
         }
 
-        return logRdfEvents;
+        return legacyLogRdfEvents;
     }
+
+
+
+
 
     public static void rdfize(CmdLsqRdfize cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
@@ -343,6 +351,7 @@ public class MainCliLsq {
             LsqUtils.skolemize(rid, rdfizeCmd.baseIri, LsqQuery.class);
             return rid;
         })
+//        .map(ResourceInDatasetImpl::createFromCopyIntoResourceGraph)
         .map(ResourceInDataset::getDataset);
 
         RDFDataMgrRx.writeDatasets(dsFlow, StdIo.openStdOutWithCloseShield(), RDFFormat.TRIG_BLOCKS);

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.aksw.simba.lsq.cli.main.MainCliLsq;
+import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
@@ -13,7 +14,7 @@ import picocli.CommandLine.Parameters;
 
 @Command(name = "rdfize", description = "RDFize query logs")
 public class CmdLsqRdfize
-    implements Callable<Integer>
+    implements Callable<Integer>, LsqRdfizeSpec
 {
     @Option(names={"-h", "--help"}, usageHelp = true)
     public boolean help = false;
@@ -45,6 +46,9 @@ public class CmdLsqRdfize
     @Parameters(arity="1..*", description="log sources")
     public List<String> nonOptionArgs = new ArrayList<>();
 
+
+
+
 //	@OptionsDelegate
 //	public CmdNgsSort sortOptions = new CmdNgsSort();
 
@@ -61,6 +65,71 @@ public class CmdLsqRdfize
     // TODO Integrate oshi to get physical core count by default
     @Option(names={"--parallel"})
     public int parallel = -1;
+
+
+    public boolean isHelp() {
+        return help;
+    }
+
+    @Override
+	public String getBaseIri() {
+        return baseIri;
+    }
+
+    @Override
+	public String getInputLogFormat() {
+        return inputLogFormat;
+    }
+
+    @Override
+	public List<String> getPrefixSources() {
+        return prefixSources;
+    }
+
+    @Override
+	public boolean isNoMerge() {
+        return noMerge;
+    }
+
+    @Override
+	public boolean isNoHostHash() {
+        return noHostHash;
+    }
+
+    @Override
+	public String getHostSalt() {
+        return hostSalt;
+    }
+
+    @Override
+	public boolean isSlimMode() {
+        return slimMode;
+    }
+
+    @Override
+	public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
+    @Override
+	public List<String> getNonOptionArgs() {
+        return nonOptionArgs;
+    }
+
+    @Override
+	public String getBufferSize() {
+        return bufferSize;
+    }
+
+    @Override
+	public String getTemporaryDirectory() {
+        return temporaryDirectory;
+    }
+
+    @Override
+	public int getParallel() {
+        return parallel;
+    }
 
     @Override
     public Integer call() throws Exception {

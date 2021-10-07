@@ -14,7 +14,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.apache.jena.atlas.iterator.IteratorResourceClosing;
+import org.apache.jena.atlas.iterator.Iter;
 import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.ext.com.google.common.collect.Iterators;
 import org.apache.jena.query.Dataset;
@@ -48,8 +48,8 @@ import net.sansa_stack.rdf.spark.io.RddRdfSaver;
 import net.sansa_stack.rdf.spark.io.input.api.RdfSource;
 import net.sansa_stack.rdf.spark.io.input.api.RdfSourceFactory;
 import net.sansa_stack.rdf.spark.io.input.impl.RdfSourceFactoryImpl;
-import net.sansa_stack.rdf.spark.rdd.op.java.DatasetOpsRddJava;
-import net.sansa_stack.rdf.spark.rdd.op.java.NamedModelOpsRddJava;
+import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
+import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
 
 
 
@@ -62,7 +62,7 @@ public class CmdLsqRehashSparkImpl {
     public static Iterator<Quad> createIteratorQuads(InputStream input, Lang lang, String baseIRI) {
         // Special case N-Quads, because the RIOT reader has a pull interface
         if ( RDFLanguages.sameLang(RDFLanguages.NQUADS, lang) ) {
-            return new IteratorResourceClosing<>(
+            return Iter.onCloseIO(
                 RiotParsers.createIteratorNQuads(input, null, RiotLib.dftProfile()),
                 input);
         }
@@ -185,8 +185,8 @@ public class CmdLsqRehashSparkImpl {
 
 
         JavaRDD<ResourceInDataset> ridRdd =
-                NamedModelOpsRddJava.mapToResourceInDataset(
-                        DatasetOpsRddJava.toNamedModels(effectiveRdd));
+                JavaRddOfNamedModelsOps.mapToResourceInDataset(
+                        JavaRddOfDatasetsOps.toNamedModels(effectiveRdd));
 
 
         Broadcast<PrefixMapping> prefixesBc = javaSparkContext.broadcast(prefixes);

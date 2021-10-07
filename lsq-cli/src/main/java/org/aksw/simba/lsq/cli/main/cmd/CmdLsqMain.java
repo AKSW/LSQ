@@ -13,6 +13,7 @@ import picocli.CommandLine.Option;
         CmdLsqRdfize.class,
         CmdLsqBenchmarkMain.class,
         CmdLsqProbe.class,
+        CmdLsqSparkParent.class,
         // CmdLsqRehash.class
         CmdLsqSparkRehash.class
 })
