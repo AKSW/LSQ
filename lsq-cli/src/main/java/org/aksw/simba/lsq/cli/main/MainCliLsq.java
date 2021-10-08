@@ -588,7 +588,7 @@ public class MainCliLsq {
 
         ExperimentRun run = tryLoadRun(configSrc)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Could not detect a resource with " + LSQ.Strs.config + " property in " + configSrc));
+                        "Could not detect a resource with " + LSQ.Terms.config + " property in " + configSrc));
 
         ExperimentConfig cfg = run.getConfig();
 

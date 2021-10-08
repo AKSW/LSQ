@@ -14,7 +14,7 @@ public class LSQ {
     public static final String NS = "http://lsq.aksw.org/vocab#";
 
 
-    public static class Strs {
+    public static class Terms {
         public static final String Query = NS + "Query";
 
         public static final String text = NS + "text";
@@ -188,14 +188,14 @@ public class LSQ {
     public static Resource resource(String local) { return ResourceFactory.createResource(NS + local); }
     public static Property property(String local) { return ResourceFactory.createProperty(NS + local); }
 
-    public static final Property config = ResourceFactory.createProperty(Strs.config);
+    public static final Property config = ResourceFactory.createProperty(Terms.config);
 
     // Used internally for the hypergraph representation - not part of the public vocab
-    public static final Resource Vertex = ResourceFactory.createResource(Strs.Vertex);
-    public static final Resource Edge = ResourceFactory.createResource(Strs.Edge);
+    public static final Resource Vertex = ResourceFactory.createResource(Terms.Vertex);
+    public static final Resource Edge = ResourceFactory.createResource(Terms.Edge);
 
-    public static final Property in = ResourceFactory.createProperty(Strs.in);
-    public static final Property out = ResourceFactory.createProperty(Strs.out);
+    public static final Property in = ResourceFactory.createProperty(Terms.in);
+    public static final Property out = ResourceFactory.createProperty(Terms.out);
 
     // Indicates that a resource represents an RDF term or a variable
     // (we cannot have those in the subject position so we need a "proxy" resource)
@@ -203,22 +203,22 @@ public class LSQ {
 
 
 
-    public static final Resource star = ResourceFactory.createResource(Strs.star);
-    public static final Resource sink = ResourceFactory.createResource(Strs.sink);
-    public static final Resource path = ResourceFactory.createResource(Strs.path);
-    public static final Resource hybrid = ResourceFactory.createResource(Strs.hybrid);
+    public static final Resource star = ResourceFactory.createResource(Terms.star);
+    public static final Resource sink = ResourceFactory.createResource(Terms.sink);
+    public static final Resource path = ResourceFactory.createResource(Terms.path);
+    public static final Resource hybrid = ResourceFactory.createResource(Terms.hybrid);
 
 
-    public static final Property joinVertex = ResourceFactory.createProperty(Strs.joinVertex);
-    public static final Property joinVertexType = ResourceFactory.createProperty(Strs.joinVertexType);
-    public static final Property joinVertexDegree = ResourceFactory.createProperty(Strs.joinVertexDegree);
+    public static final Property joinVertex = ResourceFactory.createProperty(Terms.joinVertex);
+    public static final Property joinVertexType = ResourceFactory.createProperty(Terms.joinVertexType);
+    public static final Property joinVertexDegree = ResourceFactory.createProperty(Terms.joinVertexDegree);
 
-    public static final Property bgps = ResourceFactory.createProperty(Strs.bgpCount);
-    public static final Property tps = ResourceFactory.createProperty(Strs.tpCount);
-    public static final Property minBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMin);
-    public static final Property maxBgpTriples = ResourceFactory.createProperty(Strs.tpInBgpCountMax);
-    public static final Property joinVertices = ResourceFactory.createProperty(Strs.joinVertexCount);
-    public static final Property projectVars = ResourceFactory.createProperty(Strs.projectVarCount);
+    public static final Property bgps = ResourceFactory.createProperty(Terms.bgpCount);
+    public static final Property tps = ResourceFactory.createProperty(Terms.tpCount);
+    public static final Property minBgpTriples = ResourceFactory.createProperty(Terms.tpInBgpCountMin);
+    public static final Property maxBgpTriples = ResourceFactory.createProperty(Terms.tpInBgpCountMax);
+    public static final Property joinVertices = ResourceFactory.createProperty(Terms.joinVertexCount);
+    public static final Property projectVars = ResourceFactory.createProperty(Terms.projectVarCount);
 
     //public static final Property avgJoinVerticesDegree = property("avgJoinVerticesDegree");
     public static final Property meanJoinVertexDegree = property("meanJoinVertexDegree");
@@ -247,45 +247,45 @@ public class LSQ {
     // TODO Sort out the exact semantic relation - but its roughly:
     // A SPIN query represents a query itself, whereas a LSQ query represents a record about it
     // More concretely, an LSQ record holds information about at which time a certain query was fired based on which log file, etc.
-    public static final Resource Query = ResourceFactory.createResource(Strs.Query);
+    public static final Resource Query = ResourceFactory.createResource(Terms.Query);
 
 
-    public static final Property text = ResourceFactory.createProperty(Strs.text);
-    public static final Property resultCount = ResourceFactory.createProperty(Strs.resultCount);
-    public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Strs.hasStructuralFeatures);
-    public static final Property hasSpin = ResourceFactory.createProperty(Strs.hasSpin);
-    public static final Property hasTp = ResourceFactory.createProperty(Strs.hasTp);
-    public static final Property hasBGP = ResourceFactory.createProperty(Strs.hasBgp);
+    public static final Property text = ResourceFactory.createProperty(Terms.text);
+    public static final Property resultCount = ResourceFactory.createProperty(Terms.resultCount);
+    public static final Property hasStructuralFeatures = ResourceFactory.createProperty(Terms.hasStructuralFeatures);
+    public static final Property hasSpin = ResourceFactory.createProperty(Terms.hasSpin);
+    public static final Property hasTp = ResourceFactory.createProperty(Terms.hasTp);
+    public static final Property hasBGP = ResourceFactory.createProperty(Terms.hasBgp);
 
-    public static final Property hasBGPNode = ResourceFactory.createProperty(Strs.hasBgpNode);
+    public static final Property hasBGPNode = ResourceFactory.createProperty(Terms.hasBgpNode);
 
     //public static final Property tpText = property("tpText");
     //public static final Property triplePatternResultSize = property("triplePatternResultSize");
-    public static final Property execError = ResourceFactory.createProperty(Strs.execError);
-    public static final Property processingError = ResourceFactory.createProperty(Strs.processingError);
-    public static final Property parseError = ResourceFactory.createProperty(Strs.parseError);
-    public static final Property runTimeMs = ResourceFactory.createProperty(Strs.runTimeMs);
+    public static final Property execError = ResourceFactory.createProperty(Terms.execError);
+    public static final Property processingError = ResourceFactory.createProperty(Terms.processingError);
+    public static final Property parseError = ResourceFactory.createProperty(Terms.parseError);
+    public static final Property runTimeMs = ResourceFactory.createProperty(Terms.runTimeMs);
 
-    public static final Property benchmarkRun = ResourceFactory.createProperty(Strs.benchmarkRun);
+    public static final Property benchmarkRun = ResourceFactory.createProperty(Terms.benchmarkRun);
 
-    public static final Property hasExec = ResourceFactory.createProperty(Strs.hasExec);
-    public static final Property hasLocalExec = ResourceFactory.createProperty(Strs.hasLocalExec);
-    public static final Property hasRemoteExec = ResourceFactory.createProperty(Strs.hasRemoteExec);
+    public static final Property hasExec = ResourceFactory.createProperty(Terms.hasExec);
+    public static final Property hasLocalExec = ResourceFactory.createProperty(Terms.hasLocalExec);
+    public static final Property hasRemoteExec = ResourceFactory.createProperty(Terms.hasRemoteExec);
 
-    public static final Property hasBgpExec = ResourceFactory.createProperty(Strs.hasBgpExec);
-    public static final Property hasTpExec = ResourceFactory.createProperty(Strs.hasTpExec);
-    public static final Property hasJoinVarExec = ResourceFactory.createProperty(Strs.hasJoinVarExec);
+    public static final Property hasBgpExec = ResourceFactory.createProperty(Terms.hasBgpExec);
+    public static final Property hasTpExec = ResourceFactory.createProperty(Terms.hasTpExec);
+    public static final Property hasJoinVarExec = ResourceFactory.createProperty(Terms.hasJoinVarExec);
 
     // Execution
     // Selectivity of a triple pattern in regard to the whole data set
     // TODO Rename to tpSelectivity(GraphRestricted)
-    public static final Property tpSel = ResourceFactory.createProperty(Strs.tpToGraphRatio);
+    public static final Property tpSel = ResourceFactory.createProperty(Terms.tpToGraphRatio);
 
     // Selectivity of a triple pattern in regard to the BGP in which it occurrs
-    public static final Property tpSelBGPRestricted = ResourceFactory.createProperty(Strs.tpSelBGPRestricted);
+    public static final Property tpSelBGPRestricted = ResourceFactory.createProperty(Terms.tpSelBGPRestricted);
 
     // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
-    public static final Property tpSelJoinVarRestricted = ResourceFactory.createProperty(Strs.tpSelJoinVarRestricted);
+    public static final Property tpSelJoinVarRestricted = ResourceFactory.createProperty(Terms.tpSelJoinVarRestricted);
 
     // Similar to tpSelectivity, but considering immediate filters present on it
     // (maybe only those filters for which indexes can be used)
@@ -297,7 +297,7 @@ public class LSQ {
     // TODO This is PROV vocab
     //public static final Property wasAssociatedWith = property("wasAssociatedWith");
 
-    public static final Property usesFeature = property(Strs.usesFeature);
+    public static final Property usesFeature = property(Terms.usesFeature);
 
     public static final Property triplePath = property("triplePath");
 
@@ -311,8 +311,8 @@ public class LSQ {
 
     public static final Property dataset = property("dataset");
 
-    public static final Property endpoint = ResourceFactory.createProperty(Strs.endpoint);
-    public static final Property userAgent = ResourceFactory.createProperty(Strs.userAgent);
+    public static final Property endpoint = ResourceFactory.createProperty(Terms.endpoint);
+    public static final Property userAgent = ResourceFactory.createProperty(Terms.userAgent);
 
 
     // TODO This is actually the vocab for apache log parsing - move it elsewhere
@@ -321,15 +321,15 @@ public class LSQ {
 
     public static final Property pattern = property("pattern");
 
-    public static final Property sequenceId = ResourceFactory.createProperty(Strs.sequenceId);
+    public static final Property sequenceId = ResourceFactory.createProperty(Terms.sequenceId);
 
 
     /**
      * logRecord: String representation of the original log entry - usually a line
      */
     public static final Property logRecord = property("logRecord");
-    public static final Property host = ResourceFactory.createProperty(Strs.host);
-    public static final Property hostHash = ResourceFactory.createProperty(Strs.hostHash);
+    public static final Property host = ResourceFactory.createProperty(Terms.host);
+    public static final Property hostHash = ResourceFactory.createProperty(Terms.hostHash);
     //public static final Property timestamp = ResourceFactory.createProperty(Strs.timestamp);
 
     public static final Property user = property("user");
@@ -343,7 +343,7 @@ public class LSQ {
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
     public static final Property statusCode = property("statusCode");
-    public static final Property execStatus = ResourceFactory.createProperty(Strs.execStatus);
+    public static final Property execStatus = ResourceFactory.createProperty(Terms.execStatus);
 
     public static final Property numResponseBytes = property("numResponseBytes");
 

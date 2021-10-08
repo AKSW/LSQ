@@ -50,6 +50,7 @@
 
 
 	<modules>
+		<module>lsq-model</module>
 		<module>lsq-parser</module>
 		<module>lsq-vocab-jena</module>
 		<module>lsq-core</module>
@@ -85,6 +86,13 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
 
 			<!-- <dependency> -->
 			<!-- <groupId>org.aksw.rdf-processing-toolkit</groupId> -->

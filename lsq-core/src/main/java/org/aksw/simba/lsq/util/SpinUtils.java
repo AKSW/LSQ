@@ -5,7 +5,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -19,13 +18,13 @@ import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
 import org.aksw.simba.lsq.core.QueryStatistics2;
+import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -37,7 +36,6 @@ import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
 import org.topbraid.spin.model.TriplePattern;
-import org.topbraid.spin.model.Variable;
 import org.topbraid.spin.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -104,7 +102,7 @@ public class SpinUtils {
     public static final Concept objects = Concept.create("PREFIX sp: <http://spinrdf.org/sp#>", "y", "?x sp:object ?y");
 
     public static Map<Node, RDFNode> indexTripleNodes(org.topbraid.spin.model.Triple t) {
-        Triple jt = SpinUtils.toJenaTriple(t);
+        Triple jt = SpinCoreUtils.toJenaTriple(t);
         Map<Node, RDFNode> result = new HashMap<>();
         result.put(jt.getSubject(), t.getSubject());
         result.put(jt.getPredicate(), t.getPredicate());
@@ -114,7 +112,7 @@ public class SpinUtils {
     }
 
     public static Map<RDFNode, Node> indexTripleNodes2(org.topbraid.spin.model.Triple t) {
-        Triple jt = SpinUtils.toJenaTriple(t);
+        Triple jt = SpinCoreUtils.toJenaTriple(t);
         Map<RDFNode, Node> result = new HashMap<>();
         result.put(t.getSubject(), jt.getSubject());
         result.put(t.getPredicate(), jt.getPredicate());
@@ -210,7 +208,7 @@ public class SpinUtils {
                         t -> {
                             Set<org.topbraid.spin.model.Triple> tmp = indexTriplePatterns(t);
                             BasicPattern r = new BasicPattern();
-                            tmp.forEach(x -> r.add(toJenaTriple(x)));
+                            tmp.forEach(x -> r.add(SpinCoreUtils.toJenaTriple(x)));
                             return r;
                         }));
 
@@ -253,17 +251,6 @@ public class SpinUtils {
         return result;
     }
 
-    public static Node toNode(RDFNode node) {
-        Node result = node.canAs(Variable.class)
-            ? Var.alloc(node.as(Variable.class).getName())
-            : node.asNode();
-        return result;
-    }
-
-    public static Triple toJenaTriple(org.topbraid.spin.model.Triple t) {
-        Triple result = new Triple(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
-        return result;
-    }
 
 //    public static Set<org.topbraid.spin.model.Triple> indexTriplePatterns2(Resource res) {
 //        Model spinModel = ResourceUtils.reachableClosure(res);
@@ -292,7 +279,7 @@ public class SpinUtils {
         Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach(r -> r.inModel(queryRes.getModel())
-                .addProperty(RDFS.label, FmtUtils.stringForTriple(toJenaTriple(r)) + " .")
+                .addProperty(RDFS.label, FmtUtils.stringForTriple(SpinCoreUtils.toJenaTriple(r)) + " .")
                 // .addProperty(RDFS.label, TripleUtils.toNTripleString(t))
                 );
                 //.addProperty(LSQ.triplePatternText, TripleUtils.toNTripleString(t)));
@@ -304,7 +291,7 @@ public class SpinUtils {
         Set<org.topbraid.spin.model.Triple> triplePatternIndex = indexTriplePatterns(spinModel);
 
         triplePatternIndex.forEach(r -> {
-            int tripleCount = fetchTriplePatternExtensionSize(dataQef, toJenaTriple(r));
+            int tripleCount = fetchTriplePatternExtensionSize(dataQef, SpinCoreUtils.toJenaTriple(r));
             //double selectivity = tripleCount / (double)totalTripleCount;
 
             spinModel.add(r, LSQ.resultCount, spinModel.createTypedLiteral(tripleCount));
@@ -415,7 +402,7 @@ public class SpinUtils {
 
         for(Resource tpExecRes : tpExecRess) {
             org.topbraid.spin.model.Triple spinTriple = tpExecRes.getProperty(LSQ.hasTp).getObject().as(TriplePattern.class);
-            Triple triple = toJenaTriple(spinTriple);
+            Triple triple = SpinCoreUtils.toJenaTriple(spinTriple);
 
             long count = countTriplePattern(qef, triple);
 
@@ -539,45 +526,6 @@ public class SpinUtils {
     }
 
 
-    /**
-     * Reads a single object for a given subject - predicate pair and
-     * maps the corresponding object through a transformation function.
-     *
-     * Convenience function. model.listObjectsOfProperty(s, p).toList().stream().map(
-     *
-     *
-     *
-     * @param model
-     * @param s
-     * @param p
-     * @param fn
-     * @return
-     */
-    public static Optional<RDFNode> readObject(Resource s, Property p) {
-        Optional<RDFNode> result = s.listProperties(p).toList().stream()
-                .map(stmt -> stmt.getObject())
-                .findFirst();
-
-        //T result = tmp.isPresent() ? tmp.get() : null;
-        return result;
-    }
-
-    /**
-     * If the node is a variable, returns the variable.
-     * Otherwise returns the given node
-     *
-     * @param model
-     * @param rdfNode
-     * @return
-     */
-    public static Node readNode(RDFNode rdfNode, Map<RDFNode, Node> rdfNodeToNode) {
-        Node result = rdfNodeToNode == null
-                ? SpinUtils.readNode(rdfNode)
-                : rdfNodeToNode.computeIfAbsent(rdfNode, SpinUtils::readNode);
-
-        return result;
-    }
-
     public static Set<RDFNode> listRDFNodes(org.topbraid.spin.model.Triple triple) {
         Set<RDFNode> result = new LinkedHashSet<>();
         result.add(triple.getSubject());
@@ -600,33 +548,6 @@ public class SpinUtils {
                 result = tgtModel.asRDFNode(node);
             }
         }
-
-        return result;
-    }
-
-    public static Node readNode(RDFNode rdfNode) {
-        Node result = null;
-        if(rdfNode != null && rdfNode.isResource()) {
-            Resource r = rdfNode.asResource();
-            String varName = org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.getLiteralPropertyValue(r, SP.varName, String.class);
-            if(varName != null) {
-                result = Var.alloc(varName);
-            }
-        }
-
-        result = result == null ? rdfNode.asNode() : result;
-
-        return result;
-    }
-
-    public static Optional<Triple> readTriple(Resource r, Map<RDFNode, Node> modelToNode) {
-        Node s = readObject(r, SP.subject).map(x -> readNode(x, modelToNode)).orElse(null);
-        Node p = readObject(r, SP.predicate).map(x -> readNode(x, modelToNode)).orElse(null);
-        Node o = readObject(r, SP.object).map(x -> readNode(x, modelToNode)).orElse(null);
-
-        Optional<Triple> result = s == null || p == null || o == null
-                ? Optional.empty()
-                : Optional.of(new Triple(s, p, o));
 
         return result;
     }

@@ -27,6 +27,7 @@ import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.ModelUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
+import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
@@ -1050,7 +1051,7 @@ public class LsqProcessor
                 Map<org.topbraid.spin.model.Triple, Element> resToEl = e.getValue().stream()
                         .collect(Collectors.toMap(
                                 r -> r,
-                                r -> ElementUtils.createElement(SpinUtils.toJenaTriple(r))));
+                                r -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(r))));
 
 
                 Set<Var> bgpVars = resToEl.values().stream()
@@ -1157,7 +1158,7 @@ public class LsqProcessor
             // We need to create observation resources for each variable in each bgp
             for(Entry<Resource, org.topbraid.spin.model.Triple> e : bgpToTps.entries()) {
                 org.topbraid.spin.model.Triple t = e.getValue();
-                org.apache.jena.graph.Triple tr = SpinUtils.toJenaTriple(t);
+                org.apache.jena.graph.Triple tr = SpinCoreUtils.toJenaTriple(t);
 
                 Set<Var> vars;
 

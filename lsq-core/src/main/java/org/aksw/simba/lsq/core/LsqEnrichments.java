@@ -9,7 +9,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
+import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.BgpNode;
@@ -42,6 +42,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.core.Var;
@@ -58,8 +60,6 @@ import org.topbraid.spin.vocabulary.SP;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import com.google.common.io.BaseEncoding;
-
-import io.reactivex.rxjava3.core.Maybe;
 
 public class LsqEnrichments {
 
@@ -159,7 +159,7 @@ public class LsqEnrichments {
 
 
                         List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
-                                .filter(tp -> TripleUtils.streamNodes(SpinUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
+                                .filter(tp -> TripleUtils.streamNodes(SpinCoreUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
                                 .collect(Collectors.toList());
                         // Do not generate empty subBgps
     //                    if(!subBgpTps.isEmpty()) {
@@ -198,7 +198,7 @@ public class LsqEnrichments {
                 Set<RDFNode> rdfNodes = SpinUtils.listRDFNodes(tp);
 //                logger.info("triple pattern: " + tp);
                 for(RDFNode rdfNode : rdfNodes) {
-                    Node node = SpinUtils.readNode(rdfNode);
+                    Node node = org.aksw.simba.lsq.model.util.SpinCoreUtils.readNode(rdfNode);
 //                    logger.info("Read bgp node " + rdfNode + " -> " + node);
 
                     // Compute bgpNodes for all RDF terms - not just variables!
@@ -365,7 +365,16 @@ public class LsqEnrichments {
             String queryStr = lsqQuery.getText();
             Objects.requireNonNull(queryStr, "Query string must not be null");
 
-            Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+            Query query;
+            try {
+                query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+            } catch (Exception e) {
+                logger.error("Dumping LsqQuery with non-parseable sparql query string:");
+                // TODO Write to logger
+                RDFDataMgr.write(System.err, lsqQuery.getModel(), RDFFormat.TURTLE_PRETTY);
+
+                throw new IllegalArgumentException("An LsqQuery with a non-parsable sparql query string was provided.", e);
+            }
 
             PrefixMapping prefixMapping = query.getPrefixMapping();
 
@@ -442,19 +451,19 @@ public class LsqEnrichments {
             return lsqQuery;
     }
 
-    
+
     public static Resource skolemizeSpin(Resource spinQuery) {
-    	return skolemizeSpin(spinQuery, "http://lsq.aksw.org/spin-");
+        return skolemizeSpin(spinQuery, "http://lsq.aksw.org/spin-");
     }
-    
+
     public static Resource skolemizeSpin(Resource spinQuery, String prefix) {
         Resource result = Skolemize.skolemizeTree(spinQuery, false,
                 (r, hashCode) -> prefix + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                 (r, d) -> true).asResource();
-        
+
         return result;
     }
-    
+
     /**
      * Analyze the query for a set of structural features (e.g. use of optional,
      * union, exists, etc...) and attach them to the given resource
@@ -784,7 +793,7 @@ public class LsqEnrichments {
         Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
 
         for (org.topbraid.spin.model.Triple st : spinTriples) {
-            Triple t = SpinUtils.toJenaTriple(st);
+            Triple t = SpinCoreUtils.toJenaTriple(st);
             // Get the triple's nodes
             Node s = t.getSubject();
             Node p = t.getPredicate();

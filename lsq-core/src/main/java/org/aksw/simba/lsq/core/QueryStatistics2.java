@@ -24,12 +24,10 @@ import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.MapUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
-import org.aksw.simba.lsq.spinx.model.DirectedHyperEdge;
+import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.spinx.model.Bgp;
-import org.aksw.simba.lsq.spinx.model.BgpNode;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.NestedResource;
-import org.aksw.simba.lsq.util.SpinUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -57,7 +55,6 @@ import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementGroup;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.PatternVars;
-import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -145,7 +142,7 @@ public class QueryStatistics2 {
      * @return
      */
     public static Map<org.topbraid.spin.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<? extends org.topbraid.spin.model.Triple> triples) {
-        Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)));
+        Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(t)));
 
         Map<org.topbraid.spin.model.Triple, Long> result = fetchRestrictedResultSetRowCount(qef, map);
         return result;
@@ -154,7 +151,7 @@ public class QueryStatistics2 {
 
     public static Map<Var, Long> fetchCountVarJoin(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
         Set<Element> map = triples.stream()
-                .map(t -> ElementUtils.createElement(SpinUtils.toJenaTriple(t)))
+                .map(t -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(t)))
                 .collect(Collectors.toSet());
 
         Map<Var, Long>  result = fetchCountJoinVarGroup(qef, map);
