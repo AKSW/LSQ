@@ -344,8 +344,13 @@ public class MainCliLsq {
 
         Flowable<Dataset> dsFlow = flow.map(rid -> {
             LsqQuery q = rid.as(LsqQuery.class);
-            LsqEnrichments.enrichWithFullSpinModelCore(q);
-            LsqEnrichments.enrichWithStaticAnalysis(q);
+
+            if (q.getParseError() == null) {
+
+                LsqEnrichments.enrichWithFullSpinModelCore(q);
+                LsqEnrichments.enrichWithStaticAnalysis(q);
+            }
+
             // TODO createLsqRdfFlow already performs skolemize; duplicated effort
             LsqUtils.skolemize(rid, rdfizeCmd.baseIri, LsqQuery.class);
             return rid;
