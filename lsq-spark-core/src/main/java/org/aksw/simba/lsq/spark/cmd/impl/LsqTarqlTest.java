@@ -12,9 +12,9 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-import net.sansa_stack.query.spark.io.input.csv.CsvDataSources;
-import net.sansa_stack.query.spark.rdd.op.JavaRddOfBindingsOps;
-import net.sansa_stack.rdf.spark.io.RddRdfSaver;
+import net.sansa_stack.spark.io.csv.input.CsvDataSources;
+import net.sansa_stack.spark.io.rdf.output.RddRdfSaver;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
 
 public class LsqTarqlTest {
 

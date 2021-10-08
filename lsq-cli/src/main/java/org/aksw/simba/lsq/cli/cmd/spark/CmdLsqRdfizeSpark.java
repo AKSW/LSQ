@@ -11,8 +11,8 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import net.sansa_stack.rdf.spark.io.LsqSparkIo;
 import net.sansa_stack.rdf.spark.io.LsqSparkUtils;
-import net.sansa_stack.rdf.spark.io.RddRdfSaver;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfResourcesOps;
+import net.sansa_stack.spark.io.rdf.output.RddRdfSaver;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfResourcesOps;
 import picocli.CommandLine.Command;
 
 @Command(name = "rdfize", description = "RDFize query logs")

@@ -44,12 +44,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Streams;
 
-import net.sansa_stack.rdf.spark.io.RddRdfSaver;
-import net.sansa_stack.rdf.spark.io.input.api.RdfSource;
-import net.sansa_stack.rdf.spark.io.input.api.RdfSourceFactory;
-import net.sansa_stack.rdf.spark.io.input.impl.RdfSourceFactoryImpl;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
+import net.sansa_stack.spark.io.rdf.input.api.RdfSource;
+import net.sansa_stack.spark.io.rdf.input.api.RdfSourceFactory;
+import net.sansa_stack.spark.io.rdf.input.impl.RdfSourceFactoryImpl;
+import net.sansa_stack.spark.io.rdf.output.RddRdfSaver;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfNamedModelsOps;
 
 
 

@@ -19,11 +19,11 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import com.google.common.collect.Streams;
 
-import net.sansa_stack.query.spark.io.input.csv.CsvDataSources;
-import net.sansa_stack.query.spark.rdd.op.JavaRddOfBindingsOps;
-import net.sansa_stack.rdf.spark.rdd.function.JavaRddFunction;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
+import net.sansa_stack.spark.io.csv.input.CsvDataSources;
+import net.sansa_stack.spark.rdd.function.JavaRddFunction;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfNamedModelsOps;
 
 
 public class CsvParserSpark {

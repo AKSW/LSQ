@@ -47,10 +47,10 @@ import com.google.common.collect.TreeMultimap;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.FlowableTransformer;
-import net.sansa_stack.rdf.spark.rdd.function.JavaRddFunction;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
-import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfResourcesOps;
+import net.sansa_stack.spark.rdd.function.JavaRddFunction;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfNamedModelsOps;
+import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfResourcesOps;
 
 
 public class LsqSparkIo {

@@ -19,10 +19,10 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 
-import net.sansa_stack.query.spark.io.input.csv.CsvDataSources;
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark;
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark.BindingToResourceTransform;
-import net.sansa_stack.rdf.spark.rdd.function.JavaRddFunction;
+import net.sansa_stack.spark.io.csv.input.CsvDataSources;
+import net.sansa_stack.spark.rdd.function.JavaRddFunction;
 
 
 /** Process the LSQ registry such that it can ingest spark sources */
