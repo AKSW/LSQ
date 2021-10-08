@@ -10,24 +10,22 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.lambda.serializable.SerializableFunction;
+import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.rx.op.RxOps;
 import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
 import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -40,14 +38,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
+import com.google.common.collect.Streams;
 import com.google.common.collect.TreeMultimap;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.FlowableTransformer;
-import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark.JavaRddFunction;
+import net.sansa_stack.rdf.spark.rdd.function.JavaRddFunction;
 import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
 import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
 import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfResourcesOps;
@@ -68,13 +68,13 @@ public class LsqSparkIo {
      */
     public static JavaRDD<Resource> createReader(
             String logSource,
-            Function<String, SparqlStmt> sparqlStmtParser,
+            SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp,
             String logFormat,
             Map<String, SourceOfRddOfResources> logFmtRegistry,
             String baseIri,
             String hostHashSalt,
             String serviceUrl,
-            Function<String, String> hashFn
+            SerializableFunction<String, String> hashFn
             ) throws Exception {
 
         Lang lang = logFormat == null
@@ -162,15 +162,19 @@ public class LsqSparkIo {
 
                     return r;
                 })
-                .flatMap(record -> {
-                    Optional<Resource> r;
-                    try {
-                        r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
-                    } catch (Exception e) {
-                        logger.warn("Internal error; trying to continue", e);
-                        r = Optional.empty();
-                    }
-                    return r.map(Collections::singleton).orElse(Collections.emptySet()).iterator();
+                .mapPartitions(it -> {
+                    SparqlStmtParser sparqlStmtParser = sparqlStmtParserSupp.get();
+
+                    return Streams.stream(it).flatMap(record -> {
+                        Optional<Resource> r;
+                        try {
+                            r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                        } catch (Exception e) {
+                            logger.warn("Internal error; trying to continue", e);
+                            r = Optional.empty();
+                        }
+                        return r.map(Collections::singleton).orElse(Collections.emptySet()).stream();
+                    }).iterator();
                 });
         }
 
@@ -260,15 +264,17 @@ public class LsqSparkIo {
 
 
         List<String> rawPrefixSources = rdfizeCmd.getPrefixSources();
-        Iterable<String> prefixSources = LsqUtils.prependDefaultPrefixSources(rawPrefixSources);
-        Function<String, SparqlStmt> sparqlStmtParser = LsqUtils.createSparqlParser(prefixSources);
+        Iterable<String> prefixSources = Lists.newArrayList(LsqUtils.prependDefaultPrefixSources(rawPrefixSources));
+
+        // FIXME The prefixes need to be serialized in the driver!
+        SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp = () -> LsqUtils.createSparqlParser(prefixSources);
 
 
         Map<String, SourceOfRddOfResources> logFmtRegistry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sc);
 
 
         // Hash function which is applied after combining host names with salts
-        Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
+        SerializableFunction<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
 
@@ -278,7 +284,7 @@ public class LsqSparkIo {
                 try {
                     r = LsqSparkIo.createReader(
                         logSource,
-                        sparqlStmtParser,
+                        sparqlStmtParserSupp,
                         logFormat,
                         logFmtRegistry,
                         baseIri,

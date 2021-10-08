@@ -2,7 +2,6 @@ package net.sansa_stack.rdf.spark.io.csv;
 
 import java.io.IOException;
 
-import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -20,73 +19,14 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import com.google.common.collect.Streams;
 
-import net.sansa_stack.query.spark.io.input.csv.CsvSources;
+import net.sansa_stack.query.spark.io.input.csv.CsvDataSources;
 import net.sansa_stack.query.spark.rdd.op.JavaRddOfBindingsOps;
+import net.sansa_stack.rdf.spark.rdd.function.JavaRddFunction;
 import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfDatasetsOps;
 import net.sansa_stack.rdf.spark.rdd.op.JavaRddOfNamedModelsOps;
 
 
 public class CsvParserSpark {
-
-    @FunctionalInterface
-    public interface JavaRddFunction<I, O>
-        extends SerializableFunction<JavaRDD<I>, JavaRDD<O>> {
-
-        default <X> JavaRddFunction<I, X> andThen(JavaRddFunction<O, X> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        default <K, V> ToJavaPairRddFunction<I, K, V> toPairRdd(ToJavaPairRddFunction<O, K, V> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        public static <I> JavaRddFunction<I, I> identity() {
-            return x -> x;
-        }
-    }
-
-    @FunctionalInterface
-    public interface ToJavaPairRddFunction<I, K, V>
-        extends SerializableFunction<JavaRDD<I>, JavaPairRDD<K, V>> {
-
-        default <KO, VO> ToJavaPairRddFunction<I, KO, VO> andThen(JavaPairRddFunction<K, V, KO, VO> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        default <O> JavaRddFunction<I, O> toRdd(ToJavaRddFunction<K, V, O> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-    }
-
-    @FunctionalInterface
-    public interface ToJavaRddFunction<K, V, O>
-        extends SerializableFunction<JavaPairRDD<K, V>, JavaRDD<O>> {
-
-        default <X> ToJavaRddFunction<K, V, X> andThen(JavaRddFunction<O, X> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        default <KX, VX> JavaPairRddFunction<K, V, KX, VX> toPairRdd(ToJavaPairRddFunction<O, KX, VX> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-    }
-
-    @FunctionalInterface
-    public interface JavaPairRddFunction<KI, VI, KO, VO>
-        extends SerializableFunction<JavaPairRDD<KI, VI>, JavaPairRDD<KO, VO>> {
-
-        default <KX, VX> JavaPairRddFunction<KI, VI, KX, VX> andThen(JavaPairRddFunction<KO, VO, KX, VX> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        default <X> ToJavaRddFunction<KI, VI, X> toRdd(ToJavaRddFunction<KO, VO, X> next) {
-            return rdd -> next.apply(this.apply(rdd));
-        }
-
-        public static <K, V> JavaPairRddFunction<K, V, K, V> identity() {
-            return x -> x;
-        }
-    }
 
 
 
@@ -107,7 +47,7 @@ public class CsvParserSpark {
     }
 
     public static JavaRDD<Resource> loadMappedCsv(JavaSparkContext sc, String path, CSVFormat csvFormat, Query query) throws IOException {
-        JavaRDD<Binding> rdd = CsvSources.createRddOfBindings(sc, path, csvFormat);
+        JavaRDD<Binding> rdd = CsvDataSources.createRddOfBindings(sc, path, csvFormat);
 
         return newTransformerBindingToResource(query).apply(rdd);
     }

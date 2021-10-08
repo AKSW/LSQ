@@ -12,7 +12,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-import net.sansa_stack.query.spark.io.input.csv.CsvSources;
+import net.sansa_stack.query.spark.io.input.csv.CsvDataSources;
 import net.sansa_stack.query.spark.rdd.op.JavaRddOfBindingsOps;
 import net.sansa_stack.rdf.spark.io.RddRdfSaver;
 
@@ -74,7 +74,7 @@ public class LsqTarqlTest {
 
         String path = "/home/raven/Datasets/bio2rdf_sparql_logs_processed_01-2019_to_07-2021.csv";
 
-        JavaRDD<Binding> bindingRdd = CsvSources.createRddOfBindings(sc, path, baseCsvFormat);
+        JavaRDD<Binding> bindingRdd = CsvDataSources.createRddOfBindings(sc, path, baseCsvFormat);
 
 
 

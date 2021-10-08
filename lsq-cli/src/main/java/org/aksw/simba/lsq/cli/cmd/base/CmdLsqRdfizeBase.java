@@ -3,12 +3,9 @@ package org.aksw.simba.lsq.cli.cmd.base;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
 
-import org.aksw.simba.lsq.cli.main.MainCliLsq;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 
-import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
