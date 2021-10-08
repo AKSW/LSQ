@@ -7,7 +7,7 @@ import org.aksw.simba.lsq.cli.main.MainCliLsq;
 
 import picocli.CommandLine.Command;
 
-@Command(name = "rdfize", description = "RDFize query logs")
+@Command(name = "rdfize", description = "RDFize query logs into query centric named graphs")
 public class CmdLsqRdfizeRx
     extends CmdLsqRdfizeBase
     implements Callable<Integer>
