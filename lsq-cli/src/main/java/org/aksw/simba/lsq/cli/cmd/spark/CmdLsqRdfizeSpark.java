@@ -3,9 +3,11 @@ package org.aksw.simba.lsq.cli.cmd.spark;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
+import org.aksw.jena_sparql_api.rx.RDFLanguagesEx;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -29,6 +31,9 @@ public class CmdLsqRdfizeSpark
     @Override
     public Integer call() throws Exception {
 
+        RDFFormat fmt = Optional.ofNullable(RDFLanguagesEx.findRdfFormat(outputSpec.outFormat))
+            .orElseThrow(() -> new IllegalAccessException("Unknown format: " + outputSpec.outFormat));
+
         JavaSparkContext sc = LsqSparkUtils.createSparkContext(conf -> {
             Optional.ofNullable(getTemporaryDirectory()).ifPresent(v -> conf.set("spark.local.dir", v));
         });
@@ -37,7 +42,7 @@ public class CmdLsqRdfizeSpark
 
         RddRdfSaver.createForDataset(logRdfEvents)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
-            .setOutputFormat(outputSpec.outFormat)
+            .setOutputFormat(fmt)
             // .setOutputFormat(cmd.getOutFormat())
             .setMapQuadsToTriplesForTripleLangs(true)
             // .setAllowOverwriteFiles(true)
