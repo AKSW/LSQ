@@ -154,8 +154,8 @@ public class LsqSparkIo {
                 .zipWithIndex()
                 // Add the zipped index to the resource
                 .map(e -> {
-                    Resource r = e._1();
-                    Long idx = e._2();
+                    Resource r = e._1;
+                    Long idx = e._2;
 
                     RemoteExecution re = r.as(RemoteExecution.class);
                     re.setSequenceId(idx);

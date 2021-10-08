@@ -46,6 +46,7 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
+import org.aksw.jena_sparql_api.util.iri.PrefixMappingTrie;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
 import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
@@ -793,14 +794,14 @@ public class LsqUtils {
     }
 
     public static SparqlStmtParser createSparqlParser(Iterable<String> prefixSources) {
-        PrefixMapping prefixMapping = new PrefixMappingImpl();
+        PrefixMapping prefixMapping = new PrefixMappingTrie();
         for(String source : prefixSources) {
             PrefixMapping tmp = RDFDataMgr.loadModel(source);
             prefixMapping.setNsPrefixes(tmp);
         }
 
         SparqlStmtParser result = SparqlStmtParserImpl.create(
-                Syntax.syntaxARQ, prefixMapping, true);
+                Syntax.syntaxARQ, null, prefixMapping, true);
 
         return result;
     }
