@@ -25,7 +25,7 @@ public class LsqCmdSparkImpls {
         }
 
 
-        JavaSparkContext sc = LsqSparkUtils.createSparkContext();
+        JavaSparkContext sc = LsqSparkUtils.createSparkContext(conf -> {});
 
         Map<String, SourceOfRddOfResources> registry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sc);
 
