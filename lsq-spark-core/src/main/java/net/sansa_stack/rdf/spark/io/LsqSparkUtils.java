@@ -1,12 +1,14 @@
 package net.sansa_stack.rdf.spark.io;
 
+import java.util.function.Consumer;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
 public class LsqSparkUtils {
 
-    public static JavaSparkContext createSparkContext() {
+    public static JavaSparkContext createSparkContext(Consumer<? super SparkConf> confCallback) {
         SparkConf sparkConf = new SparkConf()
             .setAppName("Lsq")
             .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
@@ -18,6 +20,7 @@ public class LsqSparkUtils {
             //		mapreduce.input.fileinputformat.split.minsize
             ;
 
+        confCallback.accept(sparkConf);
         sparkConf.setMaster("local[*]");
 
         SparkSession ss = SparkSession.builder().config(sparkConf).getOrCreate();
