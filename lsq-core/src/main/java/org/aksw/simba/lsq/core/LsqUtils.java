@@ -681,6 +681,10 @@ public class LsqUtils {
 //            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
             Resource r = skolemize(queryInDataset, baseIri, LsqQuery.class);
+
+            // At latest after skolemization the sequence id is no longer needed
+            re.setSequenceId(null);
+
             result = Optional.of(r);
 
 //            RDFDataMgr.write(System.out, dataset, RDFFormat.NQUADS);

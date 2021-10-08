@@ -157,6 +157,8 @@ public class LsqSparkIo {
                     Resource r = e._1;
                     Long idx = e._2;
 
+                    // Temporarily add the sequence id. For records without timestamp
+                    // the sequence id is used as a fallback
                     RemoteExecution re = r.as(RemoteExecution.class);
                     re.setSequenceId(idx);
 
@@ -166,6 +168,7 @@ public class LsqSparkIo {
                     SparqlStmtParser sparqlStmtParser = sparqlStmtParserSupp.get();
 
                     return Streams.stream(it).flatMap(record -> {
+
                         Optional<Resource> r;
                         try {
                             r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
@@ -173,6 +176,7 @@ public class LsqSparkIo {
                             logger.warn("Internal error; trying to continue", e);
                             r = Optional.empty();
                         }
+
                         return r.map(Collections::singleton).orElse(Collections.emptySet()).stream();
                     }).iterator();
                 });
