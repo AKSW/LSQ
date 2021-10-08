@@ -12,7 +12,7 @@ public class LsqSparkUtils {
             .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
             .set("spark.kryoserializer.buffer.max", "1000") // MB
             .set("spark.kryo.registrator",
-                    String.join(", ", "net.sansa_stack.rdf.spark.io.JenaKryoRegistrator"))
+                    String.join(", ", "net.sansa_stack.spark.io.rdf.kryo.JenaKryoRegistrator"))
             .set("spark.sql.crossJoin.enabled", "true")
             // .set("spark.hadoop.mapred.max.split.size", "" + 4 * 1024 * 1024)
             //		mapreduce.input.fileinputformat.split.minsize
