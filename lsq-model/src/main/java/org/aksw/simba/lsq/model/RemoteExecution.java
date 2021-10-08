@@ -70,4 +70,7 @@ public interface RemoteExecution
     @HashId
     Long getSequenceId();
     RemoteExecution setSequenceId(Long value);
+
+    @Iri(LSQ.Terms.headers)
+    RemoteExecutionHeaders getHeaders();
 }

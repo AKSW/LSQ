@@ -12,6 +12,7 @@ import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.QualifiedFeature;
 import org.aksw.simba.lsq.model.QueryExec;
 import org.aksw.simba.lsq.model.RemoteExecution;
+import org.aksw.simba.lsq.model.RemoteExecutionHeaders;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.BgpExec;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
@@ -65,6 +66,7 @@ public class JenaPluginLsq
                 QualifiedFeature.class,
                 QueryExec.class,
                 RemoteExecution.class,
+                RemoteExecutionHeaders.class,
 
                 Bgp.class,
                 BgpExec.class,

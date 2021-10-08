@@ -69,7 +69,10 @@ public class LSQ {
         //public static final String tpText = ns + "tpText";
         //public static final String triplePatternResultSize = ns + "triplePatternResultSize";
 
+        public static final String headers = NS + "headers";
+
         // Vocab for benchmark statistics (TODO group with the other error reporting (threshold exceeded) predicates above)
+
         public static final String execStatus = NS + "execStatus";
 
         public static final String execError = NS + "execError";
@@ -338,7 +341,7 @@ public class LSQ {
     public static final Property requestPath = property("uri");
     public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
-    public static final Property headers = property("headers");
+    public static final Property headers = property(Terms.headers);
     public static final Property verb = property("verb");
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
