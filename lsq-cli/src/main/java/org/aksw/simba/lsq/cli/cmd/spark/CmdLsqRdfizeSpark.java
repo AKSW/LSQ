@@ -8,6 +8,7 @@ import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -33,6 +34,11 @@ public class CmdLsqRdfizeSpark
 
         RDFFormat fmt = Optional.ofNullable(RDFLanguagesEx.findRdfFormat(outputSpec.outFormat))
             .orElseThrow(() -> new IllegalAccessException("Unknown format: " + outputSpec.outFormat));
+
+
+        if (!StreamRDFWriter.registered(fmt)) {
+            throw new IllegalArgumentException(fmt + " is not a streaming format");
+        }
 
         JavaSparkContext sc = LsqSparkUtils.createSparkContext(conf -> {
             Optional.ofNullable(getTemporaryDirectory()).ifPresent(v -> conf.set("spark.local.dir", v));
