@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import org.aksw.commons.io.syscall.sort.SysSort;
 import org.aksw.commons.io.util.StdIo;
 import org.aksw.commons.io.util.UriToPathUtils;
+import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
@@ -35,6 +36,9 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.NodesInDataset;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
@@ -44,9 +48,6 @@ import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.io.resultset.NamedGraphStreamCliUtils;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.utils.dataset.GroupedResourceInDataset;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqAnalyze;
 import org.aksw.simba.lsq.cli.cmd.rx.CmdLsqBenchmarkCreate;
@@ -250,7 +251,7 @@ public class MainCliLsq {
             sortCmd.bufferSize = rdfizeCmd.bufferSize;
             sortCmd.temporaryDirectory = rdfizeCmd.temporaryDirectory;
 
-            FlowableTransformer<GroupedResourceInDataset, GroupedResourceInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
+            FlowableTransformer<NodesInDataset, NodesInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
             legacyLogRdfEvents = legacyLogRdfEvents
                     .compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
                     .compose(sorter)
@@ -331,6 +332,23 @@ public class MainCliLsq {
 
     }
 
+    public static SerializableFunction<Resource, Resource> createEnricher(String baseIri) {
+        return in -> {
+            LsqQuery q = in.as(LsqQuery.class);
+
+            if (q.getParseError() == null) {
+
+                LsqEnrichments.enrichWithFullSpinModelCore(q);
+                LsqEnrichments.enrichWithStaticAnalysis(q);
+            }
+
+            // TODO createLsqRdfFlow already performs skolemize; duplicated effort
+            Resource out = LsqUtils.skolemize(in, baseIri, LsqQuery.class, null);
+            return out;
+        };
+    }
+
+
     public static void analyze(CmdLsqAnalyze analyzeCmd) throws Exception {
         CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
@@ -342,17 +360,11 @@ public class MainCliLsq {
 
         Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
 
+        Function<Resource, Resource> enricher = createEnricher(rdfizeCmd.baseIri);
+
         Flowable<Dataset> dsFlow = flow.map(rid -> {
-            LsqQuery q = rid.as(LsqQuery.class);
-
-            if (q.getParseError() == null) {
-
-                LsqEnrichments.enrichWithFullSpinModelCore(q);
-                LsqEnrichments.enrichWithStaticAnalysis(q);
-            }
-
-            // TODO createLsqRdfFlow already performs skolemize; duplicated effort
-            LsqUtils.skolemize(rid, rdfizeCmd.baseIri, LsqQuery.class);
+            // TODO The enricher may in general rename the input resource due to skolemization - handle this case
+            enricher.apply(rid);
             return rid;
         })
 //        .map(ResourceInDatasetImpl::createFromCopyIntoResourceGraph)

@@ -3,8 +3,8 @@ package org.aksw.simba.lsq.cli.trash;
 import java.io.IOException;
 import java.util.Calendar;
 
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
 import org.aksw.simba.lsq.core.LsqConfigImpl;
 import org.aksw.simba.lsq.core.LsqProcessor;
 import org.aksw.simba.lsq.core.LsqUtils;

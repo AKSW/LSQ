@@ -38,6 +38,8 @@ import org.aksw.jena_sparql_api.delay.extra.DelayerDefault;
 import org.aksw.jena_sparql_api.io.json.RDFNodeJsonUtils;
 import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlQueryParserImpl;
@@ -50,8 +52,6 @@ import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
 import org.aksw.jena_sparql_api.util.iri.PrefixMappingTrie;
 import org.aksw.jena_sparql_api.utils.DatasetUtils;
 import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDataset;
-import org.aksw.jena_sparql_api.utils.model.ResourceInDatasetImpl;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.Mapper;
@@ -758,7 +758,9 @@ public class LsqUtils {
         NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), model);
         Resource result = model.asRDFNode(newRoot).asResource();
 
-        postProcessor.accept(result, renames);
+        if (postProcessor != null) {
+            postProcessor.accept(result, renames);
+        }
 
         return result;
     }
