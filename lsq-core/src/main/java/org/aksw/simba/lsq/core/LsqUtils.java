@@ -18,6 +18,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -680,10 +681,14 @@ public class LsqUtils {
 //            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
 //            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
-            Resource r = skolemize(queryInDataset, baseIri, LsqQuery.class);
+            Resource r = skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
+                Optional.ofNullable(renames.get(re.asNode()))
+                    .map(newRoot.getModel()::wrapAsResource)
+                    .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));
+            });
 
-            // At latest after skolemization the sequence id is no longer needed
-            re.setSequenceId(null);
+            // After skolemization the sequence id is no longer needed
+            // Remove it from the skolemized executon
 
             result = Optional.of(r);
 
@@ -693,6 +698,8 @@ public class LsqUtils {
 
 
         } else {
+            re.setSequenceId(null);
+
             result = Optional.empty();
         }
 
@@ -736,7 +743,8 @@ public class LsqUtils {
     public static <T extends RDFNode> Resource skolemize(
             Resource root,
             String baseIri,
-            Class<T> cls) {
+            Class<T> cls,
+            BiConsumer<Resource, Map<Node, Node>> postProcessor) {
         T q = root.as(cls);
         HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(q);
         Map<Node, Node> renames = hashIdCxt.getNodeMapping(baseIri);
@@ -749,6 +757,8 @@ public class LsqUtils {
         // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
         NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), model);
         Resource result = model.asRDFNode(newRoot).asResource();
+
+        postProcessor.accept(result, renames);
 
         return result;
     }

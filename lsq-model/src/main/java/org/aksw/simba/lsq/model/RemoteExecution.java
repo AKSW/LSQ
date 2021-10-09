@@ -16,26 +16,30 @@ import org.apache.jena.rdf.model.Resource;
 public interface RemoteExecution
     extends Resource
 {
-    @StringId
-    default String getStringId(HashIdCxt cxt) {
-
-        String serviceUrl = getEndpointUrl();
+    static String getLogEntryId(RemoteExecution re) {
+        String serviceUrl = re.getEndpointUrl();
 
         String serviceId = serviceUrl == null
                 ? "unknown-service"
                 : UriToPathUtils.resolvePath(serviceUrl).toString()
                 .replace('/', '-');
 
-        Long seqId = getSequenceId();
-        Calendar timestamp = getTimestamp();
+        Long seqId = re.getSequenceId();
+        Calendar timestamp = re.getTimestamp();
         // TODO If there is a timestamp then use it
         // Otherwise, use sourceFileName + sequenceId
         String logEntryId = serviceId + "_" + (timestamp != null
                 ? timestamp.toInstant().toString()
                 : seqId);
 
-        // String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "remoteExecution"
+        return logEntryId;
+    }
+
+    @StringId
+    default String getStringId(HashIdCxt cxt) {
         String prefix = "remoteExec";
+
+        String logEntryId = getLogEntryId(this);
         String result = prefix + "-" + logEntryId;
 
         return result;

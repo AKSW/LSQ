@@ -122,7 +122,7 @@ public class WebLogParser {
             // Hacky approach to convert datetime pattern to regex - based on
             // https://stackoverflow.com/questions/6928267/converting-simpledateformat-date-format-to-regular-expression
             String regexFormat = x.replaceAll("[mHsSdMy]", "\\\\d");
-            
+
             m.addField(PROV.atTime, regexFormat, rdfDatatype);
         });
 
@@ -160,7 +160,9 @@ public class WebLogParser {
 
         // Headers
         result.put("i", (m, x) -> {
-            Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
+            //FIXME Use a proper vocabulary for the headers
+
+            Property p = ResourceFactory.createProperty("http://lsq.aksw.org/header#" + x);
             Mapper subMapper = PropertyMapper.create(p, String.class);
 
             m.addField(LSQ.headers, "[^\"]*", subMapper, false);
@@ -176,7 +178,7 @@ public class WebLogParser {
             m.addField(LSQ.query, ".*", String.class);
         });
 
-        result.put("encsparql", (m, x) -> {        	
+        result.put("encsparql", (m, x) -> {
             m.addField(LSQ.query, "[^\\s]*", String.class, Converter.from(StringUtils::urlDecode, StringUtils::urlEncode));
         });
 
