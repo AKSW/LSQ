@@ -243,8 +243,8 @@
 				<groupId>org.aksw.jena-sparql-api</groupId>
 				<artifactId>jena-sparql-api-rx-io</artifactId>
 				<version>${jsa.version}</version>
-				<!-- This dependency depends on hadoop with everything execluded
-				So excluding its hadoop dependency excludes the excludes... -->
+				<!-- This dependency depends on hadoop with everything execluded So excluding 
+					its hadoop dependency excludes the excludes... -->
 				<exclusions>
 					<exclusion>
 						<groupId>org.apache.hadoop</groupId>
@@ -464,10 +464,6 @@
 								<createDependencyReducedPom>false</createDependencyReducedPom>
 								<shadedArtifactAttached>true</shadedArtifactAttached>
 								<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
-								<attach>false</attach>
-								<descriptorRefs>
-									<descriptorRef>jar-with-dependencies</descriptorRef>
-								</descriptorRefs>
 								<filters>
 									<filter>
 										<artifact>*:*</artifact>
@@ -526,6 +522,20 @@
 					<version>2.8.2</version>
 				</plugin>
 
+				<plugin>
+					<artifactId>jdeb</artifactId>
+					<groupId>org.vafer</groupId>
+					<version>1.9</version>
+					<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>jdeb</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				
 			</plugins>
 		</pluginManagement>
 	</build>
