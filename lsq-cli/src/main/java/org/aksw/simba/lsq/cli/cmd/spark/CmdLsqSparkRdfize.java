@@ -11,7 +11,7 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 
 @Command(name = "rdfize", description = "RDFize query logs")
-public class CmdLsqRdfizeSpark
+public class CmdLsqSparkRdfize
     extends CmdLsqRdfizeBase
     implements Callable<Integer>
 {

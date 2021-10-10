@@ -48,8 +48,8 @@ public class LsqSparkCmdUtils {
             rddRdfWriterFactory.forDataset(outRdd).runUnchecked();
     }
 
-    public static RxFunction<Tuple2<String, Model>, Resource> namedModelToResource() {
-        return RxFunction.<Tuple2<String, Model>>identity()
-                .andThenMap(t -> t._2().createResource(t._1()));
-    }
+//    public static RxFunction<Tuple2<String, Model>, Resource> namedModelToResource() {
+//        return RxFunction.<Tuple2<String, Model>>identity()
+//                .andThenMap(t -> t._2().createResource(t._1()));
+//    }
 }
