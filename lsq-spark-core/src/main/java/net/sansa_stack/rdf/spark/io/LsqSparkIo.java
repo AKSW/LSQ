@@ -30,6 +30,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -182,6 +183,11 @@ public class LsqSparkIo {
                     });
                 })
                 .andThen(FlowOfResourcesOps::mapToDatasets);
+//                .andThenMap(x -> {
+//                    System.out.println("got dataset: " + x.getGraphName());
+//                    RDFDataMgr.write(System.out, x, RDFFormat.TRIG_PRETTY);
+//                    return x;
+//                });
 
             result = JavaRddRxOps.mapPartitions(zippedRdd, rxFn);
 
@@ -314,7 +320,9 @@ public class LsqSparkIo {
             .collect(Collectors.toList());
 
         @SuppressWarnings("unchecked")
-        JavaRDD<DatasetOneNg> result = sc.union(rdds.toArray(new JavaRDD[0]));
+        JavaRDD<DatasetOneNg> result = rdds.size() == 1
+            ? rdds.iterator().next()
+            : sc.union(rdds.toArray(new JavaRDD[0]));
 
 
         if(rdfizeCmd.isSlimMode()) {
