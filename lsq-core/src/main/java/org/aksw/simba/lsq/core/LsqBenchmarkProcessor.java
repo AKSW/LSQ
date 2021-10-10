@@ -31,9 +31,9 @@ import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
 import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
 import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.rx.SparqlRx;
+import org.aksw.jena_sparql_api.rx.op.FlowOfQuadsOps;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
 import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
 import org.aksw.jena_sparql_api.syntax.UpdateRequestUtils;
@@ -886,7 +886,7 @@ catch (Exception e) {
 
         return SparqlRx.execSelectRaw(() -> conn.query(query))
             .concatMap(QueryFlowOps.createMapperQuads(template)::apply)
-            .compose(DatasetGraphOpsRx.groupConsecutiveQuadsRaw(Quad::getGraph, DatasetGraphFactory::create))
+            .compose(FlowOfQuadsOps.groupConsecutiveQuadsRaw(Quad::getGraph, DatasetGraphFactory::create))
             .map(e -> new SimpleEntry<>(e.getKey().getURI(), DatasetFactory.wrap(e.getValue())));
     }
 

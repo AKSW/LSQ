@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
 import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
@@ -47,7 +48,7 @@ import com.google.common.collect.Streams;
 import net.sansa_stack.spark.io.rdf.input.api.RdfSource;
 import net.sansa_stack.spark.io.rdf.input.api.RdfSourceFactory;
 import net.sansa_stack.spark.io.rdf.input.impl.RdfSourceFactoryImpl;
-import net.sansa_stack.spark.io.rdf.output.RddRdfSaver;
+import net.sansa_stack.spark.io.rdf.output.RddRdfWriter;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfNamedModelsOps;
 
@@ -169,7 +170,7 @@ public class CmdLsqRehashSparkImpl {
 //        }
 
 
-        List<JavaRDD<Dataset>> rdds = cmd.getNonOptionArgs().stream()
+        List<JavaRDD<DatasetOneNg>> rdds = cmd.getNonOptionArgs().stream()
             .map(rdfSourceFactory::get)
             .map(RdfSource::asDatasets)
             .map(RDD::toJavaRDD)
@@ -206,7 +207,7 @@ public class CmdLsqRehashSparkImpl {
 
         // System.out.println("Size spark: " + effectiveRdd.count());
 
-        RddRdfSaver.createForDataset(outRdd)
+        RddRdfWriter.createForDataset().setRdd(outRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
             .setOutputFormat(cmd.getOutFormat())
             .setMapQuadsToTriplesForTripleLangs(true)

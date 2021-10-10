@@ -1,9 +1,6 @@
 package net.sansa_stack.rdf.spark.io;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -14,24 +11,26 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
-import org.aksw.commons.rx.op.RxOps;
+import org.aksw.commons.rx.function.RxFunction;
+import org.aksw.jena_sparql_api.concepts.Concept;
+import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
 import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
-import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
+import org.aksw.jena_sparql_api.rx.model.NodeSelectorFromUnaryRelation;
+import org.aksw.jena_sparql_api.rx.model.NodesInModel;
+import org.aksw.jena_sparql_api.rx.op.FlowOfDatasetOps;
+import org.aksw.jena_sparql_api.rx.op.FlowOfResourcesOps;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 import org.aksw.simba.lsq.core.LsqUtils;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.jena.sparql.core.DatasetGraphFactory;
-import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.slf4j.Logger;
@@ -42,15 +41,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Ordering;
-import com.google.common.collect.Streams;
 import com.google.common.collect.TreeMultimap;
+import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
-import io.reactivex.rxjava3.core.FlowableTransformer;
-import net.sansa_stack.spark.rdd.function.JavaRddFunction;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
-import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfNamedModelsOps;
-import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfResourcesOps;
+import net.sansa_stack.spark.rdd.op.rx.JavaRddRxOps;
 
 
 public class LsqSparkIo {
@@ -66,7 +62,7 @@ public class LsqSparkIo {
      * @return
      * @throws Exception
      */
-    public static JavaRDD<Resource> createReader(
+    public static JavaRDD<DatasetOneNg> createReader(
             String logSource,
             SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp,
             String logFormat,
@@ -85,8 +81,7 @@ public class LsqSparkIo {
             lang = RDFDataMgr.determineLang(logSource, null, null);
         }
 
-        JavaRDD<Resource> result = null;
-
+        JavaRDD<DatasetOneNg> result = null;
 
         // Check if we are dealing with RDF
         if(lang != null) {
@@ -118,6 +113,9 @@ public class LsqSparkIo {
 
         // If the result is still null, probe for log formats
         if(result == null) {
+            JavaRDD<Resource> tmpRdd = null;
+
+
             // Probe for known RDF or know log format
             logger.info("Processing log source " + logSource);
 
@@ -143,16 +141,17 @@ public class LsqSparkIo {
                 throw new RuntimeException("No log format parser found for '" + logFormat + "'");
             }
 
-            result = rddFactory.load(logSource);
+            tmpRdd = rddFactory.load(logSource);
 
 
             // The webLogParser yields resources (blank nodes) for the log entry
             // First add a sequence id attribute
             // Then invert the entry:
 
-            result = result
+            // SerializableFlowableTransformer<Upstream, Downstream>
+
+            JavaRDD<Resource> zippedRdd = tmpRdd
                 .zipWithIndex()
-                // Add the zipped index to the resource
                 .map(e -> {
                     Resource r = e._1;
                     Long idx = e._2;
@@ -163,30 +162,40 @@ public class LsqSparkIo {
                     re.setSequenceId(idx);
 
                     return r;
-                })
-                .mapPartitions(it -> {
+                });
+
+            RxFunction<Resource, DatasetOneNg> rxFn = RxFunction.<Resource>identity()
+                // Add the zipped index to the resource
+                .andThenFlatMapIterable(record -> {
                     SparqlStmtParser sparqlStmtParser = sparqlStmtParserSupp.get();
 
-                    return Streams.stream(it).flatMap(record -> {
+                    Optional<Resource> r;
+                    try {
+                        r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                    } catch (Exception e) {
+                        logger.warn("Internal error; trying to continue", e);
+                        r = Optional.empty();
+                    }
 
-                        Optional<Resource> r;
-                        try {
-                            r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
-                        } catch (Exception e) {
-                            logger.warn("Internal error; trying to continue", e);
-                            r = Optional.empty();
-                        }
+                    return r.map(Collections::singleton).orElse(Collections.emptySet());
+                })
+                .andThen(FlowOfResourcesOps::mapToDatasets);
 
-                        return r.map(Collections::singleton).orElse(Collections.emptySet()).stream();
-                    }).iterator();
-                });
+            result = JavaRddRxOps.mapPartitions(zippedRdd, rxFn);
+
+//            result = tmpRdd.mapPartitionsToPair(it ->
+//                Streams.stream(it).map(r -> new Tuple2<>(r.getURI(), r.getModel())).iterator());
         }
 
 
         return result;
     }
 
-
+    public static NodesInModel fromRDFNode(RDFNode rdfNode) {
+        return new NodesInModel(
+                rdfNode.getModel(),
+                new NodeSelectorFromUnaryRelation(Concept.createNodes(rdfNode.asNode())));
+    }
 
     public static List<Entry<String, Number>> probeLogFormat(Map<String, SourceOfRddOfResources> registry, String resource) {
 
@@ -244,9 +253,9 @@ public class LsqSparkIo {
 
 
 
-    public static JavaRDD<Resource> createLsqRdfFlow(
+    public static JavaRDD<DatasetOneNg> createLsqRdfFlow(
             JavaSparkContext sc,
-            LsqRdfizeSpec rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
+            LsqRdfizeSpec rdfizeCmd)  {
         String logFormat = rdfizeCmd.getInputLogFormat();
         List<String> logSources = rdfizeCmd.getNonOptionArgs();
         String baseIri = rdfizeCmd.getBaseIri();
@@ -282,9 +291,9 @@ public class LsqSparkIo {
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
 
-        List<JavaRDD<Resource>> rdds = logSources.stream()
+        List<JavaRDD<DatasetOneNg>> rdds = logSources.stream()
             .map(logSource -> {
-                JavaRDD<Resource> r;
+                JavaRDD<DatasetOneNg> r;
                 try {
                     r = LsqSparkIo.createReader(
                         logSource,
@@ -303,7 +312,7 @@ public class LsqSparkIo {
             .collect(Collectors.toList());
 
         @SuppressWarnings("unchecked")
-        JavaRDD<Resource> result = sc.union(rdds.toArray(new JavaRDD[0]));
+        JavaRDD<DatasetOneNg> result = sc.union(rdds.toArray(new JavaRDD[0]));
 
 
         if(rdfizeCmd.isSlimMode()) {
@@ -313,15 +322,22 @@ public class LsqSparkIo {
             List<SparqlStmt> sparqlStmts = sparqlProcessor.getSparqlStmts().stream()
                     .map(Entry::getKey).collect(Collectors.toList());
 
-            result = flatMapResources(sparqlStmts).apply(result);
+            result = JavaRddRxOps.mapPartitions(result,
+                    RxFunction.<DatasetOneNg>identity()
+                    .andThenMap(x -> (Dataset)x)
+                    .andThen(FlowOfDatasetOps.mapWithSparql(sparqlStmts))
+                    .andThen(FlowOfDatasetOps.flatMapNamedGraphs()));
+
+            // result = flatMapResources(sparqlStmts).apply(result);
         }
 
         if(!rdfizeCmd.isNoMerge()) {
-            result = JavaRddFunction.<Resource>identity()
-                .toPairRdd(JavaRddOfResourcesOps::mapToNamedModels)
-                .andThen(rdd -> JavaRddOfNamedModelsOps.groupNamedModels(rdd, true, true, 0))
-                .toRdd(JavaRddOfNamedModelsOps::mapToResources)
-                .apply(result);
+            result = JavaRddOfDatasetsOps.groupNamedGraphsByGraphIri(result, true, true, 0);
+//            result = JavaPairRddFunction.<String, Model>identity()
+//                // .toPairRdd(JavaRddOfResourcesOps::mapToNamedModels)
+//                .andThen(rdd -> JavaRddOfNamedModelsOps.groupNamedModels(rdd, true, true, 0))
+//                .toRdd(JavaRddOfNamedModelsOps::mapToResources)
+//                .apply(result);
 
 //            SysSort sortCmd = new SysSort();
 //            sortCmd.bufferSize = rdfizeCmd.bufferSize;
@@ -339,42 +355,77 @@ public class LsqSparkIo {
     }
 
 
+    /**
+     * Run a sequence of sparql statements against a model in the values
+     *
+     * @param <K>
+     * @param <V>
+     * @param getModel
+     * @param baseStmts
+     * @return
+     */
+//    public static <K, V> JavaPairRddFunction<K, V, K, V> runOnEachModel(
+//            SerializableFunction<V, Model> modelGetter,
+//            Collection<? extends SparqlStmt> baseStmts) {
+//        // Turn statements to strings for serialization
+//        List<String> stmtStrs = baseStmts.stream().map(Object::toString).collect(Collectors.toList());
+//
+//        return inRdd -> inRdd.mapPartitionsToPair(it -> {
+//            return Streams.stream(it)
+//                    .map(t -> {
+//                        Model model = modelGetter.apply(t._2());
+//                        Dataset dataset = DatasetFactory.wrap(model);
+//
+//                        SparqlStmtParser parser = SparqlStmtParserImpl.createAsGiven();
+//                        List<SparqlStmt> stmts = stmtStrs.stream().map(parser).collect(Collectors.toList());
+//
+//                        FlowableTransformer<Dataset, Dataset> transformer = DatasetFlowOps.createMapperDataset(stmts, DatasetGraphFactory::create, cxt -> {});
+//
+//                        transformer.apply(null)
+//
+//
+//                        // return RxOps.transform(it, transformer);
+//
+//                        return t;
+//                    }).iterator();
+//        });
+//    }
 
-    public static JavaRddFunction<Resource, Resource> flatMapResources(Collection<? extends SparqlStmt> baseStmts) {
-        // Turn statements to strings for serialization
-        List<String> stmtStrs = baseStmts.stream().map(Object::toString).collect(Collectors.toList());
+//    public static JavaRddFunction<Resource, Resource> flatMapResources(Collection<? extends SparqlStmt> baseStmts) {
+//        // Turn statements to strings for serialization
+//        List<String> stmtStrs = baseStmts.stream().map(Object::toString).collect(Collectors.toList());
+//
+//        return JavaRddFunction.<Resource>identity()
+//            .toPairRdd(JavaRddOfResourcesOps::mapToNamedModels)
+//            .toRdd(JavaRddOfNamedModelsOps::mapToDatasets)
+//            .andThen(rdd -> rdd.mapPartitions(it -> {
+//                    SparqlStmtParser parser = SparqlStmtParserImpl.createAsGiven();
+//                    List<SparqlStmt> stmts = stmtStrs.stream().map(parser).collect(Collectors.toList());
+//
+//                    FlowableTransformer<Dataset, Dataset> transformer = FlowOfDatasetOps.createMapperDataset(stmts, DatasetGraphFactory::create, cxt -> {});
+//
+//                    return RxOps.transform(it, transformer);
+//             }))
+//            .toPairRdd(JavaRddOfDatasetsOps::flatMapToNamedModels)
+//            .toRdd(JavaRddOfNamedModelsOps::mapToResources);
+//    }
 
-        return JavaRddFunction.<Resource>identity()
-            .toPairRdd(JavaRddOfResourcesOps::mapToNamedModels)
-            .toRdd(JavaRddOfNamedModelsOps::mapToDatasets)
-            .andThen(rdd -> rdd.mapPartitions(it -> {
-                    SparqlStmtParser parser = SparqlStmtParserImpl.createAsGiven();
-                    List<SparqlStmt> stmts = stmtStrs.stream().map(parser).collect(Collectors.toList());
 
-                    FlowableTransformer<Dataset, Dataset> transformer = DatasetFlowOps.createMapperDataset(stmts, DatasetGraphFactory::create, cxt -> {});
-
-                    return RxOps.transform(it, transformer);
-             }))
-            .toPairRdd(JavaRddOfDatasetsOps::flatMapToNamedModels)
-            .toRdd(JavaRddOfNamedModelsOps::mapToResources);
-    }
-
-
-    public static JavaRddFunction<Dataset, Dataset> flatMapDataset(Collection<? extends SparqlStmt> baseStmts) {
-
-        // Turn statements to strings for serialization
-        List<String> stmtStrs = baseStmts.stream().map(Object::toString).collect(Collectors.toList());
-
-        return rdd -> {
-            return rdd.mapPartitions(it -> {
-                SparqlStmtParser parser = SparqlStmtParserImpl.createAsGiven();
-                List<SparqlStmt> stmts = stmtStrs.stream().map(parser).collect(Collectors.toList());
-
-                FlowableTransformer<Dataset, Dataset> transformer = DatasetFlowOps.createMapperDataset(stmts, DatasetGraphFactory::create, cxt -> {});
-
-                return RxOps.transform(it, transformer);
-            });
-        };
-    }
+//    public static JavaRddFunction<Dataset, Dataset> flatMapDataset(Collection<? extends SparqlStmt> baseStmts) {
+//
+//        // Turn statements to strings for serialization
+//        List<String> stmtStrs = baseStmts.stream().map(Object::toString).collect(Collectors.toList());
+//
+//        return rdd -> {
+//            return rdd.mapPartitions(it -> {
+//                SparqlStmtParser parser = SparqlStmtParserImpl.createAsGiven();
+//                List<SparqlStmt> stmts = stmtStrs.stream().map(parser).collect(Collectors.toList());
+//
+//                FlowableTransformer<Dataset, Dataset> transformer = FlowOfDatasetOps.createMapperDataset(stmts, DatasetGraphFactory::create, cxt -> {});
+//
+//                return RxOps.transform(it, transformer);
+//            });
+//        };
+//    }
 
 }

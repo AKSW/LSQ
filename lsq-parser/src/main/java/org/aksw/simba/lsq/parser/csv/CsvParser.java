@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.rx.DatasetGraphOpsRx;
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
+import org.aksw.jena_sparql_api.rx.op.FlowOfQuadsOps;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Query;
@@ -44,7 +44,7 @@ public class CsvParser {
         return upstream ->
             upstream
             .compose(QueryFlowOps.createMapperQuads(query))
-            .compose(DatasetGraphOpsRx.groupConsecutiveQuadsToGraph(Quad::getGraph, Quad::asTriple, GraphFactoryEx::createInsertOrderPreservingGraph))
+            .compose(FlowOfQuadsOps.groupConsecutiveQuadsToGraph(Quad::getGraph, Quad::asTriple, GraphFactoryEx::createInsertOrderPreservingGraph))
             .map(e -> {
                 Model m = ModelFactory.createModelForGraph(e.getValue());
                 return m.asRDFNode(e.getKey());

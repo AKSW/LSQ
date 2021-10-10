@@ -13,7 +13,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
-import net.sansa_stack.spark.io.rdf.output.RddRdfSaver;
+import net.sansa_stack.spark.io.rdf.output.RddRdfWriter;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
 
 public class LsqTarqlTest {
@@ -119,7 +119,8 @@ public class LsqTarqlTest {
 
         // System.out.println("Size spark: " + effectiveRdd.count());
 
-        RddRdfSaver.createForQuad(quadRdd)
+        RddRdfWriter.createForQuad()
+            .setRdd(quadRdd)
             .setGlobalPrefixMapping(new PrefixMappingImpl())
             .setOutputFormat(RDFFormat.TRIG_BLOCKS)
             // .setOutputFormat(cmd.getOutFormat())
