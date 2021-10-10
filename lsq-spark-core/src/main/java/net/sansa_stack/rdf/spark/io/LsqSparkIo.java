@@ -166,18 +166,20 @@ public class LsqSparkIo {
 
             RxFunction<Resource, DatasetOneNg> rxFn = RxFunction.<Resource>identity()
                 // Add the zipped index to the resource
-                .andThenFlatMapIterable(record -> {
+                .andThen(upstream -> {
                     SparqlStmtParser sparqlStmtParser = sparqlStmtParserSupp.get();
 
-                    Optional<Resource> r;
-                    try {
-                        r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
-                    } catch (Exception e) {
-                        logger.warn("Internal error; trying to continue", e);
-                        r = Optional.empty();
-                    }
+                    return upstream.flatMapIterable(record -> {
+                        Optional<Resource> r;
+                        try {
+                            r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                        } catch (Exception e) {
+                            logger.warn("Internal error; trying to continue", e);
+                            r = Optional.empty();
+                        }
 
-                    return r.map(Collections::singleton).orElse(Collections.emptySet());
+                        return r.map(Collections::singleton).orElse(Collections.emptySet());
+                    });
                 })
                 .andThen(FlowOfResourcesOps::mapToDatasets);
 
