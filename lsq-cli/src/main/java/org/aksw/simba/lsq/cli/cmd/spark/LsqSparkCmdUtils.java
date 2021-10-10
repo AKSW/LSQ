@@ -5,9 +5,9 @@ import java.util.Optional;
 import org.aksw.commons.rx.function.RxFunction;
 import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
+import org.aksw.simba.lsq.cli.main.MainCliLsq;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -16,7 +16,6 @@ import net.sansa_stack.rdf.spark.io.LsqSparkIo;
 import net.sansa_stack.rdf.spark.io.LsqSparkUtils;
 import net.sansa_stack.spark.io.rdf.output.RddRdfWriterFactory;
 import net.sansa_stack.spark.rdd.op.rx.JavaRddRxOps;
-import scala.Tuple2;
 
 public class LsqSparkCmdUtils {
 
@@ -24,9 +23,13 @@ public class LsqSparkCmdUtils {
             LsqRdfizeSpec inputSpec,
             CmdOutputSpecBase outputSpec,
             RxFunction<DatasetOneNg, DatasetOneNg> processor) {
+
+        PrefixMapping prefixes = MainCliLsq.addLsqPrefixes(new PrefixMappingImpl());
+
         RddRdfWriterFactory rddRdfWriterFactory = RddRdfWriterFactory.create()
-                .setGlobalPrefixMapping(new PrefixMappingImpl())
+                .setGlobalPrefixMapping(prefixes)
                 .setOutputFormat(outputSpec.outFormat)
+                .setDeferOutputForUsedPrefixes(100)
                 // .setOutputFormat(cmd.getOutFormat())
                 .setMapQuadsToTriplesForTripleLangs(true)
                 // .setAllowOverwriteFiles(true)

@@ -155,7 +155,7 @@ public class LSQ {
 
         public static final String host = NS + "host";
         public static final String hostHash = NS + "hostHash";
-        public static final String atTime = PROV.ns + "atTime";
+        public static final String atTime = PROV.NS + "atTime";
         public static final String endpoint = NS + "endpoint";
         public static final String userAgent = NS + "userAgent";
 

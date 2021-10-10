@@ -67,6 +67,7 @@ import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.ext.com.google.common.hash.Hashing;
@@ -444,13 +445,14 @@ public class MainCliLsq {
     }
 */
 
-    public static void addLsqPrefixes(PrefixMapping model) {
-        model
+    public static PrefixMapping addLsqPrefixes(PrefixMapping prefixMapping) {
+        return prefixMapping
             .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("dct", DCTerms.NS)
             .setNsPrefix("xsd", XSD.NS)
             .setNsPrefix("lsqr", "http://lsq.aksw.org/")
-            .setNsPrefix("sp", SP.NS);
+            .setNsPrefix("sp", SP.NS)
+            .setNsPrefix("prov", PROV.NS);
     }
 
 
