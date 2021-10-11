@@ -8,7 +8,7 @@ nav_order: 1
 
 Several LSQ commands come in two flavours: `rx` and `spark`.
 [RxJava](https://github.com/ReactiveX/RxJava) is a framework for building workflows over streaming data.
-Spark is framework for processing large amounts of (input) data in parallel, both locally and on a cluster.
+[Apache Spark](https://spark.apache.org/) is framework for processing large amounts of (input) data in parallel, both locally and on a cluster.
 It is possible to (re-)use rx-based functions within spark's `rdd.mapPartition` feature - and this is what `lsq spark` does.
 
 Concretely, LSQ builds on [SANSA-Stack](https://github.com/SANSA-Stack/SANSA-Stack) which provides a foundation for working with RDF/SPARQL in Apache Spark.
