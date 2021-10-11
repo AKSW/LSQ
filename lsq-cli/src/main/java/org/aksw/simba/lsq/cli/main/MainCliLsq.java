@@ -92,6 +92,7 @@ import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.XSD;
+import org.openrdf.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
@@ -333,20 +334,34 @@ public class MainCliLsq {
 
     }
 
+    /** Wrap an enricher to log any exception*/
+    public static <T> Function<LsqQuery, T> safeEnricher(Function<LsqQuery, T> enricher) {
+        return in -> {
+            T r = null;
+            try {
+                r = enricher.apply(in);
+            } catch (Exception e) {
+                // ARQ2SPIN (2.0.0) raises a classcast exception for queries making
+                // use of literals in subject position
+                logger.warn(String.format("Enrichment of %s failed", in.getText()), e);
+            }
+            return r;
+        };
+    }
+
     public static SerializableFunction<Resource, Resource> createEnricher(String baseIri) {
         return in -> {
             LsqQuery q = in.as(LsqQuery.class);
+            // TODO Parse query here only once
+            // Store it in a context object that gets passed to the enrichers?
 
             if (q.getParseError() == null) {
 
-                try {
-                    LsqEnrichments.enrichWithFullSpinModelCore(q);
-                    LsqEnrichments.enrichWithStaticAnalysis(q);
-                } catch (Exception e) {
-                    // ARQ2SPIN (2.0.0) raises a classcast exception for queries making
-                    // use of literals in subject position
-                    logger.warn(String.format("Enrichment of %s failed", q.getText()), e);
-                }
+                // TODO Given enrichers a name
+                // TODO Track failed enrichments in the output? qualify error with enricher name?
+                // TODO Create a registry for enrichers
+                safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);
+                safeEnricher(LsqEnrichments::enrichWithStaticAnalysis).apply(q);
             }
 
             // TODO createLsqRdfFlow already performs skolemize; duplicated effort
@@ -455,6 +470,7 @@ public class MainCliLsq {
         return prefixMapping
             .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("dct", DCTerms.NS)
+            .setNsPrefix("rdf", RDF.NAMESPACE)
             .setNsPrefix("xsd", XSD.NS)
             .setNsPrefix("lsqr", "http://lsq.aksw.org/")
             .setNsPrefix("sp", SP.NS)
