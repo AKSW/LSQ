@@ -28,7 +28,7 @@ mvn -Pdist,standalone clean install
 
 The jar bundle contains a main class manifest and can thus be run with `java -jar`:
 ```bash
-mvn -P dist clean install
+mvn -Pdist,standalone clean install
 
 java -jar lsq-cli/target/lsq-cli-${VERSON}-jar-with-dependencies.jar
 ```
