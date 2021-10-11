@@ -9,7 +9,7 @@ nav_order: 6
 
 
 For reference, here is a depicition of the [LSQ data model](Data-Model)
-![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/lsq-docs/lsq2-datamodel.svg)
+![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/docs/v2/images/lsq2-datamodel.png)
 
 
 The following result sets of SPARQL queries are based on the LSQ output of this query:
