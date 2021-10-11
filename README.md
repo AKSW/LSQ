@@ -14,7 +14,7 @@ LSQ2 introduces significant improvements over the prior version in every aspect:
 ## Documentation
 
 ### Detailed Documentation
-For detailed documentation about setup, use and concepts of the LSQ command line tool please refer to our [wiki pages](https://github.com/AKSW/LSQ/wiki).
+For detailed documentation about setup, use and concepts of the LSQ command line tool please refer to our [LSQ Website](http://lsq.aksw.org/).
 
 ### Quick Reference
 
@@ -24,18 +24,18 @@ This is a typical maven project and can is thus built with `mvn clean install`.
 
 **For Ubuntu/Debian users:** The build process creates a `.deb` package that can be conviently installed **after build** with
 
-`./reinstall-debs.sh` (requires root access).
+`./reinstall-deb.sh` (requires root access).
 
 
 #### Quick Usage
 A quick reference for the typical process is as follows:
 
 ```
-lsq probe file.log
-lsq rdfize -e http://server.from/which/the/log/is/from file.log > file.log.trig
-lsq benchmark create -d myDatasetLabel -e http://localhost:8890/sparql -o > benchmark.conf.ttl
-lsq benchmark prepare -c benchmark.conf.ttl -o > benchmark.run.ttl
-lsq benchmark run -c benchmark.run.ttl *.log.trig
+lsq rx probe file.log
+lsq rx rdfize -e http://server.from/which/the/log/is/from file.log > file.log.trig
+lsq rx benchmark create -d myDatasetLabel -e http://localhost:8890/sparql -o > benchmark.conf.ttl
+lsq rx benchmark prepare -c benchmark.conf.ttl -o > benchmark.run.ttl
+lsq rx benchmark run -c benchmark.run.ttl *.log.trig
 ```
 
 The `-o` option causes the settings to be written to the console. Omit `-o` to have LSQ auto-generate files.
