@@ -40,6 +40,12 @@
 			<artifactId>lsq-spark-core</artifactId>
 		</dependency>
 
+
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-enrichers</artifactId>
+		</dependency>
+
 		<!-- <dependency> -->
 		<!-- <groupId>org.apache.commons</groupId> -->
 		<!-- <artifactId>commons-configuration2</artifactId> -->
