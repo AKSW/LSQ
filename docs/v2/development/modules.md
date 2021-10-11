@@ -15,6 +15,6 @@ LSQ consists of the following modules, ordered from lower to higher level.
 * [lsq-core](https://github.com/AKSW/LSQ/tree/develop/lsq-core): The core of LSQ, most prominently the RDFizer.
 * [lsq-enrichers](https://github.com/AKSW/LSQ/tree/develop/lsq-enrichers): Classes for enriching LSQ models and benchmarking SPARQL queries.
 * [lsq-spark-core](https://github.com/AKSW/LSQ/tree/develop/lsq-spark-core): Binding of LSQ for [Apache Spark](https://spark.apache.org/).
-* [lsq-cli](https://github.com/AKSW/LSQ/tree/develop/lsq-cli): [Picocli](https://picocli.info/)-based Command line interface for LSQ.
-* [lsq-debian-cli](https://github.com/AKSW/LSQ/tree/develop/lsq-debian-cli): Debian packaging of LSQ
+* [lsq-cli](https://github.com/AKSW/LSQ/tree/develop/lsq-cli): [Picocli](https://picocli.info/)-based Command line interface (cli) for LSQ.
+* [lsq-debian-cli](https://github.com/AKSW/LSQ/tree/develop/lsq-debian-cli): Debian packaging of LSQ's cli.
 
