@@ -16,7 +16,7 @@ Concretely, LSQ builds on [SANSA-Stack](https://github.com/SANSA-Stack/SANSA-Sta
 
 ## Differences
 * `rx` commands are more lightweight and support immediate streaming from stdin (see the note on sorting below). For small input data they may perform faster because there is no overhead in initializing spark.
-* `spark` commands can read input sources in parallel and thus **significantly** outperform plain `rx` on larger input data.
+* `spark` commands can read input sources in parallel and thus **significantly** outperform plain `rx` ones on larger input data.
 
 ### A Note on Sorting
 `lsq {spark|rx} rdfize` by default tries inverts log entries into a query centric named graphs and then sorts and merges them.
