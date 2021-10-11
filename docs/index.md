@@ -80,7 +80,7 @@ If you use this dataset, please cite us
 
 Muhammad Saleem, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmood, and Axel-Cyrille Ngonga Ngomo. "[LSQ: the Linked SPARQL Queries Dataset.](https://aidanhogan.com/docs/LSQ_ISWC2015.pdf)" In International Semantic Web Conference, pp. 261-269, Springer, 2015.
 
-```
+```bibtex
 @inproceedings{SaleemAHMN15,
   author    = {Muhammad Saleem and
                Muhammad Intizar Ali and
