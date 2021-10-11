@@ -16,7 +16,7 @@ The following table summarizes those profiles:
 |------------------------------------------|---------------------|---------------------------------------|
 | Libraries only                           | (none)              | `mvn clean install`                   |
 | Jar bundle (uber jar)                    | dist                | `mvn -Pdist clean install`            |
-| Embed spark                              | standalone          | `mvn -Pdist,standalone clean install` |
+| Embed Apache Spark                       | standalone          | `mvn -Pdist,standalone clean install` |
 | Debian package (implies dist,standalone) | deb                 | `mvn -Pdeb clean install`             |
 
 If you want a self-contained runnable jar file then build lsq using:
@@ -41,7 +41,7 @@ Installing the debian package makes the `lsq` command available (located at `/us
 
 
 * You may first want to completely remove (i.e. purge) a prior installation
-```
+```bash
 sudo apt-get purge lsq-cli
 ```
 
