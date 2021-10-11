@@ -18,6 +18,7 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark;
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark.BindingToResourceTransform;
@@ -28,8 +29,11 @@ import net.sansa_stack.spark.rdd.function.JavaRddFunction;
 /** Process the LSQ registry such that it can ingest spark sources */
 public class LsqRegistrySparkAdapter {
 
+    public static Map<String, SourceOfRddOfResources> createDefaultLogFmtRegistry(SparkSession ss) {
+        return createDefaultLogFmtRegistry(JavaSparkContext.fromSparkContext(ss.sparkContext()));
+    }
 
-   public static Map<String, SourceOfRddOfResources> createDefaultLogFmtRegistry(JavaSparkContext sc) {
+    public static Map<String, SourceOfRddOfResources> createDefaultLogFmtRegistry(JavaSparkContext sc) {
         Map<String, SourceOfRddOfResources> result = new LinkedHashMap<>();
 
         Model model = RDFDataMgr.loadModel("default-log-formats.ttl");

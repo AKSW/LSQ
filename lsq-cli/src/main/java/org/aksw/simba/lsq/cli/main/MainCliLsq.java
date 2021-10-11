@@ -339,8 +339,14 @@ public class MainCliLsq {
 
             if (q.getParseError() == null) {
 
-                LsqEnrichments.enrichWithFullSpinModelCore(q);
-                LsqEnrichments.enrichWithStaticAnalysis(q);
+                try {
+                    LsqEnrichments.enrichWithFullSpinModelCore(q);
+                    LsqEnrichments.enrichWithStaticAnalysis(q);
+                } catch (Exception e) {
+                    // ARQ2SPIN (2.0.0) raises a classcast exception for queries making
+                    // use of literals in subject position
+                    logger.warn(String.format("Enrichment of %s failed", q.getText()), e);
+                }
             }
 
             // TODO createLsqRdfFlow already performs skolemize; duplicated effort

@@ -8,7 +8,7 @@ import org.apache.spark.sql.SparkSession;
 
 public class LsqSparkUtils {
 
-    public static JavaSparkContext createSparkContext(Consumer<? super SparkConf> confCallback) {
+    public static SparkSession createSparkSession(Consumer<? super SparkConf> confCallback) {
         SparkConf sparkConf = new SparkConf()
             .setAppName("Lsq")
             .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
@@ -25,9 +25,9 @@ public class LsqSparkUtils {
 
         SparkSession ss = SparkSession.builder().config(sparkConf).getOrCreate();
 
-        JavaSparkContext sc = JavaSparkContext.fromSparkContext(ss.sparkContext());
+        //JavaSparkContext sc = JavaSparkContext.fromSparkContext(ss.sparkContext());
 
-        return sc;
+        return ss;
     }
 
 }

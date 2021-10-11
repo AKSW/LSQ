@@ -34,6 +34,7 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,7 @@ import com.google.common.collect.TreeMultimap;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
+import net.sansa_stack.spark.io.rdf.input.impl.RdfSourceFactoryImpl;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfDatasetsOps;
 import net.sansa_stack.spark.rdd.op.rx.JavaRddRxOps;
 
@@ -64,6 +66,7 @@ public class LsqSparkIo {
      * @throws Exception
      */
     public static JavaRDD<DatasetOneNg> createReader(
+            SparkSession sparkSession,
             String logSource,
             SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp,
             String logFormat,
@@ -92,10 +95,10 @@ public class LsqSparkIo {
 
                 // TODO Stream as datasets first, then select any resource with LSQ.text
                 logger.info("Quad-based format detected - assuming RDFized log as input");
-//                result = rdfSourceFactory.get(logSource).asDatasets().toJavaRDD()
+                result = RdfSourceFactoryImpl.from(sparkSession).get(logSource).asDatasets().toJavaRDD();
 //                        .flatMap(ds -> DatasetUtils.listResourcesWithProperty(ds, LSQ.text).toList().iterator());
 
-                throw new RuntimeException("Quad based format not implemented");
+                // throw new RuntimeException("Quad based format not implemented");
 
             } else if(RDFLanguages.isTriples(lang)){
                 logger.info("Triple-based format detected - assuming RDFized log as input");
@@ -262,7 +265,8 @@ public class LsqSparkIo {
 
 
     public static JavaRDD<DatasetOneNg> createLsqRdfFlow(
-            JavaSparkContext sc,
+            // JavaSparkContext sc,
+            SparkSession sparkSession,
             LsqRdfizeSpec rdfizeCmd)  {
         String logFormat = rdfizeCmd.getInputLogFormat();
         List<String> logSources = rdfizeCmd.getNonOptionArgs();
@@ -291,7 +295,7 @@ public class LsqSparkIo {
         SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp = () -> LsqUtils.createSparqlParser(prefixSources);
 
 
-        Map<String, SourceOfRddOfResources> logFmtRegistry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sc);
+        Map<String, SourceOfRddOfResources> logFmtRegistry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sparkSession);
 
 
         // Hash function which is applied after combining host names with salts
@@ -304,6 +308,7 @@ public class LsqSparkIo {
                 JavaRDD<DatasetOneNg> r;
                 try {
                     r = LsqSparkIo.createReader(
+                        sparkSession,
                         logSource,
                         sparqlStmtParserSupp,
                         logFormat,
@@ -318,6 +323,8 @@ public class LsqSparkIo {
                 return r;
             })
             .collect(Collectors.toList());
+
+        JavaSparkContext sc = JavaSparkContext.fromSparkContext(sparkSession.sparkContext());
 
         @SuppressWarnings("unchecked")
         JavaRDD<DatasetOneNg> result = rdds.size() == 1

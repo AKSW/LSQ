@@ -10,7 +10,7 @@ import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.sql.SparkSession;
 
 import net.sansa_stack.rdf.spark.io.LsqSparkIo;
 import net.sansa_stack.rdf.spark.io.LsqSparkUtils;
@@ -40,7 +40,7 @@ public class LsqSparkCmdUtils {
                 .setDeletePartitionFolderAfterMerge(true)
                 .validate();
 
-            JavaSparkContext sc = LsqSparkUtils.createSparkContext(conf -> {
+            SparkSession sc = LsqSparkUtils.createSparkSession(conf -> {
                 Optional.ofNullable(inputSpec.getTemporaryDirectory()).ifPresent(v -> conf.set("spark.local.dir", v));
             });
 

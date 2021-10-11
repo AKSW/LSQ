@@ -12,7 +12,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
 @Command(name="probe", description = "Probe log files for known formats")
-public class CmdLsqProbeSpark
+public class CmdLsqSparkProbe
     implements Callable<Integer>
 {
     @Option(names = {"-h", "--help"}, usageHelp = true)

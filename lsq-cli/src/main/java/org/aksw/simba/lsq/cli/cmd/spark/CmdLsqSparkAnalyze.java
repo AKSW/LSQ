@@ -7,18 +7,17 @@ import java.util.concurrent.Callable;
 import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.rx.function.RxFunction;
 import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.rx.op.FlowOfResourcesOps;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
 import org.aksw.simba.lsq.cli.main.MainCliLsq;
 import org.apache.jena.rdf.model.Resource;
 
+import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
+@Command(name = "analyze", description = "Analyze query logs")
 public class CmdLsqSparkAnalyze
     implements Callable<Integer>
 {

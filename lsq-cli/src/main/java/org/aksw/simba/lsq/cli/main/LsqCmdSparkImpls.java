@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.aksw.simba.lsq.cli.cmd.spark.CmdLsqProbeSpark;
-import org.apache.spark.api.java.JavaSparkContext;
+import org.aksw.simba.lsq.cli.cmd.spark.CmdLsqSparkProbe;
+import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +17,7 @@ import net.sansa_stack.rdf.spark.io.SourceOfRddOfResources;
 public class LsqCmdSparkImpls {
     private static final Logger logger = LoggerFactory.getLogger(LsqCmdSparkImpls.class);
 
-    public static void probe(CmdLsqProbeSpark cmdProbe) {
+    public static void probe(CmdLsqSparkProbe cmdProbe) {
         List<String> nonOptionArgs = cmdProbe.nonOptionArgs;
         if(nonOptionArgs.isEmpty()) {
             logger.error("No arguments provided.");
@@ -25,9 +25,9 @@ public class LsqCmdSparkImpls {
         }
 
 
-        JavaSparkContext sc = LsqSparkUtils.createSparkContext(conf -> {});
+        SparkSession ss = LsqSparkUtils.createSparkSession(conf -> {});
 
-        Map<String, SourceOfRddOfResources> registry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sc);
+        Map<String, SourceOfRddOfResources> registry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(ss);
 
         for(int i = 0; i < nonOptionArgs.size(); ++i) {
             String filename = nonOptionArgs.get(i);
