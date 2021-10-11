@@ -32,7 +32,7 @@ mvn -Pdist,standalone clean install
 
 java -jar lsq-cli/target/lsq-cli-${VERSON}-jar-with-dependencies.jar
 ```
-(Don't forget to substitute ${VERSION} with its proper value)
+(Don't forget to substitute `${VERSION}` with its proper value)
 
 
 ### Building, Installing and Running the Debian Package

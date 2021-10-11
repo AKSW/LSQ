@@ -34,23 +34,23 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 
 In order to see the named graphs referring to different logs in the [LSQ v2.0 endpoint](http://lsq.aksw.org/sparql) you can use:
 
-````
+```sparql
 SELECT DISTINCT ?g WHERE {GRAPH ?g {?s ?p ?o}}
-````
+```
 
 In order to find raw query texts from, e.g., the DBpedia log, you can use:
 
-````
+```sparql
 PREFIX lsqv: <http://lsq.aksw.org/vocab#> 
 SELECT DISTINCT ?o
 WHERE { 
    GRAPH <http://lsq.aksw.org/dbpedia> { ?s lsqv:text ?o }
 }
-````
+```
 
 In order to find (for example) queries in all logs that use `OPTIONAL` and have at least two triple triple patterns, you can use:
 
-````
+```sparql
 PREFIX lsqv: <http://lsq.aksw.org/vocab#> 
 PREFIX sd: <http://www.w3.org/ns/sparql-service-description#> 
 SELECT DISTINCT ?text ?endpoint ?tpCount 
@@ -62,7 +62,7 @@ WHERE {
    ?features lsqv:tpCount ?tpCount . 
    FILTER(?tpCount > 2) 
 } LIMIT 10
-````
+```
 
 Other useful queries which can be executed over LSQ datasets in order to collect statistics are available [here](https://docs.google.com/spreadsheets/d/1jndGJ2qicN2WworS3Q_4FAjM_QOEUGlWiPPX4hkRoNE/edit?usp=sharing) 
 
@@ -80,7 +80,7 @@ If you use this dataset, please cite us
 
 Muhammad Saleem, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmood, and Axel-Cyrille Ngonga Ngomo. "[LSQ: the Linked SPARQL Queries Dataset.](https://aidanhogan.com/docs/LSQ_ISWC2015.pdf)" In International Semantic Web Conference, pp. 261-269, Springer, 2015.
 
-````
+```bibtex
 @inproceedings{SaleemAHMN15,
   author    = {Muhammad Saleem and
                Muhammad Intizar Ali and
@@ -97,7 +97,7 @@ Muhammad Saleem, Muhammad Intizar Ali, Aidan Hogan, Qaiser Mehmood, and Axel-Cyr
   url       = {https://doi.org/10.1007/978-3-319-25010-6\_15},
   doi       = {10.1007/978-3-319-25010-6\_15}
 }
-````
+```
 
 ### LSQ Team
 
