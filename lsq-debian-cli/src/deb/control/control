@@ -3,7 +3,7 @@ Version: [[version]]
 Section: web
 Priority: optional
 Architecture: all
-Depends: openjdk-8-jre-headless
+Recommends: default-jre-headless
 Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
 Description: Sparqlify Command Line Interfaces
 Distribution: ldstack-nightly
