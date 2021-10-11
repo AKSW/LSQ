@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.enricher.core;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
 import org.aksw.simba.lsq.core.util.Skolemize;
 import org.aksw.simba.lsq.core.util.SpinUtils;
+import org.aksw.simba.lsq.enricher.benchmark.core.LsqExec;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.util.SpinCoreUtils;
@@ -33,7 +34,6 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
-import org.aksw.simba.lsq.util.SpinUtilsOld;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -197,7 +197,7 @@ public class LsqEnrichments {
             Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
             for(TriplePattern tp : bgp.getTriplePatterns()) {
-                Set<RDFNode> rdfNodes = SpinUtilsOld.listRDFNodes(tp);
+                Set<RDFNode> rdfNodes = SpinAccessUtils.listRDFNodes(tp);
 //                logger.info("triple pattern: " + tp);
                 for(RDFNode rdfNode : rdfNodes) {
                     Node node = org.aksw.simba.lsq.model.util.SpinCoreUtils.readNode(rdfNode);
@@ -232,7 +232,7 @@ public class LsqEnrichments {
      */
     public static BgpNode createBgpNode(Model model, Node jenaNode) {
         BgpNode result = (jenaNode.isVariable()
-                ? SpinUtilsOld.writeNode(model, jenaNode)
+                ? SpinAccessUtils.writeNode(model, jenaNode)
                 : model.createResource())
             .as(BgpNode.class);
 
@@ -253,7 +253,7 @@ public class LsqEnrichments {
             Model spinModel = bgpInfo.getModel();
 
             // Extend the spin model with BGPs
-            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtilsOld.indexBasicPatterns2(spinModel); //queryRes);
+            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinAccessUtils.indexBasicPatterns2(spinModel); //queryRes);
 
             for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 

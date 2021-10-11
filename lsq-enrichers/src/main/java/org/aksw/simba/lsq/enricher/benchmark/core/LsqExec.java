@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.enricher.benchmark.core;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -8,13 +8,13 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
+import org.aksw.simba.lsq.enricher.benchmark.opcache.EvaluatorDispatchWithCaching;
+import org.aksw.simba.lsq.enricher.benchmark.opcache.OpExtKeyAndTableSupplier;
+import org.aksw.simba.lsq.enricher.benchmark.opcache.TableMgr;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.QueryExec;
-import org.aksw.simba.lsq.opcache.EvaluatorDispatchWithCaching;
-import org.aksw.simba.lsq.opcache.OpExtKeyAndTableSupplier;
-import org.aksw.simba.lsq.opcache.TableMgr;
 import org.aksw.simba.lsq.spinx.model.BgpInfo;
 import org.aksw.simba.lsq.spinx.model.BgpNodeExec;
 import org.aksw.simba.lsq.spinx.model.LsqTriplePattern;

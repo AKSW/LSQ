@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.opcache;
+package org.aksw.simba.lsq.enricher.benchmark.opcache;
 
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.sparql.algebra.Op;

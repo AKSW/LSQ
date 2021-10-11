@@ -1,6 +1,6 @@
 package org.aksw.simba.lsq;
 
-import org.aksw.simba.lsq.core.QueryStatistics2;
+import org.aksw.simba.lsq.enrich.core.QueryStatistics2;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.util.SpinUtilsOld;
 import org.apache.jena.query.Query;

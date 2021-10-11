@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.enrich.benchmark;
+package org.aksw.simba.lsq.enricher.benchmark.core;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -43,8 +43,7 @@ import org.aksw.jena_sparql_api.utils.ExprUtils;
 import org.aksw.jena_sparql_api.utils.Quads;
 import org.aksw.jena_sparql_api.utils.ResultSetUtils;
 import org.aksw.jena_sparql_api.utils.Vars;
-import org.aksw.simba.lsq.core.LsqEnrichments;
-import org.aksw.simba.lsq.core.LsqExec;
+import org.aksw.simba.lsq.enricher.core.LsqEnrichments;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;

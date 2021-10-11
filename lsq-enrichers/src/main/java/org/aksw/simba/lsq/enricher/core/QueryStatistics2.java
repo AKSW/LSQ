@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.core;
+package org.aksw.simba.lsq.enricher.core;
 
 import java.util.Arrays;
 import java.util.Collection;

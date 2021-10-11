@@ -12,7 +12,7 @@ import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
 import org.aksw.simba.lsq.cli.trash.LsqProcessor;
-import org.aksw.simba.lsq.core.QueryStatistics2;
+import org.aksw.simba.lsq.enricher.core.QueryStatistics2;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.util.SpinUtilsOld;

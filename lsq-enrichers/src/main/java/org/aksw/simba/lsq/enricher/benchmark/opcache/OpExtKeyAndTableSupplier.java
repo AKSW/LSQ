@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.opcache;
+package org.aksw.simba.lsq.enricher.benchmark.opcache;
 
 import java.util.Objects;
 import java.util.function.Supplier;

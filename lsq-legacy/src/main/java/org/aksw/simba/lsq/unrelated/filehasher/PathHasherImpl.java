@@ -1,4 +1,4 @@
-package org.aksw.simba.lsq.unrelated;
+package org.aksw.simba.lsq.unrelated.filehasher;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
