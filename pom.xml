@@ -69,7 +69,7 @@
 		<aksw-commons.version>0.9.1-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
-		<spark.deps.scope>compile</spark.deps.scope>
+		<spark.deps.scope>provided</spark.deps.scope>
 
 		<scala.binary.version>2.12</scala.binary.version>
 		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
@@ -558,15 +558,18 @@
 
 	<profiles>
 		<profile>
-			<id>bundle</id>
-			<build>
-				<plugins>
-
-
-				</plugins>
-			</build>
+			<id>standalone</id>
+			<properties>
+				<spark.deps.scope>compile</spark.deps.scope>
+			</properties>
 		</profile>
-
+		<profile>
+			<id>deb</id>
+			<properties>
+				<spark.deps.scope>compile</spark.deps.scope>
+			</properties>
+		</profile>
+	
 		<profile>
 			<id>doclint-java8-disable</id>
 			<activation>

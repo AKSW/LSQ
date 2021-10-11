@@ -12,13 +12,17 @@ In order to reduce build times for specific tasks there exist different profiles
 The following table summarizes those profiles:
 
 
-| Build task                             | Required profile(s) | Example                    |
-|----------------------------------------|---------------------|----------------------------|
-| Libraries only                         | (none)              | `mvn clean install`        |
-| Jar bundle (uber jar)                  | dist                | `mvn -Pdist clean install` |
-| Debian package (depends on jar bundle) | deb                 | `mvn -Pdeb clean install`  |
+| Build task                               | Required profile(s) | Example                               |
+|------------------------------------------|---------------------|---------------------------------------|
+| Libraries only                           | (none)              | `mvn clean install`                   |
+| Jar bundle (uber jar)                    | dist                | `mvn -Pdist clean install`            |
+| Embed spark                              | standalone          | `mvn -Pdist,standalone clean install` |
+| Debian package (implies dist,standalone) | deb                 | `mvn -Pdeb clean install`             |
 
-
+If you want a self-contained runnable jar file then build lsq using:
+```bash
+mvn -Pdist,standalone clean install
+```
 
 ### Building the Jar Bundle (jar-with-dependencies)
 
