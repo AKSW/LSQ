@@ -24,6 +24,12 @@
 
 	<dependencies>
 
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-picocli</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>info.picocli</groupId>
 			<artifactId>picocli</artifactId>

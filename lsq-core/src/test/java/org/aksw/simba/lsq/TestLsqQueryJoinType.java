@@ -2,8 +2,7 @@ package org.aksw.simba.lsq;
 
 import org.aksw.simba.lsq.core.QueryStatistics2;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
-import org.aksw.simba.lsq.trash.LSQARQ2SPIN;
-import org.aksw.simba.lsq.util.SpinUtils;
+import org.aksw.simba.lsq.util.SpinUtilsOld;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -11,6 +10,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.topbraid.spin.arq.ARQ2SPIN;
 
 public class TestLsqQueryJoinType {
     //@Test
@@ -21,13 +21,13 @@ public class TestLsqQueryJoinType {
         Model model = ModelFactory.createDefaultModel();
         Resource featureRes = model.createResource();
 
-        LSQARQ2SPIN arq2spin = new LSQARQ2SPIN(model);
+        ARQ2SPIN arq2spin = new ARQ2SPIN(model);
         SpinQueryEx spinRes = arq2spin.createQuery(query, null).as(SpinQueryEx.class);
 
 
         Resource outputRes = model.createResource();
 
-        SpinUtils.enrichWithHasTriplePattern(spinRes, spinRes);
+        SpinUtilsOld.enrichWithHasTriplePattern(spinRes, spinRes);
         //QueryStatistics2.enrichResourceWithQueryFeatures(featureRes, query);
         QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
         RDFDataMgr.write(System.out, spinRes.getModel(), RDFFormat.TURTLE);

@@ -19,6 +19,8 @@ import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jena_sparql_api.utils.ElementUtils;
 import org.aksw.jena_sparql_api.utils.QueryUtils;
 import org.aksw.jena_sparql_api.utils.TripleUtils;
+import org.aksw.simba.lsq.core.util.Skolemize;
+import org.aksw.simba.lsq.core.util.SpinUtils;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.LsqStructuralFeatures;
 import org.aksw.simba.lsq.model.util.SpinCoreUtils;
@@ -31,7 +33,7 @@ import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
 import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
-import org.aksw.simba.lsq.util.SpinUtils;
+import org.aksw.simba.lsq.util.SpinUtilsOld;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -195,7 +197,7 @@ public class LsqEnrichments {
             Map<Node, BgpNode> bgpNodeMap = bgp.indexBgpNodes();
 
             for(TriplePattern tp : bgp.getTriplePatterns()) {
-                Set<RDFNode> rdfNodes = SpinUtils.listRDFNodes(tp);
+                Set<RDFNode> rdfNodes = SpinUtilsOld.listRDFNodes(tp);
 //                logger.info("triple pattern: " + tp);
                 for(RDFNode rdfNode : rdfNodes) {
                     Node node = org.aksw.simba.lsq.model.util.SpinCoreUtils.readNode(rdfNode);
@@ -230,7 +232,7 @@ public class LsqEnrichments {
      */
     public static BgpNode createBgpNode(Model model, Node jenaNode) {
         BgpNode result = (jenaNode.isVariable()
-                ? SpinUtils.writeNode(model, jenaNode)
+                ? SpinUtilsOld.writeNode(model, jenaNode)
                 : model.createResource())
             .as(BgpNode.class);
 
@@ -251,7 +253,7 @@ public class LsqEnrichments {
             Model spinModel = bgpInfo.getModel();
 
             // Extend the spin model with BGPs
-            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtils.indexBasicPatterns2(spinModel); //queryRes);
+            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinUtilsOld.indexBasicPatterns2(spinModel); //queryRes);
 
             for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 
@@ -380,7 +382,7 @@ public class LsqEnrichments {
 
     //        SpinQueryEx spinRes = lsqQuery.getSpinQuery().as(SpinQueryEx.class);
 
-            Resource spinQuery = LsqProcessor.createSpinModel(query, lsqQuery.getModel());
+            Resource spinQuery = SpinUtils.createSpinModel(query, lsqQuery.getModel());
 
             // Immediately skolemize the spin model - before attachment of
             // additional properties changes the hashes

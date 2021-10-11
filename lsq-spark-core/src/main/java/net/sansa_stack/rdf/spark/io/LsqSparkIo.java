@@ -22,7 +22,8 @@ import org.aksw.jena_sparql_api.rx.op.FlowOfResourcesOps;
 import org.aksw.jena_sparql_api.stmt.SparqlStmt;
 import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
-import org.aksw.simba.lsq.core.LsqUtils;
+import org.aksw.simba.lsq.core.LsqRdfizer;
+import org.aksw.simba.lsq.core.rx.io.input.LsqProbeUtils;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Dataset;
@@ -30,7 +31,6 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -176,7 +176,7 @@ public class LsqSparkIo {
                     return upstream.flatMapIterable(record -> {
                         Optional<Resource> r;
                         try {
-                            r = LsqUtils.processLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
+                            r = LsqRdfizer.rdfizeLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record);
                         } catch (Exception e) {
                             logger.warn("Internal error; trying to continue", e);
                             r = Optional.empty();
@@ -254,7 +254,7 @@ public class LsqSparkIo {
                 logger.debug("Probing against format " + formatName + " raised exception", e);
             }
 
-            double weight = LsqUtils.analyzeInformationRatio(baseItems, r -> r.hasProperty(LSQ.processingError));
+            double weight = LsqProbeUtils.analyzeInformationRatio(baseItems, r -> r.hasProperty(LSQ.processingError));
 
             result.put(weight, formatName);
         }
@@ -289,10 +289,10 @@ public class LsqSparkIo {
 
 
         List<String> rawPrefixSources = rdfizeCmd.getPrefixSources();
-        Iterable<String> prefixSources = Lists.newArrayList(LsqUtils.prependDefaultPrefixSources(rawPrefixSources));
+        Iterable<String> prefixSources = Lists.newArrayList(LsqRdfizer.prependDefaultPrefixSources(rawPrefixSources));
 
         // FIXME The prefixes need to be serialized in the driver!
-        SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp = () -> LsqUtils.createSparqlParser(prefixSources);
+        SerializableSupplier<SparqlStmtParser> sparqlStmtParserSupp = () -> LsqRdfizer.createSparqlParser(prefixSources);
 
 
         Map<String, SourceOfRddOfResources> logFmtRegistry = LsqRegistrySparkAdapter.createDefaultLogFmtRegistry(sparkSession);

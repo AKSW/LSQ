@@ -58,6 +58,8 @@
 		<module>lsq-enrichers</module>
 		<module>lsq-cli</module>
 		<module>lsq-debian-cli</module>
+
+		<!-- <module>lsq-legacy</module> -->
 	</modules>
 
 	<properties>
@@ -118,6 +120,12 @@
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-beans</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-picocli</artifactId>
 				<version>${aksw-commons.version}</version>
 			</dependency>
 
