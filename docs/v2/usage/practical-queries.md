@@ -1,7 +1,7 @@
 ---
 parent: Usage
 title: Useful Queries
-nav_order: 5
+nav_order: 6
 ---
 
 
