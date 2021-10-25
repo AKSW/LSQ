@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
-import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.core.FluentQueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.utils.QueryExecutionUtils;
@@ -927,7 +927,7 @@ public class LsqProcessor
 
         Stopwatch sw = Stopwatch.createStarted();
         try(QueryExecution qe = qef.createQueryExecution(query)) {
-            long resultSetSize = QueryExecutionUtils.consume(qe);
+            long resultSetSize = QueryExecUtils.consume(qe);
             double durationInMillis = sw.stop().elapsed(TimeUnit.NANOSECONDS) / 1000000.0;
 
 

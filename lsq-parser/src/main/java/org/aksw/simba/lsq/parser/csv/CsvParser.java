@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rx.GraphFactoryEx;
-import org.aksw.jena_sparql_api.rx.op.FlowOfQuadsOps;
-import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
+import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
+import org.aksw.jenax.sparql.rx.op.QueryFlowOps;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;

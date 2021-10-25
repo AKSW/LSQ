@@ -4,12 +4,12 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
-import org.aksw.jena_sparql_api.util.iri.PrefixMappingTrie;
+import org.aksw.jenax.arq.util.prefix.PrefixMappingTrie;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtQuery;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.aksw.simba.lsq.core.util.Skolemize;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.RemoteExecution;

@@ -2,7 +2,7 @@ package org.aksw.simba.lsq.parser;
 
 import java.util.regex.Pattern;
 
-import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeDelegate;
+import org.aksw.jenax.arq.util.datatype.RDFDatatypeDelegate;
 import org.apache.jena.datatypes.RDFDatatype;
 
 /**

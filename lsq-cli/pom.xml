@@ -24,10 +24,14 @@
 
 	<dependencies>
 
-
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-picocli</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-rx-ops-syscall</artifactId>
 		</dependency>
 
 		<dependency>
@@ -64,11 +68,8 @@
 			<artifactId>slf4j-log4j12</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-server-standalone</artifactId>
-			<version>${jsa.version}</version>
-		</dependency>
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-server-standalone</artifactId> 
+			<version>${jsa.version}</version> </dependency> -->
 
 	</dependencies>
 

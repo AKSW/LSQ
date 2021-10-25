@@ -9,7 +9,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
 import org.aksw.jena_sparql_api.mapper.annotation.StringId;
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Resource;

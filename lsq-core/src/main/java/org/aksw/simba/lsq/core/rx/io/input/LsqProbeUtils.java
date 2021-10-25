@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtUtils;
+import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
+import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.core.io.input.registry.LsqInputFormatRegistry;
 import org.aksw.simba.lsq.vocab.LSQ;

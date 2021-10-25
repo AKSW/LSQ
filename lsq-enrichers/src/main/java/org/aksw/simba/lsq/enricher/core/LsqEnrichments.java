@@ -13,12 +13,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.QueryUtils;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.syntax.QueryUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.core.util.Skolemize;
 import org.aksw.simba.lsq.core.util.SpinUtils;
 import org.aksw.simba.lsq.enricher.benchmark.core.LsqExec;

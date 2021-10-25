@@ -32,20 +32,20 @@ import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
 import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
-import org.aksw.jena_sparql_api.core.connection.SparqlQueryConnectionWithReconnect;
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.NodesInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.rx.DatasetFactoryEx;
-import org.aksw.jena_sparql_api.rx.DatasetGraphFactoryEx;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
 import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
+import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor;
+import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionWithReconnect;
+import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
+import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
+import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
+import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqMain;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxAnalyze;
@@ -86,8 +86,8 @@ import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.XSD;
-import org.openrdf.model.vocabulary.RDF;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.topbraid.spin.vocabulary.SP;
@@ -236,7 +236,8 @@ public class MainCliLsq {
                     DatasetFlowOps.createMapperDataset(sparqlStmts,
                             r -> r.getDataset(),
                             (r, ds) -> r.inDataset(ds),
-                            DatasetGraphFactoryEx::createInsertOrderPreservingDatasetGraph);
+                            DatasetGraphFactoryEx::createInsertOrderPreservingDatasetGraph,
+                            cxt -> {});
 
 
             legacyLogRdfEvents = legacyLogRdfEvents
@@ -409,7 +410,7 @@ public class MainCliLsq {
         return prefixMapping
             .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("dct", DCTerms.NS)
-            .setNsPrefix("rdf", RDF.NAMESPACE)
+            .setNsPrefix("rdf", RDF.uri)
             .setNsPrefix("xsd", XSD.NS)
             .setNsPrefix("lsqr", "http://lsq.aksw.org/")
             .setNsPrefix("sp", SP.NS)

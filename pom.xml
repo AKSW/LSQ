@@ -63,9 +63,8 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.2.0</jena.version>
-		<jsa.subversion>1-SNAPSHOT</jsa.subversion>
-		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
+		<jena.version>4.3.0-SNAPSHOT</jena.version>
+		<jsa.version>4.3.0-1-SNAPSHOT</jsa.version>
 		<aksw-commons.version>0.9.1-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
@@ -228,19 +227,8 @@
 			<!-- <artifactId>jena-arq</artifactId> -->
 			<!-- <version>${jena.version}</version> -->
 			<!-- </dependency> -->
-
-			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-core</artifactId>
-				<version>${jsa.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.quartz-scheduler</groupId>
-						<artifactId>quartz</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
+				<version>${jsa.version}</version> </dependency> -->
 			<!-- <dependency> -->
 			<!-- <groupId>org.apache.hadoop</groupId> -->
 			<!-- <artifactId>hadoop-common</artifactId> -->
@@ -249,37 +237,50 @@
 			<!-- </dependency> -->
 
 			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-reprogen-core</artifactId>
 				<version>${jsa.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-rx-io</artifactId>
-				<version>${jsa.version}</version>
-				<!-- This dependency depends on hadoop with everything execluded So excluding 
-					its hadoop dependency excludes the excludes... -->
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.hadoop</groupId>
-						<artifactId>hadoop-common</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-conjure</artifactId>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 				<version>${jsa.version}</version>
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-sparql-ext</artifactId>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-utils</artifactId>
 				<version>${jsa.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-rx</artifactId>
+				<version>${jsa.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-rx-ops-syscall</artifactId>
+				<version>${jsa.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-arq-connection</artifactId>
+				<version>${jsa.version}</version>
+			</dependency>
+
+			<!-- Used for DataRefSparqlEndpoint -->
+			<dependency>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-conjure-core</artifactId>
+				<version>${jsa.version}</version>
+			</dependency>
+
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId> 
+				<version>${jsa.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>spin</artifactId>
@@ -299,22 +300,11 @@
 				<version>1.7.25</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.aksw.fedx</groupId>
-				<artifactId>fedx-jsa</artifactId>
-				<version>3.1.0-1-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>log4j-over-slf4j</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.fasterxml.jackson.core</groupId>
-						<artifactId>jackson-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 
+			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
+				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId> 
+				<artifactId>jackson-core</artifactId> </exclusion> </exclusions> </dependency> -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -569,7 +559,7 @@
 				<spark.deps.scope>compile</spark.deps.scope>
 			</properties>
 		</profile>
-	
+
 		<profile>
 			<id>doclint-java8-disable</id>
 			<activation>

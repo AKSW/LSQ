@@ -25,24 +25,24 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.aksw.commons.io.util.StdIo;
-import org.aksw.jena_sparql_api.core.connection.ConnectionLostException;
-import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.rx.SparqlRx;
-import org.aksw.jena_sparql_api.rx.op.FlowOfQuadsOps;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
-import org.aksw.jena_sparql_api.syntax.QueryGenerationUtils;
-import org.aksw.jena_sparql_api.syntax.UpdateRequestUtils;
-import org.aksw.jena_sparql_api.utils.DatasetUtils;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.ExprUtils;
-import org.aksw.jena_sparql_api.utils.Quads;
-import org.aksw.jena_sparql_api.utils.ResultSetUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.connection.core.ConnectionLostException;
+import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
+import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
+import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.execution.ResultSetUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
+import org.aksw.jenax.arq.util.quad.DatasetUtils;
+import org.aksw.jenax.arq.util.quad.Quads;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
+import org.aksw.jenax.sparql.query.rx.SparqlRx;
+import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
 import org.aksw.simba.lsq.enricher.core.LsqEnrichments;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
@@ -828,7 +828,7 @@ catch (Exception e) {
                    try(QueryExecution qe = conn.query(countQuery)) {
                        qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
 
-                       Number count = ServiceUtils.fetchNumber(qe, countVar);
+                       Number count = QueryExecutionUtils.fetchNumber(qe, countVar);
                        if(count != null) {
                            itemCount = count.longValue();
 
@@ -881,7 +881,7 @@ catch (Exception e) {
     public static Flowable<Entry<String, Dataset>> fetchDatasets(SparqlQueryConnection conn, Iterable<Node> graphNames) {
         Query query = createFetchNamedGraphQuery(graphNames);
         QuadAcc quadAcc = new QuadAcc();
-        quadAcc.addQuad(Quads.gspo);
+        quadAcc.addQuad(Quads.GSPO);
         Template template = new Template(quadAcc);
         //template.getQuads().add(gspo);
 
@@ -905,7 +905,7 @@ catch (Exception e) {
         result.setQueryResultStar(true);
         result.setQueryPattern(
                 ElementUtils.groupIfNeeded(
-                        ElementUtils.createElement(Quads.gspo),
+                        ElementUtils.createElement(Quads.GSPO),
                         new ElementFilter(ExprUtils.oneOf(Vars.g, graphNames))
                 ));
         result.addOrderBy(Vars.g, Query.ORDER_ASCENDING);

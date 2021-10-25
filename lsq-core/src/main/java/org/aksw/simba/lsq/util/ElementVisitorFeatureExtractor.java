@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.util.strings.StringUtils;
-import org.aksw.jena_sparql_api.utils.ExprUtils;
+import org.aksw.commons.util.string.StringUtils;
+import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;

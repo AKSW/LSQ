@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.UnaryRelation;
+import org.aksw.jenax.sparql.relation.api.UnaryRelation;
 import org.aksw.simba.lsq.util.ConceptModelUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;

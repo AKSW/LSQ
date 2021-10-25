@@ -13,14 +13,15 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtIterator;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParserImpl;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtQuery;
-import org.aksw.jena_sparql_api.utils.DatasetUtils;
+import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
+import org.aksw.jenax.arq.dataset.impl.RDFNodeInDatasetUtils;
+import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
+import org.aksw.jenax.arq.util.quad.DatasetUtils;
+import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
+import org.aksw.jenax.stmt.core.SparqlStmtQuery;
+import org.aksw.jenax.stmt.util.SparqlStmtIterator;
 import org.aksw.simba.lsq.core.LsqRdfizer;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.model.RemoteExecution;
@@ -181,7 +182,7 @@ public class LsqRxIo {
                 logger.info("Quad-based format detected - assuming RDFized log as input");
                 result = RDFDataMgrRx.createFlowableDatasets(inSupp, lang, null)
                         .flatMap(ds -> Flowable.fromIterable(
-                                DatasetUtils.listResourcesWithProperty(ds, LSQ.text).toList()));
+                                RDFNodeInDatasetUtils.listResourcesWithProperty(ds, LSQ.text).toList()));
 
 //        		result = Streams.stream(RDFDataMgrRx.createFlowableResources(inSupp, lang, "")
 //        			.blockingIterable()

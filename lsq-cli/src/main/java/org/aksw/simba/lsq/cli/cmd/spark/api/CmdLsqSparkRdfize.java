@@ -3,7 +3,7 @@ package org.aksw.simba.lsq.cli.cmd.spark.api;
 import java.util.concurrent.Callable;
 
 import org.aksw.commons.rx.function.RxFunction;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
+import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
 import org.aksw.simba.lsq.cli.util.spark.LsqCliSparkUtils;

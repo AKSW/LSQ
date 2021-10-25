@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.enricher.benchmark.opcache;
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import org.aksw.jenax.arq.util.binding.TableUtils;
 import org.apache.jena.atlas.io.IndentedWriter;
 import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.algebra.Table;
@@ -56,7 +57,7 @@ public class OpExtKeyAndTableSupplier
     @Override
     public QueryIterator eval(QueryIterator input, ExecutionContext execCxt) {
         Table table = queryIterSupplier.get();
-        QueryIterator result = new QueryIteratorResultSet(table.toResultSet());
+        QueryIterator result = new QueryIteratorResultSet(TableUtils.toResultSet(table)); //table.toResultSet());
         // QueryIterator result = queryIterSupplier.get();
         return result;
     }

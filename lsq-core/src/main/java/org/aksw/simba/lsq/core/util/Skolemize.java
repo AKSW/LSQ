@@ -11,14 +11,14 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.conjure.algebra.common.ResourceTreeUtils;
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
-import org.aksw.jena_sparql_api.mapper.proxy.MapperProxyUtils;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.ResourceInDataset;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jena_sparql_api.utils.NodeTransformLib2;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
+import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
+import org.aksw.jenax.arq.util.node.NodeTransformLib2;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.reprogen.core.MapperProxyUtils;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.apache.jena.ext.com.google.common.hash.HashCode;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -248,7 +248,7 @@ public class Skolemize {
         Model model = root.getModel();
         // Apply an in-place node transform on the dataset
         // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
-        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), model);
+        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(renames::get), model);
         Resource result = model.asRDFNode(newRoot).asResource();
 
         if (postProcessor != null) {
@@ -274,7 +274,7 @@ public class Skolemize {
         Dataset dataset = queryInDataset.getDataset();
         // Apply an in-place node transform on the dataset
         // queryInDataset = ResourceInDatasetImpl.applyNodeTransform(queryInDataset, NodeTransformLib2.makeNullSafe(renames::get));
-        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
+        NodeTransformLib2.applyNodeTransform(NodeTransformLib2.wrapWithNullAsIdentity(renames::get), dataset);
         ResourceInDataset result = new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot);
         return result;
     }

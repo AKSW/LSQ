@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.aksw.jena_sparql_api.util.sparql.syntax.path.PathWalker;
+import org.aksw.jenax.sparql.path.PathWalker;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.path.P_Alt;

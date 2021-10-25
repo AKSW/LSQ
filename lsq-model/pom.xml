@@ -16,8 +16,8 @@
 	<dependencies>
 
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-conjure</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-conjure-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -31,8 +31,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
 
 		<dependency>

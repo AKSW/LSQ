@@ -7,7 +7,7 @@ import java.util.Set;
 import org.aksw.jena_sparql_api.mapper.annotation.HashId;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.jena_sparql_api.mapper.hashid.HashIdCxt;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.enhanced.EnhGraph;

@@ -15,15 +15,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.commons.collections.MapUtils;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jena_sparql_api.concepts.Concept;
 import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
-import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
-import org.aksw.jena_sparql_api.utils.ElementUtils;
-import org.aksw.jena_sparql_api.utils.MapUtils;
-import org.aksw.jena_sparql_api.utils.TripleUtils;
-import org.aksw.jena_sparql_api.utils.Vars;
+import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
+import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.syntax.ElementUtils;
+import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;
@@ -58,7 +58,6 @@ import org.apache.jena.sparql.syntax.PatternVars;
 import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.openrdf.query.MalformedQueryException;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -101,7 +100,7 @@ public class QueryStatistics2 {
 
         //ServiceUtils.fetchCountConcept(sparqlService, concept, itemLimit, rowLimit)L
         Query query = ConceptUtils.createQueryList(c);
-        Integer tmp = ServiceUtils.fetchInteger(qef, query, c.getVar());
+        Integer tmp = QueryExecutionUtils.fetchInteger(qef.createQueryExecution(query), c.getVar());
         Long result = tmp.longValue();
 
         return result;

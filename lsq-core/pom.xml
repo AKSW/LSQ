@@ -20,9 +20,10 @@
 		</dependency>
 	
 	
+	
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-rx-io</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
 		</dependency>
 
 
@@ -30,16 +31,6 @@
 			<groupId>org.aksw.commons</groupId>
 			<artifactId>aksw-commons-beans</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>org.aksw.commons</groupId>
-			<artifactId>aksw-commons-io-utils</artifactId>
-		</dependency>
-
-		<!-- <dependency> -->
-		<!-- <groupId>org.hobbit</groupId> -->
-		<!-- <artifactId>facete3-impl</artifactId> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.apache.jena</groupId>
@@ -76,25 +67,38 @@
 			<artifactId>shacl</artifactId>
 		</dependency>
 -->
+<!--
 		<dependency>
 			<groupId>org.aksw.jena-sparql-api</groupId>
 			<artifactId>jena-sparql-api-core</artifactId>
 		</dependency>
-
+-->
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-conjure</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-conjure-core</artifactId>
+		</dependency>
+
+<!--
 		<dependency>
 			<groupId>org.aksw.fedx</groupId>
 			<artifactId>fedx-jsa</artifactId>
 		</dependency>
+-->
 
 		<dependency>
 			<groupId>junit</groupId>

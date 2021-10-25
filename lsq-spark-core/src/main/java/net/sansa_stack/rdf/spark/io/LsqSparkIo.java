@@ -12,22 +12,18 @@ import java.util.stream.Collectors;
 import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.rx.function.RxFunction;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.rdf.model.ext.dataset.api.DatasetOneNg;
-import org.aksw.jena_sparql_api.rx.SparqlScriptProcessor;
-import org.aksw.jena_sparql_api.rx.model.NodeSelectorFromUnaryRelation;
-import org.aksw.jena_sparql_api.rx.model.NodesInModel;
-import org.aksw.jena_sparql_api.rx.op.FlowOfDatasetOps;
-import org.aksw.jena_sparql_api.rx.op.FlowOfResourcesOps;
-import org.aksw.jena_sparql_api.stmt.SparqlStmt;
-import org.aksw.jena_sparql_api.stmt.SparqlStmtParser;
+import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor;
+import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
+import org.aksw.jenax.sparql.rx.op.FlowOfDatasetOps;
+import org.aksw.jenax.sparql.rx.op.FlowOfResourcesOps;
+import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 import org.aksw.simba.lsq.core.LsqRdfizer;
 import org.aksw.simba.lsq.core.rx.io.input.LsqProbeUtils;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Dataset;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
@@ -202,11 +198,11 @@ public class LsqSparkIo {
         return result;
     }
 
-    public static NodesInModel fromRDFNode(RDFNode rdfNode) {
-        return new NodesInModel(
-                rdfNode.getModel(),
-                new NodeSelectorFromUnaryRelation(Concept.createNodes(rdfNode.asNode())));
-    }
+//    public static NodesInModel fromRDFNode(RDFNode rdfNode) {
+//        return new NodesInModel(
+//                rdfNode.getModel(),
+//                new NodeSelectorFromUnaryRelation(Concept.createNodes(rdfNode.asNode())));
+//    }
 
     public static List<Entry<String, Number>> probeLogFormat(Map<String, SourceOfRddOfResources> registry, String resource) {
 
