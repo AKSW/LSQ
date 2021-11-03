@@ -45,6 +45,7 @@ import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
+import org.aksw.jenax.sparql.rx.op.FlowOfRdfNodesInDatasetsOps;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqMain;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
@@ -251,10 +252,10 @@ public class MainCliLsq {
 
             FlowableTransformer<NodesInDataset, NodesInDataset> sorter = ResourceInDatasetFlowOps.createSystemSorter(sortCmd, null);
             legacyLogRdfEvents = legacyLogRdfEvents
-                    .compose(ResourceInDatasetFlowOps.groupedResourceInDataset())
+                    .compose(FlowOfRdfNodesInDatasetsOps.groupedResourceInDataset())
                     .compose(sorter)
-                    .compose(ResourceInDatasetFlowOps::mergeConsecutiveResourceInDatasets)
-                    .flatMap(ResourceInDatasetFlowOps::ungrouperResourceInDataset);
+                    .compose(FlowOfRdfNodesInDatasetsOps::mergeConsecutiveResourceInDatasets)
+                    .flatMap(FlowOfRdfNodesInDatasetsOps::ungrouperResourceInDataset);
         }
 
         return legacyLogRdfEvents;
