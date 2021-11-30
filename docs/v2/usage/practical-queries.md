@@ -11,6 +11,16 @@ nav_order: 6
 For reference, here is a depicition of the [LSQ data model](Data-Model)
 ![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/docs/v2/images/lsq2-datamodel.png)
 
+```sparql
+Print all SELECT queries from DBpedia log 
+SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
+?spin a <http://spinrdf.org/sp#Select> . 
+}
+
+```
 
 The following result sets of SPARQL queries are based on the LSQ output of this query:
 ```sparql
