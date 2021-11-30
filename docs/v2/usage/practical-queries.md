@@ -34,7 +34,7 @@ SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
 ```
 
 ```sparql
-Get all queries having resultset zero. 
+Get all queries having resultset greather than zero. 
 SELECT DISTINCT ?text WHERE 
 {
 ?s <http://lsq.aksw.org/vocab#text> ?text .
@@ -42,7 +42,7 @@ SELECT DISTINCT ?text WHERE
 ?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le . 
 ?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe . 
 ?qe <http://lsq.aksw.org/vocab#resultCount> ?rs  . 
-FILTER(?rs = 0)}
+FILTER(?rs > 0)}
 
 ```
 
