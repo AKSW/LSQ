@@ -141,6 +141,28 @@ Top objects ordered by query count	SELECT ?object COUNT(Distinct ?query) as ?que
 	GROUP BY ?object
 	ORDER BY DESC(?queryCount)
 ```
+```sparql
+Various features of SPARQL queries. 
+Prefix lsq: <http://lsq.aksw.org/vocab#>
+SELECT  DISTINCT  ?qId  ?joinVertices ?tps ?rs ?rt ?meanJoinVertexDegree 
+{
+?qId  lsq:text ?text .
+?qId  lsq:hasRemoteExec ?re . 
+?qId  lsq:hasLocalExec ?le . 
+?qId  lsq:hasStructuralFeatures ?sf .
+?sf   lsq:projectVarCount ?projVars.
+?sf   lsq:joinVertexCount ?joinVertices . 
+?sf   lsq:tpCount ?tps .
+?sf   lsq:joinVertexDegreeMean ?meanJoinVertexDegree . 
+?sf   lsq:usesFeature  lsq:Select  .  
+?le   lsq:hasQueryExec ?qe . 
+?qe   lsq:resultCount ?rs. 
+?qe   lsq:evalDuration ?rt. 
+Filter (?rs > 0 && ?rs < 20000000 && ?tps > 0)
+}
+Limit 1000000
+
+```
 
 The following result sets of SPARQL queries are based on the LSQ output of this query:
 ```sparql
