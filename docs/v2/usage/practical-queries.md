@@ -12,13 +12,37 @@ For reference, here is a depicition of the [LSQ data model](Data-Model)
 ![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/docs/v2/images/lsq2-datamodel.png)
 
 ```sparql
-Print all SELECT queries from DBpedia log 
+Get all SELECT queries from DBpedia log 
 SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
 {
 ?s <http://lsq.aksw.org/vocab#text> ?text .
 ?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
 ?spin a <http://spinrdf.org/sp#Select> . 
 }
+
+```
+
+```sparql
+Get all SELECT queries from DBpedia log 
+SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
+?spin a <http://spinrdf.org/sp#Select> . 
+}
+
+```
+
+```sparql
+Get all queries having resultset zero. 
+SELECT DISTINCT ?text WHERE 
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasRemoteExec> ?re . 
+?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le . 
+?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe . 
+?qe <http://lsq.aksw.org/vocab#resultCount> ?rs  . 
+FILTER(?rs = 0)}
 
 ```
 
