@@ -195,7 +195,7 @@ public class CmdLsqRehashSparkImpl {
         JavaRDD<Dataset> outRdd = ridRdd
             .mapPartitions(ridIt -> {
                 PrefixMapping pm = prefixesBc.getValue();
-                SparqlStmtParser sparqlStmtParser = SparqlStmtParserImpl.create(
+                SparqlStmtParser sparqlStmtParser = SparqlStmtParserImpl.createWithCloseAction(
                         Syntax.syntaxARQ, pm, true);
 
                 return Streams.stream(ridIt)

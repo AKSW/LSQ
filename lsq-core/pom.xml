@@ -18,9 +18,9 @@
 			<groupId>org.aksw.simba.lsq</groupId>
 			<artifactId>lsq-model</artifactId>
 		</dependency>
-	
-	
-	
+
+
+
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-rx</artifactId>
@@ -61,18 +61,10 @@
 			<artifactId>spin</artifactId>
 		</dependency>
 
-<!--
-		<dependency>
-			<groupId>org.topbraid</groupId>
-			<artifactId>shacl</artifactId>
-		</dependency>
--->
-<!--
-		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-core</artifactId>
-		</dependency>
--->
+		<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
+			</dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
@@ -85,7 +77,7 @@
 
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
-			<artifactId>jenax-arq-connection</artifactId>
+			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -93,12 +85,8 @@
 			<artifactId>jenax-conjure-core</artifactId>
 		</dependency>
 
-<!--
-		<dependency>
-			<groupId>org.aksw.fedx</groupId>
-			<artifactId>fedx-jsa</artifactId>
-		</dependency>
--->
+		<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -110,8 +98,8 @@
 			</dependency> -->
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j18-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 

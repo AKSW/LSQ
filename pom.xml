@@ -63,8 +63,8 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.3.0-SNAPSHOT</jena.version>
-		<jsa.version>4.3.0-1-SNAPSHOT</jsa.version>
+		<jena.version>4.3.1</jena.version>
+		<jsa.version>4.3.1-1-SNAPSHOT</jsa.version>
 		<aksw-commons.version>0.9.1-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
@@ -72,6 +72,11 @@
 
 		<scala.binary.version>2.12</scala.binary.version>
 		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
+
+		<slf4j.version>1.8.0-beta4</slf4j.version>
+		<log4j.version>2.16.0</log4j.version>
+		
+		<junit.version>4.13.1</junit.version>
 
 		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
 
@@ -268,7 +273,7 @@
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
-				<artifactId>jenax-arq-connection</artifactId>
+				<artifactId>jenax-arq-connection-core</artifactId>
 				<version>${jsa.version}</version>
 			</dependency>
 
@@ -293,11 +298,16 @@
 				</exclusions>
 			</dependency>
 
+			<dependency>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j18-impl</artifactId>
+				<version>${log4j.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.25</version>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
 
@@ -308,7 +318,7 @@
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
+				<version>${junit.version}</version>
 			</dependency>
 
 			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 

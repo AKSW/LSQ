@@ -10,7 +10,7 @@ MAIN_CLASS="org.aksw.simba.lsq.cli.main.MainCliLsq"
 
 
 # TODO Set opts depending on java version
-EXTRA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED"
+#EXTRA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.invoke=ALL-UNNAMED"
 
 java $EXTRA_OPTS $JAVA_OPTS -cp "$LIB_DIR/lsq-cli.jar" "$MAIN_CLASS" "$@"
 
