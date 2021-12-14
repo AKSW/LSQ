@@ -11,6 +11,158 @@ nav_order: 6
 For reference, here is a depicition of the [LSQ data model](Data-Model)
 ![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/docs/v2/images/lsq2-datamodel.png)
 
+```sparql
+Get all SELECT queries from DBpedia log 
+SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
+?spin a <http://spinrdf.org/sp#Select> . 
+}
+
+```
+
+```sparql
+Get all SELECT queries from DBpedia log 
+SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
+?spin a <http://spinrdf.org/sp#Select> . 
+}
+
+```
+
+```sparql
+Get all queries having resultset greather than zero. 
+SELECT DISTINCT ?text WHERE 
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasRemoteExec> ?re . 
+?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le . 
+?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe . 
+?qe <http://lsq.aksw.org/vocab#resultCount> ?rs  . 
+FILTER(?rs > 0)}
+
+```
+
+```sparql
+Get all star shaped queries (There are four types of nodes in LSQ namely Star, Path, Hybrid, Sink). 
+SELECT DISTINCT ?text
+WHERE 
+{ 
+?s <http://lsq.aksw.org/vocab#text> ?text . 
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf . 
+?sf <http://lsq.aksw.org/vocab#hasBgp> ?bgp .
+?bgp <http://lsq.aksw.org/vocab#hasBgpNode> ?jv .
+?jv <http://lsq.aksw.org/vocab#joinVertexType> <http://lsq.aksw.org/vocab#star>. 
+}
+```
+```sparql
+Queries along with their resultset sizes and runtimes
+SELECT ?text ?rs ?sec
+WHERE { 
+?s <http://lsq.aksw.org/vocab#text> ?text . 
+?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le .
+?s <http://lsq.aksw.org/vocab#hasRemoteExec> ?re .
+?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe .
+?qe <http://lsq.aksw.org/vocab#resultCount> ?rs. 
+?qe <http://lsq.aksw.org/vocab#evalDuration> ?sec 
+}
+
+
+```
+```sparql
+Queries with number of triple patterns
+SELECT ?text ?tp 
+WHERE { ?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
+?sf <http://lsq.aksw.org/vocab#tpCount> ?tp. }
+```
+
+```sparql
+Queries and their number of join vertices. 
+SELECT ?text ?jv
+WHERE
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
+?sf <http://lsq.aksw.org/vocab#joinVertexCount> ?jv. 
+}
+```
+```sparql
+Get all queries having Filters 
+
+SELECT (count(DISTINCT ?text) as ?totalFilter)
+WHERE { 
+?s <http://lsq.aksw.org/vocab#text> ?text . 
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
+?sf <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Filter> . 
+}
+```
+```sparql
+Total Solution modifier
+
+SELECT
+(count(DISTINCT ?text) as ?totalMod) 
+WHERE {
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf . 
+?sf <http://lsq.aksw.org/vocab#usesFeature> ?uf .
+FILTER(?uf = <http://lsq.aksw.org/vocab#OrderBy> || ?uf = <http://lsq.aksw.org/vocab#Offset> || ?uf = <http://lsq.aksw.org/vocab#Limit>) }
+```
+```sparql
+Total queries having SPARQL functions used. 
+
+SELECT (count(DISTINCT ?text) as ?totalFunc)
+WHERE {
+?s <http://lsq.aksw.org/vocab#text> ?text . 
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf . 
+?sf <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Functions> 
+}
+```
+```sparql
+Count of property paths
+
+PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT ?o (COUNT(*) AS ?ppathCount) 
+{
+?s lsq:usesFeature ?o . 
+FILTER(?o IN (lsq:LinkPath, lsq:ReverseLinkPath, lsq:NegPropSetPath , lsq:InversePath, lsq:ModPath, lsq:FixedLengthPath, lsq:DistinctPath, lsq:MultiPath, lsq:ShortestPath, lsq:ZeroOrOnePath)) } GROUP BY ?o ORDER BY DESC(COUNT(*)
+)
+```
+```sparql
+Top objects ordered by query count	SELECT ?object COUNT(Distinct ?query) as ?queryCount
+	{
+	?s <http://lsq.aksw.org/vocab#text> ?query .
+	?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
+	?sf <http://lsq.aksw.org/vocab#hasTP> ?tp .
+	?tp <http://spinrdf.org/sp#object> ?object
+	}
+	GROUP BY ?object
+	ORDER BY DESC(?queryCount)
+```
+```sparql
+Various features of SPARQL queries. 
+Prefix lsq: <http://lsq.aksw.org/vocab#>
+SELECT  DISTINCT  ?qId  ?joinVertices ?tps ?rs ?rt ?meanJoinVertexDegree 
+{
+?qId  lsq:text ?text .
+?qId  lsq:hasRemoteExec ?re . 
+?qId  lsq:hasLocalExec ?le . 
+?qId  lsq:hasStructuralFeatures ?sf .
+?sf   lsq:projectVarCount ?projVars.
+?sf   lsq:joinVertexCount ?joinVertices . 
+?sf   lsq:tpCount ?tps .
+?sf   lsq:joinVertexDegreeMean ?meanJoinVertexDegree . 
+?sf   lsq:usesFeature  lsq:Select  .  
+?le   lsq:hasQueryExec ?qe . 
+?qe   lsq:resultCount ?rs. 
+?qe   lsq:evalDuration ?rt. 
+Filter (?rs > 0 && ?rs < 20000000 && ?tps > 0)
+}
+Limit 1000000
+
+```
 
 The following result sets of SPARQL queries are based on the LSQ output of this query:
 ```sparql
