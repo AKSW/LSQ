@@ -8,6 +8,7 @@
 @prefix sd: <http://www.w3.org/ns/sparql-service-description#>.
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.
 @prefix spin: <http://spinrdf.org/spin#>.
+@prefix void: <http://rdfs.org/ns/void#>.
 @prefix xsd:  <http://www.w3.org/2001/XMLSchema#>.
 
 lsqv: a owl:Ontology ;
@@ -168,11 +169,24 @@ lsqv:hasStructuralFeatures a rdf:Property , owl:ObjectProperty ;
 	rdfs:domain lsqv:Query ;
 	rdfs:range lsqv:StructuralFeatures .
 
+lsqv:dataset a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "execution dataset"@en ;
+	rdfs:comment "the VoID dataset on which a given query execution was run"@en ;
+	rdfs:domain lsqv:QueryExec ;
+	rdfs:range void:Dataset .
+
+lsqv:service a rdf:Property , owl:ObjectProperty ;
+	rdfs:label "execution service"@en ;
+	rdfs:comment "the SPARQL service on which a given query execution was run"@en ;
+	rdfs:domain lsqv:QueryExec ;
+	rdfs:range sd:Service .
+
 lsqv:endpoint a rdf:Property , owl:ObjectProperty ;
 	rdfs:label "execution endpoint"@en ;
 	rdfs:comment "the endpoint on which a given query execution was run"@en ;
-	rdfs:domain lsqv:QueryExev ;
-	rdfs:range cogs:Endpoint .
+	rdfs:domain lsqv:QueryExec ;
+	rdfs:range cogs:Endpoint ;
+	owl:propertyChainAxiom ( lsqv:dataset void:sparqlEndpoint ) , ( lsqv:service sd:endpoint ) .
 
 lsqv:usesFeature a rdf:Property , owl:ObjectProperty ;
 	rdfs:label "uses feature"@en ;
