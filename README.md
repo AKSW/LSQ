@@ -1,7 +1,7 @@
 # Linked SPARQL Queries (LSQ) Framework
 A framework for RDFizing query logs and benchmarking queries and graph patterns.
 
-## What's New
+## What's New in LSQ V2
 
 ### 2020-08-06 LSQ2 Pre-release
 LSQ2 introduces significant improvements over the prior version in every aspect: Ease-of-use, flexibility, modularity, consintency in the data model and generated IDs.
