@@ -1,9 +1,13 @@
 ---
+parent: Resources
 title: Downloads
 has_children: true
-nav_order: 3
+nav_order: 1
 ---
 
+The LSQ ontology file is available at:
+
+* [http://lsq.aksw.org/vocab](http://lsq.aksw.org/vocab)
 
 LSQ datasets can be downloaded from the following file server:
 
