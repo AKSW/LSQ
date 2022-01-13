@@ -10,7 +10,7 @@ Sources of queries are typically logs of triple stores or web servers in general
 Analysis involves extracting the basic graph patterns, used features such as functions and operators, and statistics of these features.
 Benchmarking evaluates queries by executing them against a given SPARQL endpoint thereby measuring performance and result set characteristics.
 
-[View it on GitHub](https://github.com/AKSW/LSQ){: .btn .fs-5 .mb-4 .mb-md-0 }
+[View it on GitHub](https://github.com/AKSW/LSQ){: .btn .fs-5 .mb-4 .mb-md-0 } [Downloads & Services](/v2/resources/){: .btn .fs-5 .mb-4 .mb-md-0 }
 
 ## Installation of LSQ Framework
 
