@@ -1,7 +1,7 @@
 # Linked SPARQL Queries (LSQ) Framework
 A framework for RDFizing query logs and benchmarking queries and graph patterns.
 
-## What's New
+## What's New in LSQ V2
 
 ### 2020-08-06 LSQ2 Pre-release
 LSQ2 introduces significant improvements over the prior version in every aspect: Ease-of-use, flexibility, modularity, consintency in the data model and generated IDs.
@@ -41,7 +41,19 @@ lsq rx benchmark run -c benchmark.run.ttl *.log.trig
 The `-o` option causes the settings to be written to the console. Omit `-o` to have LSQ auto-generate files.
 
 
-![LSQ Process Overview](lsq-docs/lsq2-overview.svg "")
+#### Run with Docker
+
+Run example running LSQ to RDFize SPARQL logs, input and output files in the current working directory (replace `$(pwd)` by `${PWD}` for Windows PowerShell):
+
+```bash
+docker run -it -v $(pwd):/data ghcr.io/aksw/lsq rx rdfize --endpoint=http://dbpedia.org/sparql virtuoso.dbpedia.log 
+```
+
+Build the Docker image from the source code:
+
+```bash
+docker build -t ghcr.io/aksw/lsq .
+```
 
 
 ## License

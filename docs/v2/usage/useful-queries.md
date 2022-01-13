@@ -9,32 +9,20 @@ nav_order: 6
 
 
 For reference, here is a depicition of the [LSQ data model](Data-Model)
-![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/blob/develop/docs/v2/images/lsq2-datamodel.png)
+![Depiction of the LSQ2 Data Model](https://github.com/AKSW/LSQ/raw/develop/docs/v2/images/lsq2-datamodel.png)
 
 ```sparql
-Get all SELECT queries from DBpedia log 
+# Get all SELECT queries from DBpedia log 
 SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
 {
 ?s <http://lsq.aksw.org/vocab#text> ?text .
 ?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
 ?spin a <http://spinrdf.org/sp#Select> . 
 }
-
 ```
 
 ```sparql
-Get all SELECT queries from DBpedia log 
-SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
-{
-?s <http://lsq.aksw.org/vocab#text> ?text .
-?s <http://lsq.aksw.org/vocab#hasSpin> ?spin .
-?spin a <http://spinrdf.org/sp#Select> . 
-}
-
-```
-
-```sparql
-Get all queries having resultset greather than zero. 
+# Get all queries having resultset greater than zero. 
 SELECT DISTINCT ?text WHERE 
 {
 ?s <http://lsq.aksw.org/vocab#text> ?text .
@@ -42,12 +30,12 @@ SELECT DISTINCT ?text WHERE
 ?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le . 
 ?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe . 
 ?qe <http://lsq.aksw.org/vocab#resultCount> ?rs  . 
-FILTER(?rs > 0)}
-
+FILTER(?rs > 0)
+}
 ```
 
 ```sparql
-Get all star shaped queries (There are four types of nodes in LSQ namely Star, Path, Hybrid, Sink). 
+# Get all star shaped queries (There are four types of nodes in LSQ namely Star, Path, Hybrid, Sink). 
 SELECT DISTINCT ?text
 WHERE 
 { 
@@ -58,8 +46,9 @@ WHERE
 ?jv <http://lsq.aksw.org/vocab#joinVertexType> <http://lsq.aksw.org/vocab#star>. 
 }
 ```
+
 ```sparql
-Queries along with their resultset sizes and runtimes
+# Queries along with their resultset sizes and runtimes
 SELECT ?text ?rs ?sec
 WHERE { 
 ?s <http://lsq.aksw.org/vocab#text> ?text . 
@@ -69,19 +58,19 @@ WHERE {
 ?qe <http://lsq.aksw.org/vocab#resultCount> ?rs. 
 ?qe <http://lsq.aksw.org/vocab#evalDuration> ?sec 
 }
-
-
 ```
+
 ```sparql
-Queries with number of triple patterns
+# Queries with number of triple patterns
 SELECT ?text ?tp 
 WHERE { ?s <http://lsq.aksw.org/vocab#text> ?text .
 ?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
-?sf <http://lsq.aksw.org/vocab#tpCount> ?tp. }
+?sf <http://lsq.aksw.org/vocab#tpCount> ?tp. 
+}
 ```
 
 ```sparql
-Queries and their number of join vertices. 
+# Queries and their number of join vertices. 
 SELECT ?text ?jv
 WHERE
 {
@@ -90,9 +79,9 @@ WHERE
 ?sf <http://lsq.aksw.org/vocab#joinVertexCount> ?jv. 
 }
 ```
-```sparql
-Get all queries having Filters 
 
+```sparql
+# Total queries having Filters 
 SELECT (count(DISTINCT ?text) as ?totalFilter)
 WHERE { 
 ?s <http://lsq.aksw.org/vocab#text> ?text . 
@@ -100,20 +89,20 @@ WHERE {
 ?sf <http://lsq.aksw.org/vocab#usesFeature> <http://lsq.aksw.org/vocab#Filter> . 
 }
 ```
-```sparql
-Total Solution modifier
 
-SELECT
-(count(DISTINCT ?text) as ?totalMod) 
+```sparql
+# Total queries having Solution modifiers
+SELECT (count(DISTINCT ?text) as ?totalMod) 
 WHERE {
 ?s <http://lsq.aksw.org/vocab#text> ?text .
 ?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf . 
 ?sf <http://lsq.aksw.org/vocab#usesFeature> ?uf .
-FILTER(?uf = <http://lsq.aksw.org/vocab#OrderBy> || ?uf = <http://lsq.aksw.org/vocab#Offset> || ?uf = <http://lsq.aksw.org/vocab#Limit>) }
+FILTER(?uf = <http://lsq.aksw.org/vocab#OrderBy> || ?uf = <http://lsq.aksw.org/vocab#Offset> || ?uf = <http://lsq.aksw.org/vocab#Limit>) 
+}
 ```
-```sparql
-Total queries having SPARQL functions used. 
 
+```sparql
+# Total queries having SPARQL functions 
 SELECT (count(DISTINCT ?text) as ?totalFunc)
 WHERE {
 ?s <http://lsq.aksw.org/vocab#text> ?text . 
@@ -121,47 +110,50 @@ WHERE {
 ?sf <http://lsq.aksw.org/vocab#usesFeature>  <http://lsq.aksw.org/vocab#Functions> 
 }
 ```
-```sparql
-Count of property paths
 
-PREFIX lsq: <http://lsq.aksw.org/vocab#> SELECT ?o (COUNT(*) AS ?ppathCount) 
+```sparql
+# Count of property paths
+PREFIX lsqv: <http://lsq.aksw.org/vocab#> 
+SELECT ?o (COUNT(*) AS ?ppathCount) 
 {
-?s lsq:usesFeature ?o . 
-FILTER(?o IN (lsq:LinkPath, lsq:ReverseLinkPath, lsq:NegPropSetPath , lsq:InversePath, lsq:ModPath, lsq:FixedLengthPath, lsq:DistinctPath, lsq:MultiPath, lsq:ShortestPath, lsq:ZeroOrOnePath)) } GROUP BY ?o ORDER BY DESC(COUNT(*)
+?s lsqv:usesFeature ?o . 
+FILTER(?o IN (lsqv:LinkPath, lsqv:ReverseLinkPath, lsqv:NegPropSetPath , lsqv:InversePath, lsqv:ModPath, lsqv:FixedLengthPath, lsqv:DistinctPath, lsqv:MultiPath, lsqv:ShortestPath, lsqv:ZeroOrOnePath)) } GROUP BY ?o ORDER BY DESC(COUNT(*)
 )
 ```
+
 ```sparql
-Top objects ordered by query count	SELECT ?object COUNT(Distinct ?query) as ?queryCount
-	{
-	?s <http://lsq.aksw.org/vocab#text> ?query .
-	?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
-	?sf <http://lsq.aksw.org/vocab#hasTP> ?tp .
-	?tp <http://spinrdf.org/sp#object> ?object
-	}
-	GROUP BY ?object
-	ORDER BY DESC(?queryCount)
+# Top objects ordered by query count	
+SELECT ?object COUNT(Distinct ?query) as ?queryCount
+{
+?s <http://lsq.aksw.org/vocab#text> ?query .
+?s <http://lsq.aksw.org/vocab#hasStructuralFeatures> ?sf .
+?sf <http://lsq.aksw.org/vocab#hasTP> ?tp .
+?tp <http://spinrdf.org/sp#object> ?object
+}
+GROUP BY ?object
+ORDER BY DESC(?queryCount)
 ```
+
 ```sparql
-Various features of SPARQL queries. 
-Prefix lsq: <http://lsq.aksw.org/vocab#>
+# Various features of SPARQL queries
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
 SELECT  DISTINCT  ?qId  ?joinVertices ?tps ?rs ?rt ?meanJoinVertexDegree 
 {
-?qId  lsq:text ?text .
-?qId  lsq:hasRemoteExec ?re . 
-?qId  lsq:hasLocalExec ?le . 
-?qId  lsq:hasStructuralFeatures ?sf .
-?sf   lsq:projectVarCount ?projVars.
-?sf   lsq:joinVertexCount ?joinVertices . 
-?sf   lsq:tpCount ?tps .
-?sf   lsq:joinVertexDegreeMean ?meanJoinVertexDegree . 
-?sf   lsq:usesFeature  lsq:Select  .  
-?le   lsq:hasQueryExec ?qe . 
-?qe   lsq:resultCount ?rs. 
-?qe   lsq:evalDuration ?rt. 
-Filter (?rs > 0 && ?rs < 20000000 && ?tps > 0)
+?qId  lsqv:text ?text .
+?qId  lsqv:hasRemoteExec ?re . 
+?qId  lsqv:hasLocalExec ?le . 
+?qId  lsqv:hasStructuralFeatures ?sf .
+?sf   lsqv:projectVarCount ?projVars.
+?sf   lsqv:joinVertexCount ?joinVertices . 
+?sf   lsqv:tpCount ?tps .
+?sf   lsqv:joinVertexDegreeMean ?meanJoinVertexDegree . 
+?sf   lsqv:usesFeature  lsq:Select  .  
+?le   lsqv:hasQueryExec ?qe . 
+?qe   lsqv:resultCount ?rs. 
+?qe   lsqv:evalDuration ?rt. 
+FILTER (?rs > 0 && ?rs < 20000000 && ?tps > 0)
 }
-Limit 1000000
-
+LIMIT 1000000
 ```
 
 The following result sets of SPARQL queries are based on the LSQ output of this query:
@@ -177,18 +169,18 @@ SELECT * {
 
 
 ```sparql
-PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel {
   ?query lsq:hasStructuralFeatures ?sf .
 
-  ?sf         lsq:hasBgp     ?bgp .
-  ?bgp        lsq:hasBgpNode ?bgpNode .
-  ?bgpNode    lsq:hasSubBgp  ?subBgp .
-  ?subBgp     lsq:hasTpInBgp ?subTpInBgp .
-  ?subTpInBgp lsq:hasTp      ?subTp .
+  ?sf         lsqv:hasBgp     ?bgp .
+  ?bgp        lsqv:hasBgpNode ?bgpNode .
+  ?bgpNode    lsqv:hasSubBgp  ?subBgp .
+  ?subBgp     lsqv:hasTpInBgp ?subTpInBgp .
+  ?subTpInBgp lsqv:hasTp      ?subTp .
 
   ?bgp     rdfs:label ?bgpLabel .
   ?bgpNode rdfs:label ?bgpNodeLabel .
@@ -196,7 +188,6 @@ SELECT ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel {
   ?subTp   rdfs:label ?subTpLabel .
 
 } ORDER BY ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel
-
 ```
 
 ```
@@ -223,38 +214,38 @@ Note, that the rationale for the reverse link is that from an element all corres
 
 
 ```sparql
-PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?exp ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel ?bgpSize  ?subTpSize ?subTpToBgpRatio {
-  ?query          lsq:hasLocalExec   ?localExec .
-  ?localExec      lsq:hasBgpExec     ?bgpExec .
-  ?bgpExec        lsq:hasJoinVarExec ?bgpNodeExec .
-  ?bgpNodeExec    lsq:hasSubBgpExec  ?subBgpExec .
-  ?subBgpExec     lsq:hasTpInBgpExec ?subTpInBgpExec .
-  ?subTpInBgpExec lsq:hasTpExec      ?subTpExec .
+  ?query          lsqv:hasLocalExec   ?localExec .
+  ?localExec      lsqv:hasBgpExec     ?bgpExec .
+  ?bgpExec        lsqv:hasJoinVarExec ?bgpNodeExec .
+  ?bgpNodeExec    lsqv:hasSubBgpExec  ?subBgpExec .
+  ?subBgpExec     lsqv:hasTpInBgpExec ?subTpInBgpExec .
+  ?subTpInBgpExec lsqv:hasTpExec      ?subTpExec .
 
   # Links from the executions to the query's elements
-  ?bgp     lsq:hasExec ?bgpExec     ; rdfs:label ?bgpLabel .
-  ?bgpNode lsq:hasExec ?bgpNodeExec ; rdfs:label ?bgpNodeLabel .
-  ?subBgp  lsq:hasExec ?subBgpExec  ; rdfs:label ?subBgpLabel .
-  ?subTp   lsq:hasExec ?subTpExec   ; rdfs:label ?subTpLabel .
+  ?bgp     lsqv:hasExec ?bgpExec     ; rdfs:label ?bgpLabel .
+  ?bgpNode lsqv:hasExec ?bgpNodeExec ; rdfs:label ?bgpNodeLabel .
+  ?subBgp  lsqv:hasExec ?subBgpExec  ; rdfs:label ?subBgpLabel .
+  ?subTp   lsqv:hasExec ?subTpExec   ; rdfs:label ?subTpLabel .
 
-  ?localExec lsq:benchmarkRun ?exp .  
+  ?localExec lsqv:benchmarkRun ?exp .  
 
   # Get the measurements
-  ?subBgpExec lsq:hasElementExec [ lsq:itemCount ?bgpSize   ] .
-  ?subTpExec  lsq:hasElementExec [ lsq:itemCount ?subTpSize ] .
+  ?subBgpExec lsqv:hasElementExec [ lsqv:itemCount ?bgpSize   ] .
+  ?subTpExec  lsqv:hasElementExec [ lsqv:itemCount ?subTpSize ] .
 
-  ?subTpInBgpExec lsq:tpToBgpRatio ?subTpToBgpRatio .
+  ?subTpInBgpExec lsqv:tpToBgpRatio ?subTpToBgpRatio .
 
   # Further useful triple patterns
-  # ?query lsq:hash ?queryHash .
+  # ?query lsqv:hash ?queryHash .
   # ?exp dct:identifier ?expId .
 
   # bgp/tp selectivities (may be absent if involved result sets exceeded benchmark limits)
-  # OPTIONAL { ?subTpInBgpExec lsq:bgpRestrictedTpSel ?bgpRestrictedTpSel }
+  # OPTIONAL { ?subTpInBgpExec lsqv:bgpRestrictedTpSel ?bgpRestrictedTpSel }
 
 } ORDER BY ?exp ?bgpLabel ?bgpNodeLabel ?subBgpLabel
 ```
