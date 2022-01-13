@@ -190,7 +190,7 @@ SELECT ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel {
 } ORDER BY ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel
 ```
 
-#### Accessing the components (RDF terms + variables) of a queries triple patterns (via the BGPs)
+#### Accessing the RDF terms and variables of a query's triple patterns (via the BGPs)
 ```sparql
 PREFIX lsqv: <http://lsq.aksw.org/vocab#>
 PREFIX sp: <http://spinrdf.org/sp#>
