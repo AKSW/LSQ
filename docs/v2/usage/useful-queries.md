@@ -190,6 +190,29 @@ SELECT ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel {
 } ORDER BY ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel
 ```
 
+#### Accessing the components (RDF terms + variables) of a queries triple patterns (via the BGPs)
+```
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT ?tpLabel ?s ?p ?o {
+  { SELECT * { ?query lsqv:hasStructuralFeatures ?sf } LIMIT 1 }
+
+  Graph ?g {
+    ?sf         lsqv:hasBgp     ?bgp .
+    ?bgp        lsqv:hasTpInBgp ?tpInBgp .
+    ?tpInBgp    lsqv:hasTp      ?tp .
+
+    ?bgp rdfs:label ?bgpLabel .
+    ?tp  rdfs:label ?tpLabel .
+
+    ?tp sp:subject ?s .
+    ?tp sp:predicate ?p .
+    ?tp sp:object ?o .
+  }
+}
+```
+
 ```
 ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 | bgpLabel                                                                                          | bgpNodeLabel | subBgpLabel                                                                                       | subTpLabel                                                                                                          |
