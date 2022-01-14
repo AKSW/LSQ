@@ -156,6 +156,32 @@ FILTER (?rs > 0 && ?rs < 20000000 && ?tps > 0)
 LIMIT 1000000
 ```
 
+```sparql
+# find queries with dbo:Actor as an object in a triple pattern
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT DISTINCT ?text ?query
+WHERE { 
+  ?query lsqv:text ?text .
+  ?query lsqv:hasStructuralFeatures/lsqv:hasBgp/lsqv:hasTpInBgp/lsqv:hasTp/sp:object dbo:Actor .
+}
+```
+
+```sparql
+# find queries with the actor keyword
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT DISTINCT ?text ?query
+WHERE { 
+  ?query lsqv:text ?text .
+  ?text bif:contains "actor" .
+}
+```
+
 The following result sets of SPARQL queries are based on the LSQ output of this query:
 ```sparql
 PREFIX swc:  <http://data.semanticweb.org/ns/swc/ontology#>
