@@ -156,6 +156,32 @@ FILTER (?rs > 0 && ?rs < 20000000 && ?tps > 0)
 LIMIT 1000000
 ```
 
+```sparql
+# find queries with dbo:Actor as an object in a triple pattern
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT DISTINCT ?text ?query
+WHERE { 
+  ?query lsqv:text ?text .
+  ?query lsqv:hasStructuralFeatures/lsqv:hasBgp/lsqv:hasTpInBgp/lsqv:hasTp/sp:object dbo:Actor .
+}
+```
+
+```sparql
+# find queries with the actor keyword
+PREFIX dbo: <http://dbpedia.org/ontology/>
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT DISTINCT ?text ?query
+WHERE { 
+  ?query lsqv:text ?text .
+  ?text bif:contains "actor" .
+}
+```
+
 The following result sets of SPARQL queries are based on the LSQ output of this query:
 ```sparql
 PREFIX swc:  <http://data.semanticweb.org/ns/swc/ontology#>
@@ -188,6 +214,29 @@ SELECT ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel {
   ?subTp   rdfs:label ?subTpLabel .
 
 } ORDER BY ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel
+```
+
+#### Accessing the RDF terms and variables of a query's triple patterns (via the BGPs)
+```sparql
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+
+SELECT ?tpLabel ?s ?p ?o {
+  { SELECT * { ?query lsqv:hasStructuralFeatures ?sf } LIMIT 1 }
+
+  Graph ?g {
+    ?sf         lsqv:hasBgp     ?bgp .
+    ?bgp        lsqv:hasTpInBgp ?tpInBgp .
+    ?tpInBgp    lsqv:hasTp      ?tp .
+
+    ?bgp rdfs:label ?bgpLabel .
+    ?tp  rdfs:label ?tpLabel .
+
+    ?tp sp:subject ?s .
+    ?tp sp:predicate ?p .
+    ?tp sp:object ?o .
+  }
+}
 ```
 
 ```
