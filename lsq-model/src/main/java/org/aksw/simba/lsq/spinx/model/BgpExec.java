@@ -4,11 +4,11 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.mapper.annotation.HashId;
-import org.aksw.jena_sparql_api.mapper.annotation.Inverse;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.jena_sparql_api.mapper.annotation.StringId;
+import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.Inverse;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.annotation.reprogen.StringId;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.model.ElementExec;
 import org.aksw.simba.lsq.vocab.LSQ;

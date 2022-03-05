@@ -226,7 +226,7 @@ public class LsqExec {
                 try {
                     String key = queryExec.toString();
                     result = new OpExtKeyAndTableSupplier(key, () ->
-                        TableMgr.parseTableFromString(str, ResultSetLang.SPARQLResultSetJSON));
+                        TableMgr.parseTableFromString(str, ResultSetLang.RS_JSON));
                 } catch(Exception e) {
                     logger.warn("Failed to parse a result set", e);
                 }

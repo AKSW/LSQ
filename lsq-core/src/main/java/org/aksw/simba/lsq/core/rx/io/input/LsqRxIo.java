@@ -13,10 +13,10 @@ import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.LongStream;
 
+import org.aksw.commons.io.util.StdIo;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.RDFNodeInDatasetUtils;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
-import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
@@ -36,7 +36,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
-import org.apache.tika.io.CloseShieldInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,7 +157,7 @@ public class LsqRxIo {
 //		}
 
         Callable<InputStream> inSupp = logSource == null
-                ? () -> new CloseShieldInputStream(System.in)
+                ? () -> StdIo.openStdInWithCloseShield()
                 : () -> RDFDataMgr.open(logSource); // Alteratively StreamMgr.open()
 
         Lang lang = logFormat == null

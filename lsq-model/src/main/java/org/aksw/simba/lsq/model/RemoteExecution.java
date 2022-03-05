@@ -3,11 +3,11 @@ package org.aksw.simba.lsq.model;
 import java.util.Calendar;
 
 import org.aksw.commons.io.util.UriToPathUtils;
-import org.aksw.jena_sparql_api.mapper.annotation.HashId;
-import org.aksw.jena_sparql_api.mapper.annotation.Iri;
-import org.aksw.jena_sparql_api.mapper.annotation.IriType;
-import org.aksw.jena_sparql_api.mapper.annotation.ResourceView;
-import org.aksw.jena_sparql_api.mapper.annotation.StringId;
+import org.aksw.jenax.annotation.reprogen.HashId;
+import org.aksw.jenax.annotation.reprogen.Iri;
+import org.aksw.jenax.annotation.reprogen.IriType;
+import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.annotation.reprogen.StringId;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;

@@ -3,7 +3,7 @@ package org.aksw.simba.lsq.cli.trash;
 import java.io.File;
 import java.util.List;
 
-import org.aksw.jena_sparql_api.mapper.annotation.IriNs;
+import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.apache.jena.rdf.model.Resource;
 
 import com.beust.jcommander.Parameter;

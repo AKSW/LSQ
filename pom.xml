@@ -63,9 +63,9 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.3.2</jena.version>
-		<jsa.version>4.3.2-1-SNAPSHOT</jsa.version>
-		<aksw-commons.version>0.9.1-SNAPSHOT</aksw-commons.version>
+		<jena.version>4.5.0-SNAPSHOT</jena.version>
+		<jsa.version>4.5.0-1-SNAPSHOT</jsa.version>
+		<aksw-commons.version>0.9.3-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
 		<spark.deps.scope>provided</spark.deps.scope>
@@ -154,7 +154,7 @@
 			<dependency>
 				<groupId>net.sansa-stack</groupId>
 				<artifactId>sansa-spark-jena-java${scala.version.suffix}</artifactId>
-				<version>0.8.0-RC2-SNAPSHOT</version>
+				<version>0.8.0-RC3-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
