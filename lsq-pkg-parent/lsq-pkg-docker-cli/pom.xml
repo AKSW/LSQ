@@ -41,7 +41,7 @@
 				<artifactId>jib-maven-plugin</artifactId>
 				<configuration>
 					<to>
-						<image>docker.io/aklakan/linked-sparql-queries</image>
+						<image>docker.io/aklakan/lsq</image>
 					</to>
 					<from>
 						<image>eclipse-temurin:11-jre</image>
