@@ -12,6 +12,10 @@ Benchmarking evaluates queries by executing them against a given SPARQL endpoint
 
 [View it on GitHub](https://github.com/AKSW/LSQ){: .btn .fs-5 .mb-4 .mb-md-0 } [Downloads & Services](/v2/resources/){: .btn .fs-5 .mb-4 .mb-md-0 }
 
+## W3ID Permanent Identifiers
+
+* Consider referring to LSQ resources via http://w3id.org/lsq which is aimed at providing stable identifiers for distance futures where LSQ is hosted under a different domain.
+
 ## Installation of LSQ Framework
 
 * [Setup](v2/setup.md) of the LSQ Framework
