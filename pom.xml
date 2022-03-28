@@ -57,7 +57,7 @@
 		<module>lsq-spark-core</module>
 		<module>lsq-enrichers</module>
 		<module>lsq-cli</module>
-		<module>lsq-debian-cli</module>
+		<module>lsq-pkg-parent</module>
 
 		<!-- <module>lsq-legacy</module> -->
 	</modules>
@@ -111,6 +111,29 @@
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-enrichers</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-deb-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-rpm-cli</artifactId>
+				<type>rpm</type>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-docker-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-uberjar-cli</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -219,13 +242,14 @@
 				<version>${project.version}</version>
 			</dependency>
 
+<!--
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-cli</artifactId>
 				<version>${project.version}</version>
 				<classifier>jar-with-dependencies</classifier>
 			</dependency>
-
+-->
 
 			<!-- <dependency> -->
 			<!-- <groupId>org.apache.jena</groupId> -->
@@ -466,6 +490,33 @@
 			<plugins>
 
 				<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.6</version>
+				</plugin>
+
+				<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.6</version>
+				</plugin>
+
+				<plugin>
+					<groupId>com.google.cloud.tools</groupId>
+					<artifactId>jib-maven-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<artifactId>jdeb</artifactId>
+					<groupId>org.vafer</groupId>
+					<version>1.9</version>
+				</plugin>
+				<plugin>
+					<groupId>de.dentrassi.maven</groupId>
+					<artifactId>rpm</artifactId>
+					<version>1.8.0</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
 					<version>2.4.3</version>
@@ -538,36 +589,25 @@
 				</plugin>
 
 				<plugin>
-					<artifactId>jdeb</artifactId>
-					<groupId>org.vafer</groupId>
-					<version>1.9</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.0.2</version>
 					<executions>
 						<execution>
-							<phase>package</phase>
+							<phase>prepare-package</phase>
+							<!-- <phase>package</phase> -->
 							<goals>
-								<goal>jdeb</goal>
+								<goal>copy-dependencies</goal>
 							</goals>
 						</execution>
 					</executions>
-				</plugin>
-
-				<plugin>
-					<groupId>com.google.cloud.tools</groupId>
-					<artifactId>jib-maven-plugin</artifactId>
-					<version>3.1.4</version>
 					<configuration>
-						<to>
-							<image>lsq</image>
-						</to>
+						<!-- <useBaseVersion>false</useBaseVersion> -->
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+						<includeScope>runtime</includeScope>
+						<outputDirectory>${project.build.directory}/lib</outputDirectory>
 					</configuration>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>build</goal>
-							</goals>
-						</execution>
-					</executions>
 				</plugin>
 
 			</plugins>
@@ -628,7 +668,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -647,7 +686,6 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.6</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
