@@ -1,5 +1,6 @@
 package org.aksw.simba.lsq.spark.cmd.impl;
 
+import org.aksw.commons.model.csvw.domain.impl.DialectMutableImpl;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
@@ -12,6 +13,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
+import net.sansa_stack.hadoop.format.univocity.conf.UnivocityHadoopConf;
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
 import net.sansa_stack.spark.io.rdf.output.RddRdfWriter;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
@@ -70,11 +72,13 @@ public class LsqTarqlTest {
 
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(ss.sparkContext());
 
-        CSVFormat baseCsvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
+        // CSVFormat baseCsvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
+        UnivocityHadoopConf csvConf = new UnivocityHadoopConf(new DialectMutableImpl().setHeader(true));
+
 
         String path = "/home/raven/Datasets/bio2rdf_sparql_logs_processed_01-2019_to_07-2021.csv";
 
-        JavaRDD<Binding> bindingRdd = CsvDataSources.createRddOfBindings(sc, path, baseCsvFormat);
+        JavaRDD<Binding> bindingRdd = CsvDataSources.createRddOfBindings(sc, path, csvConf);
 
 
 

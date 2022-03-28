@@ -19,6 +19,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 
 import com.google.common.collect.Streams;
 
+import net.sansa_stack.hadoop.format.univocity.conf.UnivocityHadoopConf;
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
 import net.sansa_stack.spark.rdd.function.JavaRddFunction;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
@@ -46,8 +47,8 @@ public class CsvParserSpark {
         };
     }
 
-    public static JavaRDD<Resource> loadMappedCsv(JavaSparkContext sc, String path, CSVFormat csvFormat, Query query) throws IOException {
-        JavaRDD<Binding> rdd = CsvDataSources.createRddOfBindings(sc, path, csvFormat);
+    public static JavaRDD<Resource> loadMappedCsv(JavaSparkContext sc, String path, UnivocityHadoopConf csvConf, Query query) throws IOException {
+        JavaRDD<Binding> rdd = CsvDataSources.createRddOfBindings(sc, path, csvConf);
 
         return newTransformerBindingToResource(query).apply(rdd);
     }

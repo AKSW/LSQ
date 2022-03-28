@@ -686,10 +686,17 @@
 			</snapshots>
 		</repository>
 
-		<!-- <repository> <id>maven.aksw.internal</id> <name>AKSW Internal Repository</name> 
-			<url>https://maven.aksw.org/archiva/repository/internal</url> <releases> 
-			<enabled>true</enabled> </releases> <snapshots> <enabled>false</enabled> 
-			</snapshots> </repository> -->
+                <!-- Repo for latest jena snapshots -->
+                <repository>
+                        <id>apache-repo-snapshots</id>
+                        <url>https://repository.apache.org/content/repositories/snapshots/</url>
+                        <releases>
+                                <enabled>false</enabled>
+                        </releases>
+                        <snapshots>
+                                <enabled>true</enabled>
+                        </snapshots>
+                </repository>
 
 		<repository>
 			<id>com.topquadrant.internal</id>
