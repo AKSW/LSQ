@@ -1,7 +1,7 @@
 ---
 parent: Usage
 title: RDFization
-nav_order: 2
+nav_order: 30
 ---
 
 
