@@ -1,7 +1,7 @@
 ---
 parent: Usage
 title: Probing Log Files
-nav_order: 2
+nav_order: 20
 ---
 
 Probing is performed with the `lsq probe` subcommand. Multiple files can be processed at once using globbing.
