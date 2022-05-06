@@ -8,6 +8,11 @@ nav_order: 4
 
 LSQ requires Maven to build.
 
+If you want a self-contained runnable jar then build lsq using:
+```bash
+mvn -Pdist,standalone clean install
+```
+
 In order to reduce build times for specific tasks there exist different profiles.
 The following table summarizes those profiles:
 
@@ -18,11 +23,6 @@ The following table summarizes those profiles:
 | Jar bundle (uber jar)                    | dist                | `mvn -Pdist clean install`            |
 | Embed Apache Spark                       | standalone          | `mvn -Pdist,standalone clean install` |
 | Debian package (implies dist,standalone) | deb                 | `mvn -Pdeb clean install`             |
-
-If you want a self-contained runnable jar file then build lsq using:
-```bash
-mvn -Pdist,standalone clean install
-```
 
 ### Building the Jar Bundle (jar-with-dependencies)
 
