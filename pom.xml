@@ -63,8 +63,8 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.5.0-SNAPSHOT</jena.version>
-		<jsa.version>4.5.0-1-SNAPSHOT</jsa.version>
+		<jena.version>4.5.0</jena.version>
+		<jenax.version>4.5.0-1-SNAPSHOT</jenax.version>
 		<aksw-commons.version>0.9.3-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
@@ -75,7 +75,7 @@
 
 		<slf4j.version>1.8.0-beta4</slf4j.version>
 		<log4j.version>2.17.1</log4j.version>
-		
+
 		<junit.version>4.13.1</junit.version>
 
 		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
@@ -242,22 +242,17 @@
 				<version>${project.version}</version>
 			</dependency>
 
-<!--
-			<dependency>
-				<groupId>org.aksw.simba.lsq</groupId>
-				<artifactId>lsq-cli</artifactId>
-				<version>${project.version}</version>
-				<classifier>jar-with-dependencies</classifier>
-			</dependency>
--->
+			<!-- <dependency> <groupId>org.aksw.simba.lsq</groupId> <artifactId>lsq-cli</artifactId>
+				<version>${project.version}</version> <classifier>jar-with-dependencies</classifier>
+				</dependency> -->
 
 			<!-- <dependency> -->
 			<!-- <groupId>org.apache.jena</groupId> -->
 			<!-- <artifactId>jena-arq</artifactId> -->
 			<!-- <version>${jena.version}</version> -->
 			<!-- </dependency> -->
-			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
-				<version>${jsa.version}</version> </dependency> -->
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId>
+				<version>${jenax.version}</version> </dependency> -->
 			<!-- <dependency> -->
 			<!-- <groupId>org.apache.hadoop</groupId> -->
 			<!-- <artifactId>hadoop-common</artifactId> -->
@@ -268,48 +263,48 @@
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-reprogen-core</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-utils</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-rx</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-rx-ops-syscall</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-arq-connection-core</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
 			<!-- Used for DataRefSparqlEndpoint -->
 			<dependency>
 				<groupId>org.aksw.jenax</groupId>
 				<artifactId>jenax-conjure-core</artifactId>
-				<version>${jsa.version}</version>
+				<version>${jenax.version}</version>
 			</dependency>
 
-			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId> 
-				<version>${jsa.version}</version> </dependency> -->
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId>
+				<version>${jenax.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.topbraid</groupId>
 				<artifactId>spin</artifactId>
@@ -335,9 +330,9 @@
 			</dependency>
 
 
-			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
-				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
-				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId> 
+			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId>
+				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId>
+				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId> </exclusion> </exclusions> </dependency> -->
 			<dependency>
 				<groupId>junit</groupId>
@@ -345,12 +340,12 @@
 				<version>${junit.version}</version>
 			</dependency>
 
-			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId>
 				<version>5.0.3.RELEASE</version> </dependency> -->
 
 
-			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
-				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId> 
+			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId>
+				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId>
 				<artifactId>jena-arq</artifactId> </exclusion> </exclusions> </dependency> -->
 
 		</dependencies>
@@ -359,11 +354,11 @@
 	<!-- Don't touch the stuff below unless you know what you are doing -->
 
 
-	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
-		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
-		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId> 
-		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId> 
-		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin> 
+	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration>
+		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId>
+		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId>
+		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin>
 		</reportPlugins> </configuration> </plugin> </plugins> </reporting> -->
 
 
@@ -381,7 +376,7 @@
 		</resources>
 
 		<plugins>
-			<!-- A newer version of resources plugin is apparently needed to filter 
+			<!-- A newer version of resources plugin is apparently needed to filter
 				${project.build.timestamp} -->
 			<!-- Does not working although suggested at https://stackoverflow.com/questions/13228472/how-to-access-maven-build-timestamp-for-resource-filtering -->
 			<!-- <plugin> -->
@@ -490,15 +485,15 @@
 			<plugins>
 
 				<plugin>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.6</version>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.6</version>
 				</plugin>
 
 				<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
 				</plugin>
 
 				<plugin>
@@ -549,7 +544,7 @@
 					</executions>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings 
+				<!--This plugin's configuration is used to store Eclipse m2e settings
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
@@ -724,17 +719,17 @@
 			</snapshots>
 		</repository>
 
-                <!-- Repo for latest jena snapshots -->
-                <repository>
-                        <id>apache-repo-snapshots</id>
-                        <url>https://repository.apache.org/content/repositories/snapshots/</url>
-                        <releases>
-                                <enabled>false</enabled>
-                        </releases>
-                        <snapshots>
-                                <enabled>true</enabled>
-                        </snapshots>
-                </repository>
+		<!-- Repo for latest jena snapshots -->
+		<repository>
+			<id>apache-repo-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 
 		<repository>
 			<id>com.topquadrant.internal</id>

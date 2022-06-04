@@ -3,7 +3,7 @@ package org.aksw.simba.lsq.model;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.IriType;
@@ -31,8 +31,8 @@ public interface ExperimentConfig
     ExperimentConfig setCreationDate(Calendar cal);
 
     @Iri(LSQ.Terms.endpoint)
-    ExperimentConfig setDataRef(DataRefSparqlEndpoint dataRef);
-    DataRefSparqlEndpoint getDataRef();
+    ExperimentConfig setDataRef(RdfDataRefSparqlEndpoint dataRef);
+    RdfDataRefSparqlEndpoint getDataRef();
 
     @Iri(LSQ.Terms.requestDelay)
     BigDecimal getRequestDelay();

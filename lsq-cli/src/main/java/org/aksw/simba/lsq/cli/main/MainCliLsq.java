@@ -31,7 +31,7 @@ import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
-import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.DataRefSparqlEndpoint;
+import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint;
 import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor;
@@ -488,7 +488,7 @@ public class MainCliLsq {
         Model model = DatasetFactoryEx.createInsertOrderPreservingDataset().getDefaultModel();
         addLsqPrefixes(model);
 
-        DataRefSparqlEndpoint dataRef = model.createResource().as(DataRefSparqlEndpoint.class)
+        RdfDataRefSparqlEndpoint dataRef = model.createResource().as(RdfDataRefSparqlEndpoint.class)
                 .setServiceUrl(endpointUrl)
                 .mutateDefaultGraphs(dgs -> dgs.addAll(benchmarkCreateCmd.defaultGraphs));
 
@@ -594,11 +594,11 @@ public class MainCliLsq {
         Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
         try(RDFConnection indexConn = RDFConnectionFactory.connect(dataset)) {
 
-            DataRefSparqlEndpoint dataRef = cfg.getDataRef();
+            RdfDataRefSparqlEndpoint dataRef = cfg.getDataRef();
             try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
 
                 try(SparqlQueryConnection benchmarkConn =
-                        SparqlQueryConnectionWithReconnect.create(() -> dataPod.openConnection())) {
+                        SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
                     LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
                 }
             }

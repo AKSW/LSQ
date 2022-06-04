@@ -30,7 +30,7 @@ import org.aksw.jenax.arq.connection.core.ConnectionLostException;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
-import org.aksw.jenax.arq.util.execution.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.Quads;
