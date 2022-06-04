@@ -96,6 +96,12 @@
 		<dependencies>
 
 			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-core</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+
+			<dependency>
 				<groupId>org.apache.spark</groupId>
 				<artifactId>spark-sql_${scala.binary.version}</artifactId>
 				<version>${spark.version}</version>
