@@ -26,6 +26,7 @@
 		<module>lsq-pkg-rpm-cli</module>
 		<module>lsq-pkg-docker-cli</module>
 		<module>lsq-pkg-dummy</module>
+		<module>lsq-pkg-uberjar-cli</module>
 	</modules>
 
 <!--
