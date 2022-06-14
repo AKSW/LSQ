@@ -702,7 +702,9 @@ catch (Exception e) {
                Stopwatch retrievalSw = Stopwatch.createStarted();
 
                try(QueryExecution qe = conn.query(query)) {
-                   qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
+                   // https://github.com/apache/jena/issues/1384
+                   // qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
+                   qe.setTimeout(executionTimeoutForRetrieval);
 
                    ResultSet rs = qe.execSelect();
                    varNames.addAll(rs.getResultVars());
@@ -826,8 +828,9 @@ catch (Exception e) {
                    countingSw = Stopwatch.createStarted();
 
                    try(QueryExecution qe = conn.query(countQuery)) {
-                       qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
-
+                       // qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
+                       // https://github.com/apache/jena/issues/1384
+                       qe.setTimeout(executionTimeoutForCounting);
                        Number count = QueryExecutionUtils.fetchNumber(qe, countVar);
                        if(count != null) {
                            itemCount = count.longValue();
