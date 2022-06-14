@@ -31,14 +31,13 @@ public abstract class LsqTriplePattern
         return result;
     }
 
-
     @HashId
     public HashCode getHashId(HashIdCxt cxt)  {
         Triple t = SpinCoreUtils.toJenaTriple(this);
         HashCode result = cxt.getHashFunction().hashString(Objects.toString(t), StandardCharsets.UTF_8);
+        // System.out.println("LsqTriplePattern: " + t + " -> " + result);
         return result;
     }
-
 
     @Iri(LSQ.Terms.hasExec)
     public abstract Set<TpExec> getTpExecs();

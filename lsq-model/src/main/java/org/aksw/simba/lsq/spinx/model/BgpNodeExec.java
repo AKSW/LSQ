@@ -54,7 +54,8 @@ public interface BgpNodeExec
         //LocalExecution le = bgpExec.getQueryExec().getLocalExecution();
         LocalExecution le = getQueryExec().getLocalExecution();
         ExperimentRun bmr = le.getBenchmarkRun();
-        String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "bgpNodeExec-"
+        // String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "bgpNodeExec-"
+        String prefix = StringUtils.toLowerCamelCase(BgpNodeExec.class.getSimpleName());
         String result = prefix + "-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }

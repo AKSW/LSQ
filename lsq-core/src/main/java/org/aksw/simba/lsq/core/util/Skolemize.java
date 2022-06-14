@@ -79,8 +79,6 @@ public class Skolemize {
     // Property for the skolemized id (without uri prefix and such)
     public static final Property skolemId = ResourceFactory.createProperty("http://tmp.aksw.org/skolemId");
 
-
-
     public static void skolemize2(Resource r) {
 
     }
@@ -154,8 +152,6 @@ public class Skolemize {
         return result;
     }
 
-
-
 //    public static void skolemizeOld(Resource r) {
 //        Map<Resource, String> map = new HashMap<>();
 //
@@ -194,7 +190,6 @@ public class Skolemize {
 //        }
 //    }
 
-
     /**
      * Perform a depth first post order traversal.
      * Renames all encountered blank nodes that qualify for renaming.
@@ -231,8 +226,6 @@ public class Skolemize {
         return result;
     }
 
-
-
     public static <T extends RDFNode> Resource skolemize(
             Resource root,
             String baseIri,
@@ -258,7 +251,6 @@ public class Skolemize {
         return result;
     }
 
-
     public static <T extends RDFNode> ResourceInDataset skolemize(
             ResourceInDataset queryInDataset,
             String baseIri,
@@ -278,7 +270,4 @@ public class Skolemize {
         ResourceInDataset result = new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot);
         return result;
     }
-
-
-
 }

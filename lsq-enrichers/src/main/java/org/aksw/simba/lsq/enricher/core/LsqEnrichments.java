@@ -283,6 +283,8 @@ public class LsqEnrichments {
 
                 List<LsqTriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
                 for(org.topbraid.spin.model.Triple tp : e.getValue()) {
+                    // System.err.println("TP:" + tp);
+
                     bgpTps.add(tp.as(LsqTriplePattern.class));
                 }
 

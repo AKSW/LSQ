@@ -88,6 +88,7 @@ import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -291,8 +292,6 @@ public class MainCliLsq {
         }
     }
 
-
-
     /** Wrap an enricher to log any exception*/
     public static <T> Function<LsqQuery, T> safeEnricher(Function<LsqQuery, T> enricher) {
         return in -> {
@@ -412,6 +411,7 @@ public class MainCliLsq {
             .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("dct", DCTerms.NS)
             .setNsPrefix("rdf", RDF.uri)
+            .setNsPrefix("rdfs", RDFS.uri)
             .setNsPrefix("xsd", XSD.NS)
             .setNsPrefix("lsqr", "http://lsq.aksw.org/")
             .setNsPrefix("sp", SP.NS)

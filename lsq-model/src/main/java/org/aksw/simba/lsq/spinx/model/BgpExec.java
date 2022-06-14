@@ -13,6 +13,8 @@ import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.model.ElementExec;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 
 
 /**
@@ -46,26 +48,30 @@ public interface BgpExec
         Bgp bgp = getBgp();
         // TODO Replace the prefix with e.g. cxt.getClassLabel(SpinBgpExec.class)
 //        String result = "bgpExec-" + cxt.getHashAsString(bgp) + "-" + getLocalExecution().getBenchmarkRun().getIdentifier();
-        String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // "bgpExec"
+        String prefix = StringUtils.toLowerCamelCase(BgpExec.class.getSimpleName()); // "bgpExec"
 
-        String result = prefix + "-" + cxt.getHashAsString(bgp) + "-" + cxt.getStringId(getQueryExec().getLocalExecution().getBenchmarkRun());
+        String bgpHash = cxt.getHashAsString(bgp);
+
+//      RDFDataMgr.write(System.out, this.getModel(), RDFFormat.NTRIPLES);
+//        if (bgpHash == null) {
+//            System.err.println("Null BGP hash encountered");
+//        }
+
+        String result = prefix + "-" + bgpHash + "-" + cxt.getStringId(getQueryExec().getLocalExecution().getBenchmarkRun());
         return result;
     }
 
-
-    // Link from this exec to the benchmark result of the BGP's extension query
+// Link from this exec to the benchmark result of the BGP's extension query
 //    @Iri(LSQ.Strs.hasExec)
 //    @Inverse
 //    LocalExecution getBgpQueryExec();
 //    SpinBgpExec setBgpQueryExec(LocalExecution exec);
-
 
     @Iri(LSQ.Terms.hasTpInBgpExec)
     Set<TpInBgpExec> getTpInBgpExecs();
 
     @Iri(LSQ.Terms.hasJoinVarExec)
     Set<BgpNodeExec> getBgpNodeExecs();
-
 
     default TpInBgpExec findTpInBgpExec(Resource tpInBgp) {
         Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();
