@@ -108,6 +108,13 @@
 				<scope>${spark.deps.scope}</scope>
 			</dependency>
 
+			<!-- Override version of hadoop/spark -->
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.15</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-model</artifactId>
@@ -248,8 +255,8 @@
 				<version>${project.version}</version>
 			</dependency>
 
-			<!-- <dependency> <groupId>org.aksw.simba.lsq</groupId> <artifactId>lsq-cli</artifactId>
-				<version>${project.version}</version> <classifier>jar-with-dependencies</classifier>
+			<!-- <dependency> <groupId>org.aksw.simba.lsq</groupId> <artifactId>lsq-cli</artifactId> 
+				<version>${project.version}</version> <classifier>jar-with-dependencies</classifier> 
 				</dependency> -->
 
 			<!-- <dependency> -->
@@ -257,7 +264,7 @@
 			<!-- <artifactId>jena-arq</artifactId> -->
 			<!-- <version>${jena.version}</version> -->
 			<!-- </dependency> -->
-			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId>
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
 				<version>${jenax.version}</version> </dependency> -->
 			<!-- <dependency> -->
 			<!-- <groupId>org.apache.hadoop</groupId> -->
@@ -309,7 +316,7 @@
 				<version>${jenax.version}</version>
 			</dependency>
 
-			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId>
+			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId> 
 				<version>${jenax.version}</version> </dependency> -->
 			<dependency>
 				<groupId>org.topbraid</groupId>
@@ -336,9 +343,9 @@
 			</dependency>
 
 
-			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId>
-				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId>
-				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId>
+			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
+				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId> 
 				<artifactId>jackson-core</artifactId> </exclusion> </exclusions> </dependency> -->
 			<dependency>
 				<groupId>junit</groupId>
@@ -346,12 +353,12 @@
 				<version>${junit.version}</version>
 			</dependency>
 
-			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId>
+			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
 				<version>5.0.3.RELEASE</version> </dependency> -->
 
 
-			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId>
-				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId>
+			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId> 
 				<artifactId>jena-arq</artifactId> </exclusion> </exclusions> </dependency> -->
 
 		</dependencies>
@@ -360,11 +367,11 @@
 	<!-- Don't touch the stuff below unless you know what you are doing -->
 
 
-	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId>
-		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration>
-		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId>
-		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId>
-		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin>
+	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
+		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId> 
+		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId> 
+		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin> 
 		</reportPlugins> </configuration> </plugin> </plugins> </reporting> -->
 
 
@@ -382,7 +389,7 @@
 		</resources>
 
 		<plugins>
-			<!-- A newer version of resources plugin is apparently needed to filter
+			<!-- A newer version of resources plugin is apparently needed to filter 
 				${project.build.timestamp} -->
 			<!-- Does not working although suggested at https://stackoverflow.com/questions/13228472/how-to-access-maven-build-timestamp-for-resource-filtering -->
 			<!-- <plugin> -->
@@ -550,7 +557,7 @@
 					</executions>
 				</plugin>
 
-				<!--This plugin's configuration is used to store Eclipse m2e settings
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
 					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
