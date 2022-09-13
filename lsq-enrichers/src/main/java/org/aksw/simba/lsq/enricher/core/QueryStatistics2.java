@@ -140,15 +140,15 @@ public class QueryStatistics2 {
      * @param triples
      * @return
      */
-    public static Map<org.topbraid.spin.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<? extends org.topbraid.spin.model.Triple> triples) {
-        Map<org.topbraid.spin.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(t)));
+    public static Map<org.spinrdf.model.Triple, Long> fetchRestrictedResultSetRowCount(QueryExecutionFactory qef, Collection<? extends org.spinrdf.model.Triple> triples) {
+        Map<org.spinrdf.model.Triple, Element> map = MapUtils.index(triples, t -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(t)));
 
-        Map<org.topbraid.spin.model.Triple, Long> result = fetchRestrictedResultSetRowCount(qef, map);
+        Map<org.spinrdf.model.Triple, Long> result = fetchRestrictedResultSetRowCount(qef, map);
         return result;
     }
 
 
-    public static Map<Var, Long> fetchCountVarJoin(QueryExecutionFactory qef, Collection<org.topbraid.spin.model.Triple> triples) {
+    public static Map<Var, Long> fetchCountVarJoin(QueryExecutionFactory qef, Collection<org.spinrdf.model.Triple> triples) {
         Set<Element> map = triples.stream()
                 .map(t -> ElementUtils.createElement(SpinCoreUtils.toJenaTriple(t)))
                 .collect(Collectors.toSet());

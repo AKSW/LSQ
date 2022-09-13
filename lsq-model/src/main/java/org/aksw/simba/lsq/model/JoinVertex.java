@@ -3,7 +3,7 @@ package org.aksw.simba.lsq.model;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
-import org.topbraid.spin.model.Variable;
+import org.spinrdf.model.Variable;
 
 public interface JoinVertex
 	extends Resource

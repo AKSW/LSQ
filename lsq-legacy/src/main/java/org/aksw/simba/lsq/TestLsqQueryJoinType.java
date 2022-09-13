@@ -10,7 +10,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.topbraid.spin.arq.ARQ2SPIN;
+import org.spinrdf.arq.ARQ2SPIN;
 
 public class TestLsqQueryJoinType {
     //@Test

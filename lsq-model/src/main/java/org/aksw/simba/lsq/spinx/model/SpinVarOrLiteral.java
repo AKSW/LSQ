@@ -5,7 +5,7 @@ import org.aksw.jenax.annotation.reprogen.IriNs;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.vocabulary.SP;
 
 @ResourceView
 @HashId

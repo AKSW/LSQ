@@ -24,9 +24,9 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.Var;
 import org.junit.Test;
-import org.topbraid.spin.arq.ARQ2SPIN;
-import org.topbraid.spin.model.Query;
-import org.topbraid.spin.model.Triple;
+import org.spinrdf.arq.ARQ2SPIN;
+import org.spinrdf.model.Query;
+import org.spinrdf.model.Triple;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Multimap;

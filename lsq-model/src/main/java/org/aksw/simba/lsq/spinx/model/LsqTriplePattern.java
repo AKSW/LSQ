@@ -13,7 +13,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.enhanced.EnhGraph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
-import org.topbraid.spin.model.impl.TriplePatternImpl;
+import org.spinrdf.model.impl.TriplePatternImpl;
 
 import com.google.common.hash.HashCode;
 

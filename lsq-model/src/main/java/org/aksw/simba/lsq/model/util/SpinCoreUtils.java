@@ -10,8 +10,8 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.Var;
-import org.topbraid.spin.model.Variable;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.model.Variable;
+import org.spinrdf.vocabulary.SP;
 
 public class SpinCoreUtils {
 
@@ -89,7 +89,7 @@ public class SpinCoreUtils {
         return result;
     }
 
-    public static Triple toJenaTriple(org.topbraid.spin.model.Triple t) {
+    public static Triple toJenaTriple(org.spinrdf.model.Triple t) {
         Triple result = new Triple(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
         return result;
     }

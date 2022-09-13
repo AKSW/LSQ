@@ -56,8 +56,8 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.model.TriplePattern;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.model.TriplePattern;
+import org.spinrdf.vocabulary.SP;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
@@ -253,9 +253,9 @@ public class LsqEnrichments {
             Model spinModel = bgpInfo.getModel();
 
             // Extend the spin model with BGPs
-            Multimap<Resource, org.topbraid.spin.model.Triple> bgpToTps = SpinAccessUtils.indexBasicPatterns2(spinModel); //queryRes);
+            Multimap<Resource, org.spinrdf.model.Triple> bgpToTps = SpinAccessUtils.indexBasicPatterns2(spinModel); //queryRes);
 
-            for(Entry<Resource, Collection<org.topbraid.spin.model.Triple>> e : bgpToTps.asMap().entrySet()) {
+            for(Entry<Resource, Collection<org.spinrdf.model.Triple>> e : bgpToTps.asMap().entrySet()) {
 
 
                 // Map each resource to the corresponding jena element
@@ -282,7 +282,7 @@ public class LsqEnrichments {
     //            }
 
                 List<LsqTriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
-                for(org.topbraid.spin.model.Triple tp : e.getValue()) {
+                for(org.spinrdf.model.Triple tp : e.getValue()) {
                     // System.err.println("TP:" + tp);
 
                     bgpTps.add(tp.as(LsqTriplePattern.class));
@@ -794,9 +794,9 @@ public class LsqEnrichments {
 
 //        RDFDataMgr.write(System.err, spinBgp.getModel(), RDFFormat.TURTLE_BLOCKS);
 
-        Iterable<? extends org.topbraid.spin.model.Triple> spinTriples = spinBgp.getTriplePatterns();
+        Iterable<? extends org.spinrdf.model.Triple> spinTriples = spinBgp.getTriplePatterns();
 
-        for (org.topbraid.spin.model.Triple st : spinTriples) {
+        for (org.spinrdf.model.Triple st : spinTriples) {
             Triple t = SpinCoreUtils.toJenaTriple(st);
             // Get the triple's nodes
             Node s = t.getSubject();
