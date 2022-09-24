@@ -63,9 +63,9 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.5.0</jena.version>
-		<jenax.version>4.5.0-1-SNAPSHOT</jenax.version>
-		<aksw-commons.version>0.9.3-SNAPSHOT</aksw-commons.version>
+		<jena.version>4.7.0-SNAPSHOT</jena.version>
+		<jenax.version>4.7.0-1-SNAPSHOT</jenax.version>
+		<aksw-commons.version>0.9.5-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>
 		<spark.deps.scope>provided</spark.deps.scope>
@@ -160,6 +160,12 @@
 			<dependency>
 				<groupId>org.aksw.commons</groupId>
 				<artifactId>aksw-commons-beans</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-utils</artifactId>
 				<version>${aksw-commons.version}</version>
 			</dependency>
 
@@ -744,6 +750,7 @@
 			</snapshots>
 		</repository>
 
+		<!--
 		<repository>
 			<id>com.topquadrant.internal</id>
 			<url>https://www.topquadrant.com/repository/spin</url>
@@ -754,5 +761,20 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
+		-->
+
+		<!-- Fallback for spin due to shutdown up topbraid repo. Maybe we should deploy an org.aksw.thirdparty.org.tobpraid.spin artifact. -->
+		<repository>
+                        <id>maven.aksw.internal</id>
+                        <name>AKSW Internal Repository</name>
+                        <url>https://maven.aksw.org/archiva/repository/internal</url>
+                        <releases>
+                                <enabled>true</enabled>
+                        </releases>
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                </repository>
+
 	</repositories>
 </project>
