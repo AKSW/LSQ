@@ -61,9 +61,8 @@
 			<artifactId>spin</artifactId>
 		</dependency> -->
 		<dependency>
-			<groupId>com.github.spinrdf</groupId>
+			<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
 			<artifactId>spinrdf</artifactId>
-			<version>master-SNAPSHOT</version>
 		</dependency>
 
 		<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 

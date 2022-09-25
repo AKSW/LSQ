@@ -4,6 +4,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import org.aksw.commons.util.stream.SequentialGroupBySpec;
+import org.aksw.commons.util.stream.StreamOperatorSequentialGroupBy;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;

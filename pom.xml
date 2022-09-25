@@ -325,8 +325,8 @@
 			<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-sparql-ext</artifactId> 
 				<version>${jenax.version}</version> </dependency> -->
 			<dependency>
-				<groupId>org.topbraid</groupId>
-				<artifactId>spin</artifactId>
+				<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
+				<artifactId>spinrdf</artifactId>
 				<version>2.0.0</version>
 				<exclusions>
 					<exclusion>
