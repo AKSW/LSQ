@@ -25,9 +25,14 @@
 			<artifactId>lsq-vocab-jena</artifactId>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.topbraid</groupId>
 			<artifactId>spin</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>com.github.spinrdf</groupId>
+			<artifactId>spinrdf</artifactId>
+			<version>master-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>

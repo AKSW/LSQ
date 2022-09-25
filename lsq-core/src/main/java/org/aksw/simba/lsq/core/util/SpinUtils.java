@@ -4,17 +4,17 @@ import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.topbraid.spin.arq.ARQ2SPIN;
+import org.spinrdf.arq.ARQ2SPIN;
 
 public class SpinUtils {
-    public static org.topbraid.spin.model.Query createSpinModel(
+    public static org.spinrdf.model.Query createSpinModel(
             Query query,
             Model tgtModel
             ) {
 
         return createSpinModel(query, tgtModel.createResource());
     }
-    public static org.topbraid.spin.model.Query createSpinModel(
+    public static org.spinrdf.model.Query createSpinModel(
             Query query,
             Resource spinRes
 //            BiFunction<? super Resource, String, String> lsqResToIri
@@ -31,7 +31,7 @@ public class SpinUtils {
             spinModel = ModelFactory.createDefaultModel();
         }
         ARQ2SPIN arq2spin = new ARQ2SPIN(spinModel);
-        org.topbraid.spin.model.Query tmpSpinRes = arq2spin.createQuery(query, spinRes == null ? null : spinRes.getURI());
+        org.spinrdf.model.Query tmpSpinRes = arq2spin.createQuery(query, spinRes == null ? null : spinRes.getURI());
 
         // ... and rename the blank node of the query
         // ResourceUtils.renameResource(tmpSpinRes, spinRes.getURI());

@@ -14,7 +14,7 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.sparql.core.BasicPattern;
-import org.topbraid.spin.model.Triple;
+import org.spinrdf.model.Triple;
 
 
 @ResourceView

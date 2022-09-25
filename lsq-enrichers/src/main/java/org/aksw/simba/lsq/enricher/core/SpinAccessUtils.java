@@ -13,8 +13,8 @@ import org.apache.jena.rdf.model.RDFList;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
-import org.topbraid.spin.model.TriplePattern;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.model.TriplePattern;
+import org.spinrdf.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -44,7 +44,7 @@ public class SpinAccessUtils {
      );
 
 
-    public static Set<RDFNode> listRDFNodes(org.topbraid.spin.model.Triple triple) {
+    public static Set<RDFNode> listRDFNodes(org.spinrdf.model.Triple triple) {
         Set<RDFNode> result = new LinkedHashSet<>();
         result.add(triple.getSubject());
         result.add(triple.getPredicate());
@@ -53,14 +53,14 @@ public class SpinAccessUtils {
     }
 
 
-    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Resource r) {
+    public static Multimap<Resource, org.spinrdf.model.Triple> indexBasicPatterns2(Resource r) {
         Model spinModel = ResourceUtils.reachableClosure(r);
-        Multimap<Resource, org.topbraid.spin.model.Triple> result = indexBasicPatterns2(spinModel);
+        Multimap<Resource, org.spinrdf.model.Triple> result = indexBasicPatterns2(spinModel);
         return result;
     }
 
-    public static Multimap<Resource, org.topbraid.spin.model.Triple> indexBasicPatterns2(Model spinModel) {
-        Multimap<Resource, org.topbraid.spin.model.Triple> result = ArrayListMultimap.create();
+    public static Multimap<Resource, org.spinrdf.model.Triple> indexBasicPatterns2(Model spinModel) {
+        Multimap<Resource, org.spinrdf.model.Triple> result = ArrayListMultimap.create();
 
         {
             Set<Resource> ress = ConceptModelUtils

@@ -750,19 +750,6 @@
 			</snapshots>
 		</repository>
 
-		<!--
-		<repository>
-			<id>com.topquadrant.internal</id>
-			<url>https://www.topquadrant.com/repository/spin</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-		-->
-
 		<!-- Fallback for spin due to shutdown up topbraid repo. Maybe we should deploy an org.aksw.thirdparty.org.tobpraid.spin artifact. -->
 		<repository>
                         <id>maven.aksw.internal</id>

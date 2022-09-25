@@ -16,7 +16,7 @@ import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.vocabulary.SP;
 
 import com.google.common.collect.Iterables;
 import com.google.common.hash.HashCode;

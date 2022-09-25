@@ -35,8 +35,8 @@ import org.apache.jena.sparql.expr.aggregate.AggCount;
 import org.apache.jena.sparql.util.FmtUtils;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDFS;
-import org.topbraid.spin.model.TriplePattern;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.model.TriplePattern;
+import org.spinrdf.vocabulary.SP;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.BiMap;

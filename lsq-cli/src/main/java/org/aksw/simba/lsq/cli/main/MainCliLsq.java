@@ -92,7 +92,7 @@ import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.topbraid.spin.vocabulary.SP;
+import org.spinrdf.vocabulary.SP;
 
 import com.google.common.io.BaseEncoding;
 
