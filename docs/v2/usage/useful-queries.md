@@ -20,6 +20,21 @@ SELECT DISTINCT ?text from <http://lsq.aksw.org/dbpedia> WHERE
 ?spin a <http://spinrdf.org/sp#Select> . 
 }
 ```
+```sparql
+# Get all SELECT queries from Semantic Web Dog Food along with timestamps (the original execution time on the endpoint)
+PREFIX lsqv: <http://lsq.aksw.org/vocab#> 
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+SELECT Distinct ?text ?timeStamp From <http://lsq.aksw.org/swdf>
+ WHERE 
+{ 
+?query lsqv:text ?text . 
+?query lsqv:hasRemoteExec ?re .
+?re prov:atTime ?timeStamp . 
+?query lsqv:hasSpin ?spin .
+?spin a <http://spinrdf.org/sp#Select> . 
+} 
+```
 
 ```sparql
 # Get all queries having resultset greater than zero. 
