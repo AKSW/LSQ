@@ -5,7 +5,6 @@ import java.io.IOException;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;

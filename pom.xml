@@ -63,8 +63,8 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.7.0-SNAPSHOT</jena.version>
-		<jenax.version>4.7.0-1-SNAPSHOT</jenax.version>
+		<jena.version>4.8.0-SNAPSHOT</jena.version>
+		<jenax.version>4.8.0-1-SNAPSHOT</jenax.version>
 		<aksw-commons.version>0.9.5-SNAPSHOT</aksw-commons.version>
 
 		<spark.version>3.0.1</spark.version>

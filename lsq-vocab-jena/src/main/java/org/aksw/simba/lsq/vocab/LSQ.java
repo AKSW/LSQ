@@ -389,6 +389,7 @@ public class LSQ {
     public static final Resource Functions = resource("Functions");
     public static final Resource Offset = resource("Offset");
     public static final Resource Limit = resource("Limit");
+    public static final Resource Lateral = resource("Lateral");
 
     // Path Features
     public static final Resource LinkPath = resource("LinkPath");
