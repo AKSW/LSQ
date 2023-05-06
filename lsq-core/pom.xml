@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -9,39 +10,87 @@
 	<parent>
 		<groupId>org.aksw.simba.lsq</groupId>
 		<artifactId>lsq-parent</artifactId>
-		<version>1.1.0</version>
+		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-model</artifactId>
+		</dependency>
+
+
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rx</artifactId>
+		</dependency>
+
+
+		<dependency>
+			<groupId>org.aksw.commons</groupId>
+			<artifactId>aksw-commons-beans</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-tdb2</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.jena</groupId>
+			<artifactId>jena-shacl</artifactId>
+		</dependency>
+
+		<!-- FIXME Get rid of this dependency; right now we use some ngs code which 
+			should go into a common module -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.aksw.sparql-integrate</groupId> -->
+		<!-- <artifactId>sparql-integrate-cli</artifactId> -->
+		<!-- <version>1.0.5-SNAPSHOT</version> -->
+		<!-- </dependency> -->
+
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
 			<artifactId>lsq-parser</artifactId>
 		</dependency>
 
-		<dependency>
+
+		<!-- <dependency>
 			<groupId>org.topbraid</groupId>
 			<artifactId>spin</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
+			<artifactId>spinrdf</artifactId>
+		</dependency>
+
+		<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+			</dependency> -->
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
+			</dependency> -->
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.topbraid</groupId>
-			<artifactId>shacl</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-rdfnode-in-dataset</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-core</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-arq-connection-core</artifactId>
 		</dependency>
 
 		<dependency>
-			<groupId>org.aksw.jena-sparql-api</groupId>
-			<artifactId>jena-sparql-api-mapper-proxy</artifactId>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-conjure-core</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>org.aksw.fedx</groupId>
-			<artifactId>fedx-jsa</artifactId>
-		</dependency>
+		<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+			</dependency> -->
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -49,15 +98,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-core</artifactId>
-			<!-- <scope>test</scope> -->
-		</dependency>
+		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+			</dependency> -->
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j18-impl</artifactId>
 			<scope>test</scope>
 		</dependency>
 

@@ -30,3 +30,7 @@ deptree.txt
 trash
 *.swp
 
+tmp
+
+derby.log
+

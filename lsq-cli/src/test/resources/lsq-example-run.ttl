@@ -1,0 +1,38 @@
+@prefix dct:   <http://purl.org/dc/terms/> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix lsq:   <http://lsq.aksw.org/vocab#> .
+@prefix lsqr:  <http://lsq.aksw.org/> .
+@prefix sp:    <http://spinrdf.org/sp#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+
+<http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25>
+        lsq:connectionTimeoutForRetrieval        "0.01"^^xsd:decimal ;
+        lsq:executionTimeoutForRetrieval         "0.01"^^xsd:decimal ;
+        lsq:connectionTimeoutForCounting        "0.01"^^xsd:decimal ;
+        lsq:executionTimeoutForCounting         "0.01"^^xsd:decimal ;
+        lsq:maxByteSizeForCounting   "-1"^^xsd:long ;
+        lsq:maxByteSizeForSerialization
+                "1000000"^^xsd:long ;
+        lsq:maxResultCountForCounting  "1000"^^xsd:long ;
+        lsq:maxResultCountForSerialization
+                "-1"^^xsd:long ;
+        lsq:maxCount                            "-1"^^xsd:long ;
+        lsq:baseIri       <http://lsq.aksw.org/> ;
+        lsq:datasetIri    <http://dbpedia.org/somedata> ;
+        lsq:datasetLabel  "dbpedia.org-somedata" ;
+        lsq:datasetSize   "2005615"^^<http://www.w3.org/2001/XMLSchema#long> ;
+        lsq:endpoint      [ a       <http://w3id.org/rpif/vocab#DataRefSparqlEndpoint> ;
+                            <http://w3id.org/rpif/vocab#serviceUrl>
+                                    <http://localhost:8890/sparql>
+                          ] ;
+        lsq:userAgent     "Linked SPARQL Queries (LSQ) Client" ;
+        <http://purl.org/dc/terms/identifier>
+                "xc-dbpedia.org-somedata_2020-07-25" .
+
+<http://lsq.aksw.org/xc-mydataset_2020-07-25_2020-08-05T00:24:05.487Z>
+        lsq:config      <http://lsq.aksw.org/xc-dbpedia.org-somedata_2020-07-25> ;
+        dct:identifier  "xc-mydataset_2020-07-25_2020-08-05T00:24:05.487Z" ;
+        <http://www.w3.org/ns/prov#atTime>
+                "2020-08-05T00:24:05.487Z"^^xsd:dateTime .

@@ -2,42 +2,54 @@ package org.aksw.simba.lsq;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.file.Paths;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.parser.StringMapper;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
+import org.apache.jena.ext.com.google.common.reflect.ClassPath;
+import org.apache.jena.ext.com.google.common.reflect.ClassPath.ResourceInfo;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 public class TestLsqWebServerAccessLogParser {
 
 	private static final Logger logger = LoggerFactory.getLogger(TestLsqWebServerAccessLogParser.class);
 
-	private static final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+	// private static final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
 	@Test
 	public void test() throws Exception {
     	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
-    	org.springframework.core.io.Resource[] resources = resolver.getResources("/logs/*");
+    	// org.springframework.core.io.Resource[] resources = resolver.getResources("/logs/*");
 
-    	for(org.springframework.core.io.Resource r : resources) {
-    		String rName = r.getFilename();
+    	Collection<ResourceInfo> resources = ClassPath.from(getClass().getClassLoader()).getResources().stream()
+    			.filter(r -> r.getResourceName().toLowerCase().matches("^logs/.*log$"))
+    			.collect(Collectors.toList());
+    			
+    	Assert.assertNotEquals(0, resources.size());
+    	
+    	for (ResourceInfo r : resources) {
+    		//String qualifiedNam = r.getResourceName();
+    		
+    		String rName = Paths.get(r.url().toURI()).getFileName().toString();
     		String fmtName = rName.split("\\.", 2)[0];
-
+    		
     		Mapper mapper = logFmtRegistry.get(fmtName);
     		if(mapper == null) {
     			throw new RuntimeException("No mapper for test case: " + rName);
@@ -45,7 +57,7 @@ public class TestLsqWebServerAccessLogParser {
 
 //    		logger.debug("Processing " + rName + " with format " + fmtName + " - " + mapper);
 
-    		try(BufferedReader br = new BufferedReader(new InputStreamReader(r.getInputStream()))) {
+    		try(BufferedReader br = new BufferedReader(new InputStreamReader(r.asByteSource().openStream()))) {
     			br.lines().forEach(line -> {
     				logger.debug("Parse attempt [" + fmtName + ", " + rName + "]: "  + line);
 

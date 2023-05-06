@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>org.aksw.simba.lsq</groupId>
+		<artifactId>lsq-parent</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+
+<!--
+	<scm>
+		<url>https://github.com/SmartDataAnalytics/RdfProcessingToolkit</url>
+		<connection>scm:git:git@github.com:SmartDataAnalytics/RdfProcessingToolkit.git</connection>
+		<developerConnection>scm:git:git@github.com:SmartDataAnalytics/RdfProcessingToolkit.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
+-->
+	<artifactId>lsq-pkg-parent</artifactId>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>lsq-pkg-uberjar-cli</module>
+		<module>lsq-pkg-deb-cli</module>
+		<module>lsq-pkg-rpm-cli</module>
+		<module>lsq-pkg-docker-cli</module>
+		<!-- <module>lsq-pkg-dummy</module> -->
+	</modules>
+
+<!--
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.jutzig</groupId>
+				<artifactId>github-release-plugin</artifactId>
+				<configuration>
+					<description>RDF Processing Toolking</description>
+					<releaseName>Release ${project.version}</releaseName>
+					<tag>v${project.version}</tag>
+
+					<! - - If your project has additional artifacts, such as ones produced 
+						by the maven-assembly-plugin, you can define the following (requires version 
+						1.1.1 of the plugin or higher): - - >
+					<fileSets>
+						<fileSet>
+							<directory>${basedir}</directory>
+							<includes>
+								<include>rdf-processing-toolkit-pkg-rpm-cli/target/${project.artifactId}*.rpm</include>
+								<include>rdf-processing-toolkit-pkg-deb-cli/target/${project.artifactId}*.deb</include>
+							</includes>
+						</fileSet>
+					</fileSets>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+-->
+</project>
+

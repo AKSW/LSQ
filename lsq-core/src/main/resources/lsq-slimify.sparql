@@ -1,0 +1,41 @@
+# From log records, remove all but host, timestamp and query
+# Use sparql-integrate with '-u' flag to scan over named graphs
+
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+# PREFIX eg: <http://www.example.org/>
+
+DELETE {
+  GRAPH ?g {
+    ?s ?p ?o .
+    ?o ?x ?y
+  }
+}
+WHERE {
+  { SELECT DISTINCT ?g ?s {
+      GRAPH ?g {
+        ?s lsq:query [] .
+      }
+   } }
+   GRAPH ?g {
+     ?s ?p ?o
+     # Optional in order to delete orphaned lsq:header resources (such as Referer, User-agent)
+     OPTIONAL{ ?o ?x ?y }
+     FILTER(?p NOT IN (lsq:host, lsq:hostHash, lsq:uri, lsq:endpoint, prov:atTime))
+
+     
+     # Remove lsq:text if ?s is referenced by remote execution with that that attribute
+     # FILTER(?p != lsq:text || EXISTS {
+     #  GRAPH ?g {
+     #    []
+     #      lsq:hasRemoteExec ?s ;
+     #      lsq:text []
+     #  } 
+     # })
+
+   }
+}
+
+
+CONSTRUCT WHERE { GRAPH ?g { ?s ?p ?o } }
+

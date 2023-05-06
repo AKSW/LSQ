@@ -1,0 +1,12 @@
+Package: lsq-cli
+Version: [[version]]
+Section: web
+Priority: optional
+Architecture: all
+Recommends: default-jre-headless
+Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
+Description: Sparqlify Command Line Interfaces
+Distribution: ldstack-nightly
+Homepage: http://aksw.org/Projects/LSQ
+Vcs-Git: git://github.com/AKSW/LSQ.git
+Vcs-Browser: https://github.com/AKSW/LSQ

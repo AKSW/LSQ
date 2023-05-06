@@ -1,14 +1,11 @@
 package org.aksw.simba.lsq.parser;
 
 import java.text.DateFormat;
-import java.time.OffsetDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Locale;
 
-import org.aksw.jena_sparql_api.sparql.ext.datatypes.RDFDatatypeDelegate;
+import org.aksw.jenax.arq.util.datatype.RDFDatatypeDelegate;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.datatypes.xsd.impl.XSDDateTimeType;
 

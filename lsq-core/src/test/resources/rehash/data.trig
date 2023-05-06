@@ -1,0 +1,30 @@
+<http://lsq.aksw.org/q-ffff52c61d4c5679bb1d9ec7658b0279ec796aa005d43dc2bb561e8660d15dbe> {
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:36:43Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "9ac13df121ccec34ebca4b6afe71a82082a811c4e5b94211ff922345739c69db" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++*++%0AWHERE+%7B+%0A%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%22SPTSSA%22+.+%7D%0ALIMIT+5000+%0AOFFSET+0+&format=json" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-07-15T20:36:43Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/q-ffff52c61d4c5679bb1d9ec7658b0279ec796aa005d43dc2bb561e8660d15dbe>
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:36:43Z> ;
+            <http://lsq.aksw.org/vocab#hash>  "ffff52c61d4c5679bb1d9ec7658b0279ec796aa005d43dc2bb561e8660d15dbe" ;
+            <http://lsq.aksw.org/vocab#text>  "PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\nPREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT  *\nWHERE\n  { ?s  rdfs:label  \"SPTSSA\" }\nOFFSET  0\nLIMIT   5000\n" .
+}
+
+<http://lsq.aksw.org/q-ffffdb6aac4a7ca3147ff325c69c087e3f970a6c528b3f26ff48c0cbc3cab7a9> {
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:08:09Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "9ac13df121ccec34ebca4b6afe71a82082a811c4e5b94211ff922345739c69db" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++*++%0AWHERE+%7B+%0A%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%22ADA%22+.+%7D%0ALIMIT+5000+%0AOFFSET+0+&format=json" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-07-15T20:08:09Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/q-ffffdb6aac4a7ca3147ff325c69c087e3f970a6c528b3f26ff48c0cbc3cab7a9>
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:08:20Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:08:09Z> ;
+            <http://lsq.aksw.org/vocab#hash>  "ffffdb6aac4a7ca3147ff325c69c087e3f970a6c528b3f26ff48c0cbc3cab7a9" ;
+            <http://lsq.aksw.org/vocab#text>  "PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\nPREFIX  rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n\nSELECT  *\nWHERE\n  { ?s  rdfs:label  \"ADA\" }\nOFFSET  0\nLIMIT   5000\n" .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-07-15T20:08:20Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "9ac13df121ccec34ebca4b6afe71a82082a811c4e5b94211ff922345739c69db" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++*++%0AWHERE+%7B+%0A%3Fs+%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E+%22ADA%22+.+%7D%0ALIMIT+5000+%0AOFFSET+0+&format=json" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-07-15T20:08:20Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+}
+

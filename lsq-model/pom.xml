@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<artifactId>lsq-model</artifactId>
+	<packaging>jar</packaging>
+
+	<parent>
+		<groupId>org.aksw.simba.lsq</groupId>
+		<artifactId>lsq-parent</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-conjure-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.simba.lsq</groupId>
+			<artifactId>lsq-vocab-jena</artifactId>
+		</dependency>
+
+		<!-- <dependency>
+			<groupId>org.topbraid</groupId>
+			<artifactId>spin</artifactId>
+		</dependency> -->
+		<dependency>
+			<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
+			<artifactId>spinrdf</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-reprogen-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j18-impl</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
+</project>

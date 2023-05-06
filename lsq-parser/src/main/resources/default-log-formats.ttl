@@ -50,3 +50,25 @@ fmt:wikidata
   a lsq:WebAccessLogFormat ;
   lsq:pattern "%encsparql\t%{yyyy-MM-dd HH:mm:ss}C\t%l\t%{User-agent}i" ;
   .
+  
+fmt:bio2rdfProcessedCsv
+  a lsq:CsvLogFormat ;
+  lsq:pattern
+"""
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+CONSTRUCT {
+  GRAPH ?s {
+    ?s
+      lsq:query ?query ;
+      lsq:host ?domain ;
+      lsq:headers [ <http://example.org/header#User-agent> ?agent ] ;
+      prov:atTime ?t
+  }
+} {
+  BIND(IRI(CONCAT('urn:lsq:', MD5(CONCAT(?query, '-', ?domain, '-', ?timestamp)))) AS ?s)
+  BIND(STRDT(?timestamp, xsd:dateTime) AS ?t)
+}
+""" .
+

@@ -1,0 +1,66 @@
+<http://lsq.aksw.org/q-ffddb45114627b55b0619995634c3748ca30ce97f459c4810b6f08e1c1016939> {
+    <http://lsq.aksw.org/q-ffddb45114627b55b0619995634c3748ca30ce97f459c4810b6f08e1c1016939>
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-04T22:24:47Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-06T17:15:32Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-12-03T07:19:44Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-12-03T09:14:44Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-08-16T12:27:17Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-08-15T23:45:28Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-05T00:29:27Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-02T14:22:12Z> ;
+            <http://lsq.aksw.org/vocab#hash>  "ffddb45114627b55b0619995634c3748ca30ce97f459c4810b6f08e1c1016939" ;
+            <http://lsq.aksw.org/vocab#text>  "PREFIX  xsd:  <http://www.w3.org/2001/XMLSchema#>\n\nSELECT  ?S ?P\nWHERE\n  { ?S  ?P  \"spastin\" }\n" ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-02T19:50:46Z> ;
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-06T18:01:14Z> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-06T17:15:32Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-06T17:15:32Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-02T19:50:46Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-02T19:50:46Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-08-16T12:27:17Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-08-16T12:27:17Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-12-03T07:19:44Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "4824beed5102f2461f539485d13d65b61c8e93ee9928885dbb6ce5755734e477" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-12-03T07:19:44Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-04T22:24:47Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-04T22:24:47Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-12-03T09:14:44Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "4824beed5102f2461f539485d13d65b61c8e93ee9928885dbb6ce5755734e477" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-12-03T09:14:44Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-02T14:22:12Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-02T14:22:12Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-08-15T23:45:28Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-08-15T23:45:28Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-06T18:01:14Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-06T18:01:14Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+    <http://lsq.aksw.org/re-cu.kegg.bio2rdf.org-sparql_2013-09-05T00:29:27Z>
+            <http://lsq.aksw.org/vocab#endpoint>  <https://cu.kegg.bio2rdf.org/sparql> ;
+            <http://lsq.aksw.org/vocab#hostHash>  "86ac6a8e9d7f9104cd5d32e64d95592f03fdc0e03b49c41d3a7acd3418a701b4" ;
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=SELECT++%3FS+%3FP%0AWHERE%0A++%7B+%3FS+%3FP+%22spastin%22+%7D%0A" ;
+            <http://www.w3.org/ns/prov#atTime>  "2013-09-05T00:29:27Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
+}
+

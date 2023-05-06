@@ -1,10 +1,10 @@
 package org.aksw.simba.lsq.util;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-import org.aksw.jena_sparql_api.util.sparql.syntax.path.PathWalker;
+import org.aksw.jenax.sparql.path.PathWalker;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.path.P_Alt;
@@ -30,14 +30,21 @@ import org.apache.jena.sparql.path.PathVisitor;
 public class PathVisitorFeatureExtractor
     implements PathVisitor
 {
-    protected Set<Resource> features = new HashSet<>();
+    protected Map<Resource, Integer> featureToFrequency = new LinkedHashMap<>();
 
-    public Set<Resource> getFeatures() {
-        return features;
+    public int incrementFeatureCount(Resource feature) {
+        int newCount = ElementVisitorFeatureExtractor.addAndGet(featureToFrequency, feature, 1);
+        return newCount;
     }
 
-    public static Set<Resource> getFeatures(Path path) {
-        Set<Resource> result;
+
+    public Map<Resource, Integer> getFeatures() {
+        return featureToFrequency;
+    }
+
+
+    public static Map<Resource, Integer> getFeatures(Path path) {
+        Map<Resource, Integer> result;
 
         if(path != null)
         {
@@ -45,7 +52,7 @@ public class PathVisitorFeatureExtractor
             PathWalker.walk(path, visitor);
             result = visitor.getFeatures();
         } else {
-            result = Collections.emptySet();
+            result = Collections.emptyMap();
         }
         return result;
 
@@ -54,82 +61,82 @@ public class PathVisitorFeatureExtractor
 
     @Override
     public void visit(P_Link pathNode) {
-        features.add(LSQ.LinkPath);
+        incrementFeatureCount(LSQ.LinkPath);
     }
 
     @Override
     public void visit(P_ReverseLink pathNode) {
-        features.add(LSQ.ReverseLinkPath);
+        incrementFeatureCount(LSQ.ReverseLinkPath);
     }
 
     @Override
     public void visit(P_NegPropSet pathNotOneOf) {
-        features.add(LSQ.NegPropSetPath);
+        incrementFeatureCount(LSQ.NegPropSetPath);
     }
 
     @Override
     public void visit(P_Inverse inversePath) {
-        features.add(LSQ.InversePath);
+        incrementFeatureCount(LSQ.InversePath);
     }
 
     @Override
     public void visit(P_Mod pathMod) {
-        features.add(LSQ.ModPath);
+        incrementFeatureCount(LSQ.ModPath);
     }
 
     @Override
     public void visit(P_FixedLength pFixedLength) {
-        features.add(LSQ.FixedLengthPath);
+        incrementFeatureCount(LSQ.FixedLengthPath);
     }
 
     @Override
     public void visit(P_Distinct pathDistinct) {
-        features.add(LSQ.DistinctPath);
+        incrementFeatureCount(LSQ.DistinctPath);
     }
 
     @Override
     public void visit(P_Multi pathMulti) {
-        features.add(LSQ.MultiPath);
+        incrementFeatureCount(LSQ.MultiPath);
     }
 
     @Override
     public void visit(P_Shortest pathShortest) {
-        features.add(LSQ.ShortestPath);
+        incrementFeatureCount(LSQ.ShortestPath);
     }
 
     @Override
     public void visit(P_ZeroOrOne path) {
-        features.add(LSQ.ZeroOrOnePath);
+        incrementFeatureCount(LSQ.ZeroOrOnePath);
     }
 
     @Override
     public void visit(P_ZeroOrMore1 path) {
-        features.add(LSQ.ZeroOrMore1Path);
+        incrementFeatureCount(LSQ.ZeroOrMore1Path);
     }
 
     @Override
     public void visit(P_ZeroOrMoreN path) {
-        features.add(LSQ.ZeroOrMoreNPath);
+        incrementFeatureCount(LSQ.ZeroOrMoreNPath);
     }
 
     @Override
     public void visit(P_OneOrMore1 path) {
-        features.add(LSQ.OneOrMore1Path);
+        incrementFeatureCount(LSQ.OneOrMore1Path);
     }
 
     @Override
     public void visit(P_OneOrMoreN path) {
-        features.add(LSQ.OneOrMoreNPath);
+        incrementFeatureCount(LSQ.OneOrMoreNPath);
     }
 
     @Override
     public void visit(P_Alt pathAlt) {
-        features.add(LSQ.AltPath);
+        incrementFeatureCount(LSQ.AltPath);
     }
 
     @Override
     public void visit(P_Seq pathSeq) {
-        features.add(LSQ.SeqPath);
+        incrementFeatureCount(LSQ.SeqPath);
     }
 
 }

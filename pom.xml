@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.aksw.simba.lsq</groupId>
 	<artifactId>lsq-parent</artifactId>
-	<version>1.1.0</version>
+	<version>2.0.0-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -49,19 +50,45 @@
 
 
 	<modules>
+		<module>lsq-model</module>
 		<module>lsq-parser</module>
 		<module>lsq-vocab-jena</module>
 		<module>lsq-core</module>
+		<module>lsq-spark-core</module>
+		<module>lsq-enrichers</module>
 		<module>lsq-cli</module>
-		<module>lsq-debian-cli</module>
+		<module>lsq-pkg-parent</module>
+
+		<!-- <module>lsq-legacy</module> -->
 	</modules>
 
 	<properties>
-		<jena.version>3.11.0</jena.version>
-		<jsa.subversion>1</jsa.subversion>
-		<jsa.version>${jena.version}-${jsa.subversion}</jsa.version>
-		<maven.compiler.source>1.8</maven.compiler.source>
-		<maven.compiler.target>1.8</maven.compiler.target>
+		<jena.version>4.8.0</jena.version>
+		<jenax.version>4.8.0-2</jenax.version>
+		<aksw-commons.version>0.9.5</aksw-commons.version>
+		<sansa.version>0.8.7</sansa.version>
+
+		<spark.version>3.0.1</spark.version>
+		<spark.deps.scope>compile</spark.deps.scope>
+
+		<scala.binary.version>2.12</scala.binary.version>
+		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
+
+		<slf4j.version>1.7.36</slf4j.version>
+		<log4j.version>2.18.0</log4j.version>
+
+
+		<jackson.version>2.13.0</jackson.version>
+
+		<junit.version>4.13.1</junit.version>
+
+		<spring-boot.version>2.3.3.RELEASE</spring-boot.version>
+
+		<timestamp>${maven.build.timestamp}</timestamp>
+		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+
+		<maven.compiler.release>11</maven.compiler.release>
+		<!-- <maven.compiler.source>1.8</maven.compiler.source> <maven.compiler.target>1.8</maven.compiler.target> -->
 		<java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
 		<file.encoding>UTF-8</file.encoding>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -71,6 +98,143 @@
 
 	<dependencyManagement>
 		<dependencies>
+
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-core</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.spark</groupId>
+				<artifactId>spark-sql_${scala.binary.version}</artifactId>
+				<version>${spark.version}</version>
+				<scope>${spark.deps.scope}</scope>
+			</dependency>
+
+			<!-- Override version of hadoop/spark -->
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.15</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-model</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-enrichers</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-deb-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-rpm-cli</artifactId>
+				<type>rpm</type>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-docker-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-pkg-uberjar-cli</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+
+			<!-- <dependency> -->
+			<!-- <groupId>org.aksw.rdf-processing-toolkit</groupId> -->
+			<!-- <artifactId>rdf-processing-toolkit-cli</artifactId> -->
+			<!-- <version>1.0.7-SNAPSHOT</version> -->
+			<!-- </dependency> -->
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-beans</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-utils</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-picocli</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.aksw.commons</groupId>
+				<artifactId>aksw-commons-io-utils</artifactId>
+				<version>${aksw-commons.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>info.picocli</groupId>
+				<artifactId>picocli</artifactId>
+				<version>4.4.0</version>
+			</dependency>
+
+			<!-- <dependency> -->
+			<!-- <groupId>net.sansa-stack</groupId> -->
+			<!-- <artifactId>sansa-rdf-spark${scala.version.suffix}</artifactId> -->
+			<!-- <version>0.8.0-RC2-SNAPSHOT</version> -->
+			<!-- </dependency> -->
+
+			<dependency>
+				<groupId>net.sansa-stack</groupId>
+				<artifactId>sansa-spark-jena-java${scala.version.suffix}</artifactId>
+				<version>${sansa.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.12.0</version>
+			</dependency>
+
+			<!-- https://stackoverflow.com/questions/53787624/spark-throwing-arrayindexoutofboundsexception-when-parallelizing-list/53787847 -->
+			<dependency>
+				<groupId>com.thoughtworks.paranamer</groupId>
+				<artifactId>paranamer</artifactId>
+				<version>2.8</version>
+			</dependency>
+
+
+			<!-- <dependency> -->
+			<!-- <groupId>org.hobbit</groupId> -->
+			<!-- <artifactId>facete3-impl</artifactId> -->
+			<!-- <version>1.2.0-SNAPSHOT</version> -->
+			<!-- </dependency> -->
+
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-tdb2</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.apache.jena</groupId>
+				<artifactId>jena-shacl</artifactId>
+				<version>${jena.version}</version>
+			</dependency>
+
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-vocab-jena</artifactId>
@@ -91,7 +255,7 @@
 
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
-				<artifactId>lsq-cli</artifactId>
+				<artifactId>lsq-spark-core</artifactId>
 				<version>${project.version}</version>
 			</dependency>
 
@@ -99,128 +263,113 @@
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-cli</artifactId>
 				<version>${project.version}</version>
-				<classifier>jar-with-dependencies</classifier>
 			</dependency>
 
-
-			<!-- <dependency> -->
-			<!-- <groupId>org.apache.jena</groupId> -->
-			<!-- <artifactId>jena-arq</artifactId> -->
-			<!-- <version>${jena.version}</version> -->
-			<!-- </dependency> -->
-
+			<!-- Used for DataRefSparqlEndpoint -->
 			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-core</artifactId>
-				<version>${jsa.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.quartz-scheduler</groupId>
-						<artifactId>quartz</artifactId>
-					</exclusion>
-				</exclusions>
+				<groupId>org.aksw.jenax</groupId>
+				<artifactId>jenax-bom</artifactId>
+				<version>${jenax.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 
 			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-mapper-proxy</artifactId>
-				<version>${jsa.version}</version>
-			</dependency>
-
-
-			<dependency>
-				<groupId>org.aksw.jena-sparql-api</groupId>
-				<artifactId>jena-sparql-api-sparql-ext</artifactId>
-				<version>${jsa.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.topbraid</groupId>
-				<artifactId>spin</artifactId>
+				<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
+				<artifactId>spinrdf</artifactId>
 				<version>2.0.0</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.apache.jena</groupId>
 						<artifactId>jena-arq</artifactId>
 					</exclusion>
+					<exclusion>
+						<groupId>org.apache.jena</groupId>
+						<artifactId>apache-jena-libs</artifactId>
+					</exclusion>
 				</exclusions>
 			</dependency>
 
 			<dependency>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot</artifactId>
-				<version>1.5.10.RELEASE</version>
-			</dependency>
-
-			<dependency>
-				<groupId>net.sf.jopt-simple</groupId>
-				<artifactId>jopt-simple</artifactId>
-				<version>5.0.4</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.beust</groupId>
-				<artifactId>jcommander</artifactId>
-				<version>1.72</version>
+				<groupId>org.apache.logging.log4j</groupId>
+				<artifactId>log4j-slf4j18-impl</artifactId>
+				<version>${log4j.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>1.7.25</version>
+				<artifactId>slf4j-api</artifactId>
+				<version>${slf4j.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.aksw.fedx</groupId>
-				<artifactId>fedx-jsa</artifactId>
-				<version>3.1.0-1-SNAPSHOT</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>log4j-over-slf4j</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.fasterxml.jackson.core</groupId>
-						<artifactId>jackson-core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+            <!-- FasterXML -->
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
 
+			<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+				<version>3.1.0-1-SNAPSHOT</version> <exclusions> <exclusion> <groupId>org.slf4j</groupId> 
+				<artifactId>log4j-over-slf4j</artifactId> </exclusion> <exclusion> <groupId>com.fasterxml.jackson.core</groupId> 
+				<artifactId>jackson-core</artifactId> </exclusion> </exclusions> </dependency> -->
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.13.1</version>
+				<version>${junit.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-core</artifactId>
-				<version>5.0.3.RELEASE</version>
-			</dependency>
+			<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+				<version>5.0.3.RELEASE</version> </dependency> -->
 
-			<dependency>
-				<groupId>org.topbraid</groupId>
-				<artifactId>shacl</artifactId>
-				<version>1.1.0</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.apache.jena</groupId>
-						<artifactId>jena-arq</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
+
+			<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+				<version>1.1.0</version> <exclusions> <exclusion> <groupId>org.apache.jena</groupId> 
+				<artifactId>jena-arq</artifactId> </exclusion> </exclusions> </dependency> -->
 
 		</dependencies>
 	</dependencyManagement>
 
 	<!-- Don't touch the stuff below unless you know what you are doing -->
+
+
+	<!-- <reporting> <plugins> <plugin> <groupId>org.apache.maven.plugins</groupId> 
+		<artifactId>maven-site-plugin</artifactId> <version>3.6</version> <configuration> 
+		<reportPlugins> <plugin> <artifactId>maven-project-info-reports-plugin</artifactId> 
+		<version>2.9</version> </plugin> <plugin> <groupId>net.alchim31.maven</groupId> 
+		<artifactId>scala-maven-plugin</artifactId> <version>4.5.3</version> </plugin> 
+		</reportPlugins> </configuration> </plugin> </plugins> </reporting> -->
+
+
+
+
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources-filtered</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 
 		<plugins>
+			<!-- A newer version of resources plugin is apparently needed to filter 
+				${project.build.timestamp} -->
+			<!-- Does not working although suggested at https://stackoverflow.com/questions/13228472/how-to-access-maven-build-timestamp-for-resource-filtering -->
+			<!-- <plugin> -->
+			<!-- <groupId>org.apache.maven.plugins</groupId> -->
+			<!-- <artifactId>maven-resources-plugin</artifactId> -->
+			<!-- <version>3.2.0</version> -->
+			<!-- </plugin> -->
+
 			<plugin>
 				<groupId>com.amashchenko.maven.plugin</groupId>
 				<artifactId>gitflow-maven-plugin</artifactId>
-				<version>1.6.0</version>
+				<version>1.9.0</version>
 				<configuration>
 					<gitFlowConfig>
 						<versionTagPrefix>v</versionTagPrefix>
@@ -248,10 +397,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.6.2</version>
+				<version>3.8.1</version>
 				<configuration>
-					<source>${maven.compiler.source}</source>
-					<target>${maven.compiler.target}</target>
+					<release>${maven.compiler.release}</release>
+					<!-- <source>${maven.compiler.source}</source> <target>${maven.compiler.target}</target> -->
 					<encoding>${project.build.sourceEncoding}</encoding>
 				</configuration>
 			</plugin>
@@ -295,7 +444,7 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<version>2.20</version>
 				<configuration>
-<!--					<skipTests>false</skipTests> -->
+					<!-- <skipTests>false</skipTests> -->
 				</configuration>
 			</plugin>
 
@@ -317,6 +466,33 @@
 			<plugins>
 
 				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.6.6</version>
+				</plugin>
+
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-gpg-plugin</artifactId>
+					<version>1.6</version>
+				</plugin>
+
+				<plugin>
+					<groupId>com.google.cloud.tools</groupId>
+					<artifactId>jib-maven-plugin</artifactId>
+					<version>3.2.0</version>
+				</plugin>
+				<plugin>
+					<artifactId>jdeb</artifactId>
+					<groupId>org.vafer</groupId>
+					<version>1.9</version>
+				</plugin>
+				<plugin>
+					<groupId>de.dentrassi.maven</groupId>
+					<artifactId>rpm</artifactId>
+					<version>1.8.0</version>
+				</plugin>
+				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-shade-plugin</artifactId>
 					<version>2.4.3</version>
@@ -330,10 +506,6 @@
 								<createDependencyReducedPom>false</createDependencyReducedPom>
 								<shadedArtifactAttached>true</shadedArtifactAttached>
 								<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
-								<attach>false</attach>
-								<descriptorRefs>
-									<descriptorRef>jar-with-dependencies</descriptorRef>
-								</descriptorRefs>
 								<filters>
 									<filter>
 										<artifact>*:*</artifact>
@@ -392,6 +564,28 @@
 					<version>2.8.2</version>
 				</plugin>
 
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>3.0.2</version>
+					<executions>
+						<execution>
+							<phase>prepare-package</phase>
+							<!-- <phase>package</phase> -->
+							<goals>
+								<goal>copy-dependencies</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<!-- <useBaseVersion>false</useBaseVersion> -->
+						<overWriteReleases>false</overWriteReleases>
+						<overWriteSnapshots>true</overWriteSnapshots>
+						<includeScope>runtime</includeScope>
+						<outputDirectory>${project.build.directory}/lib</outputDirectory>
+					</configuration>
+				</plugin>
+
 			</plugins>
 		</pluginManagement>
 	</build>
@@ -399,14 +593,18 @@
 
 	<profiles>
 		<profile>
-			<id>bundle</id>
-			<build>
-				<plugins>
-
-
-				</plugins>
-			</build>
+			<id>standalone</id>
+			<properties>
+				<spark.deps.scope>compile</spark.deps.scope>
+			</properties>
 		</profile>
+		<profile>
+			<id>deb</id>
+			<properties>
+				<spark.deps.scope>compile</spark.deps.scope>
+			</properties>
+		</profile>
+
 
 		<profile>
 			<id>doclint-java8-disable</id>
@@ -446,7 +644,6 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>
-						<version>1.6</version>
 						<executions>
 							<execution>
 								<id>sign-artifacts</id>
@@ -465,7 +662,6 @@
 					<plugin>
 						<groupId>org.sonatype.plugins</groupId>
 						<artifactId>nexus-staging-maven-plugin</artifactId>
-						<version>1.6.6</version>
 						<extensions>true</extensions>
 						<configuration>
 							<serverId>ossrh</serverId>
@@ -487,7 +683,7 @@
 		<snapshotRepository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 		</snapshotRepository>
 	</distributionManagement>
 
@@ -495,7 +691,7 @@
 		<repository>
 			<id>maven.aksw.snapshots</id>
 			<name>AKSW Snapshot Repository</name>
-			<url>http://maven.aksw.org/archiva/repository/snapshots</url>
+			<url>https://maven.aksw.org/archiva/repository/snapshots</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
@@ -503,9 +699,31 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+
+		<!-- Repo for latest jena snapshots -->
 		<repository>
-			<id>org.topbraid</id>
-			<url>http://topquadrant.com/repository/spin</url>
+			<id>apache-repo-snapshots</id>
+			<url>https://repository.apache.org/content/repositories/snapshots/</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
+
+		<!-- Fallback for spin due to shutdown up topbraid repo. Maybe we should deploy an org.aksw.thirdparty.org.tobpraid.spin artifact. -->
+		<repository>
+                        <id>maven.aksw.internal</id>
+                        <name>AKSW Internal Repository</name>
+                        <url>https://maven.aksw.org/archiva/repository/internal</url>
+                        <releases>
+                                <enabled>true</enabled>
+                        </releases>
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                </repository>
+
 	</repositories>
 </project>

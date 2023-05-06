@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.http.NameValuePair;
@@ -122,7 +122,7 @@ public class WebLogParser {
             // Hacky approach to convert datetime pattern to regex - based on
             // https://stackoverflow.com/questions/6928267/converting-simpledateformat-date-format-to-regular-expression
             String regexFormat = x.replaceAll("[mHsSdMy]", "\\\\d");
-            
+
             m.addField(PROV.atTime, regexFormat, rdfDatatype);
         });
 
@@ -130,7 +130,7 @@ public class WebLogParser {
         result.put("r", (m, x) -> {
             m.addField(LSQ.verb, "[^\\s\"]*", String.class);
             m.skipPattern("\\s*", " ");
-            m.addField(LSQ.path, "[^\\s\"]*", String.class);
+            m.addField(LSQ.requestPath, "[^\\s\"]*", String.class);
             m.skipPattern("\\s*", " ");
             m.addField(LSQ.protocol, "[^\\s\"]*", String.class);
         });
@@ -147,7 +147,7 @@ public class WebLogParser {
         //result.put("b", (m, x) -> m.ignoreField("-|\\d+"));
 
         result.put("U", (m, x) -> {
-            m.addField(LSQ.path, "[^\\s\"?]*", String.class);
+            m.addField(LSQ.requestPath, "[^\\s\"?]*", String.class);
         });
 //
         result.put("q", (m, x) -> {
@@ -160,7 +160,9 @@ public class WebLogParser {
 
         // Headers
         result.put("i", (m, x) -> {
-            Property p = ResourceFactory.createProperty("http://example.org/header#" + x);
+            //FIXME Use a proper vocabulary for the headers
+
+            Property p = ResourceFactory.createProperty("http://lsq.aksw.org/header#" + x);
             Mapper subMapper = PropertyMapper.create(p, String.class);
 
             m.addField(LSQ.headers, "[^\"]*", subMapper, false);
@@ -176,7 +178,7 @@ public class WebLogParser {
             m.addField(LSQ.query, ".*", String.class);
         });
 
-        result.put("encsparql", (m, x) -> {        	
+        result.put("encsparql", (m, x) -> {
             m.addField(LSQ.query, "[^\\s]*", String.class, Converter.from(StringUtils::urlDecode, StringUtils::urlEncode));
         });
 
@@ -345,7 +347,7 @@ public class WebLogParser {
             String pathStr = Objects.toString(m.get("path"));
 
             Optional.ofNullable(m.get("protocol")).ifPresent(o -> inout.addLiteral(LSQ.protocol, o));
-            Optional.ofNullable(m.get(pathStr)).ifPresent(o -> inout.addLiteral(LSQ.path, o));
+            Optional.ofNullable(m.get(pathStr)).ifPresent(o -> inout.addLiteral(LSQ.requestPath, o));
             Optional.ofNullable(m.get("verb")).ifPresent(o -> inout.addLiteral(LSQ.verb, o));
 
             if(pathStr != null) {
@@ -393,9 +395,9 @@ public class WebLogParser {
     }
 
 
-    public static void extractQuery(Resource r) {
+    public static void extractRawQueryString(Resource r) {
         List<Function<Resource, String>> extractors = Arrays.asList(
-                x -> x.hasProperty(LSQ.path) ? extractQueryString(x.getProperty(LSQ.path).getString()) : null,
+                x -> x.hasProperty(LSQ.requestPath) ? extractQueryString(x.getProperty(LSQ.requestPath).getString()) : null,
                 x -> x.hasProperty(LSQ.queryString) ? extractQueryString2(x.getProperty(LSQ.queryString).getString()) : null
         );
 
