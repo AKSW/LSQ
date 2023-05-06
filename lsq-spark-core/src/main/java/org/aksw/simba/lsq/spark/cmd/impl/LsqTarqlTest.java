@@ -1,19 +1,27 @@
 package org.aksw.simba.lsq.spark.cmd.impl;
 
+import java.util.function.Supplier;
+
+import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.model.csvw.domain.impl.DialectMutableImpl;
-import org.apache.commons.csv.CSVFormat;
+import org.aksw.commons.model.csvw.univocity.UnivocityCsvwConf;
+import org.aksw.jenax.arq.picocli.CmdMixinArq;
+import org.aksw.jenax.arq.util.exec.ExecutionContextUtils;
+import org.aksw.jenax.arq.util.security.ArqSecurity;
+import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.engine.ExecutionContext;
 import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.util.Context;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-import net.sansa_stack.hadoop.format.univocity.conf.UnivocityHadoopConf;
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
 import net.sansa_stack.spark.io.rdf.output.RddRdfWriter;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
@@ -73,17 +81,19 @@ public class LsqTarqlTest {
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(ss.sparkContext());
 
         // CSVFormat baseCsvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
-        UnivocityHadoopConf csvConf = new UnivocityHadoopConf(new DialectMutableImpl().setHeader(true));
+        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true));
 
 
         String path = "/home/raven/Datasets/bio2rdf_sparql_logs_processed_01-2019_to_07-2021.csv";
 
         JavaRDD<Binding> bindingRdd = CsvDataSources.createRddOfBindings(sc, path, csvConf);
 
+        // CmdMixinArq.configureCxt(ARQ.getContext(), arqConfig);
+        CmdMixinArq arqConfig = new CmdMixinArq();
+        Supplier<ExecutionContext> execCxtSupplier = createExecCxtSupplier(arqConfig);
 
 
-
-        JavaRDD<Quad> quadRdd = JavaRddOfBindingsOps.tarqlQuads(bindingRdd, query);
+        JavaRDD<Quad> quadRdd = JavaRddOfBindingsOps.tarqlQuads(bindingRdd, query, execCxtSupplier);
         //JavaRDD<Dataset> outRdd = null;
 //
 //        List<JavaRDD<Dataset>> rdds = cmd.getNonOptionArgs().stream()
@@ -138,6 +148,18 @@ public class LsqTarqlTest {
             .run();
     }
 
+    public static Supplier<ExecutionContext> createExecCxtSupplier(CmdMixinArq arqConfig) {
+        SerializableSupplier<ExecutionContext> execCxtSupplier = () -> {
+            Context baseCxt = ARQ.getContext().copy();
+            CmdMixinArq.configureCxt(baseCxt, arqConfig);
+            baseCxt.set(ArqSecurity.symAllowFileAccess, true);
 
+            // Scripting can only be set via system property
+            // baseCxt.setTrue(ARQ.systemPropertyScripting)
 
+            ExecutionContext execCxt = ExecutionContextUtils.createExecCxtEmptyDsg(baseCxt);
+            return execCxt;
+        };
+        return execCxtSupplier;
+    }
 }

@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.aksw.commons.model.csvw.domain.impl.DialectMutableImpl;
+import org.aksw.commons.model.csvw.univocity.UnivocityCsvwConf;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.commons.csv.CSVFormat;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Model;
@@ -21,7 +21,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
-import net.sansa_stack.hadoop.format.univocity.conf.UnivocityHadoopConf;
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark;
 import net.sansa_stack.rdf.spark.io.csv.CsvParserSpark.BindingToResourceTransform;
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
@@ -97,7 +96,7 @@ public class LsqRegistrySparkAdapter {
 
     public static SourceOfRddOfResources createCsvSource(JavaSparkContext sc, String queryStr) {
         // CSVFormat csvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
-        UnivocityHadoopConf csvConf = new UnivocityHadoopConf(new DialectMutableImpl().setHeader(true));
+        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true));
 
         return source -> {
             Query query = QueryFactory.create(queryStr);

@@ -25,6 +25,4 @@ public class CmdLsqSparkRdfize
         LsqCliSparkUtils.runSparkJob(this, outputSpec, RxFunction.<DatasetOneNg>identity());
         return 0;
     }
-
-
 }

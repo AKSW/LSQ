@@ -17,6 +17,7 @@ import org.apache.jena.sparql.util.NodeIsomorphismMap;
  * @author raven
  *
  */
+@Deprecated // Migrate to OpVar
 public class OpExtKey
     extends OpExt
 {
