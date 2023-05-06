@@ -18,18 +18,19 @@
 			<artifactId>lsq-pkg-uberjar-cli</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
                 <dependency>
                         <groupId>org.aksw.simba.lsq</groupId>
                         <artifactId>lsq-pkg-deb-cli</artifactId>
                         <scope>provided</scope>
                 </dependency>
+                <!--
                 <dependency>
                         <groupId>org.aksw.simba.lsq</groupId>
                         <artifactId>lsq-pkg-rpm-cli</artifactId>
-						<type>rpm</type>
+			<type>rpm</type>
                         <scope>provided</scope>
                 </dependency>
+                -->
                 <dependency>
                         <groupId>org.aksw.simba.lsq</groupId>
                         <artifactId>lsq-pkg-docker-cli</artifactId>
