@@ -67,7 +67,6 @@ public class SpinAccessUtils {
                     .listResourcesUnchecked(spinModel, tpListStarts, Resource.class)
                     .collect(Collectors.toSet()).blockingGet();
 
-
             for(Resource r : ress) {
                 RDFList list = r.as(RDFList.class);
                 for(RDFNode item : list.asJavaList()) {

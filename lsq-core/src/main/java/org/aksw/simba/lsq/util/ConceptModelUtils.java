@@ -10,10 +10,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.sparql.core.Var;
-import org.apache.poi.ss.formula.functions.T;
 
 import io.reactivex.rxjava3.core.Flowable;
-
 
 public class ConceptModelUtils {
     public static <T extends Resource> Flowable<T> listResources(Model model, Concept concept, Class<? extends T> clazz) {

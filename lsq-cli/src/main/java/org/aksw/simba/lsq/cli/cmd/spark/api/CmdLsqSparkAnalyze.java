@@ -44,9 +44,15 @@ public class CmdLsqSparkAnalyze
             return RxFunction.<DatasetOneNg>identity()
                 .andThenMap(ds -> {
                     Resource r = ds.getModel().createResource(ds.getGraphName());
+                    // System.err.println("Starting processing: " + r);
+
+                    if (r.toString().contains("3B0r_bVVjj377f2RT0CXPK-XvLFN4CVMaPXrc6leOCw")) {
+                        System.out.println("here");
+                    }
 
                     Resource skolemized = enricher.apply(r);
 
+                    // System.err.println("Finished processed: " + r);
                     // TODO Do something with the skolemized resource?
 
                     return ds;
