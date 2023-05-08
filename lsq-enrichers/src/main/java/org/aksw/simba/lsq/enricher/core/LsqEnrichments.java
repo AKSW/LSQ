@@ -159,7 +159,6 @@ public class LsqEnrichments {
                             }
                         }
 
-
                         List<LsqTriplePattern> subBgpTps = bgp.getTriplePatterns().stream()
                                 .filter(tp -> TripleUtils.streamNodes(SpinCoreUtils.toJenaTriple(tp)).collect(Collectors.toSet()).contains(jenaNode))
                                 .collect(Collectors.toList());
@@ -282,10 +281,19 @@ public class LsqEnrichments {
     //            }
 
                 List<LsqTriplePattern> bgpTps = bgpCtxRes.getTriplePatterns();
-                for(org.spinrdf.model.Triple tp : e.getValue()) {
-                    // System.err.println("TP:" + tp);
+                if (false) {
+                    // This variant has to traverse the RDF list on every add
+                    for(org.spinrdf.model.Triple tp : e.getValue()) {
+                        // System.err.println("TP:" + tp);
 
-                    bgpTps.add(tp.as(LsqTriplePattern.class));
+                        bgpTps.add(tp.as(LsqTriplePattern.class));
+                    }
+                } else {
+                    // This variant is more optimized by using addAll
+                    List<LsqTriplePattern> tmp = e.getValue().stream()
+                            .map(tp -> tp.as(LsqTriplePattern.class))
+                            .collect(Collectors.toList());
+                    bgpTps.addAll(tmp);
                 }
 
 
