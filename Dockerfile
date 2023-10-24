@@ -10,8 +10,8 @@ FROM openjdk:11-jre-slim
 # Import the lsq-cli jar from the build step
 COPY --from=build lsq-cli/target/lsq-cli-*-jar-with-dependencies.jar /app/lsq-cli.jar
 
-RUN apt-get update && \
-    apt-get install -y wget
+#RUN apt-get update && \
+#    apt-get install -y wget
 
 # # Install Spark for standalone context in /opt
 # ENV APACHE_SPARK_VERSION=3.2.0
