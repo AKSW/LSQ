@@ -4,8 +4,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jenax.sparql.relation.api.UnaryRelation;
+import org.aksw.jenax.sparql.fragment.api.Fragment1;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
 import org.aksw.simba.lsq.util.ConceptModelUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.rdf.model.Model;
@@ -23,7 +23,7 @@ import com.google.common.collect.Multimap;
 /** Utils for accessing certain information in a spin model */
 public class SpinAccessUtils {
 
-    public static final UnaryRelation tpListStarts = Concept.create(
+    public static final Fragment1 tpListStarts = Concept.create(
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
             + "PREFIX sp: <http://spinrdf.org/sp#>",
             "listStart",
@@ -34,7 +34,7 @@ public class SpinAccessUtils {
      );
 
 
-    public static final UnaryRelation tpNoList = Concept.create(
+    public static final Fragment1 tpNoList = Concept.create(
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
             + "PREFIX sp: <http://spinrdf.org/sp#>",
             "listStart",

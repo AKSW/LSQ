@@ -35,11 +35,11 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint
 import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
+import org.aksw.jenax.dataaccess.sparql.connection.reconnect.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
@@ -69,7 +69,6 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -94,6 +93,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spinrdf.vocabulary.SP;
 
+import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;

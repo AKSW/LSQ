@@ -63,12 +63,12 @@
 	</modules>
 
 	<properties>
-		<jena.version>4.8.0</jena.version>
-		<jenax.version>4.8.0-2</jenax.version>
-		<aksw-commons.version>0.9.6</aksw-commons.version>
-		<sansa.version>0.8.7</sansa.version>
+		<jena.version>4.9.0</jena.version>
+		<jenax.version>4.9.0-1-SNAPSHOT</jenax.version>
+		<aksw-commons.version>0.9.7-SNAPSHOT</aksw-commons.version>
+		<sansa.version>0.9.0-SNAPSHOT</sansa.version>
 
-		<spark.version>3.0.1</spark.version>
+		<spark.version>3.3.2</spark.version>
 		<spark.deps.scope>compile</spark.deps.scope>
 
 		<scala.binary.version>2.12</scala.binary.version>

@@ -26,11 +26,10 @@ import java.util.stream.Collectors;
 
 import org.aksw.commons.io.util.StdIo;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
-import org.aksw.jenax.arq.connection.core.ConnectionLostException;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.util.binding.ResultSetUtils;
-import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.expr.ExprUtils;
 import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.Quads;
@@ -38,6 +37,7 @@ import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.dataaccess.sparql.connection.reconnect.ConnectionLostException;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
@@ -57,7 +57,6 @@ import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.ext.com.google.common.base.Stopwatch;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.query.Dataset;
@@ -91,6 +90,8 @@ import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spinrdf.model.TriplePattern;
+
+import com.google.common.base.Stopwatch;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.FlowableTransformer;

@@ -96,7 +96,7 @@ public class LsqRegistrySparkAdapter {
 
     public static SourceOfRddOfResources createCsvSource(JavaSparkContext sc, String queryStr) {
         // CSVFormat csvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
-        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true));
+        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true), null);
 
         return source -> {
             Query query = QueryFactory.create(queryStr);

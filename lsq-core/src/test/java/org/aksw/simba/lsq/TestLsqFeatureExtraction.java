@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMap;
 import org.apache.jena.query.QueryFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.junit.Assert;

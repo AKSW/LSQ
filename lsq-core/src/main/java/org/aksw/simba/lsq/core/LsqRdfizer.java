@@ -15,7 +15,7 @@ import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;

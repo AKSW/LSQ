@@ -17,13 +17,13 @@ import java.util.stream.StreamSupport;
 
 import org.aksw.commons.collections.MapUtils;
 import org.aksw.commons.util.string.StringUtils;
-import org.aksw.jena_sparql_api.concepts.Concept;
-import org.aksw.jena_sparql_api.concepts.ConceptUtils;
-import org.aksw.jenax.arq.connection.core.QueryExecutionFactory;
-import org.aksw.jenax.arq.util.exec.QueryExecutionUtils;
+import org.aksw.jenax.arq.util.exec.query.QueryExecutionUtils;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
 import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.dataaccess.sparql.factory.execution.query.QueryExecutionFactory;
+import org.aksw.jenax.sparql.fragment.impl.Concept;
+import org.aksw.jenax.sparql.fragment.impl.ConceptUtils;
 import org.aksw.simba.lsq.model.util.SpinCoreUtils;
 import org.aksw.simba.lsq.spinx.model.Bgp;
 import org.aksw.simba.lsq.spinx.model.SpinQueryEx;

@@ -7,7 +7,7 @@ import java.util.stream.LongStream;
 import org.aksw.commons.rx.op.FlowableOperatorSequentialGroupBy;
 import org.aksw.jena_sparql_api.rx.RDFDataMgrRx;
 import org.aksw.simba.lsq.model.LsqQuery;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.riot.Lang;
 
 import io.reactivex.rxjava3.core.Flowable;

@@ -6,7 +6,7 @@ import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.model.csvw.domain.impl.DialectMutableImpl;
 import org.aksw.commons.model.csvw.univocity.UnivocityCsvwConf;
 import org.aksw.jenax.arq.picocli.CmdMixinArq;
-import org.aksw.jenax.arq.util.exec.ExecutionContextUtils;
+import org.aksw.jenax.arq.util.exec.query.ExecutionContextUtils;
 import org.aksw.jenax.arq.util.security.ArqSecurity;
 import org.apache.jena.query.ARQ;
 import org.apache.jena.query.Query;
@@ -81,7 +81,7 @@ public class LsqTarqlTest {
         JavaSparkContext sc = JavaSparkContext.fromSparkContext(ss.sparkContext());
 
         // CSVFormat baseCsvFormat = CSVFormat.Builder.create(CSVFormat.EXCEL).setSkipHeaderRecord(true).build();
-        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true));
+        UnivocityCsvwConf csvConf = new UnivocityCsvwConf(new DialectMutableImpl().setHeader(true), null);
 
 
         String path = "/home/raven/Datasets/bio2rdf_sparql_logs_processed_01-2019_to_07-2021.csv";

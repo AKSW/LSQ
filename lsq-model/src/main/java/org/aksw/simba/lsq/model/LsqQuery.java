@@ -9,9 +9,9 @@ import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.hash.HashCode;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
-import org.apache.jena.ext.com.google.common.io.BaseEncoding;
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 import org.apache.jena.query.Query;
 import org.apache.jena.rdf.model.Resource;
 

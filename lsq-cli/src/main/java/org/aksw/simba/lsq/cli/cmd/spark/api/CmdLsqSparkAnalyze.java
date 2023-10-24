@@ -46,9 +46,9 @@ public class CmdLsqSparkAnalyze
                     Resource r = ds.getModel().createResource(ds.getGraphName());
                     // System.err.println("Starting processing: " + r);
 
-                    if (r.toString().contains("3B0r_bVVjj377f2RT0CXPK-XvLFN4CVMaPXrc6leOCw")) {
-                        System.out.println("here");
-                    }
+//                    if (r.toString().contains("3B0r_bVVjj377f2RT0CXPK-XvLFN4CVMaPXrc6leOCw")) {
+//                        System.out.println("here");
+//                    }
 
                     Resource skolemized = enricher.apply(r);
 

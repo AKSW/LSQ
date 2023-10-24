@@ -9,7 +9,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.Map.Entry;
 
-import org.apache.jena.ext.com.google.common.primitives.Ints;
+import com.google.common.primitives.Ints;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.HashCode;
