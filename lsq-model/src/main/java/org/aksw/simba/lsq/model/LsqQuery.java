@@ -97,7 +97,9 @@ public interface LsqQuery
         if (hash == null) {
             hash = cxt.getHashAsString(this);
         }
-        return prefix + "-" + hash.replace('/', '-');
+        // Note: Dot '.' is not part of base64 encoding
+        // This allows to use a hash as a path segment in an URL without introducing ambiguity
+        return prefix + "-" + hash.replace('/', '.');
     }
 
     /**
