@@ -17,7 +17,7 @@ public class TestLsqModel {
     public void test01() {
         Model model = ModelFactory.createDefaultModel();
         // Query query = QueryFactory.create("SELECT ?o ?p ?s { ?s ?p ?o }");
-        Query query = QueryFactory.create("SELECT ?s ?p ?o { ?s ?p ?o } OFFSET 5 LIMIT 10");
+        Query query = QueryFactory.create("SELECT ?p ?o { ?s ?p ?o } OFFSET 5 LIMIT 10");
         LsqQuery before = model.createResource().as(LsqQuery.class);
         QueryHash hash = QueryHash.createHash(query);
         System.out.println(hash);
