@@ -19,13 +19,10 @@
 			<artifactId>lsq-model</artifactId>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-arq-rx</artifactId>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.aksw.commons</groupId>
@@ -42,7 +39,8 @@
 			<artifactId>jena-shacl</artifactId>
 		</dependency>
 
-		<!-- FIXME Get rid of this dependency; right now we use some ngs code which 
+		<!-- FIXME Get rid of this dependency; right now we use some ngs code
+		which 
 			should go into a common module -->
 		<!-- <dependency> -->
 		<!-- <groupId>org.aksw.sparql-integrate</groupId> -->
@@ -65,9 +63,11 @@
 			<artifactId>spinrdf</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.topbraid</groupId> <artifactId>shacl</artifactId> 
+		<!-- <dependency> <groupId>org.topbraid</groupId>
+		<artifactId>shacl</artifactId> 
 			</dependency> -->
-		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId> <artifactId>jena-sparql-api-core</artifactId> 
+		<!-- <dependency> <groupId>org.aksw.jena-sparql-api</groupId>
+		<artifactId>jena-sparql-api-core</artifactId> 
 			</dependency> -->
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
@@ -89,7 +89,8 @@
 			<artifactId>jenax-conjure-core</artifactId>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.aksw.fedx</groupId> <artifactId>fedx-jsa</artifactId> 
+		<!-- <dependency> <groupId>org.aksw.fedx</groupId>
+		<artifactId>fedx-jsa</artifactId> 
 			</dependency> -->
 
 		<dependency>
@@ -98,7 +99,8 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- <dependency> <groupId>org.springframework</groupId> <artifactId>spring-core</artifactId> 
+		<!-- <dependency> <groupId>org.springframework</groupId>
+		<artifactId>spring-core</artifactId> 
 			</dependency> -->
 
 		<dependency>
