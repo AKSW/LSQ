@@ -21,7 +21,8 @@ ADD lsq-pkg-uberjar-cli-*-jar-with-dependencies.jar "$HOME/lsq-cli.jar"
 WORKDIR /data
 VOLUME [ "/data" ]
 
-ENTRYPOINT ["java","-jar","$HOME/lsq-cli.jar"]
+# XXX $HOME Does not get expanded in the entry point
+ENTRYPOINT ["java","-jar","/lsq/lsq-cli.jar"]
 CMD ["-h"]
 
 # Usage:
