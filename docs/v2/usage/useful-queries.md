@@ -299,8 +299,8 @@ SELECT ?exp ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel ?bgpSize  ?subTpSiz
   ?localExec lsqv:benchmarkRun ?exp .  
 
   # Get the measurements
-  ?subBgpExec lsqv:hasElementExec [ lsqv:itemCount ?bgpSize   ] .
-  ?subTpExec  lsqv:hasElementExec [ lsqv:itemCount ?subTpSize ] .
+  ?subBgpExec lsqv:hasElementExec [ lsqv:resultCount ?bgpSize   ] .
+  ?subTpExec  lsqv:hasElementExec [ lsqv:resultCount ?subTpSize ] .
 
   ?subTpInBgpExec lsqv:tpToBgpRatio ?subTpToBgpRatio .
 
