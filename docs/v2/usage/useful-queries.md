@@ -324,3 +324,56 @@ SELECT ?exp ?bgpLabel ?bgpNodeLabel ?subBgpLabel ?subTpLabel ?bgpSize  ?subTpSiz
 | lsqr:xc-dbpedia.org-somedata_2020-07-25_at_05-08-2020_02:24:05 | "?obj  a      swc:SessionEvent ;\n      ?prop  ?target" | "?target"    | "?obj  ?prop  ?target"                                  | "?obj ?prop ?target"      | 900     | 900       | 1               |
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ```
+
+
+#### Find Sparse Join Candidates among BGPs
+```sparql
+# Find Sparse join candidates: Search for basic graph patterns that have significantly
+# fewer results than the smallest result set among its triple patterns.
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?exp ?text ?bgpLabel ?bgpLabel ?bgpLabel ?tpLabel ?bgpSize  ?tpSize ?bgpTpSizeRatio {
+  { SELECT * { # Comment out this SELECT block to run this query on all data
+
+  {
+    ?query          lsqv:hasLocalExec   ?localExec .
+    ?localExec      lsqv:hasBgpExec     ?bgpExec .
+
+    # Links from the executions to the query's elements
+    ?bgp     lsqv:hasExec ?bgpExec     ; rdfs:label ?bgpLabel .
+    ?bgpExec lsqv:hasElementExec [ lsqv:resultCount ?bgpSize ] .
+        
+    # Discard bgps with empty results
+    FILTER(?bgpSize > 0)
+  }
+  LATERAL {
+    # For the current bgpExec, get the tp with the smallest result set size
+    SELECT ?bgpExec ?tpExec ?tpSize {
+      ?bgpExec        lsqv:hasTpInBgpExec ?tpInBgpExec .
+      ?tpInBgpExec    lsqv:hasTpExec      ?tpExec .
+      ?tpExec  lsqv:hasElementExec [ lsqv:resultCount ?tpSize ] .
+    } ORDER BY ASC(?tpSize) LIMIT 1
+  }
+
+  # Compute the ratio of the bgp size vs smallest tp size
+  BIND(?bgpSize / ?tpSize AS ?bgpTpSizeRatio)
+  ?tp      lsqv:hasExec ?tpExec  ; rdfs:label ?tpLabel .
+  ?localExec lsqv:benchmarkRun ?exp .  
+  ?query lsqv:text ?text
+  
+  } LIMIT 1000 }
+}
+ORDER BY ASC(?bgpTpSizeRatio)
+```
+
+```
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| exp                                                                | bgpLabel                                                                                                                                                                                                                                                                                                                                                                                                                       | tpLabel                                                                                          | bgpSize                                        | tpSize                                           | bgpTpSizeRatio             |
+===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+| <http://lsq.aksw.org/xc-dbpedia_2020-10-10_at_10-10-2020_18:29:19> | "?id  a                     <http://dbpedia.org/ontology/Film> ;\n     <http://dbpedia.org/property/title>  ?ft ;\n     <http://dbpedia.org/ontology/imdbId>  ?imdb_id"                                                                                                                                                                                                                                                        | "?id <http://dbpedia.org/ontology/imdbId> ?imdb_id"                                              | "23"^^<http://www.w3.org/2001/XMLSchema#long>  | "70876"^^<http://www.w3.org/2001/XMLSchema#long> | 0.000324510412551498391557 |
+| <http://lsq.aksw.org/xc-dbpedia_2020-10-10_at_10-10-2020_18:29:19> | "?artist  a                     <http://dbpedia.org/ontology/MusicalArtist> ;\n         <http://www.w3.org/2000/01/rdf-schema#label>  ?name ;\n         <http://dbpedia.org/property/genre>  <http://dbpedia.org/resource/Acid_rock> ;\n         <http://dbpedia.org/property/genre>  <http://dbpedia.org/resource/Funk_rock> ;\n         <http://dbpedia.org/property/genre>  <http://dbpedia.org/resource/Psychedelic_rock>" | "?artist <http://dbpedia.org/property/genre> <http://dbpedia.org/resource/Acid_rock>"            | "1"^^<http://www.w3.org/2001/XMLSchema#long>   | "356"^^<http://www.w3.org/2001/XMLSchema#long>   | 0.002808988764044943820225 |
+| <http://lsq.aksw.org/xc-dbpedia_2020-10-10_at_10-10-2020_18:29:19> | "?author  a                     <http://dbpedia.org/ontology/Writer> .\n?film    <http://dbpedia.org/ontology/writer>  ?author .\n?actor   <http://dbpedia.org/property/starring>  ?film .\n?author  <http://www.w3.org/2002/07/owl#sameAs>  ?nytId"                                                                                                                                                                           | "?author <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://dbpedia.org/ontology/Writer>" | "116"^^<http://www.w3.org/2001/XMLSchema#long> | "30649"^^<http://www.w3.org/2001/XMLSchema#long> | 0.003784789063264706841985 |
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+```
