@@ -412,7 +412,7 @@ public class WebLogParser {
         // List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
         List<Entry<String, String>> qsArgs = UriUtils.parseQueryStringAsList(queryString);
         String result = qsArgs.stream()
-            .filter(x -> x.getValue().equals("query"))
+            .filter(x -> x.getKey().equals("query"))
             .findFirst()
             .map(x -> x.getValue())
             .orElse(null);

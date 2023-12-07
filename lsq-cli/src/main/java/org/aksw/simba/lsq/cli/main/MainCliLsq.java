@@ -261,10 +261,6 @@ public class MainCliLsq {
         return legacyLogRdfEvents;
     }
 
-
-
-
-
     public static void rdfize(CmdLsqRdfizeBase cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
