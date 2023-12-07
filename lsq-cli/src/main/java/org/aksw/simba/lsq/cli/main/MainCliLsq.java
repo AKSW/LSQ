@@ -161,7 +161,6 @@ public class MainCliLsq {
             .execute(args);
     }
 
-
     public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
         String logFormat = rdfizeCmd.inputLogFormat;
         List<String> logSources = rdfizeCmd.nonOptionArgs;

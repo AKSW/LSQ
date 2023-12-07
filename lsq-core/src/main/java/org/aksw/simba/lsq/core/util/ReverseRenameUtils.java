@@ -58,7 +58,7 @@ public class ReverseRenameUtils {
 
     /** Return the node obtained by applying reverse-renaming to its nodes  */
     public static Triple effectiveTriple(Triple t) {
-        return new Triple(
+        return Triple.create(
                 effectiveNode(t.getSubject()),
                 effectiveNode(t.getPredicate()),
                 effectiveNode(t.getObject()));

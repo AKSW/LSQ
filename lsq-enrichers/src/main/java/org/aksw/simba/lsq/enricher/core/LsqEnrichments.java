@@ -209,7 +209,7 @@ public class LsqEnrichments {
                     BgpNode bgpNode = bgpNodeMap.computeIfAbsent(node,
                             n -> createBgpNode(spinModel, n));
 
-                    bgpNode.setLabel(NodeFmtLib.str(node));
+                    bgpNode.setLabel(NodeFmtLib.strNT(node));
                     bgpNode.getProxyFor().add(rdfNode);
 
 

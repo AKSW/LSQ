@@ -702,10 +702,13 @@ catch (Exception e) {
                logger.info("Benchmarking " + queryStr);
                Stopwatch retrievalSw = Stopwatch.createStarted();
 
-               try(QueryExecution qe = conn.query(query)) {
+               try(QueryExecution qe = conn.newQuery()
+                       .timeout(executionTimeoutForRetrieval, TimeUnit.MILLISECONDS)
+                       .query(query)
+                       .build()) {
                    // https://github.com/apache/jena/issues/1384
                    // qe.setTimeout(connectionTimeoutForRetrieval, executionTimeoutForRetrieval);
-                   qe.setTimeout(executionTimeoutForRetrieval);
+                   // qe.setTimeout(executionTimeoutForRetrieval);
 
                    ResultSet rs = qe.execSelect();
                    varNames.addAll(rs.getResultVars());
@@ -824,14 +827,19 @@ catch (Exception e) {
                    Var countVar = queryAndVar.getKey();
                    Query countQuery = queryAndVar.getValue();
 
-                   logger.info("Counting " + countQuery);
+                   if (logger.isInfoEnabled()) {
+                       logger.info("Counting " + countQuery);
+                   }
 
                    countingSw = Stopwatch.createStarted();
 
-                   try(QueryExecution qe = conn.query(countQuery)) {
+                   try(QueryExecution qe = conn.newQuery()
+                           .query(countQuery)
+                           .timeout(executionTimeoutForCounting, TimeUnit.MILLISECONDS)
+                           .build()) {
                        // qe.setTimeout(connectionTimeoutForCounting, executionTimeoutForCounting);
                        // https://github.com/apache/jena/issues/1384
-                       qe.setTimeout(executionTimeoutForCounting);
+                       // qe.setTimeout(executionTimeoutForCounting);
                        Number count = QueryExecutionUtils.fetchNumber(qe, countVar);
                        if(count != null) {
                            itemCount = count.longValue();
@@ -842,7 +850,9 @@ catch (Exception e) {
                } catch (ConnectionLostException e) {
                    throw new ConnectionLostException(e);
                } catch(Exception e) {
-                   logger.warn("Counting error: ", e);
+                   if (logger.isWarnEnabled()) {
+                       logger.warn("Counting error: ", e);
+                   }
     //                   String errorMsg = Optional.ofNullable(ExceptionUtils.getRootCause(e)).orElse(e).getMessage();
                    String errorMsg = ExceptionUtils.getStackTrace(e);
                    result.setCountingError(errorMsg);
@@ -874,7 +884,9 @@ catch (Exception e) {
 
            result.setEvalDuration(evalDuration);
 
-           logger.info("Benchmark result after " + evalDuration + " seconds: " + result.getResultSetSize() + " results and error message " + result.getRetrievalError());
+           if(logger.isInfoEnabled()) {
+               logger.info("Benchmark result after " + evalDuration + " seconds: " + result.getResultSetSize() + " results and error message " + result.getRetrievalError());
+           }
 
            return result;
            //Calendar end = Calendar.getInstance();
