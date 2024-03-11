@@ -261,7 +261,7 @@
 			<dependency>
 				<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
 				<artifactId>spinrdf</artifactId>
-				<version>2.0.0</version>
+				<version>4.0.0-SNAPSHOT</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.apache.jena</groupId>
