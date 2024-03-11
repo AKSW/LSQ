@@ -11,12 +11,18 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.GeoSparqlExAggregators;
+import org.aksw.jena_sparql_api.sparql.ext.geosparql.GeometryWrapperUtils;
+import org.aksw.jenax.arq.util.node.NodeTransformCollectNodes;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryUtils;
 import org.aksw.jenax.arq.util.triple.TripleUtils;
+import org.aksw.jenax.arq.util.var.Vars;
+import org.aksw.jenax.model.geosparql.HasGeometry;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.core.util.Skolemize;
@@ -35,6 +41,7 @@ import org.aksw.simba.lsq.spinx.model.TpInBgp;
 import org.aksw.simba.lsq.util.ElementVisitorFeatureExtractor;
 import org.aksw.simba.lsq.util.NestedResource;
 import org.aksw.simba.lsq.vocab.LSQ;
+import org.apache.jena.geosparql.implementation.GeometryWrapper;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Query;
@@ -48,7 +55,13 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.out.NodeFmtLib;
 import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.sparql.algebra.Algebra;
+import org.apache.jena.sparql.algebra.Op;
 import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.engine.binding.Binding;
+import org.apache.jena.sparql.engine.binding.BindingFactory;
+import org.apache.jena.sparql.expr.ExprVar;
+import org.apache.jena.sparql.graph.NodeTransformLib;
 import org.apache.jena.sparql.syntax.Element;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
 import org.apache.jena.sparql.util.FmtUtils;
@@ -495,6 +508,48 @@ public class LsqEnrichments {
 
         if (features.isEmpty()) {
             resource.addProperty(LSQ.usesFeature, LSQ.None);
+        }
+    }
+
+    public static LsqQuery enrichWithBBox(LsqQuery lsqQuery) {
+        String queryStr = lsqQuery.getText();
+        // TODO Avoid repeated parse
+        Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
+        enrichResourceWithBBox(lsqQuery, query);
+        return lsqQuery;
+    }
+
+    /**
+     * Extract all mentioned geometries from the given query and annotate the resource
+     * with the envelope of them.
+     *
+     * @param resource
+     * @param query
+     */
+    public static void enrichResourceWithBBox(Resource resource, Query query) {
+        Collector<Binding, ?, GeometryWrapper> collector = GeoSparqlExAggregators.aggGeometryWrapperCollection(new ExprVar(Vars.x), false).asCollector();
+        NodeTransformCollectNodes n = new NodeTransformCollectNodes();
+
+        // QueryTransformOps only invokes NodeTransformer for variables - so we can't use it to detect spatial literals
+        // ElementTransform e = new ElementTransformSubst2(n);
+        // QueryTransformOps.transform(query, e);
+
+        // Use algebra form to detect spatial literals
+        Op op = Algebra.compile(query);
+        NodeTransformLib.transform(n, op);
+        Set<Node> nodes = n.getNodes();
+
+        // Reuses binding-based aggregator
+        GeometryWrapper geom = nodes.stream()
+                .filter(node -> GeometryWrapperUtils.extractGeometryWrapperOrNull(node) != null)
+                .map(node -> BindingFactory.binding(Vars.x, node))
+                .collect(collector);
+
+        boolean isEmptyGeom = geom.isEmpty();
+        if (geom != null && !isEmptyGeom) {
+            Node envelope = geom.envelope().asNode();
+            HasGeometry hasGeometry = resource.as(HasGeometry.class);
+            hasGeometry.addNewGeometry().setAsWKT(envelope);
         }
     }
 

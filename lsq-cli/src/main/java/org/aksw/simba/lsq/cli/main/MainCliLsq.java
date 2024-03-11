@@ -315,6 +315,8 @@ public class MainCliLsq {
                 // TODO Create a registry for enrichers
                 safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);
                 safeEnricher(LsqEnrichments::enrichWithStaticAnalysis).apply(q);
+
+                safeEnricher(LsqEnrichments::enrichWithBBox).apply(q);
             }
 
             // TODO createLsqRdfFlow already performs skolemize; duplicated effort

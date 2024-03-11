@@ -11,6 +11,7 @@ import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.annotation.reprogen.StringId;
 import org.aksw.jenax.arq.util.syntax.QueryHash;
+import org.aksw.jenax.model.geosparql.HasGeometry;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.query.Query;
@@ -46,7 +47,7 @@ import com.google.common.io.BaseEncoding;
  */
 @ResourceView
 public interface LsqQuery
-    extends Resource
+    extends Resource, HasGeometry
 {
     @HashId(excludeRdfProperty = true)
     @Iri(LSQ.Terms.text)
