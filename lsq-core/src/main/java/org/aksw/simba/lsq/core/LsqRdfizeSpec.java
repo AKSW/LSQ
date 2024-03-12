@@ -16,7 +16,10 @@ public interface LsqRdfizeSpec {
 
     String getHostSalt();
 
+    // Consolidate "Slim mode" and "query only" into a class that captures what features to rdfize
+
     boolean isSlimMode();
+    boolean isQueryOnly();
 
     String getEndpointUrl();
 

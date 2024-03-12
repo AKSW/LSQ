@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.aksw.simba.lsq.core.LsqRdfizeSpec;
 
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
@@ -36,8 +37,22 @@ public class CmdLsqRdfizeBase
     @Option(names={"-s", "--slim"}, description="Slim output only retains query, hostname, timestamp and sequence id")
     public boolean slimMode = false;
 
-    @Option(names={"-e", "--endpoint"}, required=true, description="Service endpoint for which the logs were generated")
-    public String endpointUrl = null;
+
+    @ArgGroup(exclusive = true, multiplicity = "1")
+    public RdfizationLevel rdfizationLevel = new RdfizationLevel();
+
+    public static class RdfizationLevel {
+        @Option(names={"--query-only"}, description="Only RDFize the query. Do not track its occurrence.")
+        public boolean queryOnly = false;
+
+        // Endpoint is not needed if --query-only is specified
+        @Option(names={"-e", "--endpoint"}, required=true, description="Service endpoint for which the logs were generated")
+        public String endpointUrl = null;
+    }
+
+    @Option(names = { "-d", "--used-prefixes" }, description = "Number of records (bindings/quads) by which to defer RDF output in order to analyze used prefixes; default: ${DEFAULT-VALUE}", defaultValue = "100")
+    public long usedPrefixDefer;
+
 
     @Parameters(arity="1..*", description="log sources")
     public List<String> nonOptionArgs = new ArrayList<>();
@@ -98,13 +113,18 @@ public class CmdLsqRdfizeBase
     }
 
     @Override
-    public boolean isSlimMode() {
-        return slimMode;
+    public String getEndpointUrl() {
+        return rdfizationLevel.endpointUrl;
     }
 
     @Override
-    public String getEndpointUrl() {
-        return endpointUrl;
+    public boolean isQueryOnly() {
+        return rdfizationLevel.queryOnly;
+    }
+
+    @Override
+    public boolean isSlimMode() {
+        return slimMode;
     }
 
     @Override
