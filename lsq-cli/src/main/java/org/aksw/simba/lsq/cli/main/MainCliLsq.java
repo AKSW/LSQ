@@ -641,6 +641,11 @@ public class MainCliLsq {
         Files.createDirectories(tdb2FullPath);
         String fullPathStr = tdb2FullPath.toString();
 
+
+        LsqEnricherShell enricherFactory = new LsqEnricherShell(lsqBaseIri, benchmarkExecuteCmd.enricherSpec.getEffectiveList(), LsqEnricherRegistry::get);
+        Function<Resource, Resource> enricher = enricherFactory.get();
+
+
         logger.info("TDB2 benchmark db location: " + tdb2FullPath);
 
         Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
@@ -649,7 +654,7 @@ public class MainCliLsq {
             try (RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
                 try (SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
-                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, enricher, benchmarkConn, indexConn);
                 }
             }
         } finally {

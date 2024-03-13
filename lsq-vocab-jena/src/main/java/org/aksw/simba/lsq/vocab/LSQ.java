@@ -19,6 +19,10 @@ public class LSQ {
 
         public static final String text = NS + "text";
         public static final String hash = NS + "hash";
+
+        public static final String countValue = NS + "countValue";
+        // XXX isCountDistinct / isCountStar
+
         public static final String resultCount = NS + "resultCount";
         public static final String isDistinct = NS + "isDistinct";
 

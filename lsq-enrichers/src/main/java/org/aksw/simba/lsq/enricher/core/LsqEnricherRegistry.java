@@ -50,6 +50,7 @@ public class LsqEnricherRegistry {
     }
 
     public static LsqEnricherRegistry initDefaults(LsqEnricherRegistry registry) {
+        registry.register("none", () -> lsqQuery -> lsqQuery); // Identity mapping
         registry.register("spin", () -> LsqEnrichments::enrichWithFullSpinModelCore);
         registry.register("static", () -> LsqEnrichments::enrichWithStaticAnalysis);
         registry.register("bbox", () -> LsqEnrichments::enrichWithBBox);

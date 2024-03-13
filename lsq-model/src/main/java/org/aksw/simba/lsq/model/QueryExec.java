@@ -53,6 +53,11 @@ public interface QueryExec extends Resource {
     Long getResultSetSize();
     QueryExec setResultSetSize(Long resultSetSize);
 
+    /** The value returned by SELECT COUNT() queries */
+    @Iri(LSQ.Terms.countValue)
+    Long getCountValue();
+    QueryExec setCountValue(Long countValue);
+
     @Iri(LSQ.Terms.exceededMaxByteSizeForCounting)
     Boolean getExceededMaxByteSizeForCounting();
     QueryExec setExceededMaxByteSizeForCounting(Boolean offOrOn);

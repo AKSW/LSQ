@@ -29,6 +29,12 @@
 			<groupId>org.topbraid</groupId>
 			<artifactId>spin</artifactId>
 		</dependency> -->
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
 			<artifactId>spinrdf</artifactId>

@@ -43,7 +43,6 @@ import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
-import org.aksw.simba.lsq.enricher.core.LsqEnrichments;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LocalExecution;
@@ -112,42 +111,42 @@ public class LsqBenchmarkProcessor {
         return null;
     }
 
-
-    public static void run() {
-        SparqlQueryConnection benchmarkConn = RDFConnectionFactory.connect(DatasetFactory.create());
-
-        Model configModel = ModelFactory.createDefaultModel();
-
-        String expId = "testrun";
-        String expSuffix = "_" + expId;
-        String lsqBaseIri = "http://lsq.aksw.org/";
-
-        ExperimentConfig config = configModel
-                .createResource("http://someconfig.at/now")
-                .as(ExperimentConfig.class)
-                .setIdentifier(expId);
-
-        Instant benchmarkRunStartTimestamp = Instant.ofEpochMilli(0);
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(benchmarkRunStartTimestamp, ZoneId.systemDefault());
-        Calendar cal = GregorianCalendar.from(zdt);
-        XSDDateTime xsddt = new XSDDateTime(cal);
-
-        ExperimentRun expRun = configModel
-                .createResource()
-                .as(ExperimentRun.class)
-                .setConfig(config)
-                .setTimestamp(xsddt);
-
-        HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
-        String expRunIri = lsqBaseIri + tmp.getStringId(expRun);
-        expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
-
-        Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-                .map(r -> r.as(LsqQuery.class));
-
-        // TODO Need to set up an index connection
-        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
-    }
+//
+//    public static void run() {
+//        SparqlQueryConnection benchmarkConn = RDFConnectionFactory.connect(DatasetFactory.create());
+//
+//        Model configModel = ModelFactory.createDefaultModel();
+//
+//        String expId = "testrun";
+//        String expSuffix = "_" + expId;
+//        String lsqBaseIri = "http://lsq.aksw.org/";
+//
+//        ExperimentConfig config = configModel
+//                .createResource("http://someconfig.at/now")
+//                .as(ExperimentConfig.class)
+//                .setIdentifier(expId);
+//
+//        Instant benchmarkRunStartTimestamp = Instant.ofEpochMilli(0);
+//        ZonedDateTime zdt = ZonedDateTime.ofInstant(benchmarkRunStartTimestamp, ZoneId.systemDefault());
+//        Calendar cal = GregorianCalendar.from(zdt);
+//        XSDDateTime xsddt = new XSDDateTime(cal);
+//
+//        ExperimentRun expRun = configModel
+//                .createResource()
+//                .as(ExperimentRun.class)
+//                .setConfig(config)
+//                .setTimestamp(xsddt);
+//
+//        HashIdCxt tmp = MapperProxyUtils.getHashId(expRun);
+//        String expRunIri = lsqBaseIri + tmp.getStringId(expRun);
+//        expRun = ResourceUtils.renameResource(expRun, expRunIri).as(ExperimentRun.class);
+//
+//        Flowable<LsqQuery> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
+//                .map(r -> r.as(LsqQuery.class));
+//
+//        // TODO Need to set up an index connection
+//        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
+//    }
 
     /**
      * If something goes wrong when running the wrapped action
@@ -181,6 +180,7 @@ public class LsqBenchmarkProcessor {
             String lsqBaseIri,
             ExperimentConfig config,
             ExperimentRun expRun,
+            Function<Resource, Resource> enricher,
             SparqlQueryConnection benchmarkConn,
             RDFConnection indexConn) {
 
@@ -212,6 +212,11 @@ public class LsqBenchmarkProcessor {
 //                .map(r -> r.as(LsqQuery.class))
 //                .skip(1)
 //                .take(1)
+                .concatMapMaybe(lsqQuery -> {
+                    Maybe<LsqQuery> r = safeMaybe(() -> enricher.apply(lsqQuery).as(LsqQuery.class));
+                    return r;
+                })
+                /*
                 .concatMapMaybe(lsqQuery ->
                     safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
 //                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
@@ -222,9 +227,11 @@ public class LsqBenchmarkProcessor {
 //                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
 //                    System.exit(1);
 //                })
+   */
                 //.flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
-                .map(lsqQuery -> extractAllQueries(lsqQuery))
-                .map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
+                //.map(lsqQuery -> extractAllQueries(lsqQuery))
+                //.map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
+                .map(lsqQuery -> benchmarkSecondaryQueries ? extractAllQueries(lsqQuery) : Collections.singleton(lsqQuery))
 //                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
 //                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
 //                .lift(OperatorObserveThroughput.create("throughput", 100))
@@ -474,9 +481,10 @@ try {
 
 //                    expRoot.setBenchmarkRun(expRun);
 
-            LsqExec.createAllExecs(primaryQuery, expRun);
-
-
+            // If there is no spin model then don't try to create executions for its elements
+            if (primaryQuery.getSpinQuery() != null) {
+                LsqExec.createAllExecs(primaryQuery, expRun);
+            }
 
             HashIdCxt hashIdCxt = MapperProxyUtils.getHashId(expRoot);//.getHash(bgp);
             //Map<RDFNode, HashCode> renames = hashIdCxt.getMapping();
@@ -689,6 +697,7 @@ catch (Exception e) {
                return result;
            }
 
+           // TODO For COUNT queries add the LSQ.countValue to the output model
 
            Stopwatch evalSw = Stopwatch.createStarted(); // Total time spent evaluating
 
