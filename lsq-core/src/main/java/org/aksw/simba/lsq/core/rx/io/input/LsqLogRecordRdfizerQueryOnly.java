@@ -28,7 +28,7 @@ public class LsqLogRecordRdfizerQueryOnly
 
     @Override
     public Resource apply(Resource logEntry) {
-        RemoteExecution re = logEntry.as(RemoteExecution.class);
+        // RemoteExecution re = logEntry.as(RemoteExecution.class);
 
         // If we cannot obtain a query from the log record, we omit the entry
         // Optional<Resource> result;
@@ -53,17 +53,16 @@ public class LsqLogRecordRdfizerQueryOnly
                 q.setParseError(t.toString());
             }
 
-
             Resource r = Skolemize.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
-                Optional.ofNullable(renames.get(re.asNode()))
-                    .map(newRoot.getModel()::wrapAsResource)
-                    .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));
+//                Optional.ofNullable(renames.get(re.asNode()))
+//                    .map(newRoot.getModel()::wrapAsResource)
+//                    .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));
             });
 
             result = r; //Optional.of(r);
 
         } else {
-            re.setSequenceId(null);
+            // re.setSequenceId(null);
             result = null;
         }
 

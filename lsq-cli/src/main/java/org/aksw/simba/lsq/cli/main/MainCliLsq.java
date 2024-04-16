@@ -471,6 +471,19 @@ public class MainCliLsq {
     }
 
 
+    public static String createExperimentId(String datasetLabel) {
+        // experimentId = distributionId + "_" + timestamp
+
+        Instant now = Instant.now();
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+        // Calendar nowCal = GregorianCalendar.from(zdt);
+        //String timestamp = now.toString();
+        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+
+        String expId = "xc-" + datasetLabel + "_" + timestamp;
+        return expId;
+    }
+
     /**
      * Creates a model with the configuration of the benchmark experiment
      * which serves as the base for running the benchmark
@@ -492,20 +505,22 @@ public class MainCliLsq {
             datasetIri = datasetId;
         }
 
-        // experimentId = distributionId + "_" + timestamp
+//        // experimentId = distributionId + "_" + timestamp
+//        String datasetLabel = UriToPathUtils.resolvePath(datasetId).toString()
+//                .replace('/', '-');
+//
+//
+//        Instant now = Instant.now();
+//        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+//        // Calendar nowCal = GregorianCalendar.from(zdt);
+//        //String timestamp = now.toString();
+//        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+//
+//        String expId = "xc-" + datasetLabel + "_" + timestamp;
         String datasetLabel = UriToPathUtils.resolvePath(datasetId).toString()
                 .replace('/', '-');
 
-
-        Instant now = Instant.now();
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
-        // Calendar nowCal = GregorianCalendar.from(zdt);
-        //String timestamp = now.toString();
-        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
-
-
-
-        String expId = "xc-" + datasetLabel + "_" + timestamp;
+        String expId = createExperimentId(datasetId);
 
         // Not used if stdout flag is set
         String outFilename = sanitizeFilename(expId) + ".conf.ttl";
@@ -649,12 +664,13 @@ public class MainCliLsq {
         logger.info("TDB2 benchmark db location: " + tdb2FullPath);
 
         Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
-        try (RDFConnection indexConn = RDFConnection.connect(dataset)) {
+        try (OutputStream out = StdIo.openStdOutWithCloseShield();
+             RDFConnection indexConn = RDFConnection.connect(dataset)) {
             RdfDataRefSparqlEndpoint dataRef = cfg.getDataRef();
             try (RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
                 try (SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
-                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, enricher, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor.process(out, queryFlow, lsqBaseIri, cfg, run, enricher, benchmarkConn, indexConn);
                 }
             }
         } finally {

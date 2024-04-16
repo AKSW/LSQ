@@ -11,6 +11,9 @@ import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A class that bundles together active enrichers and context information.
+ */
 public class LsqEnricherShell
     implements SerializableSupplier<Function<Resource, Resource>>
     // implements LsqEnricherFactory

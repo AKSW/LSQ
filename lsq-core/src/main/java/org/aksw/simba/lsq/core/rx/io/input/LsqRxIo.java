@@ -53,7 +53,7 @@ public class LsqRxIo {
         try {
             try(InputStream in = inSupp.call()) {
                 // If the buffer gets completely filled, our input is too large
-                byte[] buffer = new byte[16 * 1024 * 1024];
+                byte[] buffer = new byte[1024 * 1024 * 1024];
                 int n = IOUtils.read(in, buffer);
                 if(n == buffer.length) {
                     throw new RuntimeException("Input is too large for sparql stream; reached limit of " + buffer.length + " bytes");

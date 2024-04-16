@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.enricher.benchmark.core;
 
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -40,7 +41,6 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.ConnectionLostException;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
-import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
 import org.aksw.simba.lsq.model.ExperimentConfig;
@@ -71,9 +71,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
-import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.sparql.core.DatasetGraphFactory;
@@ -85,7 +83,6 @@ import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.Template;
 import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateRequest;
-import org.apache.jena.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spinrdf.model.TriplePattern;
@@ -167,6 +164,23 @@ public class LsqBenchmarkProcessor {
        return result;
    }
 
+   public static void process(
+           OutputStream out,
+           Flowable<LsqQuery> rawQueryFlow,
+           String lsqBaseIri,
+           ExperimentConfig config,
+           ExperimentRun expRun,
+           Function<Resource, Resource> enricher,
+           SparqlQueryConnection benchmarkConn,
+           RDFConnection indexConn) {
+       Flowable<ResourceInDataset> flowable = processCore(rawQueryFlow, lsqBaseIri, config, expRun, enricher, benchmarkConn, indexConn);
+
+       Iterable<ResourceInDataset> items = flowable.blockingIterable();
+       for(ResourceInDataset item : items) {
+           RDFDataMgr.write(out, item.getDataset(), RDFFormat.TRIG_BLOCKS);
+       }
+   }
+
     /**
      *
      * @param lsqBaseIri The IRI prefix to prepend to generated resources
@@ -175,7 +189,7 @@ public class LsqBenchmarkProcessor {
      *        of benchmark information
      * @param benchmarkConn The connection on which to perform benchmarking
      */
-    public static void process(
+    public static Flowable<ResourceInDataset> processCore(
             Flowable<LsqQuery> rawQueryFlow,
             String lsqBaseIri,
             ExperimentConfig config,
@@ -239,12 +253,7 @@ public class LsqBenchmarkProcessor {
 //                .lift(OperatorObserveThroughput.create("buffered", 100))
                 ;
 
-        Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
-        Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
-
-        // Create a database to ensure uniqueness of evaluation tasks
-        while(itBatches.hasNext()) {
-            List<Set<LsqQuery>> batch = itBatches.next();
+        Flowable<ResourceInDataset> result = queryFlow.flatMapIterable(batch -> {
             List<ResourceInDataset> items = processBatchOfQueries(
                     batch,
                     lsqBaseIri,
@@ -253,11 +262,31 @@ public class LsqBenchmarkProcessor {
                     benchmarkConn,
                     lsqQueryExecFn,
                     indexConn);
+            return items;
+        });
 
-            for(ResourceInDataset item : items) {
-                RDFDataMgr.write(StdIo.openStdOutWithCloseShield(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
+        if (false) {
+            Iterable<List<Set<LsqQuery>>> batches = queryFlow.blockingIterable();
+            Iterator<List<Set<LsqQuery>>> itBatches = batches.iterator();
+
+            // Create a database to ensure uniqueness of evaluation tasks
+            while(itBatches.hasNext()) {
+                List<Set<LsqQuery>> batch = itBatches.next();
+                List<ResourceInDataset> items = processBatchOfQueries(
+                        batch,
+                        lsqBaseIri,
+                        config,
+                        expRun,
+                        benchmarkConn,
+                        lsqQueryExecFn,
+                        indexConn);
+
+                for(ResourceInDataset item : items) {
+                    RDFDataMgr.write(StdIo.openStdOutWithCloseShield(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
+                }
             }
         }
+        return result;
 
 
 //

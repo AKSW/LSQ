@@ -23,19 +23,21 @@ public interface ExperimentRun
     ExperimentRun setConfig(ExperimentConfig dataRef);
     ExperimentConfig getConfig();
 
-
     // The id should be based on getConfig.getIdentifier() and getTimestamp()
     @Iri("dct:identifier")
     @HashId
     String getIdentifier();
     ExperimentRun setIdentifier(String id);
 
-
     @HashId
     @Iri(LSQ.Terms.atTime)
     XSDDateTime getTimestamp();
     ExperimentRun setTimestamp(XSDDateTime calendar);
 
+    @HashId
+    @Iri(LSQ.Terms.runId)
+    Integer getRunId();
+    ExperimentRun setRunId(Integer runId);
 
     /**
      * The identifier should be composed of getConfig().getIdentifier() and getTimestamp()
@@ -57,7 +59,14 @@ public interface ExperimentRun
         Calendar cal = Objects.requireNonNull(getTimestamp(), "no timestamp given").asCalendar();
         String timestamp = dateFormat.format(cal.getTime());
         //String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // ""
-        String result = id + "_at_" + timestamp;
+
+        String result = id;
+        Integer runId = getRunId();
+        if (runId != null) {
+            result += "_run" + runId;
+        }
+
+        result += "_at_" + timestamp;
         return result;
     }
 
