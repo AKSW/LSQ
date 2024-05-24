@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqAnalyzeBase.EnricherSpec;
 import org.aksw.simba.lsq.cli.main.MainCliLsq;
 
 import com.google.common.base.StandardSystemProperty;
 
+import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Help.Visibility;
 import picocli.CommandLine.Option;
@@ -31,6 +33,9 @@ public class CmdLsqRxBenchmarkRun
 
     @Parameters(arity = "1..*", paramLabel="FILE", description="Log files to process")
     public List<String> logSources = new ArrayList<>();
+
+    @ArgGroup(exclusive = true, multiplicity = "0..1")
+    public EnricherSpec enricherSpec = new EnricherSpec();
 
     @Override
     public Integer call() throws Exception {

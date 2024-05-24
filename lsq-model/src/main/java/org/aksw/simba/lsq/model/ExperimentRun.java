@@ -20,22 +20,28 @@ public interface ExperimentRun
 {
     @HashId
     @Iri(LSQ.Terms.config)
-    ExperimentRun setConfig(ExperimentConfig dataRef);
-    ExperimentConfig getConfig();
-
+    ExperimentRun setExec(ExperimentExec exec);
+    ExperimentExec getExec();
 
     // The id should be based on getConfig.getIdentifier() and getTimestamp()
-    @Iri("dct:identifier")
-    @HashId
-    String getIdentifier();
-    ExperimentRun setIdentifier(String id);
+//    @Iri("dct:identifier")
+//    @HashId
+//    String getIdentifier();
+//    ExperimentRun setIdentifier(String id);
 
-
-    @HashId
+    /**
+     * Timestamp when this run iteration was started.
+     * This is just informational. For identity, the runId is used.
+     * @return
+     */
     @Iri(LSQ.Terms.atTime)
     XSDDateTime getTimestamp();
     ExperimentRun setTimestamp(XSDDateTime calendar);
 
+    @HashId
+    @Iri(LSQ.Terms.runId)
+    Integer getRunId();
+    ExperimentRun setRunId(Integer runId);
 
     /**
      * The identifier should be composed of getConfig().getIdentifier() and getTimestamp()
@@ -53,12 +59,27 @@ public interface ExperimentRun
 
     @StringId
     default String getStringId(HashIdCxt cxt) {
-        String id = getConfig().getIdentifier();
-        Calendar cal = Objects.requireNonNull(getTimestamp(), "no timestamp given").asCalendar();
-        String timestamp = dateFormat.format(cal.getTime());
+        ExperimentExec exec = getExec();
+        ExperimentConfig config = exec.getConfig();
+        // String id = config.getIdentifier();
+        Integer runId = getRunId();
+//        Calendar cal = Objects.requireNonNull(getTimestamp(), "no timestamp given").asCalendar();
+//        String timestamp = dateFormat.format(cal.getTime());
         //String prefix = StringUtils.toLowerCamelCase(getClass().getSimpleName()); // ""
-        String result = id + "_at_" + timestamp;
+
+        String result = exec.getStringId(cxt);
+        String runSuffix = runId == null ? "" : Integer.toString(runId);
+        result += "_run" + runSuffix;
+
         return result;
+//        String result = id;
+//        Integer runId = getRunId();
+//        if (runId != null) {
+//            result += "_run" + runId;
+//        }
+//
+//        result += "_at_" + timestamp;
+//        return result;
     }
 
 //    @Iri(LSQ.Strs.endpoint)

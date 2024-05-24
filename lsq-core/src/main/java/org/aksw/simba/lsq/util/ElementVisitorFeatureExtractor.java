@@ -255,11 +255,11 @@ public class ElementVisitorFeatureExtractor
         Map<Resource, Integer> elFeatures = getFeatures(query.getQueryPattern());
         result.putAll(elFeatures);
 
-        switch(query.getQueryType()) {
-        case Query.QueryTypeSelect: addAndGet(result, LSQ.Select); break;
-        case Query.QueryTypeConstruct: addAndGet(result, LSQ.Construct); break;
-        case Query.QueryTypeDescribe: addAndGet(result, LSQ.Describe); break;
-        case Query.QueryTypeAsk: addAndGet(result, LSQ.Ask); break;
+        switch(query.queryType()) {
+        case SELECT: addAndGet(result, LSQ.Select); break;
+        case CONSTRUCT: addAndGet(result, LSQ.Construct); break;
+        case DESCRIBE: addAndGet(result, LSQ.Describe); break;
+        case ASK: addAndGet(result, LSQ.Ask); break;
         default: addAndGet(result, LSQ.Unknown); break;
         }
 

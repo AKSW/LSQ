@@ -5,15 +5,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
+import org.aksw.jenax.annotation.reprogen.StringId;
+import org.aksw.jenax.arq.util.syntax.QueryHash;
+import org.aksw.jenax.model.geosparql.HasGeometry;
+import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.hash.HashCode;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
-import org.apache.jena.ext.com.google.common.io.BaseEncoding;
 import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Resource;
+
+import com.google.common.hash.HashCode;
+import com.google.common.hash.Hashing;
+import com.google.common.io.BaseEncoding;
 
 
 /**
@@ -39,7 +47,7 @@ import org.apache.jena.rdf.model.Resource;
  */
 @ResourceView
 public interface LsqQuery
-    extends Resource
+    extends Resource, HasGeometry
 {
     @HashId(excludeRdfProperty = true)
     @Iri(LSQ.Terms.text)
@@ -83,6 +91,17 @@ public interface LsqQuery
     @Iri(LSQ.Terms.hasRemoteExec)
     Set<RemoteExecution> getRemoteExecutions();
 
+    @StringId
+    default String getStringId(HashIdCxt cxt) {
+        String prefix = StringUtils.toLowerCamelCase(LsqQuery.class.getSimpleName());
+        String hash = getHash();
+        if (hash == null) {
+            hash = cxt.getHashAsString(this);
+        }
+        // Note: Dot '.' is not part of base64 encoding
+        // This allows to use a hash as a path segment in an URL without introducing ambiguity
+        return prefix + "-" + hash.replace('/', '.');
+    }
 
     /**
      * Index of remote executions by the experiment config resource
@@ -105,7 +124,7 @@ public interface LsqQuery
 //}
 
 
-    public static String createHash(String str) {
+    public static String createHashOld(String str) {
 //        System.out.println("Hashing " + str.replace('\n', ' '));
 
         // FIXME The hash computation of the jsa-mapper includes the properties and use the RDF term serialization - so the hashes do not align
@@ -119,6 +138,17 @@ public interface LsqQuery
 
         return result;
     }
+
+    public static String createHash(String str) {
+        String result;
+        try {
+            Query query = QueryFactory.create(str, Syntax.syntaxARQ);
+            result = QueryHash.createHash(query).toString();
+        } catch (Exception e) {
+            result = createHashOld(str);
+        }
+        return result;
+      }
 
     default LsqQuery setQueryAndHash(String str) {
         String hash = createHash(str);

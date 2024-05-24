@@ -3,6 +3,7 @@ package org.aksw.simba.lsq.jena.plugin;
 import org.aksw.jenax.reprogen.core.JenaPluginUtils;
 import org.aksw.simba.lsq.model.ElementExec;
 import org.aksw.simba.lsq.model.ExperimentConfig;
+import org.aksw.simba.lsq.model.ExperimentExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.Host;
 import org.aksw.simba.lsq.model.JoinVertex;
@@ -57,6 +58,7 @@ public class JenaPluginLsq
         JenaPluginUtils.registerResourceClasses(
                 ElementExec.class,
                 ExperimentConfig.class,
+                ExperimentExec.class,
                 ExperimentRun.class,
                 Host.class,
                 JoinVertex.class,

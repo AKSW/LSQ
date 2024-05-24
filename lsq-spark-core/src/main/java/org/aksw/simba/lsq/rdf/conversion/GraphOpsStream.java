@@ -4,8 +4,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.aksw.commons.util.stream.SequentialGroupBySpec;
-import org.aksw.commons.util.stream.StreamOperatorSequentialGroupBy;
+import org.aksw.commons.util.stream.CollapseRunsSpec;
+import org.aksw.commons.util.stream.StreamOperatorCollapseRuns;
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
@@ -16,7 +16,7 @@ public class GraphOpsStream {
             Function<Triple, Node> grouper,
             Supplier<Graph> graphSupplier) {
 
-        return StreamOperatorSequentialGroupBy.<Triple, Node, Graph>create(SequentialGroupBySpec.create(
+        return StreamOperatorCollapseRuns.<Triple, Node, Graph>create(CollapseRunsSpec.create(
                 grouper::apply,
                 groupKey -> graphSupplier.get(),
                 Graph::add))::transform;

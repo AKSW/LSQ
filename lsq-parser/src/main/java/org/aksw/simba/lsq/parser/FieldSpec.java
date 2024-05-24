@@ -3,7 +3,7 @@ package org.aksw.simba.lsq.parser;
 import java.util.regex.Pattern;
 
 import org.apache.jena.datatypes.RDFDatatype;
-import org.apache.jena.ext.com.google.common.base.Converter;
+import com.google.common.base.Converter;
 
 public class FieldSpec {
 

@@ -37,7 +37,7 @@ public class SpinCoreUtils {
 
         Optional<Triple> result = s == null || p == null || o == null
                 ? Optional.empty()
-                : Optional.of(new Triple(s, p, o));
+                : Optional.of(Triple.create(s, p, o));
 
         return result;
     }
@@ -90,7 +90,7 @@ public class SpinCoreUtils {
     }
 
     public static Triple toJenaTriple(org.spinrdf.model.Triple t) {
-        Triple result = new Triple(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
+        Triple result = Triple.create(toNode(t.getSubject()), toNode(t.getPredicate()), toNode(t.getObject()));
         return result;
     }
 

@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>org.aksw.simba.lsq</groupId>
 		<artifactId>lsq-parent</artifactId>
-		<version>2.0.0-RC2</version>
+		<version>2.0.0-RC3</version>
 	</parent>
 
 	<dependencies>
@@ -29,6 +29,12 @@
 			<groupId>org.topbraid</groupId>
 			<artifactId>spin</artifactId>
 		</dependency> -->
+
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		
 		<dependency>
 			<groupId>org.aksw.thirdparty.org.spinrdf</groupId>
 			<artifactId>spinrdf</artifactId>
@@ -37,6 +43,11 @@
 		<dependency>
 			<groupId>org.aksw.jenax</groupId>
 			<artifactId>jenax-reprogen-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aksw.jenax</groupId>
+			<artifactId>jenax-models-geosparql</artifactId>
 		</dependency>
 
 		<dependency>

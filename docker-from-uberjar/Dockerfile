@@ -10,26 +10,19 @@
 
 ARG home="/lsq"
 
-FROM maven:3-jdk-11 as build
-ARG home
-ENV HOME "$home"
-RUN mkdir -p "$HOME"
-WORKDIR "$HOME"
-ADD . "$HOME"
-RUN --mount=type=cache,target=/root/.m2 mvn -Pdist,standalone clean install
-
 # Final running image
 FROM openjdk:11-jre-slim
 ARG home
 ENV HOME "$home"
 # Import the lsq-cli jar from the build step
-COPY --from=build "$HOME/lsq-pkg-parent/lsq-pkg-uberjar-cli/target/"lsq-pkg-uberjar-cli-*-jar-with-dependencies.jar "$HOME/lsq-cli.jar"
+ADD lsq-pkg-uberjar-cli-*-jar-with-dependencies.jar "$HOME/lsq-cli.jar"
 
 # Using /data as working directory that will be shared with host for input/output files
 WORKDIR /data
 VOLUME [ "/data" ]
 
-ENTRYPOINT ["java","-jar","$HOME/lsq-cli.jar"]
+# XXX $HOME Does not get expanded in the entry point
+ENTRYPOINT ["java","-jar","/lsq/lsq-cli.jar"]
 CMD ["-h"]
 
 # Usage:

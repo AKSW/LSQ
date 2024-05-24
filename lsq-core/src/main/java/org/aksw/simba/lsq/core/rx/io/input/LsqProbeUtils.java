@@ -13,7 +13,7 @@ import org.aksw.jenax.stmt.util.SparqlStmtUtils;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.core.io.input.registry.LsqInputFormatRegistry;
 import org.aksw.simba.lsq.vocab.LSQ;
-import org.apache.jena.ext.com.google.common.collect.Maps;
+import com.google.common.collect.Maps;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

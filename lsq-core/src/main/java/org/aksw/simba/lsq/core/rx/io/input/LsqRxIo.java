@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Function;
 import java.util.stream.LongStream;
@@ -22,14 +23,11 @@ import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.util.SparqlStmtIterator;
-import org.aksw.simba.lsq.core.LsqRdfizer;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.Mapper;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.commons.io.IOUtils;
-import org.apache.jena.ext.com.google.common.base.Strings;
-import org.apache.jena.ext.com.google.common.collect.Maps;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
@@ -38,6 +36,9 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFLanguages;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -52,7 +53,7 @@ public class LsqRxIo {
         try {
             try(InputStream in = inSupp.call()) {
                 // If the buffer gets completely filled, our input is too large
-                byte[] buffer = new byte[16 * 1024 * 1024];
+                byte[] buffer = new byte[1024 * 1024 * 1024];
                 int n = IOUtils.read(in, buffer);
                 if(n == buffer.length) {
                     throw new RuntimeException("Input is too large for sparql stream; reached limit of " + buffer.length + " bytes");
@@ -139,13 +140,9 @@ public class LsqRxIo {
      */
     public static Flowable<Resource> createReader(
             String logSource,
-            Function<String, SparqlStmt> sparqlStmtParser,
             String logFormat,
             Map<String, ResourceParser> logFmtRegistry,
-            String baseIri,
-            String hostHashSalt,
-            String serviceUrl,
-            Function<String, String> hashFn
+            Function<Resource, Resource> rdfizer
             ) throws IOException {
 
 //		String filename;
@@ -176,7 +173,6 @@ public class LsqRxIo {
             // If quad based, use streaming
             // otherwise partition by lsq.text property
             if(RDFLanguages.isQuads(lang)) {
-
                 // TODO Stream as datasets first, then select any resource with LSQ.text
                 logger.info("Quad-based format detected - assuming RDFized log as input");
                 result = RDFDataMgrRx.createFlowableDatasets(inSupp, lang, null)
@@ -251,7 +247,8 @@ public class LsqRxIo {
                 .flatMapMaybe(record -> {
                     Maybe<Resource> r;
                     try {
-                        r = Maybe.fromOptional(LsqRdfizer.rdfizeLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record));
+                        r = Maybe.fromOptional(Optional.ofNullable(rdfizer.apply(record)));
+                        // r = Maybe.fromOptional(LsqRdfizer.rdfizeLogRecord(sparqlStmtParser, baseIri, hostHashSalt, serviceUrl, hashFn, record));
                     } catch (Exception e) {
                         logger.warn("Internal error; trying to continue", e);
                         r = Maybe.empty();

@@ -1,14 +1,11 @@
 package org.aksw.simba.lsq.cli.cmd.rx.api;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqAnalyzeBase;
 import org.aksw.simba.lsq.cli.main.MainCliLsq;
 
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 /**
  * Static analysis of queries
@@ -17,13 +14,10 @@ import picocli.CommandLine.Parameters;
  *
  */
 @Command(name = "analyze", description = "Analyze queries and emit structural features")
-public class CmdLsqRxAnalyze implements Callable<Integer> {
-    @Option(names = { "-h", "--help" }, usageHelp = true)
-    public boolean help = false;
-
-    @Parameters(arity = "1..*", description = "file-list to probe")
-    public List<String> nonOptionArgs = new ArrayList<>();
-
+public class CmdLsqRxAnalyze
+    extends CmdLsqAnalyzeBase
+    implements Callable<Integer>
+{
     @Override
     public Integer call() throws Exception {
         MainCliLsq.analyze(this);

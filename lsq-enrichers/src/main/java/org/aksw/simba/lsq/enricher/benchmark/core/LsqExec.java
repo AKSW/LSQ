@@ -69,7 +69,7 @@ public class LsqExec {
         Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
         LocalExecution expRoot = rleMap.get(expRun);
 
-        Long datasetSize = expRun.getConfig().getDatasetSize();
+        Long datasetSize = expRun.getExec().getConfig().getDatasetSize();
 
         /*
          * BgpExecs, TpInBgpExecs and TpExec

@@ -1,33 +1,27 @@
 package org.aksw.simba.lsq.cli.cmd.spark.api;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 
-import org.aksw.commons.lambda.serializable.SerializableFunction;
+import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.rx.function.RxFunction;
 import org.aksw.jenax.arq.dataset.api.DatasetOneNg;
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqAnalyzeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdOutputSpecBase;
-import org.aksw.simba.lsq.cli.main.MainCliLsq;
 import org.aksw.simba.lsq.cli.util.spark.LsqCliSparkUtils;
+import org.aksw.simba.lsq.enricher.core.LsqEnricherRegistry;
+import org.aksw.simba.lsq.enricher.core.LsqEnricherShell;
 import org.apache.jena.rdf.model.Resource;
 
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Mixin;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 @Command(name = "analyze", description = "Analyze query logs")
 public class CmdLsqSparkAnalyze
+    extends CmdLsqAnalyzeBase
     implements Callable<Integer>
 {
-    @Option(names = { "-h", "--help" }, usageHelp = true)
-    public boolean help = false;
-
-    @Parameters(arity = "1..*", description = "file-list to probe")
-    public List<String> nonOptionArgs = new ArrayList<>();
-
     @Mixin
     public CmdOutputSpecBase outputSpec;
 
@@ -38,17 +32,21 @@ public class CmdLsqSparkAnalyze
         rdfizeCmd.noMerge = true;
         String baseIri = rdfizeCmd.baseIri;
 
+        SerializableSupplier<LsqEnricherRegistry> registrySupplier = LsqEnricherRegistry::get;
+        LsqEnricherShell enricherFactory = new LsqEnricherShell(baseIri, enricherSpec.getEffectiveList(), registrySupplier);
+
         LsqCliSparkUtils.runSparkJob(rdfizeCmd, outputSpec, inFlow -> {
-            SerializableFunction<Resource, Resource> enricher = MainCliLsq.createEnricher(baseIri);
+//            LsqEnricherFactory enricherFactory = MainCliLsq.createEnricherFactory(baseIri, enrichers, true, LsqEnricherRegistry::get);
+            Function<Resource, Resource> enricher = enricherFactory.get();
 
             return RxFunction.<DatasetOneNg>identity()
                 .andThenMap(ds -> {
                     Resource r = ds.getModel().createResource(ds.getGraphName());
                     // System.err.println("Starting processing: " + r);
 
-                    if (r.toString().contains("3B0r_bVVjj377f2RT0CXPK-XvLFN4CVMaPXrc6leOCw")) {
-                        System.out.println("here");
-                    }
+//                    if (r.toString().contains("3B0r_bVVjj377f2RT0CXPK-XvLFN4CVMaPXrc6leOCw")) {
+//                        System.out.println("here");
+//                    }
 
                     Resource skolemized = enricher.apply(r);
 

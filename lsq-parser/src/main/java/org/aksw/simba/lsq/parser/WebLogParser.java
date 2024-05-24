@@ -1,7 +1,6 @@
 package org.aksw.simba.lsq.parser;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -13,6 +12,7 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -20,11 +20,10 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.aksw.commons.io.util.UriUtils;
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.jena.datatypes.RDFDatatype;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -359,9 +358,10 @@ public class WebLogParser {
                 String mockUri = "http://example.org/" + pathStr;
                 try {
                     URI uri = new URI(mockUri);
-                    List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
+                    List<Entry<String, String>> qsArgs = UriUtils.parseQueryStringAsList(uri.getRawQuery());
+                    // List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8.name());
                     String queryStr = qsArgs.stream()
-                        .filter(x -> x.getName().equals("query"))
+                        .filter(x -> x.getKey().equals("query"))
                         .findFirst()
                         .map(x -> x.getValue())
                         .orElse(null);
@@ -408,10 +408,11 @@ public class WebLogParser {
             .ifPresent(s -> r.addLiteral(LSQ.query, s));
     }
 
-    public static String extractQueryString2(String uri) {
-        List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+    public static String extractQueryString2(String queryString) {
+        // List<NameValuePair> qsArgs = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+        List<Entry<String, String>> qsArgs = UriUtils.parseQueryStringAsList(queryString);
         String result = qsArgs.stream()
-            .filter(x -> x.getName().equals("query"))
+            .filter(x -> x.getKey().equals("query"))
             .findFirst()
             .map(x -> x.getValue())
             .orElse(null);

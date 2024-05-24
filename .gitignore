@@ -4,6 +4,8 @@
 .settings
 target
 
+*.jar
+
 pom.xml.versionBackup
 pom.xml.versionsBackup
 

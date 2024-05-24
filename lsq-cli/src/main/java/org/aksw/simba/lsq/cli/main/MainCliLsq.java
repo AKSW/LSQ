@@ -15,11 +15,14 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -27,7 +30,6 @@ import java.util.stream.Collectors;
 import org.aksw.commons.io.syscall.sort.SysSort;
 import org.aksw.commons.io.util.StdIo;
 import org.aksw.commons.io.util.UriToPathUtils;
-import org.aksw.commons.lambda.serializable.SerializableFunction;
 import org.aksw.commons.util.exception.ExceptionUtilsAksw;
 import org.aksw.jena_sparql_api.conjure.datapod.api.RdfDataPod;
 import org.aksw.jena_sparql_api.conjure.datapod.impl.DataPods;
@@ -35,11 +37,11 @@ import org.aksw.jena_sparql_api.conjure.dataref.rdf.api.RdfDataRefSparqlEndpoint
 import org.aksw.jena_sparql_api.rx.dataset.DatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.dataset.ResourceInDatasetFlowOps;
 import org.aksw.jena_sparql_api.rx.script.SparqlScriptProcessor;
-import org.aksw.jenax.arq.connection.core.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.ResourceInDatasetImpl;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetFactoryEx;
 import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
+import org.aksw.jenax.dataaccess.sparql.connection.reconnect.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
@@ -47,9 +49,9 @@ import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
 import org.aksw.jenax.sparql.rx.op.FlowOfRdfNodesInDatasetsOps;
 import org.aksw.jenax.stmt.core.SparqlStmt;
+import org.aksw.simba.lsq.cli.cmd.base.CmdLsqAnalyzeBase;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqMain;
 import org.aksw.simba.lsq.cli.cmd.base.CmdLsqRdfizeBase;
-import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxAnalyze;
 import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxBenchmarkCreate;
 import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxBenchmarkPrepare;
 import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxBenchmarkRun;
@@ -57,31 +59,33 @@ import org.aksw.simba.lsq.cli.cmd.rx.api.CmdLsqRxProbe;
 import org.aksw.simba.lsq.core.LsqRdfizer;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.core.io.input.registry.LsqInputFormatRegistry;
+import org.aksw.simba.lsq.core.rx.io.input.LsqLogRecordRdfizer;
+import org.aksw.simba.lsq.core.rx.io.input.LsqLogRecordRdfizerQueryOnly;
 import org.aksw.simba.lsq.core.rx.io.input.LsqProbeUtils;
 import org.aksw.simba.lsq.core.rx.io.input.LsqRxIo;
-import org.aksw.simba.lsq.core.util.Skolemize;
 import org.aksw.simba.lsq.enricher.benchmark.core.LsqBenchmarkProcessor;
-import org.aksw.simba.lsq.enricher.core.LsqEnrichments;
+import org.aksw.simba.lsq.enricher.core.LsqEnricherRegistry;
+import org.aksw.simba.lsq.enricher.core.LsqEnricherShell;
 import org.aksw.simba.lsq.model.ExperimentConfig;
+import org.aksw.simba.lsq.model.ExperimentExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.aksw.simba.lsq.vocab.PROV;
-import org.apache.commons.io.output.CloseShieldOutputStream;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
-import org.apache.jena.ext.com.google.common.hash.Hashing;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdfconnection.RDFConnection;
-import org.apache.jena.rdfconnection.RDFConnectionFactory;
 import org.apache.jena.rdfconnection.RDFConnectionRemote;
 import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
@@ -94,6 +98,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spinrdf.vocabulary.SP;
 
+import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
 import io.reactivex.rxjava3.core.Flowable;
@@ -161,22 +166,27 @@ public class MainCliLsq {
             .execute(args);
     }
 
+    public static String getOrCreateSalt(CmdLsqRdfizeBase rdfizeCmd) {
+        String result = rdfizeCmd.hostSalt;
+        if(result == null) {
+            result = UUID.randomUUID().toString();
+            // TODO Make host hashing a post processing step for the log rdfization
+            logger.info("Auto generated host hash salt (only used for non-rdf log input): " + result);
+        }
+        return result;
+    }
 
     public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
+        String tmpHostHashSalt = getOrCreateSalt(rdfizeCmd);
+        return createLsqRdfFlow(rdfizeCmd, tmpHostHashSalt);
+    }
+
+    public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd, String hostHashSalt) throws FileNotFoundException, IOException, ParseException {
         String logFormat = rdfizeCmd.inputLogFormat;
         List<String> logSources = rdfizeCmd.nonOptionArgs;
         String baseIri = rdfizeCmd.baseIri;
 
-        String tmpHostHashSalt = rdfizeCmd.hostSalt;
-        if(tmpHostHashSalt == null) {
-            tmpHostHashSalt = UUID.randomUUID().toString();
-            // TODO Make host hashing a post processing step for the log rdfization
-            logger.info("Auto generated host hash salt (only used for non-rdf log input): " + tmpHostHashSalt);
-        }
-
-        String hostHashSalt = tmpHostHashSalt;
-
-        String endpointUrl = rdfizeCmd.endpointUrl;
+        String endpointUrl = rdfizeCmd.getEndpointUrl();
 // TODO Validate all sources first: For trig files it is ok if no endpoint is specified
 //		if(endpointUrl == null) {
 //			throw new RuntimeException("Please specify the URL of the endpoint the provided query logs are assigned to.");
@@ -192,23 +202,32 @@ public class MainCliLsq {
 
 
         // Hash function which is applied after combining host names with salts
-        Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
+        Function<String, String> hostHashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
+
+        Function<Resource, Resource> rdfizer;
+        if (rdfizeCmd.isQueryOnly()) {
+            rdfizer = new LsqLogRecordRdfizerQueryOnly(sparqlStmtParser, baseIri, hostHashFn);
+
+        } else {
+            rdfizer = new LsqLogRecordRdfizer(
+                    sparqlStmtParser,
+                    baseIri,
+                    hostHashSalt,
+                    endpointUrl,
+                    hostHashFn
+            );
+        }
 
         Flowable<Resource> logRdfEvents = Flowable
             .fromIterable(logSources)
             .flatMap(logSource -> {
                 Flowable<Resource> st = LsqRxIo.createReader(
                         logSource,
-                        sparqlStmtParser,
                         logFormat,
                         logFmtRegistry,
-                        baseIri,
-                        hostHashSalt,
-                        endpointUrl,
-                        hashFn);
-
+                        rdfizer);
                 return st;
             });
 
@@ -262,10 +281,6 @@ public class MainCliLsq {
         return legacyLogRdfEvents;
     }
 
-
-
-
-
     public static void rdfize(CmdLsqRdfizeBase cmdRdfize) throws Exception {
         Flowable<ResourceInDataset> logRdfEvents = createLsqRdfFlow(cmdRdfize);
         try {
@@ -292,55 +307,101 @@ public class MainCliLsq {
         }
     }
 
-    /** Wrap an enricher to log any exception*/
-    public static <T> Function<LsqQuery, T> safeEnricher(Function<LsqQuery, T> enricher) {
-        return in -> {
-            T r = null;
-            try {
-                r = enricher.apply(in);
-            } catch (Exception e) {
-                // ARQ2SPIN (2.0.0) raises a classcast exception for queries making
-                // use of literals in subject position
-                logger.warn(String.format("Enrichment of %s failed", in.getText()), e);
-            }
-            return r;
-        };
-    }
+    public static <T> List<T> effectiveList(List<T> input, boolean isWhiteList, List<T> available) {
+        List<T> result;
+        if (isWhiteList) {
+            // Validate that all inputs are available
+            Set<T> availableSet = new HashSet<>(available);
 
-    public static SerializableFunction<Resource, Resource> createEnricher(String baseIri) {
-        return in -> {
-            LsqQuery q = in.as(LsqQuery.class);
-            // TODO Parse query here only once
-            // Store it in a context object that gets passed to the enrichers?
+            Set<T> missingSet = new HashSet<>(input);
+            missingSet.removeAll(availableSet);
 
-            if (q.getParseError() == null) {
-
-                // TODO Given enrichers a name
-                // TODO Track failed enrichments in the output? qualify error with enricher name?
-                // TODO Create a registry for enrichers
-                safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);
-                safeEnricher(LsqEnrichments::enrichWithStaticAnalysis).apply(q);
+            if (!missingSet.isEmpty()) {
+                throw new NoSuchElementException("The following requested items are missing: " + missingSet);
             }
 
-            // TODO createLsqRdfFlow already performs skolemize; duplicated effort
-            Resource out = Skolemize.skolemize(in, baseIri, LsqQuery.class, null);
-            return out;
-        };
+            result = input;
+        } else {
+            Set<T> blacklist = new HashSet<>(input);
+            result = available.stream().filter(x -> !blacklist.contains(x)).toList();
+        }
+        return result;
     }
 
+//    public static Function<Resource, Resource> createEnricherFactory(String baseIri, List<String> enrichers, boolean isWhitelist, Supplier<LsqEnricherRegistry> registrySupplier) {
+//        return () -> {
+//            LsqEnricherRegistry registry = registrySupplier.get();
+//            List<String> effectiveList = effectiveList(enrichers, isWhitelist, new ArrayList<>(registry.getKeys()));
+//
+//            return in -> {
+//                // TODO Implement support for blacklisting
+//
+//                 LsqQuery q = in.as(LsqQuery.class);
+//                 // TODO Parse query here only once
+//                 // Store it in a context object that gets passed to the enrichers?
+//
+//                 if (q.getParseError() == null) {
+//                     for (String name : enrichers) {
+//                         LsqEnricherFactory f = registry.getOrThrow(name);
+//                         LsqEnricher enricher = f.get();
+//                         safeEnricher(enricher).apply(q);
+//                     }
+//
+//                     // TODO Given enrichers a name
+//                     // TODO Track failed enrichments in the output? qualify error with enricher name?
+//                     // TODO Create a registry for enrichers
+////                     safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);
+////                     safeEnricher(LsqEnrichments::enrichWithStaticAnalysis).apply(q);
+////
+////                     safeEnricher(LsqEnrichments::enrichWithBBox).apply(q);
+//                 }
+//
+//                 // TODO createLsqRdfFlow already performs skolemize; duplicated effort
+//                 Resource out = Skolemize.skolemize(in, baseIri, LsqQuery.class, null);
+//                 return out.as(LsqQuery.class);
+//            };
+//        };
+//    }
 
-    public static void analyze(CmdLsqRxAnalyze analyzeCmd) throws Exception {
+//    public static SerializableFunction<Resource, Resource> createEnricher(String baseIri) {
+//        return in -> {
+//            LsqQuery q = in.as(LsqQuery.class);
+//            // TODO Parse query here only once
+//            // Store it in a context object that gets passed to the enrichers?
+//
+//            if (q.getParseError() == null) {
+//
+//                // TODO Given enrichers a name
+//                // TODO Track failed enrichments in the output? qualify error with enricher name?
+//                // TODO Create a registry for enrichers
+//                safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);
+//                safeEnricher(LsqEnrichments::enrichWithStaticAnalysis).apply(q);
+//
+//                safeEnricher(LsqEnrichments::enrichWithBBox).apply(q);
+//            }
+//
+//            // TODO createLsqRdfFlow already performs skolemize; duplicated effort
+//            Resource out = Skolemize.skolemize(in, baseIri, LsqQuery.class, null);
+//            return out;
+//        };
+//    }
+
+
+    public static void analyze(CmdLsqAnalyzeBase analyzeCmd) throws Exception {
         CmdLsqRdfizeBase rdfizeCmd = new CmdLsqRdfizeBase();
         rdfizeCmd.nonOptionArgs = analyzeCmd.nonOptionArgs;
         rdfizeCmd.noMerge = true;
+
+        String baseIri = rdfizeCmd.baseIri;
         // TODO How to obtain the baseIRI? A simple hack would be to 'grep'
         // for the id part before lsqQuery
         // The only 'clean' option would be to make the baseIri an attribute of every lsqQuery resource
         // which might be somewhat overkill
 
-        Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
+        LsqEnricherShell enricherFactory = new LsqEnricherShell(baseIri, analyzeCmd.enricherSpec.getEffectiveList(), LsqEnricherRegistry::get);
+        Function<Resource, Resource> enricher = enricherFactory.get();
 
-        Function<Resource, Resource> enricher = createEnricher(rdfizeCmd.baseIri);
+        Flowable<ResourceInDataset> flow = createLsqRdfFlow(rdfizeCmd);
 
         Flowable<Dataset> dsFlow = flow.map(rid -> {
             // TODO The enricher may in general rename the input resource due to skolemization - handle this case
@@ -419,6 +480,19 @@ public class MainCliLsq {
     }
 
 
+    public static String createExperimentId(String datasetLabel) {
+        // experimentId = distributionId + "_" + timestamp
+
+        Instant now = Instant.now();
+        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+        // Calendar nowCal = GregorianCalendar.from(zdt);
+        //String timestamp = now.toString();
+        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+
+        String expId = "xc-" + datasetLabel + "_" + timestamp;
+        return expId;
+    }
+
     /**
      * Creates a model with the configuration of the benchmark experiment
      * which serves as the base for running the benchmark
@@ -440,20 +514,22 @@ public class MainCliLsq {
             datasetIri = datasetId;
         }
 
-        // experimentId = distributionId + "_" + timestamp
+//        // experimentId = distributionId + "_" + timestamp
+//        String datasetLabel = UriToPathUtils.resolvePath(datasetId).toString()
+//                .replace('/', '-');
+//
+//
+//        Instant now = Instant.now();
+//        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
+//        // Calendar nowCal = GregorianCalendar.from(zdt);
+//        //String timestamp = now.toString();
+//        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
+//
+//        String expId = "xc-" + datasetLabel + "_" + timestamp;
         String datasetLabel = UriToPathUtils.resolvePath(datasetId).toString()
                 .replace('/', '-');
 
-
-        Instant now = Instant.now();
-        ZonedDateTime zdt = ZonedDateTime.ofInstant(now, ZoneId.systemDefault());
-        // Calendar nowCal = GregorianCalendar.from(zdt);
-        //String timestamp = now.toString();
-        String timestamp = DateTimeFormatter.ISO_LOCAL_DATE.format(zdt);
-
-
-
-        String expId = "xc-" + datasetLabel + "_" + timestamp;
+        String expId = createExperimentId(datasetId);
 
         // Not used if stdout flag is set
         String outFilename = sanitizeFilename(expId) + ".conf.ttl";
@@ -526,7 +602,7 @@ public class MainCliLsq {
         }
 
         try(OutputStream out = outPath == null
-                ? new CloseShieldOutputStream(StdIo.openStdOutWithCloseShield())
+                ? StdIo.openStdOutWithCloseShield()
                 : Files.newOutputStream(outPath, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
             RDFDataMgr.write(out, model, RDFFormat.TURTLE_BLOCKS);
         }
@@ -568,17 +644,25 @@ public class MainCliLsq {
         //List<String> logSources = benchmarkCmd.logSources;
         // Load the benchmark config and create a benchmark run for it
 
-        ExperimentRun run = tryLoadRun(configSrc)
+        ExperimentExec expExec = tryLoadExec(configSrc)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Could not detect a resource with " + LSQ.Terms.config + " property in " + configSrc));
 
-        ExperimentConfig cfg = run.getConfig();
+        ExperimentConfig expConfig = expExec.getConfig();
 
-        String lsqBaseIri = Objects.requireNonNull(cfg.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
+
+        ExperimentRun expRun = expExec.getModel().createResource().as(ExperimentRun.class)
+                .setExec(expExec)
+                .setRunId(0)
+                // .setTimestamp(null); // xsddt
+                ;
+
+
+        String lsqBaseIri = Objects.requireNonNull(expConfig.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         //LsqBenchmeclipse-javadoc:%E2%98%82=jena-sparql-api-conjure/src%5C/main%5C/java%3Corg.aksw.jena_sparql_apiarkProcessor.createProcessor()
 
 
-        String runId = run.getIdentifier();
+        String runId = expConfig.getIdentifier();
         Objects.requireNonNull(runId, "Experiment run identifier must not be null");
 
         // Create a folder with the database for the run
@@ -589,20 +673,24 @@ public class MainCliLsq {
         Files.createDirectories(tdb2FullPath);
         String fullPathStr = tdb2FullPath.toString();
 
+        LsqEnricherShell enricherFactory = new LsqEnricherShell(lsqBaseIri, benchmarkExecuteCmd.enricherSpec.getEffectiveList(), LsqEnricherRegistry::get);
+        Function<Resource, Resource> enricher = enricherFactory.get();
+
         logger.info("TDB2 benchmark db location: " + tdb2FullPath);
 
         Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
-        try(RDFConnection indexConn = RDFConnectionFactory.connect(dataset)) {
-
-            RdfDataRefSparqlEndpoint dataRef = cfg.getDataRef();
-            try(RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
-
-                try(SparqlQueryConnection benchmarkConn =
+        try (OutputStream outStream = StdIo.openStdOutWithCloseShield();
+            RDFConnection indexConn = RDFConnection.connect(dataset)) {
+            StreamRDF out = StreamRDFWriter.getWriterStream(outStream, RDFFormat.TRIG_BLOCKS);
+            out.start();
+            RdfDataRefSparqlEndpoint dataRef = expConfig.getDataRef();
+            try (RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
+                try (SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
-                    LsqBenchmarkProcessor.process(queryFlow, lsqBaseIri, cfg, run, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor.process(out, queryFlow, lsqBaseIri, expConfig, expExec, expRun, enricher, benchmarkConn, indexConn);
                 }
             }
-
+            out.finish();
         } finally {
             dataset.close();
         }
@@ -624,8 +712,8 @@ public class MainCliLsq {
         return tryLoadResourceWithProperty(src, LSQ.endpoint, ExperimentConfig.class);
     }
 
-    public static Optional<ExperimentRun> tryLoadRun(String src) {
-        return tryLoadResourceWithProperty(src, LSQ.config, ExperimentRun.class);
+    public static Optional<ExperimentExec> tryLoadExec(String src) {
+        return tryLoadResourceWithProperty(src, LSQ.config, ExperimentExec.class);
     }
 
 
@@ -663,12 +751,13 @@ public class MainCliLsq {
         // Not used if stdout flag is set
         String outFilename = sanitizeFilename(runId) + ".run.ttl";
 
-        ExperimentRun expRun = configModel
+        ExperimentExec expRun = configModel
                 .createResource()
-                .as(ExperimentRun.class)
+                .as(ExperimentExec.class)
                 .setConfig(config)
                 .setTimestamp(xsddt)
-                .setIdentifier(runId);
+                ;
+                // .setIdentifier(runId);
 
 
         String runIri = config.getBaseIri() + runId;
