@@ -5,7 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
-import org.aksw.simba.lsq.core.util.Skolemize;
+import org.aksw.simba.lsq.core.util.SkolemizeBackport;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.apache.jena.rdf.model.Resource;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class LsqEnricherShell
              }
 
              // TODO createLsqRdfFlow already performs skolemize; duplicated effort
-             Resource out = Skolemize.skolemize(in, baseIri, LsqQuery.class, null);
+             Resource out = SkolemizeBackport.skolemize(in, baseIri, LsqQuery.class, null);
              return out.as(LsqQuery.class);
         };
     }

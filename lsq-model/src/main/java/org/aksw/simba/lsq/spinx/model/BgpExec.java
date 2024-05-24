@@ -40,6 +40,11 @@ public interface BgpExec
     Bgp getBgp();
     BgpExec setBgp(Bgp bgp);
 
+    @Iri(LSQ.Terms.hasTpInBgpExec)
+    Set<TpInBgpExec> getTpInBgpExecs();
+
+    @Iri(LSQ.Terms.hasJoinVarExec)
+    Set<BgpNodeExec> getBgpNodeExecs();
 
     // NOTE Calling the method getId is not recognized by the annotation processor
     // because there is a method Resource.setId which has incompatible types
@@ -66,12 +71,6 @@ public interface BgpExec
 //    @Inverse
 //    LocalExecution getBgpQueryExec();
 //    SpinBgpExec setBgpQueryExec(LocalExecution exec);
-
-    @Iri(LSQ.Terms.hasTpInBgpExec)
-    Set<TpInBgpExec> getTpInBgpExecs();
-
-    @Iri(LSQ.Terms.hasJoinVarExec)
-    Set<BgpNodeExec> getBgpNodeExecs();
 
     default TpInBgpExec findTpInBgpExec(Resource tpInBgp) {
         Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();

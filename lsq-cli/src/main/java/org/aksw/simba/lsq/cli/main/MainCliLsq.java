@@ -67,6 +67,7 @@ import org.aksw.simba.lsq.enricher.benchmark.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.enricher.core.LsqEnricherRegistry;
 import org.aksw.simba.lsq.enricher.core.LsqEnricherShell;
 import org.aksw.simba.lsq.model.ExperimentConfig;
+import org.aksw.simba.lsq.model.ExperimentExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -83,6 +84,8 @@ import org.apache.jena.rdfconnection.SparqlQueryConnection;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.WebContent;
+import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.sparql.lang.arq.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
@@ -163,19 +166,25 @@ public class MainCliLsq {
             .execute(args);
     }
 
+    public static String getOrCreateSalt(CmdLsqRdfizeBase rdfizeCmd) {
+        String result = rdfizeCmd.hostSalt;
+        if(result == null) {
+            result = UUID.randomUUID().toString();
+            // TODO Make host hashing a post processing step for the log rdfization
+            logger.info("Auto generated host hash salt (only used for non-rdf log input): " + result);
+        }
+        return result;
+    }
+
     public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd) throws FileNotFoundException, IOException, ParseException {
+        String tmpHostHashSalt = getOrCreateSalt(rdfizeCmd);
+        return createLsqRdfFlow(rdfizeCmd, tmpHostHashSalt);
+    }
+
+    public static Flowable<ResourceInDataset> createLsqRdfFlow(CmdLsqRdfizeBase rdfizeCmd, String hostHashSalt) throws FileNotFoundException, IOException, ParseException {
         String logFormat = rdfizeCmd.inputLogFormat;
         List<String> logSources = rdfizeCmd.nonOptionArgs;
         String baseIri = rdfizeCmd.baseIri;
-
-        String tmpHostHashSalt = rdfizeCmd.hostSalt;
-        if(tmpHostHashSalt == null) {
-            tmpHostHashSalt = UUID.randomUUID().toString();
-            // TODO Make host hashing a post processing step for the log rdfization
-            logger.info("Auto generated host hash salt (only used for non-rdf log input): " + tmpHostHashSalt);
-        }
-
-        String hostHashSalt = tmpHostHashSalt;
 
         String endpointUrl = rdfizeCmd.getEndpointUrl();
 // TODO Validate all sources first: For trig files it is ok if no endpoint is specified
@@ -193,13 +202,13 @@ public class MainCliLsq {
 
 
         // Hash function which is applied after combining host names with salts
-        Function<String, String> hashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
+        Function<String, String> hostHashFn = str -> BaseEncoding.base64Url().omitPadding().encode(Hashing.sha256()
                 .hashString(str, StandardCharsets.UTF_8)
                 .asBytes());
 
         Function<Resource, Resource> rdfizer;
         if (rdfizeCmd.isQueryOnly()) {
-            rdfizer = new LsqLogRecordRdfizerQueryOnly(sparqlStmtParser, baseIri, hashFn);
+            rdfizer = new LsqLogRecordRdfizerQueryOnly(sparqlStmtParser, baseIri, hostHashFn);
 
         } else {
             rdfizer = new LsqLogRecordRdfizer(
@@ -207,7 +216,7 @@ public class MainCliLsq {
                     baseIri,
                     hostHashSalt,
                     endpointUrl,
-                    hashFn
+                    hostHashFn
             );
         }
 
@@ -635,17 +644,25 @@ public class MainCliLsq {
         //List<String> logSources = benchmarkCmd.logSources;
         // Load the benchmark config and create a benchmark run for it
 
-        ExperimentRun run = tryLoadRun(configSrc)
+        ExperimentExec expExec = tryLoadExec(configSrc)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Could not detect a resource with " + LSQ.Terms.config + " property in " + configSrc));
 
-        ExperimentConfig cfg = run.getConfig();
+        ExperimentConfig expConfig = expExec.getConfig();
 
-        String lsqBaseIri = Objects.requireNonNull(cfg.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
+
+        ExperimentRun expRun = expExec.getModel().createResource().as(ExperimentRun.class)
+                .setExec(expExec)
+                .setRunId(0)
+                // .setTimestamp(null); // xsddt
+                ;
+
+
+        String lsqBaseIri = Objects.requireNonNull(expConfig.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         //LsqBenchmeclipse-javadoc:%E2%98%82=jena-sparql-api-conjure/src%5C/main%5C/java%3Corg.aksw.jena_sparql_apiarkProcessor.createProcessor()
 
 
-        String runId = run.getIdentifier();
+        String runId = expConfig.getIdentifier();
         Objects.requireNonNull(runId, "Experiment run identifier must not be null");
 
         // Create a folder with the database for the run
@@ -656,23 +673,24 @@ public class MainCliLsq {
         Files.createDirectories(tdb2FullPath);
         String fullPathStr = tdb2FullPath.toString();
 
-
         LsqEnricherShell enricherFactory = new LsqEnricherShell(lsqBaseIri, benchmarkExecuteCmd.enricherSpec.getEffectiveList(), LsqEnricherRegistry::get);
         Function<Resource, Resource> enricher = enricherFactory.get();
-
 
         logger.info("TDB2 benchmark db location: " + tdb2FullPath);
 
         Dataset dataset = TDB2Factory.connectDataset(fullPathStr);
-        try (OutputStream out = StdIo.openStdOutWithCloseShield();
-             RDFConnection indexConn = RDFConnection.connect(dataset)) {
-            RdfDataRefSparqlEndpoint dataRef = cfg.getDataRef();
+        try (OutputStream outStream = StdIo.openStdOutWithCloseShield();
+            RDFConnection indexConn = RDFConnection.connect(dataset)) {
+            StreamRDF out = StreamRDFWriter.getWriterStream(outStream, RDFFormat.TRIG_BLOCKS);
+            out.start();
+            RdfDataRefSparqlEndpoint dataRef = expConfig.getDataRef();
             try (RdfDataPod dataPod = DataPods.fromDataRef(dataRef)) {
                 try (SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
-                    LsqBenchmarkProcessor.process(out, queryFlow, lsqBaseIri, cfg, run, enricher, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor.process(out, queryFlow, lsqBaseIri, expConfig, expExec, expRun, enricher, benchmarkConn, indexConn);
                 }
             }
+            out.finish();
         } finally {
             dataset.close();
         }
@@ -694,8 +712,8 @@ public class MainCliLsq {
         return tryLoadResourceWithProperty(src, LSQ.endpoint, ExperimentConfig.class);
     }
 
-    public static Optional<ExperimentRun> tryLoadRun(String src) {
-        return tryLoadResourceWithProperty(src, LSQ.config, ExperimentRun.class);
+    public static Optional<ExperimentExec> tryLoadExec(String src) {
+        return tryLoadResourceWithProperty(src, LSQ.config, ExperimentExec.class);
     }
 
 
@@ -733,12 +751,13 @@ public class MainCliLsq {
         // Not used if stdout flag is set
         String outFilename = sanitizeFilename(runId) + ".run.ttl";
 
-        ExperimentRun expRun = configModel
+        ExperimentExec expRun = configModel
                 .createResource()
-                .as(ExperimentRun.class)
+                .as(ExperimentExec.class)
                 .setConfig(config)
                 .setTimestamp(xsddt)
-                .setIdentifier(runId);
+                ;
+                // .setIdentifier(runId);
 
 
         String runIri = config.getBaseIri() + runId;

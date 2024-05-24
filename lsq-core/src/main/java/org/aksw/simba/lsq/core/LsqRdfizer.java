@@ -10,16 +10,17 @@ import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
-import org.aksw.simba.lsq.core.util.Skolemize;
+import org.aksw.simba.lsq.core.util.SkolemizeBackport;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.WebLogParser;
 import org.aksw.simba.lsq.vocab.LSQ;
-import com.google.common.collect.Iterables;
 import org.apache.jena.query.Syntax;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.shared.PrefixMapping;
+
+import com.google.common.collect.Iterables;
 
 public class LsqRdfizer {
 
@@ -107,7 +108,7 @@ public class LsqRdfizer {
             String baseIri,
             String hostHashSalt,
             String serviceUrl,
-            Function<String, String> hashFn,
+            Function<String, String> hostHashFn,
             Resource x) {
         RemoteExecution re = x.as(RemoteExecution.class);
 
@@ -162,7 +163,7 @@ public class LsqRdfizer {
             String host = re.getHost();
             String hostHash = host == null
                     ? null
-                    : hashFn.apply(hostHashSalt + host);
+                    : hostHashFn.apply(hostHashSalt + host);
 
             // FIXME Respect the noHoshHash = true flag
             re.setHostHash(hostHash);
@@ -190,7 +191,7 @@ public class LsqRdfizer {
 //            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
 //            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
-            Resource r = Skolemize.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
+            Resource r = SkolemizeBackport.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
                 Optional.ofNullable(renames.get(re.asNode()))
                     .map(newRoot.getModel()::wrapAsResource)
                     .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));

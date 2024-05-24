@@ -90,7 +90,9 @@ public class LSQ {
         public static final String countingError = NS + "countingError";
 
 
+        public static final String benchmarkConfig = NS + "benchmarkConfig";
         public static final String benchmarkRun = NS + "benchmarkRun";
+        public static final String benchmarkExec = NS + "benchmarkExec";
 
         public static final String hasExec = NS + "hasExec";
         public static final String hasElementExec =  NS + "hasElementExec";
@@ -165,6 +167,7 @@ public class LSQ {
         public static final String endpoint = NS + "endpoint";
         public static final String userAgent = NS + "userAgent";
 
+        public static final String exec = NS + "exec"; // runX lsq:exec execX
         public static final String config = NS + "config";
         public static final String requestDelay = NS + "requestDelay";
 

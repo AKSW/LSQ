@@ -31,6 +31,8 @@ public interface LocalExecution
     QueryExec getQueryExec();
     LocalExecution setQueryExec(QueryExec queryExec);
 
+    @Iri(LSQ.Terms.hasBgpExec)
+    Set<BgpExec> getBgpExecs();
 
     // TODO Maybe return a list of (bgp, exec) pairs - where setValue updates the exec?
     default BgpExec findBgpExec(Resource bgp) {
@@ -48,10 +50,6 @@ public interface LocalExecution
 
         return result;
     }
-
-    @Iri(LSQ.Terms.hasBgpExec)
-    Set<BgpExec> getBgpExecs();
-
 
     @StringId
     default String getStringId(HashIdCxt cxt) {

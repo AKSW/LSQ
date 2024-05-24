@@ -25,7 +25,7 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.model.geosparql.HasGeometry;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
-import org.aksw.simba.lsq.core.util.Skolemize;
+import org.aksw.simba.lsq.core.util.SkolemizeExtra;
 import org.aksw.simba.lsq.core.util.SpinUtils;
 import org.aksw.simba.lsq.enricher.benchmark.core.LsqExec;
 import org.aksw.simba.lsq.model.LsqQuery;
@@ -430,7 +430,7 @@ public class LsqEnrichments {
 
             // Skolemize the remaining model
             if(false) {
-            Skolemize.skolemizeTree(spinRes, true,
+            SkolemizeExtra.skolemizeTree(spinRes, true,
                     (r, hashCode) -> "http://lsq.aksw.org/spin-" + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                     (n, d) -> !(n.isResource() && n.asResource().hasProperty(LSQ.text)));
             }
@@ -482,7 +482,7 @@ public class LsqEnrichments {
     }
 
     public static Resource skolemizeSpin(Resource spinQuery, String prefix) {
-        Resource result = Skolemize.skolemizeTree(spinQuery, false,
+        Resource result = SkolemizeExtra.skolemizeTree(spinQuery, false,
                 (r, hashCode) -> prefix + BaseEncoding.base64Url().omitPadding().encode(hashCode.asBytes()),
                 (r, d) -> true).asResource();
 
