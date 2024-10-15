@@ -140,7 +140,6 @@
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-pkg-rpm-cli</artifactId>
-				<type>rpm</type>
 				<version>${project.version}</version>
 			</dependency>
 			<dependency>
@@ -475,7 +474,7 @@
 				<plugin>
 					<artifactId>jdeb</artifactId>
 					<groupId>org.vafer</groupId>
-					<version>1.9</version>
+					<version>1.10</version>
 				</plugin>
 				<plugin>
 					<groupId>de.dentrassi.maven</groupId>

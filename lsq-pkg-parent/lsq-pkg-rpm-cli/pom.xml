@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>lsq-pkg-rpm-cli</artifactId>
-	<packaging>rpm</packaging>
+	<packaging>jar</packaging>
 
 	<properties>
 		<rpm.packageName>lsq-cli</rpm.packageName>
@@ -41,7 +41,7 @@
 					<plugin>
 						<groupId>de.dentrassi.maven</groupId>
 						<artifactId>rpm</artifactId>
-						<extensions>true</extensions>
+						<!-- <extensions>true</extensions> -->
 
 						<executions>
 							<execution>
@@ -138,11 +138,13 @@
 	<build>
 		<plugins>
 			<!-- Needed in order for <packaging>rpm</packaging> to be recognized -->
+			<!--
 			<plugin>
 				<groupId>de.dentrassi.maven</groupId>
 				<artifactId>rpm</artifactId>
 				<extensions>true</extensions>
 			</plugin>
+			-->
 
 			<!-- <plugin> -->
 			<!-- <groupId>org.apache.maven.plugins</groupId> -->
