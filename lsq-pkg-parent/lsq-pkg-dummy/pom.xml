@@ -5,11 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>lsq-pkg-dummy</artifactId>
+	<packaging>pom</packaging>
 
 	<parent>
 		<groupId>org.aksw.simba.lsq</groupId>
 		<artifactId>lsq-pkg-parent</artifactId>
-		<version>2.0.0-SNAPSHOT</version>
+		<version>2.0.0-RC4</version>
 	</parent>
 
 	<dependencies>
@@ -23,14 +24,11 @@
                         <artifactId>lsq-pkg-deb-cli</artifactId>
                         <scope>provided</scope>
                 </dependency>
-                <!--
                 <dependency>
                         <groupId>org.aksw.simba.lsq</groupId>
                         <artifactId>lsq-pkg-rpm-cli</artifactId>
-			<type>rpm</type>
                         <scope>provided</scope>
                 </dependency>
-                -->
                 <dependency>
                         <groupId>org.aksw.simba.lsq</groupId>
                         <artifactId>lsq-pkg-docker-cli</artifactId>
