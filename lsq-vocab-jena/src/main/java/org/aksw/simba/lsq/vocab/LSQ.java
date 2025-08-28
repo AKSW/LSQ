@@ -400,6 +400,10 @@ public class LSQ {
     public static final Resource Limit = resource("Limit");
     public static final Resource Lateral = resource("Lateral");
 
+    public static final Resource Unfold = resource("Unfold");
+    public static final Resource SemiJoin = resource("SemiJoin");
+    public static final Resource AntiJoin = resource("AntiJoi");
+
     // Path Features
     public static final Resource LinkPath = resource("LinkPath");
     public static final Resource ReverseLinkPath = resource("ReverseLinkPath");

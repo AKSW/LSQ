@@ -64,12 +64,12 @@
 	</modules>
 
 	<properties>
-		<jena.version>5.0.0</jena.version>
-		<jenax.version>5.0.0-1</jenax.version>
-		<aksw-commons.version>0.9.8</aksw-commons.version>
-		<sansa.version>0.9.5</sansa.version>
+		<jena.version>5.6.0-SNAPSHOT</jena.version>
+		<jenax.version>5.6.0-1-SNAPSHOT</jenax.version>
+		<aksw-commons.version>0.9.11-SNAPSHOT</aksw-commons.version>
+		<sansa.version>0.9.6-SNAPSHOT</sansa.version>
 
-		<spark.version>3.5.1</spark.version>
+		<spark.version>4.0.0-preview2</spark.version>
 		<spark.deps.scope>compile</spark.deps.scope>
 
 		<scala.binary.version>2.12</scala.binary.version>
@@ -196,7 +196,7 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-lang3</artifactId>
-				<version>3.12.0</version>
+				<version>3.18.0</version>
 			</dependency>
 
 			<!-- https://stackoverflow.com/questions/53787624/spark-throwing-arrayindexoutofboundsexception-when-parallelizing-list/53787847 -->

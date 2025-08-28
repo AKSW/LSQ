@@ -87,7 +87,7 @@ import org.apache.jena.riot.WebContent;
 import org.apache.jena.riot.system.StreamRDF;
 import org.apache.jena.riot.system.StreamRDFWriter;
 import org.apache.jena.shared.PrefixMapping;
-import org.apache.jena.sparql.lang.arq.ParseException;
+import org.apache.jena.sparql.lang.sparql_12.javacc.ParseException;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.DCTerms;

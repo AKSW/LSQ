@@ -22,6 +22,7 @@ import org.apache.jena.sparql.expr.ExprAggregator;
 import org.apache.jena.sparql.expr.ExprFunction;
 import org.apache.jena.sparql.path.Path;
 import org.apache.jena.sparql.syntax.Element;
+import org.apache.jena.sparql.syntax.ElementAntiJoin;
 import org.apache.jena.sparql.syntax.ElementAssign;
 import org.apache.jena.sparql.syntax.ElementBind;
 import org.apache.jena.sparql.syntax.ElementData;
@@ -35,9 +36,11 @@ import org.apache.jena.sparql.syntax.ElementNamedGraph;
 import org.apache.jena.sparql.syntax.ElementNotExists;
 import org.apache.jena.sparql.syntax.ElementOptional;
 import org.apache.jena.sparql.syntax.ElementPathBlock;
+import org.apache.jena.sparql.syntax.ElementSemiJoin;
 import org.apache.jena.sparql.syntax.ElementService;
 import org.apache.jena.sparql.syntax.ElementSubQuery;
 import org.apache.jena.sparql.syntax.ElementTriplesBlock;
+import org.apache.jena.sparql.syntax.ElementUnfold;
 import org.apache.jena.sparql.syntax.ElementUnion;
 import org.apache.jena.sparql.syntax.ElementVisitor;
 import org.apache.jena.sparql.syntax.ElementWalker;
@@ -321,4 +324,18 @@ public class ElementVisitorFeatureExtractor
 //        incrementFeatureCount(LSQ.Find);
 //    }
 
+    @Override
+    public void visit(ElementUnfold el) {
+        incrementFeatureCount(LSQ.Unfold);
+    }
+
+    @Override
+    public void visit(ElementSemiJoin el) {
+        incrementFeatureCount(LSQ.SemiJoin);
+    }
+
+    @Override
+    public void visit(ElementAntiJoin el) {
+        incrementFeatureCount(LSQ.AntiJoin);
+    }
 }

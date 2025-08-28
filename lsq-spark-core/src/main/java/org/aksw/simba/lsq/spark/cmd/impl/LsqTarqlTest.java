@@ -1,7 +1,5 @@
 package org.aksw.simba.lsq.spark.cmd.impl;
 
-import java.util.function.Supplier;
-
 import org.aksw.commons.lambda.serializable.SerializableSupplier;
 import org.aksw.commons.model.csvw.domain.impl.DialectMutableImpl;
 import org.aksw.commons.model.csvw.univocity.UnivocityCsvwConf;
@@ -25,6 +23,8 @@ import org.apache.spark.sql.SparkSession;
 import net.sansa_stack.spark.io.csv.input.CsvDataSources;
 import net.sansa_stack.spark.io.rdf.output.RddRdfWriter;
 import net.sansa_stack.spark.rdd.op.rdf.JavaRddOfBindingsOps;
+import net.sansa_stack.spark.util.LifeCycle;
+import net.sansa_stack.spark.util.LifeCycleImpl;
 
 public class LsqTarqlTest {
 
@@ -90,10 +90,9 @@ public class LsqTarqlTest {
 
         // CmdMixinArq.configureCxt(ARQ.getContext(), arqConfig);
         CmdMixinArq arqConfig = new CmdMixinArq();
-        Supplier<ExecutionContext> execCxtSupplier = createExecCxtSupplier(arqConfig);
+        LifeCycle<ExecutionContext> execCxtLifeCycle = createExecCxtSupplier(arqConfig);
 
-
-        JavaRDD<Quad> quadRdd = JavaRddOfBindingsOps.tarqlQuads(bindingRdd, query, execCxtSupplier);
+        JavaRDD<Quad> quadRdd = JavaRddOfBindingsOps.tarqlQuads(bindingRdd, query, execCxtLifeCycle);
         //JavaRDD<Dataset> outRdd = null;
 //
 //        List<JavaRDD<Dataset>> rdds = cmd.getNonOptionArgs().stream()
@@ -148,7 +147,7 @@ public class LsqTarqlTest {
             .run();
     }
 
-    public static Supplier<ExecutionContext> createExecCxtSupplier(CmdMixinArq arqConfig) {
+    public static LifeCycle<ExecutionContext> createExecCxtSupplier(CmdMixinArq arqConfig) {
         SerializableSupplier<ExecutionContext> execCxtSupplier = () -> {
             Context baseCxt = ARQ.getContext().copy();
             CmdMixinArq.configureCxt(baseCxt, arqConfig);
@@ -160,6 +159,6 @@ public class LsqTarqlTest {
             ExecutionContext execCxt = ExecutionContextUtils.createExecCxtEmptyDsg(baseCxt);
             return execCxt;
         };
-        return execCxtSupplier;
+        return LifeCycleImpl.of(execCxtSupplier, execCxt -> {});
     }
 }
