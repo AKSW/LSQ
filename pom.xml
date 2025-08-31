@@ -72,7 +72,7 @@
 		<spark.version>4.0.0-preview2</spark.version>
 		<spark.deps.scope>compile</spark.deps.scope>
 
-		<scala.binary.version>2.12</scala.binary.version>
+		<scala.binary.version>2.13</scala.binary.version>
 		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
 
 		<slf4j.version>2.0.9</slf4j.version>
