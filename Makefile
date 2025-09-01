@@ -13,7 +13,7 @@ loud = echo "@@" $(1);$(1)
 .PHONY: help
 
 .ONESHELL:
-help:   ## Show these help instructions
+help:   ## Show these help instructions. Use [make <goal> ARGS='-U'] to pass maven args.
 	@sed -rn 's/^([a-zA-Z_-]+):.*?## (.*)$$/"\1" "\2"/p' < $(MAKEFILE_LIST) | xargs printf "make %-20s# %s\n"
 
 distjar: ## Create only the standalone jar-with-dependencies of rpt
