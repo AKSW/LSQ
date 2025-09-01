@@ -200,7 +200,8 @@ public class LSQ {
     public static Resource resource(String local) { return ResourceFactory.createResource(NS + local); }
     public static Property property(String local) { return ResourceFactory.createProperty(NS + local); }
 
-    public static final Property config = ResourceFactory.createProperty(Terms.config);
+    // public static final Property config = ResourceFactory.createProperty(Terms.config);
+    public static final Property benchmarkConfig = ResourceFactory.createProperty(Terms.benchmarkConfig);
 
     // Used internally for the hypergraph representation - not part of the public vocab
     public static final Resource Vertex = ResourceFactory.createResource(Terms.Vertex);

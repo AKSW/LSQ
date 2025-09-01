@@ -646,7 +646,7 @@ public class MainCliLsq {
 
         ExperimentExec expExec = tryLoadExec(configSrc)
                 .orElseThrow(() -> new IllegalArgumentException(
-                        "Could not detect a resource with " + LSQ.Terms.config + " property in " + configSrc));
+                        "Could not detect a resource with " + LSQ.Terms.benchmarkConfig + " property in " + configSrc));
 
         ExperimentConfig expConfig = expExec.getConfig();
 
@@ -713,7 +713,7 @@ public class MainCliLsq {
     }
 
     public static Optional<ExperimentExec> tryLoadExec(String src) {
-        return tryLoadResourceWithProperty(src, LSQ.config, ExperimentExec.class);
+        return tryLoadResourceWithProperty(src, LSQ.benchmarkConfig, ExperimentExec.class);
     }
 
 
