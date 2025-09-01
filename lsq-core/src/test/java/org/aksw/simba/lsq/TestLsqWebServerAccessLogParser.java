@@ -27,46 +27,45 @@ import org.slf4j.LoggerFactory;
 
 public class TestLsqWebServerAccessLogParser {
 
-	private static final Logger logger = LoggerFactory.getLogger(TestLsqWebServerAccessLogParser.class);
+    private static final Logger logger = LoggerFactory.getLogger(TestLsqWebServerAccessLogParser.class);
 
-	// private static final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+    // private static final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
+    @Test
+    public void test() throws Exception {
+        Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
 
-	@Test
-	public void test() throws Exception {
-    	Map<String, Mapper> logFmtRegistry = WebLogParser.loadRegistry(RDFDataMgr.loadModel("default-log-formats.ttl"));
+        // org.springframework.core.io.Resource[] resources = resolver.getResources("/logs/*");
 
-    	// org.springframework.core.io.Resource[] resources = resolver.getResources("/logs/*");
+        Collection<ResourceInfo> resources = ClassPath.from(getClass().getClassLoader()).getResources().stream()
+                .filter(r -> r.getResourceName().toLowerCase().matches("^logs/.*log$"))
+                .collect(Collectors.toList());
 
-    	Collection<ResourceInfo> resources = ClassPath.from(getClass().getClassLoader()).getResources().stream()
-    			.filter(r -> r.getResourceName().toLowerCase().matches("^logs/.*log$"))
-    			.collect(Collectors.toList());
-    			
-    	Assert.assertNotEquals(0, resources.size());
-    	
-    	for (ResourceInfo r : resources) {
-    		//String qualifiedNam = r.getResourceName();
-    		
-    		String rName = Paths.get(r.url().toURI()).getFileName().toString();
-    		String fmtName = rName.split("\\.", 2)[0];
-    		
-    		Mapper mapper = logFmtRegistry.get(fmtName);
-    		if(mapper == null) {
-    			throw new RuntimeException("No mapper for test case: " + rName);
-    		}
+        Assert.assertNotEquals(0, resources.size());
+
+        for (ResourceInfo r : resources) {
+            //String qualifiedNam = r.getResourceName();
+
+            String rName = Paths.get(r.url().toURI()).getFileName().toString();
+            String fmtName = rName.split("\\.", 2)[0];
+
+            Mapper mapper = logFmtRegistry.get(fmtName);
+            if(mapper == null) {
+                throw new RuntimeException("No mapper for test case: " + rName);
+            }
 
 //    		logger.debug("Processing " + rName + " with format " + fmtName + " - " + mapper);
 
-    		try(BufferedReader br = new BufferedReader(new InputStreamReader(r.asByteSource().openStream()))) {
-    			br.lines().forEach(line -> {
-    				logger.debug("Parse attempt [" + fmtName + ", " + rName + "]: "  + line);
+            try(BufferedReader br = new BufferedReader(new InputStreamReader(r.asByteSource().openStream()))) {
+                br.lines().forEach(line -> {
+                    logger.debug("Parse attempt [" + fmtName + ", " + rName + "]: "  + line);
 
 //    				if("virtuoso.dbpedia351.log".equals(rName)) {
 //    					System.out.println("problematic entry found");
 //    				}
 
-    				Resource x = ModelFactory.createDefaultModel().createResource();
-    				mapper.parse(x, line);
+                    Resource x = ModelFactory.createDefaultModel().createResource();
+                    mapper.parse(x, line);
 
 //    				RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
 //
@@ -77,12 +76,9 @@ public class TestLsqWebServerAccessLogParser {
 ////    				}
 //
 //    				RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE);
-    			});
-    		}
-
-    	}
-
-
+                });
+            }
+        }
 
 //		String spyPathStr = smlBasePath + r.getFilename() + "/";
 //		String r2rPathStr = r2rmlBasePath + r.getFilename() + "/";
@@ -98,13 +94,10 @@ public class TestLsqWebServerAccessLogParser {
 //			logger.warn("Resource does not exist " + r2rPathStr);
 //			return null;
 //		}
+    }
 
-
-	}
-
-
-	//@Test
-	public void test2() {
+    //@Test
+    public void test2() {
         Map<String, BiConsumer<StringMapper, String>> map = WebLogParser.createWebServerLogStringMapperConfig();
 
         String logLine = "127.0.0.1 - - [06/Nov/2016:05:12:49 +0100] \"GET /icons/ubuntu-logo.png HTTP/1.1\" 200 3623 \"http://localhost/\" \"Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0\"";
@@ -130,6 +123,5 @@ public class TestLsqWebServerAccessLogParser {
             .addLiteral(LSQ.host, "0.0.0.0");
 
         System.out.println(mapper.unparse(x));
-
-	}
+    }
 }
