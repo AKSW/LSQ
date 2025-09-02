@@ -244,7 +244,7 @@ public class LsqEnrichments {
      */
     public static BgpNode createBgpNode(Model model, Node jenaNode) {
         BgpNode result = (jenaNode.isVariable()
-                ? SpinAccessUtils.writeNode(model, jenaNode)
+                ? SpinCoreUtils.writeNode(model, jenaNode)
                 : model.createResource())
             .as(BgpNode.class);
 

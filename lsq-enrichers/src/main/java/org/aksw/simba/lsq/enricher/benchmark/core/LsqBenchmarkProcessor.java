@@ -44,9 +44,9 @@ import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.ConnectionLostException;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
+import org.aksw.jenax.reprogen.util.Skolemize;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.rx.op.FlowOfQuadsOps;
-import org.aksw.simba.lsq.core.util.SkolemizeBackport;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
@@ -367,6 +367,21 @@ public class LsqBenchmarkProcessor {
         return result;
     }
 
+    /**
+     * The input "List<Set<LsqQuery>> batch" is a list of query packs (pack = linked hash set).
+     * The database that tracks which queries were processed is updated in bulk for the whole batch.
+     *
+     * @param batch A batch of query packs.
+     *              The first query in a pack is the primary one, all others are secondary queries.
+     * @param lsqBaseIri
+     * @param expConfig
+     * @param expExec
+     * @param expRun
+     * @param benchmarkConn
+     * @param lsqQueryExecFn
+     * @param indexConn
+     * @return
+     */
     public static List<ResourceInDataset> processBatchOfQueries(
             List<Set<LsqQuery>> batch,
             String lsqBaseIri,
@@ -378,6 +393,10 @@ public class LsqBenchmarkProcessor {
             RDFConnection indexConn) {
 
         // Skolemization is blocked for all resources appearing in the unionModel
+        // TODO Clarify above statement ^. I think what i meant is:
+        // The staticModel is used as a base layer with blank nodes.
+        //   Skolemize.skolemize(resource, baseLayer) skolemizes the reachable graph of resource
+        //   TODO I think this does not copy triples from the base layer into the resource graph
         Model staticModel = unionAll(expConfig.getModel(), expExec.getModel(), expRun.getModel());
 
         // Combine the query hash and the exprRun id to form the benchmark task id.
@@ -401,7 +420,7 @@ public class LsqBenchmarkProcessor {
             .blockingGet());
 
         // Obtain the set of query strings already in the store
-        Set<String> completedTaskIds = taskIdToDataset.keySet();
+        Set<String> completedTaskIds = new LinkedHashSet<>(taskIdToDataset.keySet());;
 
         Map<Node, LsqQuery> pendingTasks = inputTasks.entrySet().stream()// batch.stream()
             .filter(e -> !completedTaskIds.contains(e.getKey().toString()))
@@ -409,6 +428,8 @@ public class LsqBenchmarkProcessor {
 
         List<Quad> inserts = new ArrayList<>();
 
+        // The logic is to use TDB2 as an index for which queries have been processed.
+        // The dataset for each query is NOT stored in the TDB2 but returned via the result stream.
         for (Entry<Node, LsqQuery> task : pendingTasks.entrySet()) {
             Node queryExecId = task.getKey();
             String queryExecIri = queryExecId.getURI();
@@ -434,7 +455,7 @@ public class LsqBenchmarkProcessor {
                     expConfig.getMaxResultCountForSerialization(),
                     expConfig.getMaxByteSizeForSerialization(),
                     expConfig.getConnectionTimeoutForCounting(),
-                    expConfig.getConnectionTimeoutForRetrieval(),
+                    expConfig.getExecutionTimeoutForCounting(),
                     expConfig.getMaxCount(),
                     expConfig.getMaxCountAffectsTp());
 
@@ -446,7 +467,7 @@ public class LsqBenchmarkProcessor {
             Model unionModel = unionAll(staticModel, lsqQuery.getModel());
 
             // So we only skolemize all resources related to the newLocalExec
-            LocalExecution finalLocalExec = SkolemizeBackport.skolemize(newLocalExec, unionModel, lsqBaseIri, LocalExecution.class);
+            LocalExecution finalLocalExec = Skolemize.skolemize(newLocalExec, unionModel, lsqBaseIri, LocalExecution.class);
 
             Dataset newDataset = new DatasetOneNgImpl(DatasetGraphOneNgImpl.create(queryExecId, finalLocalExec.getModel().getGraph()));
             inserts.add(new Quad(queryExecId, queryExecId, LSQ.execStatus.asNode(), NodeFactory.createLiteralString("processed")));
@@ -456,7 +477,8 @@ public class LsqBenchmarkProcessor {
         UpdateRequest ur = UpdateRequestUtils.createUpdateRequest(inserts, null);
         Txn.executeWrite(indexConn, () -> indexConn.update(ur));
 
-        // Remove the execStatus "processed" triples from the fetched datasets
+        // Remove the execStatus "processed" triples from the COPIES[!] of the fetched datasets
+        // The copies will become part of the result flowable of this method.
         for(Dataset ds : taskIdToDataset.values()) {
             for(Entry<String, Model> e : DatasetUtils.listModels(ds)) {
                 e.getValue().removeAll(null, LSQ.execStatus, null);
@@ -468,10 +490,17 @@ public class LsqBenchmarkProcessor {
         for(Set<LsqQuery> pack : batch) {
 
             logger.info("Processing pack of size: " + pack.size());
+
             // TODO Move all the code into a nice processPack method of a new class
             try {
                 // The primary query is assumed to always be the first element of a pack
                 LsqQuery primaryQueryRaw = pack.iterator().next();
+                String primaryQueryExecId = lsqQueryExecFn.apply(primaryQueryRaw);
+
+                if (completedTaskIds.contains(primaryQueryExecId)) {
+                    logger.info("Primary benchmark task " + primaryQueryExecId + " has already been processed and emitted");
+                    continue;
+                }
 
 
                 Model primaryQueryModel = ModelFactory.createDefaultModel();
@@ -489,6 +518,12 @@ public class LsqBenchmarkProcessor {
                 // Extend the rootQuery's model with all related query executions
                 for(LsqQuery item : pack) {
                     String key = lsqQueryExecFn.apply(item);
+
+//                    if (completedTaskIds.contains(key)) {
+//                        logger.info("Secondary Benchmark task " + key + " has already been processed and emitted");
+//                        continue;
+//                    }
+
                     Dataset ds = taskIdToDataset.get(key);
                     Objects.requireNonNull(ds, "Expected dataset for key "  + key);
                     Model m = ds.getNamedModel(key);
@@ -525,6 +560,8 @@ public class LsqBenchmarkProcessor {
                 if (primaryQuery.getSpinQuery() != null) {
                     LsqExec.createAllExecs(primaryQuery, expRun);
                 }
+
+                Skolemize.skolemize(primaryQuery, staticModel, lsqBaseIri, LsqQuery.class);
 
                 if (false) {
                     Model configModel = expConfig.getModel();

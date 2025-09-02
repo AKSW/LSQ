@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Set;
 
+import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
@@ -29,6 +30,10 @@ public abstract class LsqTriplePattern
     public Triple toJenaTriple() {
         Triple result = SpinCoreUtils.toJenaTriple(this);
         return result;
+    }
+
+    public void setTriplePattern(Triple triple) {
+        SpinCoreUtils.writeTriple(this, triple);
     }
 
     @HashId

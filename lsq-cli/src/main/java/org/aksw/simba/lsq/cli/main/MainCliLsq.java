@@ -44,6 +44,7 @@ import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
+import org.aksw.jenax.reprogen.util.Skolemize;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
@@ -75,6 +76,7 @@ import org.aksw.simba.lsq.vocab.PROV;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -650,6 +652,9 @@ public class MainCliLsq {
 
         ExperimentConfig expConfig = expExec.getConfig();
 
+        // We need to skolemize expRun but not the resources of expExec.
+        Model expExecModelCopy = ModelFactory.createDefaultModel();
+        expExecModelCopy.add(expExec.getModel());
 
         ExperimentRun expRun = expExec.getModel().createResource().as(ExperimentRun.class)
                 .setExec(expExec)
@@ -657,9 +662,11 @@ public class MainCliLsq {
                 // .setTimestamp(null); // xsddt
                 ;
 
-
         String lsqBaseIri = Objects.requireNonNull(expConfig.getBaseIri(), "Base IRI (e.g. http://lsq.aksw.org/) not provided");
         //LsqBenchmeclipse-javadoc:%E2%98%82=jena-sparql-api-conjure/src%5C/main%5C/java%3Corg.aksw.jena_sparql_apiarkProcessor.createProcessor()
+
+        // expRun = Skolemize.skolemize(expRun, expExecModelCopy, lsqBaseIri, ExperimentRun.class, null);
+
 
 
         String runId = expConfig.getIdentifier();

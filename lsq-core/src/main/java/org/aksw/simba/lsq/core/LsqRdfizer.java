@@ -5,12 +5,12 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import org.aksw.jenax.arq.util.prefix.PrefixMappingTrie;
+import org.aksw.jenax.reprogen.util.Skolemize;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtParser;
 import org.aksw.jenax.stmt.core.SparqlStmtParserImpl;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.jenax.stmt.util.SparqlStmtUtils;
-import org.aksw.simba.lsq.core.util.SkolemizeBackport;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.RemoteExecution;
 import org.aksw.simba.lsq.parser.WebLogParser;
@@ -191,7 +191,7 @@ public class LsqRdfizer {
 //            NodeTransformLib2.applyNodeTransform(NodeTransformLib2.makeNullSafe(renames::get), dataset);
 //            result = Maybe.just(new ResourceInDatasetImpl(dataset, newRoot.getURI(), newRoot));
 
-            Resource r = SkolemizeBackport.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
+            Resource r = Skolemize.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
                 Optional.ofNullable(renames.get(re.asNode()))
                     .map(newRoot.getModel()::wrapAsResource)
                     .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));

@@ -101,21 +101,4 @@ public class SpinAccessUtils {
         }
         return result;
     }
-
-    public static RDFNode writeNode(Model tgtModel, Node node) {
-        RDFNode result = null;
-        if(node != null) {
-            if(node.isVariable()) {
-                String varName = node.getName();
-                Resource tmp = tgtModel.createResource();
-                org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.setLiteralProperty(
-                        tmp, SP.varName, varName);
-                result = tmp;
-            } else {
-                result = tgtModel.asRDFNode(node);
-            }
-        }
-
-        return result;
-    }
 }

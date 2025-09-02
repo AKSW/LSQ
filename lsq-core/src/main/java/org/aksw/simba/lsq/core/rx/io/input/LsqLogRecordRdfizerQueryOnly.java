@@ -2,10 +2,10 @@ package org.aksw.simba.lsq.core.rx.io.input;
 
 import java.util.function.Function;
 
+import org.aksw.jenax.reprogen.util.Skolemize;
 import org.aksw.jenax.stmt.core.SparqlStmt;
 import org.aksw.jenax.stmt.core.SparqlStmtQuery;
 import org.aksw.simba.lsq.core.LsqRdfizer;
-import org.aksw.simba.lsq.core.util.SkolemizeBackport;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
@@ -51,7 +51,7 @@ public class LsqLogRecordRdfizerQueryOnly
                 q.setParseError(t.toString());
             }
 
-            Resource r = SkolemizeBackport.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
+            Resource r = Skolemize.skolemize(queryInDataset, baseIri, LsqQuery.class, (newRoot, renames) -> {
 //                Optional.ofNullable(renames.get(re.asNode()))
 //                    .map(newRoot.getModel()::wrapAsResource)
 //                    .ifPresent(newRe -> newRe.as(RemoteExecution.class).setSequenceId(null));

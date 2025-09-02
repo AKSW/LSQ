@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.Triple;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -81,6 +82,34 @@ public class SpinCoreUtils {
         return result;
     }
 
+    public static RDFNode writeNode(Model tgtModel, Node node) {
+        RDFNode result = null;
+        if(node != null) {
+            if(node.isVariable()) {
+                String varName = node.getName();
+                Resource tmp = tgtModel.createResource();
+                org.aksw.jena_sparql_api.rdf.collections.ResourceUtils.setLiteralProperty(
+                        tmp, SP.varName, varName);
+                result = tmp;
+            } else {
+                result = tgtModel.asRDFNode(node);
+            }
+        }
+
+        return result;
+    }
+
+    public static void writeNode(Resource tgt, Property property, Node value) {
+        Model tgtModel = tgt.getModel();
+        RDFNode component = writeNode(tgtModel, value);
+        tgt.addProperty(property, component);
+    }
+
+    public static void writeTriple(Resource tgt, Triple triple) {
+        writeNode(tgt, SP.subject, triple.getSubject());
+        writeNode(tgt, SP.predicate, triple.getPredicate());
+        writeNode(tgt, SP.object, triple.getObject());
+    }
 
     public static Node toNode(RDFNode node) {
         Node result = node.canAs(Variable.class)

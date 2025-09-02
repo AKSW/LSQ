@@ -351,7 +351,7 @@ public class LSQ {
     public static final Property requestPath = property("uri");
     public static final Property queryString = property("queryString");
     public static final Property protocol = property("protocol");
-    public static final Property headers = property(Terms.headers);
+    public static final Property headers = ResourceFactory.createProperty(Terms.headers);
     public static final Property verb = property("verb");
     public static final Property parsed = property("parsed"); // Whether a log entry could be parsed
 
