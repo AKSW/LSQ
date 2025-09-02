@@ -45,6 +45,17 @@ docker: ## Build Docker image
 	$(MCIS) $(POM) -am -pl :lsq-pkg-docker-cli $(ARGS)
 	cd lsq-pkg-parent/lsq-pkg-docker-cli && $(MS) jib:dockerBuild && cd ../..
 
+selftest: ## Self-test. Requires lsq command and sparql endpoint under localhost:8890/sparql
+	inputLog="lsq-core/src/test/resources/logs/issue54.combined.log"
+	rdfLog="/tmp/lsq.selftest.log.trig"
+	benchConf="/tmp/lsq.selftest.bench.conf.ttl"
+	runConf="/tmp/lsq.selftest.run.conf.ttl"
+	lsq rx probe "$$inputLog"
+	lsq rx rdfize -e http://server.from/which/the/log/is/from "$$inputLog" > "$$rdfLog"
+	lsq rx benchmark create -d myDatasetLabel -e http://localhost:8890/sparql -o > "$$benchConf"
+	lsq rx benchmark prepare -c "$$benchConf" -o > "$$runConf"
+	lsq rx benchmark run -c "$$runConf" "$$rdfLog"
+
 release-bundle: ## Create files for Github upload
 	@set -eu
 	ver=$(VER)
@@ -62,3 +73,4 @@ release-bundle: ## Create files for Github upload
 	$(call loud,gh release create v$$ver "rpt-$${ver/-/\~}.deb" "rpt-$$ver.rpm" "rpt-$$ver.jar")
 	$(call loud,docker push aksw/rpt:$$ver)
 	$(call loud,docker push aksw/rpt)
+
