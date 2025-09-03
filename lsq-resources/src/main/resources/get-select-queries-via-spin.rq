@@ -1,0 +1,11 @@
+PREFIX lsq: <http://lsq.aksw.org/vocab#>
+PREFIX sp: <http://spinrdf.org/sp#>
+SELECT DISTINCT ?text
+{
+  ?s
+    lsq:text ?text ;
+    lsq:hasSpin ?spin .
+
+  ?spin a sp:Select . 
+}
+

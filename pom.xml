@@ -51,6 +51,7 @@
 
 
 	<modules>
+		<module>lsq-resources</module>
 		<module>lsq-model</module>
 		<module>lsq-parser</module>
 		<module>lsq-vocab-jena</module>
@@ -122,16 +123,19 @@
 
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
+				<artifactId>lsq-resources</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-model</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>
 				<artifactId>lsq-enrichers</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-
 
 			<dependency>
 				<groupId>org.aksw.simba.lsq</groupId>

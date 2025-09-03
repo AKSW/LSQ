@@ -1,0 +1,10 @@
+SELECT DISTINCT ?text WHERE 
+{
+?s <http://lsq.aksw.org/vocab#text> ?text .
+?s <http://lsq.aksw.org/vocab#hasRemoteExec> ?re . 
+?s <http://lsq.aksw.org/vocab#hasLocalExec> ?le . 
+?le <http://lsq.aksw.org/vocab#hasQueryExec> ?qe . 
+?qe <http://lsq.aksw.org/vocab#resultCount> ?rs  . 
+FILTER(?rs > 0)
+}
+

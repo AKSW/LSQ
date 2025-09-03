@@ -1,0 +1,14 @@
+PREFIX lsqv: <http://lsq.aksw.org/vocab#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX sd: <http://www.w3.org/ns/sparql-service-description#>
+SELECT Distinct ?text ?timeStamp
+{
+  GRAPH ?query {
+    ?query lsqv:text ?text .
+    ?query lsqv:hasRemoteExec ?re .
+    ?re prov:atTime ?timeStamp .
+    ?query lsqv:hasSpin ?spin .
+    ?spin a <http://spinrdf.org/sp#Select> .
+  }
+}
+

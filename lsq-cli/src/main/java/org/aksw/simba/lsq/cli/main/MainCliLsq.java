@@ -723,7 +723,6 @@ public class MainCliLsq {
         return tryLoadResourceWithProperty(src, LSQ.benchmarkConfig, ExperimentExec.class);
     }
 
-
     public static void benchmarkPrepare(CmdLsqRxBenchmarkPrepare benchmarkCmd) throws Exception {
 //        CmdLsqRdfize rdfizeCmd = new CmdLsqRdfize();
 //        rdfizeCmd.nonOptionArgs = benchmarkCmd.logSources;
@@ -766,10 +765,8 @@ public class MainCliLsq {
                 ;
                 // .setIdentifier(runId);
 
-
         String runIri = config.getBaseIri() + runId;
         ResourceUtils.renameResource(expRun, runIri);
-
 
         Path outPath = null;
         if (!benchmarkCmd.stdout) {
@@ -787,5 +784,4 @@ public class MainCliLsq {
             System.out.println(outPath);
         }
     }
-
 }

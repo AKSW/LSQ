@@ -1,0 +1,29 @@
+<http://lsq.aksw.org/lsqQuery-mCSalk0WhvZlQvlTmwvcwpWfKa-hr4ki6PUK9rI_CZI.AA.AA.s._.2HT5sQ.AA.AA.AA.AA.AA._BWtOwAA.AA.AA.AA.O0QJmA> {
+    _:b0    <http://lsq.aksw.org/header#Referer>  "-";
+            <http://lsq.aksw.org/header#User-agent>  "-" .
+    <http://lsq.aksw.org/remoteExec-from-server-which-the-log-is-from_2014-05-15T23:30:13Z>
+            <http://lsq.aksw.org/vocab#logRecord>  "x.x.x.x - - [16/May/2014:00:30:13 +0100] \"GET /sparql?query=PREFIX%20%20wdt%3A%20%20%3Chttp%3A//www.wikidata.org/prop/direct/%3E%20%20SELECT%20%20%3Fvar1%20WHERE%20%20%20%7B%20%3Fvar2%20%20wdt%3AP17%20%20%3Fvar1%20%7D HTTP/1.0\" 200 1000 \"-\" \"-\"";
+            <http://lsq.aksw.org/vocab#logRecord>  "x.x.x.x - - [16/May/2014:00:30:13 +0100] \"GET /sparql?query=PREFIX%20%20wdt%3A%20%20%3Chttp%3A//www.wikidata.org/prop/direct/%3E%20%20SELECT%20DISTINCT%20%20%3Fvar1%20WHERE%20%20%20%7B%20%3Fvar2%20%20wdt%3AP17%20%20%3Fvar1%20%7D HTTP/1.0\" 200 1001 \"-\" \"-\"";
+            <http://lsq.aksw.org/vocab#numResponseBytes>  "1001"^^<http://www.w3.org/2001/XMLSchema#int>;
+            <http://lsq.aksw.org/vocab#numResponseBytes>  "1000"^^<http://www.w3.org/2001/XMLSchema#int>;
+            <http://lsq.aksw.org/vocab#statusCode>  "200"^^<http://www.w3.org/2001/XMLSchema#int>;
+            <http://lsq.aksw.org/vocab#user>  "-";
+            <http://lsq.aksw.org/vocab#query>  "PREFIX  wdt:  <http://www.wikidata.org/prop/direct/>  SELECT DISTINCT  ?var1 WHERE   { ?var2  wdt:P17  ?var1 }";
+            <http://lsq.aksw.org/vocab#query>  "PREFIX  wdt:  <http://www.wikidata.org/prop/direct/>  SELECT  ?var1 WHERE   { ?var2  wdt:P17  ?var1 }";
+            <http://lsq.aksw.org/vocab#endpoint>  <http://server.from/which/the/log/is/from>;
+            <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#headers>  _:b1;
+            <http://lsq.aksw.org/vocab#http://lsq.aksw.org/vocab#headers>  _:b0;
+            <http://lsq.aksw.org/vocab#protocol>  "HTTP/1.0";
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=PREFIX%20%20wdt%3A%20%20%3Chttp%3A//www.wikidata.org/prop/direct/%3E%20%20SELECT%20DISTINCT%20%20%3Fvar1%20WHERE%20%20%20%7B%20%3Fvar2%20%20wdt%3AP17%20%20%3Fvar1%20%7D";
+            <http://lsq.aksw.org/vocab#uri>  "/sparql?query=PREFIX%20%20wdt%3A%20%20%3Chttp%3A//www.wikidata.org/prop/direct/%3E%20%20SELECT%20%20%3Fvar1%20WHERE%20%20%20%7B%20%3Fvar2%20%20wdt%3AP17%20%20%3Fvar1%20%7D";
+            <http://www.w3.org/ns/prov#atTime>  "2014-05-15T23:30:13Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>;
+            <http://lsq.aksw.org/vocab#verb>  "GET";
+            <http://lsq.aksw.org/vocab#hostHash>  "nLLe4G7zTqYIB1PsEMKA2DvPcwxRi6N3YZvzXh98gsI" .
+    <http://lsq.aksw.org/lsqQuery-mCSalk0WhvZlQvlTmwvcwpWfKa-hr4ki6PUK9rI_CZI.AA.AA.s._.2HT5sQ.AA.AA.AA.AA.AA._BWtOwAA.AA.AA.AA.O0QJmA>
+            <http://lsq.aksw.org/vocab#text>  "PREFIX  wdt:  <http://www.wikidata.org/prop/direct/>\n\nSELECT  ?var1\nWHERE\n  { ?var2  wdt:P17  ?var1 }\n";
+            <http://lsq.aksw.org/vocab#text>  "PREFIX  wdt:  <http://www.wikidata.org/prop/direct/>\n\nSELECT DISTINCT  ?var1\nWHERE\n  { ?var2  wdt:P17  ?var1 }\n";
+            <http://lsq.aksw.org/vocab#hasRemoteExec>  <http://lsq.aksw.org/remoteExec-from-server-which-the-log-is-from_2014-05-15T23:30:13Z>;
+            <http://lsq.aksw.org/vocab#hash>  "mCSalk0WhvZlQvlTmwvcwpWfKa-hr4ki6PUK9rI_CZI/AA/AA/s/_/2HT5sQ/AA/AA/AA/AA/AA/_BWtOwAA/AA/AA/AA/O0QJmA" .
+    _:b1    <http://lsq.aksw.org/header#Referer>  "-";
+            <http://lsq.aksw.org/header#User-agent>  "-" .
+}
