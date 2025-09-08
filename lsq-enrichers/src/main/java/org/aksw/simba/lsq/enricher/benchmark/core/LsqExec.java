@@ -62,16 +62,16 @@ public class LsqExec {
 
     private static final Logger logger = LoggerFactory.getLogger(LsqExec.class);
 
-    public static void createAllExecs(LsqQuery masterQuery, ExperimentRun expRun) {
-        if (masterQuery.getHash().equals("0tMhy2BmhjNcsboz1BV5Br9WRvvnTTEPO-xU4woHzpM/AA/AA/s/d/XRqq3w/AA/AA/AA/AA/AA/aUWrcgAA/AA/AA/AA/JnTwFw")) {
-            System.err.println("DEBUG POINT");
-        }
+    public static void createAllExecs(LsqQuery primaryQuery, ExperimentRun expRun) {
+//        if (masterQuery.getHash().equals("0tMhy2BmhjNcsboz1BV5Br9WRvvnTTEPO-xU4woHzpM/AA/AA/s/d/XRqq3w/AA/AA/AA/AA/AA/aUWrcgAA/AA/AA/AA/JnTwFw")) {
+//            System.err.println("DEBUG POINT");
+//        }
 
-        Model model = masterQuery.getModel();
+        Model model = primaryQuery.getModel();
         //SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
-        BgpInfo spinRoot = masterQuery.getStructuralFeatures();
+        BgpInfo spinRoot = primaryQuery.getStructuralFeatures();
 
-        Map<Resource, LocalExecution> rleMap = masterQuery.getLocalExecutionMap();
+        Map<Resource, LocalExecution> rleMap = primaryQuery.getLocalExecutionMap();
         LocalExecution expRoot = rleMap.get(expRun);
 
         Long datasetSize = expRun.getExec().getConfig().getDatasetSize();
@@ -202,19 +202,6 @@ public class LsqExec {
 
     }
 
-//    public static Multiset<Binding> indexResultSet(ResultSet rs, Iterable<Var> vars) {
-//        Multiset<Binding> result = HashMultiset.create();
-//        while(rs.hasNext()) {
-//            Binding o = rs.nextBinding();
-//            Binding n = BindingUtils.project(o, vars);
-//
-//            result.add(n);
-//        }
-//        return result;
-//    }
-
-
-
     /**
      * Utility method with behavior tailored to LSQ.
      *
@@ -309,37 +296,6 @@ public class LsqExec {
         return bgpExec;
     }
 
-
-    /**
-     * bgpExec -> tpInBgpExec
-     *
-     * @param expRun
-     * @param tp
-     * @return
-     */
-//    public static TpExec getOrCreateTpExec(BgpExec bgpExec, LsqTriplePattern tp) {
-//        tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
-//
-//
-//        TpExec tpExec = tpInBgpExec.getTpExec();
-//        if(tpExec == null) {
-//            tpExec = model.createResource().as(TpExec.class);
-//            LsqQuery extensionQuery = tp.getExtensionQuery();
-////                    RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-//            Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
-//            Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
-//            LocalExecution le = leMap.get(expRun);
-//            QueryExec qe = le.getQueryExec();
-//
-//            tpExec
-//                .setTpInBgpExec(tpInBgpExec) /* inverse link */
-//                .setTp(tp)
-//                .setQueryExec(qe)
-//                ;
-//        }
-//
-//    }
-
     /**
      * Get or create an execution for a triple pattern in a bgp.
      * The benchmark run id is taken from the bgpExec.
@@ -385,7 +341,7 @@ public class LsqExec {
             if (le == null) {
                 throw new IllegalStateException("No local execution for run " + expRun);
             } else {
-                logger.info("DEBUG POINT");
+                // logger.info("DEBUG POINT");
             }
             QueryExec qe = le.getQueryExec();
 
@@ -454,4 +410,45 @@ public class LsqExec {
         return result;
     }
 
+//  public static Multiset<Binding> indexResultSet(ResultSet rs, Iterable<Var> vars) {
+//  Multiset<Binding> result = HashMultiset.create();
+//  while(rs.hasNext()) {
+//      Binding o = rs.nextBinding();
+//      Binding n = BindingUtils.project(o, vars);
+//
+//      result.add(n);
+//  }
+//  return result;
+//}
+
+
+    /**
+     * bgpExec -> tpInBgpExec
+     *
+     * @param expRun
+     * @param tp
+     * @return
+     */
+//    public static TpExec getOrCreateTpExec(BgpExec bgpExec, LsqTriplePattern tp) {
+//        tp.getExtensionQuery().getLocalExecutionMap().get(expRun);
+//
+//
+//        TpExec tpExec = tpInBgpExec.getTpExec();
+//        if(tpExec == null) {
+//            tpExec = model.createResource().as(TpExec.class);
+//            LsqQuery extensionQuery = tp.getExtensionQuery();
+////                    RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+//            Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
+//            Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
+//            LocalExecution le = leMap.get(expRun);
+//            QueryExec qe = le.getQueryExec();
+//
+//            tpExec
+//                .setTpInBgpExec(tpInBgpExec) /* inverse link */
+//                .setTp(tp)
+//                .setQueryExec(qe)
+//                ;
+//        }
+//
+//    }
 }

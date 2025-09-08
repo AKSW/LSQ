@@ -23,7 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.aksw.commons.io.util.StdIo;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
@@ -38,6 +37,7 @@ import org.aksw.jenax.arq.util.quad.DatasetUtils;
 import org.aksw.jenax.arq.util.quad.Quads;
 import org.aksw.jenax.arq.util.syntax.ElementUtils;
 import org.aksw.jenax.arq.util.syntax.QueryGenerationUtils;
+import org.aksw.jenax.arq.util.triple.ModelUtils;
 import org.aksw.jenax.arq.util.update.UpdateRequestUtils;
 import org.aksw.jenax.arq.util.var.Vars;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.ConnectionLostException;
@@ -63,6 +63,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.graph.Node;
 import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.query.Dataset;
 import org.apache.jena.query.DatasetFactory;
 import org.apache.jena.query.Query;
@@ -88,9 +89,9 @@ import org.apache.jena.sparql.engine.binding.Binding;
 import org.apache.jena.sparql.modify.request.QuadAcc;
 import org.apache.jena.sparql.syntax.ElementFilter;
 import org.apache.jena.sparql.syntax.Template;
-import org.apache.jena.sparql.util.ModelUtils;
 import org.apache.jena.system.Txn;
 import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.util.iterator.ExtendedIterator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spinrdf.model.TriplePattern;
@@ -258,70 +259,6 @@ public class LsqBenchmarkProcessor {
             }
         }
         return result;
-
-
-//
-//        Model model = ModelFactory.createDefaultModel();
-//        SpinQueryEx spinRes = model.createResource("http://test.ur/i").as(SpinQueryEx.class);
-//
-//
-//
-//        // Create a stream of tasks which to benchmark:
-//        // Create a stream of bgps
-//        // Create a stream of tps
-//        // create a stream of sub-bgps
-//
-//        // Then for each of these resources,
-//
-//
-//
-////        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-//
-//        for(SpinBgp bgp : spinRes.getBgps()) {
-//            System.out.println(bgp);
-//            Collection<TriplePattern> tps = bgp.getTriplePatterns();
-//
-//            for(TriplePattern tp : tps) {
-//                System.out.println(tp);
-//            }
-//        }
-//
-//        QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
-//        // QueryStatistics2.setUpJoinVertices(spinRes);
-//        QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
-//
-//        // TODO Make skolemize reuse skolem ID resources
-//        Skolemize.skolemize(spinRes);
-//
-//
-//
-//        // TODO How to perform triple pattern and join evaluation?
-//        // Actually we would need to create a stream of unique Triple Patterns and BGPs
-//        // So should we use an (embedded DB) to keep track of for which items the statistics have already been computed
-//        // within a benchmark experiment?
-//
-//
-//
-////        QueryStatistics2.fetchCountJoinVarElement(qef, itemToElement)
-//
-//        // Now to create the evaluation results...
-//        // LsqProcessor.rdfizeQueryExecutionStats
-////        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
-//
-//
-//
-//        //Skolemize.skolemize(spinRes);
-//
-//        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
-    }
-
-    /** Create a union model of all unique non-null arguments */
-    public static Model unionAll(Model ...models) {
-        Model result = Stream.of(models)
-            .filter(Objects::nonNull)
-            .distinct()
-            .collect(ModelUtils.unionCollector());
-        return result;
     }
 
     /**
@@ -353,7 +290,7 @@ public class LsqBenchmarkProcessor {
         // The staticModel is used as a base layer with blank nodes.
         //   Skolemize.skolemize(resource, baseLayer) skolemizes the reachable graph of resource
         //   Triples from the staticModel are not copied into the benchmark outcome graph.
-        Model staticModel = unionAll(expConfig.getModel(), expExec.getModel(), expRun.getModel());
+        Model staticModel = ModelUtils.union(expConfig.getModel(), expExec.getModel(), expRun.getModel());
 
         // Combine the query hash and the exprRun id to form the benchmark task id.
         List<ResourceInDataset> result = new ArrayList<>();
@@ -407,12 +344,22 @@ public class LsqBenchmarkProcessor {
             newLocalExec.setQueryExec(newQueryExec);
 
             // Skolemization is blocked for all resources appearing in the unionModel
-            Model unionModel = unionAll(staticModel, lsqQuery.getModel());
+            Model unionModel = ModelUtils.union(staticModel, lsqQuery.getModel());
 
             // So we only skolemize all resources related to the newLocalExec
             LocalExecution finalLocalExec = Skolemize.skolemize(newLocalExec, unionModel, lsqBaseIri, LocalExecution.class);
 
             Dataset newDataset = new DatasetOneNgImpl(DatasetGraphOneNgImpl.create(queryExecId, finalLocalExec.getModel().getGraph()));
+            ExtendedIterator<Triple> it = newQueryExec.getModel().getGraph().find();
+            try {
+                while (it.hasNext()) {
+                    Triple t = it.next();
+                    inserts.add(Quad.create(queryExecId, t));
+                }
+            } finally {
+                it.close();
+            }
+
             inserts.add(new Quad(queryExecId, queryExecId, LSQ.execStatus.asNode(), NodeFactory.createLiteralString("processed")));
             taskIdToDataset.put(queryExecIri, newDataset);
         }
@@ -502,9 +449,11 @@ public class LsqBenchmarkProcessor {
 
                 // If there is no spin model then don't try to create executions for its elements
                 if (primaryQuery.getSpinQuery() != null) {
-                    System.out.println(primaryQuery.getHash());
-                    System.err.println("*******************************************");
-                    RDFDataMgr.write(System.err, primaryQuery.getModel(), RDFFormat.TURTLE_PRETTY);
+                    if (false) {
+                        System.err.println(primaryQuery.getHash());
+                        System.err.println("*******************************************");
+                        RDFDataMgr.write(System.err, primaryQuery.getModel(), RDFFormat.TURTLE_PRETTY);
+                    }
 
                     LsqExec.createAllExecs(primaryQuery, expRun);
                 }
@@ -1174,3 +1123,59 @@ public class LsqBenchmarkProcessor {
 //        // TODO Need to set up an index connection
 //        process(queryFlow, lsqBaseIri, config, expRun, benchmarkConn, null);
 //    }
+
+
+//
+//        Model model = ModelFactory.createDefaultModel();
+//        SpinQueryEx spinRes = model.createResource("http://test.ur/i").as(SpinQueryEx.class);
+//
+//
+//
+//        // Create a stream of tasks which to benchmark:
+//        // Create a stream of bgps
+//        // Create a stream of tps
+//        // create a stream of sub-bgps
+//
+//        // Then for each of these resources,
+//
+//
+//
+////        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+//
+//        for(SpinBgp bgp : spinRes.getBgps()) {
+//            System.out.println(bgp);
+//            Collection<TriplePattern> tps = bgp.getTriplePatterns();
+//
+//            for(TriplePattern tp : tps) {
+//                System.out.println(tp);
+//            }
+//        }
+//
+//        QueryStatistics2.enrichSpinQueryWithBgpStats(spinRes);
+//        // QueryStatistics2.setUpJoinVertices(spinRes);
+//        QueryStatistics2.getDirectQueryRelatedRDFizedStats(spinRes, spinRes);
+//
+//        // TODO Make skolemize reuse skolem ID resources
+//        Skolemize.skolemize(spinRes);
+//
+//
+//
+//        // TODO How to perform triple pattern and join evaluation?
+//        // Actually we would need to create a stream of unique Triple Patterns and BGPs
+//        // So should we use an (embedded DB) to keep track of for which items the statistics have already been computed
+//        // within a benchmark experiment?
+//
+//
+//
+////        QueryStatistics2.fetchCountJoinVarElement(qef, itemToElement)
+//
+//        // Now to create the evaluation results...
+//        // LsqProcessor.rdfizeQueryExecutionStats
+////        SpinUtils.enrichModelWithTriplePatternExtensionSizes(queryRes, queryExecRes, cachedQef);
+//
+//
+//
+//        //Skolemize.skolemize(spinRes);
+//
+//        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+
