@@ -22,6 +22,11 @@ import org.spinrdf.model.Triple;
 public interface Bgp
     extends LsqElement
 {
+    @Iri(LSQ.Terms.hasCanonicalElement)
+    @Override
+    Bgp getCanonicalElement();
+    Bgp setCanonicalElement(Bgp tp);
+
     /**
      * The ID of a bgp is defined by the <b>list</b> of triple patterns.
      * Note, that the ID of a TpInBgp depends on the IDs of a bgp and the tp.

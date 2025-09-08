@@ -44,7 +44,6 @@ import org.aksw.jenax.arq.dataset.orderaware.DatasetGraphFactoryEx;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.SparqlQueryConnectionWithReconnect;
 import org.aksw.jenax.reprogen.core.MapperProxyUtils;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
-import org.aksw.jenax.reprogen.util.Skolemize;
 import org.aksw.jenax.sparql.query.rx.RDFDataMgrRx;
 import org.aksw.jenax.sparql.query.rx.SparqlRx;
 import org.aksw.jenax.sparql.relation.dataset.NodesInDataset;
@@ -119,40 +118,6 @@ import picocli.CommandLine;
 public class MainCliLsq {
 
     private static final Logger logger = LoggerFactory.getLogger(MainCliLsq.class);
-
-/*
- * Spring Boot Code - in case we need it at some point; for now it turned out to not bring any benefit
- */
-
-//    public static void main(String[] args) {
-//        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder()
-//                .sources(ConfigCliLsq.class)
-//            .bannerMode(Banner.Mode.OFF)
-//            // If true, Desktop.isDesktopSupported() will return false, meaning we can't
-//            // launch a browser
-//            .headless(false).web(WebApplicationType.NONE).run(args)) {
-//        }
-//    }
-
-//    @Configuration
-//    @PropertySource("classpath:lsq-core.properties")
-//    public static class ConfigCliLsq {
-//        @Value("lsq-core.version")
-//        protected String lsqCoreVersion;
-//
-//        @Bean
-//        public ApplicationRunner applicationRunner() {
-//            return args -> {
-//                try {
-//                    int exitCode = mainCore(args.getSourceArgs());
-//                    System.exit(exitCode);
-//
-//                } catch(Exception e) {
-//                    ExceptionUtils.rethrowIfNotBrokenPipe(e);
-//                }
-//            };
-//        }
-//    }
 
     public static void main(String[] args) {
         int exitCode = mainCore(args);
@@ -784,4 +749,40 @@ public class MainCliLsq {
             System.out.println(outPath);
         }
     }
+
+
+
+/*
+ * Spring Boot Code - in case we need it at some point; for now it turned out to not bring any benefit
+ */
+
+//    public static void main(String[] args) {
+//        try (ConfigurableApplicationContext ctx = new SpringApplicationBuilder()
+//                .sources(ConfigCliLsq.class)
+//            .bannerMode(Banner.Mode.OFF)
+//            // If true, Desktop.isDesktopSupported() will return false, meaning we can't
+//            // launch a browser
+//            .headless(false).web(WebApplicationType.NONE).run(args)) {
+//        }
+//    }
+
+//    @Configuration
+//    @PropertySource("classpath:lsq-core.properties")
+//    public static class ConfigCliLsq {
+//        @Value("lsq-core.version")
+//        protected String lsqCoreVersion;
+//
+//        @Bean
+//        public ApplicationRunner applicationRunner() {
+//            return args -> {
+//                try {
+//                    int exitCode = mainCore(args.getSourceArgs());
+//                    System.exit(exitCode);
+//
+//                } catch(Exception e) {
+//                    ExceptionUtils.rethrowIfNotBrokenPipe(e);
+//                }
+//            };
+//        }
+//    }
 }

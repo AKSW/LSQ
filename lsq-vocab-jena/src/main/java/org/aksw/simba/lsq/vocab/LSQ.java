@@ -28,7 +28,6 @@ public class LSQ {
         public static final String resultCount = NS + "resultCount";
         public static final String isDistinct = NS + "isDistinct";
 
-
         // Error reporting duing benchmarking upon exceeding thresholds during counting and/or retrieval
         public static final String exceededMaxByteSizeForCounting = NS + "exceededMaxByteSizeForCounting";
         public static final String exceededMaxResultCountForCounting = NS + "exceededMaxResultCountForCounting";
@@ -105,6 +104,8 @@ public class LSQ {
         public static final String hasJoinVarExec = NS + "hasJoinVarExec";
         public static final String hasTpInBgpExec = NS + "hasTpInBgpExec";
         public static final String hasSubBgpExec = NS + "hasSubBgpExec";
+
+        public static final String hasCanonicalElement = NS + "hasCanonicalElement";
 
         public static final String usesFeature = "usesFeature";
         public static final String feature = "feature";
@@ -192,7 +193,6 @@ public class LSQ {
 
         // Selectivity of a triple pattern in regard to a variable that participates in a join with other TPs
         public static final String tpSelJoinVarRestricted = NS + "tpSelJoinVarRestricted";
-
     }
 
 

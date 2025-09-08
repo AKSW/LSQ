@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Resource;
 // FIXME Add config option to benchmark only master queries and not secondary ones
 @ResourceView
 public interface ExperimentConfig
-    extends Resource
+    extends Resource, LsqBenchmarkParams
 {
     @Iri("dct:identifier")
     @HashId
@@ -70,47 +70,66 @@ public interface ExperimentConfig
      */
 
     @Iri(LSQ.Terms.connectionTimeoutForRetrieval)
+    @Override
     BigDecimal getConnectionTimeoutForRetrieval();
+    @Override
     ExperimentConfig setConnectionTimeoutForRetrieval(BigDecimal duration);
 
     @Iri(LSQ.Terms.executionTimeoutForRetrieval)
+    @Override
     BigDecimal getExecutionTimeoutForRetrieval();
+    @Override
     ExperimentConfig setExecutionTimeoutForRetrieval(BigDecimal duration);
 
     @Iri(LSQ.Terms.connectionTimeoutForCounting)
+    @Override
     BigDecimal getConnectionTimeoutForCounting();
+    @Override
     ExperimentConfig setConnectionTimeoutForCounting(BigDecimal duration);
 
     @Iri(LSQ.Terms.executionTimeoutForCounting)
+    @Override
     BigDecimal getExecutionTimeoutForCounting();
+    @Override
     ExperimentConfig setExecutionTimeoutForCounting(BigDecimal duration);
 
     @Iri(LSQ.Terms.maxResultCountForRetrieval)
+    @Override
     Long getMaxResultCountForCounting();
+    @Override
     ExperimentConfig setMaxResultCountForCounting(Long maxItemCountForCounting);
 
     @Iri(LSQ.Terms.maxByteSizeForRetrieval)
+    @Override
     Long getMaxByteSizeForCounting();
+    @Override
     ExperimentConfig setMaxByteSizeForCounting(Long maxByteSizeForCounting);
 
     @Iri(LSQ.Terms.maxResultCountForSerialization)
+    @Override
     Long getMaxResultCountForSerialization();
+    @Override
     ExperimentConfig setMaxResultCountForSerialization(Long maxItemCountForSerialization);
 
     @Iri(LSQ.Terms.maxByteSizeForSerialization)
+    @Override
     Long getMaxByteSizeForSerialization();
+    @Override
     ExperimentConfig setMaxByteSizeForSerialization(Long maxByteSizeForSerialization);
 
     @Iri(LSQ.Terms.maxCount)
+    @Override
     Long getMaxCount();
+    @Override
     ExperimentConfig setMaxCount(Long maxItemCountForCounting);
 
     @Iri(LSQ.Terms.maxCountAffectsTp)
+    @Override
     Boolean getMaxCountAffectsTp();
+    @Override
     ExperimentConfig setMaxCountAffectsTp(Boolean offOrOn);
 
     @Iri(LSQ.Terms.benchmarkSecondaryQueries)
     Boolean benchmarkSecondaryQueries();
     ExperimentConfig benchmarkSecondaryQueries(Boolean offOrOn);
-
 }

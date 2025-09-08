@@ -76,9 +76,8 @@
 		<scala.binary.version>2.13</scala.binary.version>
 		<scala.version.suffix>_${scala.binary.version}</scala.version.suffix>
 
-		<slf4j.version>2.0.9</slf4j.version>
-		<log4j.version>2.21.0</log4j.version>
-
+		<slf4j.version>2.0.17</slf4j.version>
+		<log4j2.version>2.25.1</log4j2.version>
 
 		<jackson.version>2.13.0</jackson.version>
 
@@ -100,6 +99,14 @@
 
 	<dependencyManagement>
 		<dependencies>
+            <!-- slf4j Logger dependencies -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-bom</artifactId>
+                <version>${slf4j.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
 
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -112,6 +119,16 @@
 				<artifactId>spark-sql_${scala.binary.version}</artifactId>
 				<version>${spark.version}</version>
 				<scope>${spark.deps.scope}</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-1.2-api</artifactId>
+					</exclusion>
+                                        <exclusion>
+                                                <groupId>org.apache.logging.log4j</groupId>
+                                                <artifactId>log4j-layout-template-json</artifactId>
+                                        </exclusion>
+				</exclusions>
 			</dependency>
 
 			<!-- Override version of hadoop/spark -->
@@ -286,15 +303,17 @@
 
 			<dependency>
 				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-slf4j-impl</artifactId>
-				<version>${log4j.version}</version>
+				<artifactId>log4j-slf4j2-impl</artifactId>
+				<version>${log4j2.version}</version>
 			</dependency>
 
+<!--
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-api</artifactId>
 				<version>${slf4j.version}</version>
 			</dependency>
+-->
 
             <!-- FasterXML -->
             <dependency>

@@ -31,6 +31,11 @@ public abstract class LsqTriplePattern
         return result;
     }
 
+    @Iri(LSQ.Terms.hasCanonicalElement)
+    @Override
+    public abstract LsqTriplePattern getCanonicalElement();
+    public abstract LsqTriplePattern setCanonicalElement(LsqTriplePattern tp);
+
     public void setTriplePattern(Triple triple) {
         SpinCoreUtils.writeTriple(this, triple);
     }
