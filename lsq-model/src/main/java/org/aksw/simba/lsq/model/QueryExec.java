@@ -14,6 +14,10 @@ import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.datatypes.xsd.XSDDateTime;
 import org.apache.jena.rdf.model.Resource;
 
+/**
+ * Basic information about the execution of a query and the response.
+ * Includes time of execution and duration, result set size, encountered errors.
+ */
 @ResourceView
 @HashId // Include the type into the hash value
 public interface QueryExec extends Resource {
@@ -99,5 +103,4 @@ public interface QueryExec extends Resource {
         String result = prefix + "-" + cxt.getHashAsString(this) + "-" + cxt.getStringId(bmr);
         return result;
     }
-
 }

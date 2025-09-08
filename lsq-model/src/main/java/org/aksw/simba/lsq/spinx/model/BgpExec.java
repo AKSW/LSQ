@@ -11,6 +11,7 @@ import org.aksw.jenax.annotation.reprogen.ResourceView;
 import org.aksw.jenax.annotation.reprogen.StringId;
 import org.aksw.jenax.reprogen.hashid.HashIdCxt;
 import org.aksw.simba.lsq.model.ElementExec;
+import org.aksw.simba.lsq.model.ExperimentRun;
 import org.aksw.simba.lsq.vocab.LSQ;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.riot.RDFDataMgr;
@@ -26,13 +27,8 @@ import org.apache.jena.riot.RDFFormat;
 @ResourceView
 //@IdPrefix("bgpexec-")
 public interface BgpExec
-    extends ElementExec
+    extends ElementExec /** ElementExec points to the QueryExec. */
 {
-//    @Iri(LSQ.Strs.hasBgpExec)
-//    @Inverse
-//    LocalExecution getLocalExecution();
-//    SpinBgpExec setLocalExecution(LocalExecution le);
-
     // Link from the BGP to this exec
     @Iri(LSQ.Terms.hasExec)
     @HashId
@@ -76,12 +72,16 @@ public interface BgpExec
         Resource expRun = getQueryExec().getLocalExecution().getBenchmarkRun();
         Objects.requireNonNull(expRun);
 
-        Set<TpInBgpExec> cands = getTpInBgpExecs();
+        Set<TpInBgpExec> candExecs = getTpInBgpExecs();
         TpInBgpExec result = null;
-        for(TpInBgpExec cand : cands) {
-            if(Objects.equals(cand.getTpInBgp(), tpInBgp) && Objects.equals(cand.getBgpExec().getQueryExec().getLocalExecution().getBenchmarkRun(), expRun)) {
-                result = cand;
-                break;
+        for (TpInBgpExec candExec : candExecs) {
+            TpInBgp candTpInBgp = candExec.getTpInBgp();
+            if (Objects.equals(candTpInBgp, tpInBgp)) {
+                ExperimentRun candBenchRun = candExec.getBgpExec().getQueryExec().getLocalExecution().getBenchmarkRun();
+                if (Objects.equals(candBenchRun, expRun)) {
+                    result = candExec;
+                    break;
+                }
             }
         }
 

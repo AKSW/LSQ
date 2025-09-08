@@ -15,6 +15,22 @@ import org.aksw.simba.lsq.model.LocalExecution;
 import org.aksw.simba.lsq.vocab.LSQ;
 
 
+/**
+ * Given a bgp b, pick a variable v and create the sub-bgp of all tuples that mention v.
+ *
+ * baseBgp:
+ * <pre>
+ * ?s :p1 :o1 .
+ * ?s :p2 :o2 .
+ * :s1 :p3 ?o .
+ * </pre>
+ *
+ * The sub-bgp for (baseBgp, s) is:
+ * <pre>
+ * ?s :p1 :o1 .
+ * ?s :p2 :o2 .
+ * </pre>
+ */
 @ResourceView
 public interface BgpNodeExec
     extends ElementExec
@@ -25,22 +41,18 @@ public interface BgpNodeExec
     BgpNode getBgpNode();
     BgpNodeExec setBgpNode(BgpNode bpgNode);
 
-
     @Iri(LSQ.Terms.tpSelJoinVarRestricted)
     BigDecimal getBgpRestrictedSelectivitiy();
     BgpNodeExec setBgpRestrictedSelectivitiy(BigDecimal selectivity);
-
 
     @Iri(LSQ.Terms.hasJoinVarExec)
     @Inverse
     BgpExec getBgpExec();
     BgpNodeExec setBgpExec(BgpExec exec);
 
-
     @Iri(LSQ.Terms.hasSubBgpExec)
     BgpExec getSubBgpExec();
     BgpNodeExec setSubBgpExec(BgpExec exec);
-
 
     @StringId
     default String getStringId(HashIdCxt cxt) {

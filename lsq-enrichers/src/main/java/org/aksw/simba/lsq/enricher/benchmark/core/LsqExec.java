@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
@@ -43,7 +44,7 @@ import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 
 /**
- * Utilility methods for creating execution resources w.r.t. a given execution ID for the following SPARQL elements:
+ * Utility methods for creating execution resources w.r.t. a given execution ID for the following SPARQL elements:
  * <ul>
  * <li>basic graph pattern (bpg)</li>
  * <li>triple pattern in bgp</li>
@@ -62,6 +63,10 @@ public class LsqExec {
     private static final Logger logger = LoggerFactory.getLogger(LsqExec.class);
 
     public static void createAllExecs(LsqQuery masterQuery, ExperimentRun expRun) {
+        if (masterQuery.getHash().equals("0tMhy2BmhjNcsboz1BV5Br9WRvvnTTEPO-xU4woHzpM/AA/AA/s/d/XRqq3w/AA/AA/AA/AA/AA/aUWrcgAA/AA/AA/AA/JnTwFw")) {
+            System.err.println("DEBUG POINT");
+        }
+
         Model model = masterQuery.getModel();
         //SpinQueryEx spinRoot = masterQuery.getSpinQuery().as(SpinQueryEx.class);
         BgpInfo spinRoot = masterQuery.getStructuralFeatures();
@@ -87,7 +92,9 @@ public class LsqExec {
         // Now that all BgpExecs are set up descend into the tpExecs
         for(BgpExec bgpExec : expRoot.getBgpExecs()) {
 
-            for(TpInBgp tpInBgp : bgpExec.getBgp().getTpInBgp()) {
+            Bgp bgp = bgpExec.getBgp();
+            Set<TpInBgp> tpsInBgp = bgp.getTpInBgp();
+            for(TpInBgp tpInBgp : tpsInBgp) {
                 TpInBgpExec tpInBgpExec = getOrCreateTpInBgpExec(bgpExec, tpInBgp);
                 TpExec tpExec = tpInBgpExec.getTpExec();
 
@@ -338,6 +345,7 @@ public class LsqExec {
      * The benchmark run id is taken from the bgpExec.
      * The tpInBgp must be a member of the bgpExec's bgp.
      *
+     * 2025: I think the issue is resolved with the introduction of subBgp domain interfaces?
      * Issue: The owner of a bgpExec used to be a local execution (of a query) - but with the introduction of subBgps it may also be
      * a bgpNode. How to link to the execution now?
      *
@@ -350,18 +358,19 @@ public class LsqExec {
      * @return
      */
     public static TpInBgpExec getOrCreateTpInBgpExec(BgpExec bgpExec, TpInBgp tpInBgp) {
-        RDFNode expRun = bgpExec.getQueryExec().getLocalExecution().getBenchmarkRun();
+        QueryExec queryExec = bgpExec.getQueryExec();
+        LocalExecution bgpLe = queryExec.getLocalExecution();
+        RDFNode expRun = bgpLe.getBenchmarkRun();
 
         TpInBgpExec tpInBgpExec = bgpExec.findTpInBgpExec(tpInBgp);
         Model model = bgpExec.getModel();
 
         if(tpInBgpExec == null) {
             tpInBgpExec = model.createResource().as(TpInBgpExec.class);
-            // LsqQuery extensionQuery = tp.getExtensionQuery();
-
             // Link the bgp with the corresponding query execution
             tpInBgpExec
-                .setBgpExec(bgpExec);
+                .setBgpExec(bgpExec)
+                .setTpInBgp(tpInBgp);
         }
 
         LsqTriplePattern tp = tpInBgp.getTriplePattern();
@@ -373,10 +382,15 @@ public class LsqExec {
             Objects.requireNonNull(extensionQuery, "query for a sparql query element (graph pattern) must not be null");
             Map<Resource, LocalExecution> leMap = extensionQuery.getLocalExecutionMap();
             LocalExecution le = leMap.get(expRun);
+            if (le == null) {
+                throw new IllegalStateException("No local execution for run " + expRun);
+            } else {
+                logger.info("DEBUG POINT");
+            }
             QueryExec qe = le.getQueryExec();
 
             tpExec
-                .setTpInBgpExec(tpInBgpExec) /* inverse link */
+                .addTpInBgpExec(tpInBgpExec) /* inverse link */
                 .setTp(tp)
                 .setQueryExec(qe)
                 ;

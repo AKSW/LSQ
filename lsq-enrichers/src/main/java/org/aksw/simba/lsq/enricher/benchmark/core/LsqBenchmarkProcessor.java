@@ -558,6 +558,10 @@ public class LsqBenchmarkProcessor {
 
                 // If there is no spin model then don't try to create executions for its elements
                 if (primaryQuery.getSpinQuery() != null) {
+                    System.out.println(primaryQuery.getHash());
+                    System.err.println("*******************************************");
+                    RDFDataMgr.write(System.err, primaryQuery.getModel(), RDFFormat.TURTLE_PRETTY);
+
                     LsqExec.createAllExecs(primaryQuery, expRun);
                 }
 
@@ -636,7 +640,6 @@ public class LsqBenchmarkProcessor {
 
         //SpinQueryEx spinNode = primaryQuery.getSpinQuery().as(SpinQueryEx.class);
         LsqStructuralFeatures bgpInfo = primaryQuery.getStructuralFeatures();
-
 
         for(Bgp bgp : bgpInfo.getBgps()) {
             extractAllQueriesFromBgp(result, bgp);

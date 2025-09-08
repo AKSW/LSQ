@@ -1,6 +1,7 @@
 package org.aksw.simba.lsq.spinx.model;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import org.aksw.commons.util.string.StringUtils;
 import org.aksw.jenax.annotation.reprogen.Inverse;
@@ -25,8 +26,13 @@ public interface TpExec
 
     @Iri(LSQ.Terms.hasTpExec)
     @Inverse
-    TpInBgpExec getTpInBgpExec();
-    TpExec setTpInBgpExec(TpInBgpExec tpInBgpExec);
+    Set<TpInBgpExec> getTpInBgpExecs();
+    // TpExec setTpInBgpExec(TpInBgpExec tpInBgpExec);
+
+    default TpExec addTpInBgpExec(TpInBgpExec tpInBgpExec) {
+        getTpInBgpExecs().add(tpInBgpExec);
+        return this;
+    }
 
     @Iri(LSQ.Terms.tpSelBGPRestricted)
     BigDecimal getBgpRestrictedTpSel();

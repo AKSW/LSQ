@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Set;
 
-import org.aksw.jena_sparql_api.rdf.collections.ResourceUtils;
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
 import org.aksw.jenax.annotation.reprogen.ResourceView;
@@ -46,6 +45,10 @@ public abstract class LsqTriplePattern
 
     @Iri(LSQ.Terms.hasExec)
     public abstract Set<TpExec> getTpExecs();
+
+//  public abstract LsqElement setExtensionQuery(LsqQuery r) {
+//	super.setEx
+//}
 
 //    public TpExec findTpExec(Resource expRun) {
 //        return null;

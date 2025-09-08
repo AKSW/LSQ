@@ -29,7 +29,8 @@ public interface TpInBgp
     LsqTriplePattern getTriplePattern();
     TpInBgp setTriplePattern(Resource tp);
 
-    @Iri(LSQ.Terms.hasTpExec)
+    // @Iri(LSQ.Terms.hasTpExec)
+    @Iri(LSQ.Terms.hasExec)
     Set<TpInBgpExec> getExecs();
 
 //    default Map<Resource, TpInBgpExec> indexExecs() {
