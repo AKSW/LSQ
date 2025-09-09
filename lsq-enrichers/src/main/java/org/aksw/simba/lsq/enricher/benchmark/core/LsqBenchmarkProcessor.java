@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.aksw.commons.io.util.StdIo;
 import org.aksw.jena_sparql_api.rx.query_flow.QueryFlowOps;
 import org.aksw.jenax.arq.dataset.api.ResourceInDataset;
 import org.aksw.jenax.arq.dataset.impl.DatasetGraphOneNgImpl;
@@ -101,12 +99,10 @@ import com.google.common.base.Stopwatch;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 
-
 /**
  * This is the LSQ2 processor for benchmarking RDFized query log
  *
  * @author raven
- *
  */
 public class LsqBenchmarkProcessor {
     static final Logger logger = LoggerFactory.getLogger(LsqBenchmarkProcessor.class);
@@ -167,11 +163,6 @@ public class LsqBenchmarkProcessor {
             SparqlQueryConnection benchmarkConn,
             RDFConnection indexConn) {
 
-
-        //ExperimentConfig config = expRun.getConfig();
-        //String expSuffix
-
-
         String datasetLabel = expConfig.getDatasetLabel();
         XSDDateTime benchmarkExecTimestamp = expExec.getTimestamp();
         Instant instant = benchmarkExecTimestamp.asCalendar().toInstant();
@@ -182,46 +173,17 @@ public class LsqBenchmarkProcessor {
         String expSuffix = "_" + expId + "_" + runId;
 
         boolean benchmarkSecondaryQueries = Optional.ofNullable(expConfig.benchmarkSecondaryQueries()).orElse(false);
-
         Function<String, String> lsqQueryBaseIriFn = hash -> lsqBaseIri + "q-" + hash;
-
-        // Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
-
-//        Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> "urn://" + lsqQuery.getHash() + expSuffix;
         Function<LsqQuery, String> lsqQueryExecFn = lsqQuery -> lsqQueryBaseIriFn.apply(lsqQuery.getHash()) + expSuffix;
 
-//        Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/2020-06-27-wikidata-one-day.trig", Lang.TRIG, null)
-//                Flowable<List<Set<LsqQuery>>> queryFlow = RDFDataMgrRx.createFlowableResources("../tmp/saleem.trig", Lang.TRIG, null)
         Flowable<List<QueryPack>> queryFlow = rawQueryFlow
-//                .map(r -> r.as(LsqQuery.class))
-//                .skip(1)
-//                .take(1)
-                .concatMapMaybe(lsqQuery -> {
-                    Maybe<LsqQuery> r = safeMaybe(() -> enricher.apply(lsqQuery).as(LsqQuery.class));
-                    return r;
-                })
-                /*
-                .concatMapMaybe(lsqQuery ->
-                    safeMaybe(() -> LsqEnrichments.enrichWithFullSpinModelCore(lsqQuery)))
-//                .concatMapMaybe(lsqQuery -> enrichWithFullSpinModel(lsqQuery))
-                .map(anonQuery -> updateLsqQueryIris(anonQuery, q -> lsqQueryBaseIriFn.apply(q.getHash())))
-                .concatMapMaybe(lsqQuery ->
-                    safeMaybe(() -> LsqEnrichments.enrichWithStaticAnalysis(lsqQuery)))
-//                .doAfterNext(x -> {
-//                    RDFDataMgr.write(System.out, x.getModel(), RDFFormat.TURTLE_FLAT);
-//                    System.exit(1);
-//                })
-   */
-                //.flatMap(lsqQuery -> Flowable.fromIterable(extractAllQueries(lsqQuery)), false, 128)
-                //.map(lsqQuery -> extractAllQueries(lsqQuery))
-                //.map(batch -> benchmarkSecondaryQueries ? batch : Collections.singleton(batch.iterator().next()))
-                .map(lsqQuery -> benchmarkSecondaryQueries ? extractAllQueries(lsqQuery) : new QueryPack(lsqQuery, List.of()))
-//                .doAfterNext(lsqQuery -> lsqQuery.updateHash())
-//                .doOnNext(r -> ResourceUtils.renameResource(r, "http://lsq.aksw.org/q-" + r.getHash()).as(LsqQuery.class))
-//                .lift(OperatorObserveThroughput.create("throughput", 100))
-                .buffer(1)
-//                .lift(OperatorObserveThroughput.create("buffered", 100))
-                ;
+            .concatMapMaybe(lsqQuery -> {
+                Maybe<LsqQuery> r = safeMaybe(() -> enricher.apply(lsqQuery).as(LsqQuery.class));
+                return r;
+            })
+            .map(lsqQuery -> benchmarkSecondaryQueries ? extractAllQueries(lsqQuery) : new QueryPack(lsqQuery, List.of()))
+            .buffer(1)
+            ;
 
         Flowable<ResourceInDataset> result = queryFlow.flatMapIterable(batch -> {
             List<ResourceInDataset> items = processBatchOfQueries(
@@ -235,29 +197,6 @@ public class LsqBenchmarkProcessor {
                 indexConn);
             return items;
         });
-
-        if (false) {
-            Iterable<List<QueryPack>> batches = queryFlow.blockingIterable();
-            Iterator<List<QueryPack>> itBatches = batches.iterator();
-
-            // Create a database to ensure uniqueness of evaluation tasks
-            while(itBatches.hasNext()) {
-                List<QueryPack> batch = itBatches.next();
-                List<ResourceInDataset> items = processBatchOfQueries(
-                    batch,
-                    lsqBaseIri,
-                    expConfig,
-                    expExec,
-                    expRun,
-                    benchmarkConn,
-                    lsqQueryExecFn,
-                    indexConn);
-
-                for(ResourceInDataset item : items) {
-                    RDFDataMgr.write(StdIo.openStdOutWithCloseShield(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
-                }
-            }
-        }
         return result;
     }
 
@@ -1178,4 +1117,27 @@ public class LsqBenchmarkProcessor {
 //        //Skolemize.skolemize(spinRes);
 //
 //        RDFDataMgr.write(System.out, model, RDFFormat.TURTLE_PRETTY);
+
+//if (false) {
+//    Iterable<List<QueryPack>> batches = queryFlow.blockingIterable();
+//    Iterator<List<QueryPack>> itBatches = batches.iterator();
+//
+//    // Create a database to ensure uniqueness of evaluation tasks
+//    while(itBatches.hasNext()) {
+//        List<QueryPack> batch = itBatches.next();
+//        List<ResourceInDataset> items = processBatchOfQueries(
+//            batch,
+//            lsqBaseIri,
+//            expConfig,
+//            expExec,
+//            expRun,
+//            benchmarkConn,
+//            lsqQueryExecFn,
+//            indexConn);
+//
+//        for(ResourceInDataset item : items) {
+//            RDFDataMgr.write(StdIo.openStdOutWithCloseShield(), item.getDataset(), RDFFormat.TRIG_BLOCKS);
+//        }
+//    }
+//}
 

@@ -23,7 +23,6 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 
-
 /**
  * This class is main entry point for accessing information about a query in LSQ.
  *
@@ -36,14 +35,11 @@ import com.google.common.io.BaseEncoding;
  * (unfortunately poorly called 'remote execution') and benchmarking information related to the query
  * itself (referred to as local execution) and its constituents.
  *
- *
  * TODO This model keeps the SPIN representation of a query separate from the LSQ record about it,
  * yet I am not totally sure whether actually these should be just two views of a resource which
  * represents a SPARQL query.
  *
- *
  * @author Claus Stadler, Jan 7, 2019
- *
  */
 @ResourceView
 public interface LsqQuery
@@ -75,18 +71,17 @@ public interface LsqQuery
     LsqStructuralFeatures getStructuralFeatures();
     LsqQuery setStructuralFeatures(Resource r);
 
-//    @Iri(LSQ.Strs.hasLocalExec)
-//    <T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
+    // @Iri(LSQ.Strs.hasLocalExec)
+    // <T extends Resource> Set<T> getLocalExecutions(Class<T> itemClazz);
     @Iri(LSQ.Terms.hasLocalExec)
     Set<LocalExecution> getLocalExecutions();
 
     // Set<LocalExecution> getLocalExecutions();
-
     //Set<>getLocalExecutions();
 
     // FIXME Dynamically typed collections don't properly work with @HashId yet
-//    @Iri(LSQ.Strs.hasRemoteExec)
-//    <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
+    // @Iri(LSQ.Strs.hasRemoteExec)
+    // <T extends Resource> Set<T> getRemoteExecutions(Class<T> itemClazz);
 
     @Iri(LSQ.Terms.hasRemoteExec)
     Set<RemoteExecution> getRemoteExecutions();
@@ -113,16 +108,6 @@ public interface LsqQuery
                 .collect(Collectors.toMap(r -> r.getBenchmarkRun(), r -> r));
         return result;
     }
-
-//  default Map<Resource, LocalExecution> indexLocalExecs() {
-//  Set<LocalExecution> les = getLocalExecutions(LocalExecution.class);
-//
-//  Map<Resource, LocalExecution> result = les.stream()
-//          .collect(Collectors.toMap(le -> le.getBenchmarkRun(), le -> le));
-//
-//  return result;
-//}
-
 
     public static String createHashOld(String str) {
 //        System.out.println("Hashing " + str.replace('\n', ' '));
@@ -152,10 +137,8 @@ public interface LsqQuery
 
     default LsqQuery setQueryAndHash(String str) {
         String hash = createHash(str);
-
         setText(str);
         setHash(hash);
-
         return this;
     }
 
@@ -169,13 +152,6 @@ public interface LsqQuery
     default LsqQuery setQueryAndHash(Query query) {
         String str = query.toString();
         setQueryAndHash(str);
-
         return this;
     }
-//    @ToString
-//    default String asString() {
-//        return toString() + " " + getText();
-//    }
-    // Set<RemoteExecution> getRemoteExecutions();
 }
-

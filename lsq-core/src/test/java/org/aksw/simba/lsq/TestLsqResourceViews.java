@@ -8,7 +8,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 public class TestLsqResourceViews {
 
     @Test

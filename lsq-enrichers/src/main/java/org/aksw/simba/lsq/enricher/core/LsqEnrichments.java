@@ -645,7 +645,6 @@ public class LsqEnrichments {
             queryRes.setStructuralFeatures(featureRes);
         }
 
-
         // Add used features
         enrichResourceWithQueryFeatures(featureRes, query);
 

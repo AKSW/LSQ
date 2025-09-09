@@ -3,6 +3,10 @@ package org.aksw.simba.lsq.vocab;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.shared.PrefixMapping;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
+import org.apache.jena.vocabulary.XSD;
 
 /**
  * LSQ vocabulary
@@ -13,6 +17,8 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public class LSQ {
     public static final String NS = "http://lsq.aksw.org/vocab#";
 
+    /** TODO This ns is not consistently wired up - if wired up at all. */
+    public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
 
     public static class Terms {
         public static final String Query = NS + "Query";
@@ -360,8 +366,6 @@ public class LSQ {
 
     public static final Property numResponseBytes = property("numResponseBytes");
 
-
-
     // Query / Graph Pattern Features
     // None indicates the absence of features; must not appear with any other features
     public static final Resource None = resource("None");
@@ -426,12 +430,7 @@ public class LSQ {
     public static final Resource AltPath = resource("AltPath");
     public static final Resource SeqPath = resource("SeqPath");
 
-
     public static final Property usesService = property("usesService");
-
-
-    public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
-
 
     public static final Property hasVar = property("hasVar");
     public static final Property hasVarExec = property("hasVarExec");
@@ -444,6 +443,16 @@ public class LSQ {
     public static final Property tpId = property("tpId");
     public static final Property tpVarId = property("tpVarId");
 
+    public static PrefixMapping addPrefixes(PrefixMapping prefixes) {
+        prefixes
+            .setNsPrefix("rdf", RDF.getURI())
+            .setNsPrefix("xsd", XSD.getURI())
+            .setNsPrefix("rdfs", RDFS.getURI())
+            .setNsPrefix("lsqo", LSQ.NS)
+            .setNsPrefix("sp", "http://spinrdf.org/sp#")
+            .setNsPrefix("lsq", "http://lsq.aksw.org/");
+        return prefixes;
+    }
 
     //public static final Property
 
@@ -457,6 +466,4 @@ public class LSQ {
     //lsqv:joinVertexDegree 2 ; lsqv:joinVertexType lsqv:Star
     //lsqv:hasRemoteExecution
     //lsqv:endpoint --> maybe supersede by dataset distribution vocab (i think dcat has something)
-    //
-
 }

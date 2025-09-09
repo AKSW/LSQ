@@ -1,6 +1,6 @@
 package org.aksw.simba.lsq.enricher.core;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -23,10 +23,10 @@ public class LsqEnricherShell
     private static final long serialVersionUID = 1L;
 
     protected String baseIri;
-    protected List<String> enricherNames;
+    protected Collection<String> enricherNames;
     protected Supplier<LsqEnricherRegistry> registrySupplier;
 
-    public LsqEnricherShell(String baseIri, List<String> enricherNames, Supplier<LsqEnricherRegistry> registrySupplier) {
+    public LsqEnricherShell(String baseIri, Collection<String> enricherNames, Supplier<LsqEnricherRegistry> registrySupplier) {
         super();
         this.baseIri = baseIri;
         this.enricherNames = enricherNames;
@@ -66,7 +66,7 @@ public class LsqEnricherShell
                      safeEnricher(enricher).apply(q);
                  }
 
-                 // TODO Given enrichers a name
+                 // TODO Give enrichers a name
                  // TODO Track failed enrichments in the output? qualify error with enricher name?
                  // TODO Create a registry for enrichers
 //                     safeEnricher(LsqEnrichments::enrichWithFullSpinModelCore).apply(q);

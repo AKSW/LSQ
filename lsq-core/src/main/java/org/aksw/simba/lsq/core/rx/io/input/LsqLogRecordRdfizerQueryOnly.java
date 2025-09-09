@@ -11,7 +11,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 
 public class LsqLogRecordRdfizerQueryOnly
-    implements Function<Resource, Resource>
+    implements LsqLogRecordRdfizer
 {
     protected Function<String, SparqlStmt> sparqlStmtParser;
     protected String baseIri;

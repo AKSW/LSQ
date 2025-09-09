@@ -36,16 +36,23 @@ public interface ExperimentExec extends Resource {
     // 17/Apr/2011:06:47:47 +0200
     public static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss");
 
-    default String getIdentifier() {
-        ExperimentConfig config = getConfig();
-        String configId = config.getIdentifier();
-
-        XSDDateTime dt = getTimestamp();
+    public static String getIdentifier(ExperimentExec expExec) {
+        ExperimentConfig config = expExec.getConfig();
+        XSDDateTime dt = expExec.getTimestamp();
         Calendar cal = dt.asCalendar();
+        String result = getIdentifier(config, cal);
+        return result;
+    }
 
+    public static String getIdentifier(ExperimentConfig expCfg, Calendar cal) {
+        String configId = expCfg.getIdentifier();
         String timestampStr = dateFormat.format(cal.getTime());
         String runId = configId + "_" + timestampStr;
         return runId;
+    }
+
+    default String getIdentifier() {
+        return getIdentifier(this);
     }
 
     @StringId

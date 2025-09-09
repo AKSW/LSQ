@@ -38,4 +38,23 @@ public interface LsqBenchmarkParams {
 
     Boolean getMaxCountAffectsTp();
     LsqBenchmarkParams setMaxCountAffectsTp(Boolean offOrOn);
+
+    public static void setDefaults(LsqBenchmarkParams params) {
+        params
+            .setExecutionTimeoutForRetrieval(new BigDecimal(300))
+            .setConnectionTimeoutForRetrieval(new BigDecimal(60))
+            .setMaxResultCountForCounting(1000000l) // 1M
+            .setMaxByteSizeForCounting(-1l) // limit only by count
+            .setMaxResultCountForSerialization(-1l) // limit by byte size
+            .setMaxByteSizeForSerialization(1000000l) // 1MB
+            .setExecutionTimeoutForCounting(new BigDecimal(300))
+            .setConnectionTimeoutForCounting(new BigDecimal(60))
+            .setMaxCount(1000000000l)
+            .setMaxCountAffectsTp(false);
+            // .benchmarkSecondaryQueries(true)
+            // .setDatasetSize(datasetSize)
+            // .setDatasetLabel(datasetLabel)
+            // .setDatasetIri(datasetIri)
+            // .setBaseIri(baseIri)
+    }
 }
