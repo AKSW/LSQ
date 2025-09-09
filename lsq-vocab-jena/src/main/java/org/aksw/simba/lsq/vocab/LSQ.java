@@ -18,7 +18,7 @@ public class LSQ {
     public static final String NS = "http://lsq.aksw.org/vocab#";
 
     /** TODO This ns is not consistently wired up - if wired up at all. */
-    public static final String defaultLsqrNs = "http://lsq.aksw.org/res/";
+    public static final String defaultLsqrNs = "http://lsq.aksw.org/"; //res/";
 
     public static class Terms {
         public static final String Query = NS + "Query";
@@ -450,7 +450,7 @@ public class LSQ {
             .setNsPrefix("rdfs", RDFS.getURI())
             .setNsPrefix("lsqo", LSQ.NS)
             .setNsPrefix("sp", "http://spinrdf.org/sp#")
-            .setNsPrefix("lsq", "http://lsq.aksw.org/");
+            .setNsPrefix("lsq", LSQ.defaultLsqrNs);
         return prefixes;
     }
 

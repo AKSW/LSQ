@@ -17,6 +17,8 @@ import org.aksw.jenax.arq.util.quad.DatasetGraphUtils;
 import org.aksw.jenax.dataaccess.sparql.connection.reconnect.SparqlQueryConnectionWithReconnect;
 import org.aksw.simba.lsq.core.ResourceParser;
 import org.aksw.simba.lsq.core.io.input.registry.LsqInputFormatRegistry;
+import org.aksw.simba.lsq.core.rx.io.input.LsqLogRecordRdfizer;
+import org.aksw.simba.lsq.core.rx.io.input.LsqLogRecordRdfizerFull;
 import org.aksw.simba.lsq.core.rx.io.input.LsqRxIo;
 import org.aksw.simba.lsq.enricher.benchmark.core.LsqBenchmarkProcessor;
 import org.aksw.simba.lsq.enricher.core.LsqEnricherRegistry;
@@ -40,7 +42,9 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFParserBuilder;
 import org.apache.jena.riot.system.StreamRDF;
+import org.apache.jena.riot.system.StreamRDFOps;
 import org.apache.jena.riot.system.StreamRDFWriter;
+import org.apache.jena.shared.impl.PrefixMappingImpl;
 import org.apache.jena.tdb2.TDB2Factory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -65,17 +69,11 @@ public class TestLsqBenchmark {
 
         ByteSource byteSource = ByteSource.wrap(inputLog.getBytes(StandardCharsets.UTF_8));
 
-//        LsqLogRecordRdfizer rdfizer = LsqLogRecordRdfizerFull.newBuilder()
-//            .setServiceUrl("htttp://www.example.org/lsq/sparql")
-//            .build();
-//
-        SerializableSupplier<LsqEnricherRegistry> registrySupplier = LsqEnricherRegistry::get;
-        LsqEnricherShell enricherFactory = new LsqEnricherShell("http://lsq.aksw.org/", LsqEnricherRegistry.get().getKeys(), registrySupplier);
+        LsqLogRecordRdfizer rdfizer = LsqLogRecordRdfizerFull.newBuilder()
+            .setServiceUrl("htttp://www.example.org/lsq/sparql")
+            .build();
 
-        Function<Resource, Resource> rdfizer = enricherFactory.get();
-
-
-        // TODO Use the registry as an internal default
+        // TODO Use the registry as an internal default - remove need for explicit creation.
         Map<String, ResourceParser> logFmtRegistry = LsqInputFormatRegistry.createDefaultLogFmtRegistry();
 
         List<Resource> list = LsqRxIo.createReader(inputLog, byteSource::openStream, "sparql", logFmtRegistry, rdfizer).toList().blockingGet();
@@ -120,6 +118,10 @@ public class TestLsqBenchmark {
         // expExec -> comomn settings for multiple runs
         // expRun -> expExec + runId + start time stamp
 
+        SerializableSupplier<LsqEnricherRegistry> registrySupplier = LsqEnricherRegistry::get;
+        LsqEnricherShell enricherFactory = new LsqEnricherShell("http://lsq.aksw.org/", LsqEnricherRegistry.get().getKeys(), registrySupplier);
+
+        Function<Resource, Resource> enricher = enricherFactory.get();
 
         Flowable<LsqQuery> queryFlow = Flowable.just(r.as(LsqQuery.class));
 
@@ -127,11 +129,12 @@ public class TestLsqBenchmark {
         try (OutputStream outStream = StdIo.openStdOutWithCloseShield();
             RDFConnection indexConn = RDFConnection.connect(dataset)) {
             StreamRDF out = StreamRDFWriter.getWriterStream(outStream, RDFFormat.TRIG_BLOCKS);
+            StreamRDFOps.sendPrefixesToStream(LSQ.addPrefixes(new PrefixMappingImpl()), out);
             out.start();
             try (RdfDataPod dataPod = DataPods.fromDataset(testData)) {
                 try (SparqlQueryConnection benchmarkConn =
                         SparqlQueryConnectionWithReconnect.create(() -> dataPod.getConnection())) {
-                    LsqBenchmarkProcessor.process(out, queryFlow, baseIri, expCfg, expExec, expRun, rdfizer, benchmarkConn, indexConn);
+                    LsqBenchmarkProcessor.process(out, queryFlow, baseIri, expCfg, expExec, expRun, enricher, benchmarkConn, indexConn);
                 }
             }
             out.finish();

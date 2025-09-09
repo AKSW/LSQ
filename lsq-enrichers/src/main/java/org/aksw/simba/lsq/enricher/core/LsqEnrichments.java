@@ -580,33 +580,6 @@ public class LsqEnrichments {
         return Optional.ofNullable(result);
     }
 
-//    public static Optional<Number> min(Iterable<? extends Number> numbers) {
-//        Number result = null;
-//        for(Number number : numbers) {
-//            result = result == null
-//                    ? number
-//                    : number.doubleValue() < result.doubleValue()
-//                        ? number
-//                        : result;
-//        }
-//
-//        return Optional.ofNullable(result);
-//    }
-//
-//    public static Optional<Number> max(Iterable<? extends Number> numbers) {
-//        Number result = null;
-//        for(Number number : numbers) {
-//            result = result == null
-//                    ? number
-//                    : number.doubleValue() > result.doubleValue()
-//                        ? number
-//                        : result;
-//        }
-//
-//        return Optional.ofNullable(result);
-//    }
-
-
     public static int intSum(Iterable<? extends Number> numbers) {
         int result = 0;
         for(Number number : numbers) {
@@ -616,28 +589,11 @@ public class LsqEnrichments {
         return result;
     }
 
-
-//    public static BigDecimal mean(Iterable<? extends Number> numbers) {
-//        BigDecimal result = null;
-//        int n = 0;
-//        for(Number number : numbers) {
-//        	++n;
-//        	result = result == null
-//        			? number
-//        			: result.add
-//        }
-//
-//        return result;
-//    }
-
-
-
     // Requires the spin model to exist on the argument
     public static LsqQuery enrichWithStaticAnalysis(LsqQuery queryRes) {
         String queryStr = queryRes.getText();
-        // TODO Avoid repeated parse
+        // XXX Could use our RDFDatatypeQuery implementation to avoid repeated parsing.
         Query query = QueryFactory.create(queryStr, Syntax.syntaxARQ);
-
 
         LsqStructuralFeatures featureRes = queryRes.getStructuralFeatures();
         if(featureRes == null) {
@@ -981,5 +937,45 @@ public class LsqEnrichments {
 
         return result;
     }
-
 }
+
+
+//public static Optional<Number> min(Iterable<? extends Number> numbers) {
+//  Number result = null;
+//  for(Number number : numbers) {
+//      result = result == null
+//              ? number
+//              : number.doubleValue() < result.doubleValue()
+//                  ? number
+//                  : result;
+//  }
+//
+//  return Optional.ofNullable(result);
+//}
+//
+//public static Optional<Number> max(Iterable<? extends Number> numbers) {
+//  Number result = null;
+//  for(Number number : numbers) {
+//      result = result == null
+//              ? number
+//              : number.doubleValue() > result.doubleValue()
+//                  ? number
+//                  : result;
+//  }
+//
+//  return Optional.ofNullable(result);
+//}
+
+//public static BigDecimal mean(Iterable<? extends Number> numbers) {
+//BigDecimal result = null;
+//int n = 0;
+//for(Number number : numbers) {
+//	++n;
+//	result = result == null
+//			? number
+//			: result.add
+//}
+//
+//return result;
+//}
+

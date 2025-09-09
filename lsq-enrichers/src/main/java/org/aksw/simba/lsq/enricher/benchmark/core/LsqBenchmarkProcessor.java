@@ -473,6 +473,9 @@ public class LsqBenchmarkProcessor {
             extractAllQueriesFromBgp(secondaryQueries, bgp);
         }
 
+        // Make sure the primary query is not part of the secondary queries.
+        secondaryQueries.remove(primaryQuery);
+
         QueryPack result = new QueryPack(primaryQuery, new ArrayList<>(secondaryQueries));
         return result;
     }
