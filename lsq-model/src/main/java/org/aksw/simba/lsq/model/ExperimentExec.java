@@ -2,8 +2,10 @@ package org.aksw.simba.lsq.model;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.aksw.jenax.annotation.reprogen.HashId;
 import org.aksw.jenax.annotation.reprogen.Iri;
@@ -32,6 +34,11 @@ public interface ExperimentExec extends Resource {
     @Iri(LSQ.Terms.atTime)
     XSDDateTime getTimestamp();
     ExperimentExec setTimestamp(XSDDateTime calendar);
+
+    default Instant getTimestampAsInstant() {
+        XSDDateTime dateTime = getTimestamp();
+        return dateTime == null ? null : dateTime.asCalendar().toInstant();
+    }
 
     // 17/Apr/2011:06:47:47 +0200
     public static final DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss");

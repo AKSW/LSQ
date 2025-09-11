@@ -346,7 +346,7 @@ public class LsqBenchmarkProcessor {
 
 
                 // Extend the rootQuery's model with all related query executions
-                for(LsqQuery item : queries) {
+                for (LsqQuery item : queries) {
                     String key = lsqQueryExecFn.apply(item);
 
 //                    if (completedTaskIds.contains(key)) {
@@ -553,19 +553,9 @@ public class LsqBenchmarkProcessor {
             String queryStr,
             QueryExec result,
             LsqBenchmarkParams params) {
-        return rdfizeQueryExecutionBenchmark(conn,
-                queryStr,
-                result,
-                params.getConnectionTimeoutForRetrieval(),
-                params.getExecutionTimeoutForRetrieval(),
-                params.getMaxResultCountForCounting(),
-                params.getMaxByteSizeForCounting(),
-                params.getMaxResultCountForSerialization(),
-                params.getMaxByteSizeForSerialization(),
-                params.getConnectionTimeoutForCounting(),
-                params.getExecutionTimeoutForCounting(),
-                params.getMaxCount(),
-                params.getMaxCountAffectsTp());
+        LsqBenchmarkEngine benchmarker = LsqBenchmarkEngine.newBuilder().setParams(params).build();
+        benchmarker.benchmark(conn, result, queryStr);
+        return result;
     }
 
     /*

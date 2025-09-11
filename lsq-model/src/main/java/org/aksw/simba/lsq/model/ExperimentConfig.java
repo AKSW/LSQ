@@ -14,7 +14,7 @@ import org.apache.jena.rdf.model.Resource;
 // FIXME Add config option to benchmark only master queries and not secondary ones
 @ResourceView
 public interface ExperimentConfig
-    extends Resource, LsqBenchmarkParams
+    extends Resource, LsqBenchmarkParamsMutable
 {
     @Iri("dct:identifier")
     @HashId

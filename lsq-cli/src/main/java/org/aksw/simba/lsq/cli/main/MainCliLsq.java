@@ -70,7 +70,7 @@ import org.aksw.simba.lsq.enricher.core.LsqEnricherShell;
 import org.aksw.simba.lsq.model.ExperimentConfig;
 import org.aksw.simba.lsq.model.ExperimentExec;
 import org.aksw.simba.lsq.model.ExperimentRun;
-import org.aksw.simba.lsq.model.LsqBenchmarkParams;
+import org.aksw.simba.lsq.model.LsqBenchmarkParamsMutable;
 import org.aksw.simba.lsq.model.LsqQuery;
 import org.aksw.simba.lsq.model.util.LsqUtils;
 import org.aksw.simba.lsq.vocab.LSQ;
@@ -371,7 +371,7 @@ public class MainCliLsq {
 
         ExperimentConfig cfg = model.createResource(expIri).as(ExperimentConfig.class);
 
-        LsqBenchmarkParams.setDefaults(cfg);
+        LsqBenchmarkParamsMutable.setDefaults(cfg);
 
         if (qt != null) {
             cfg.setExecutionTimeoutForRetrieval(new BigDecimal(qt).divide(new BigDecimal(1000)));
